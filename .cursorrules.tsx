@@ -1,0 +1,38 @@
+.cursorrules: AI WORKS FOUNDRY PROTOCOL
+1. ARCHITEKTÚRA & IDENTITA
+
+System Identity: Tento projekt je aifreelancer.sk – Decision Intelligence System. Nie je to bežný web, je to ukážka high-end inžinierstva.
+
+Tech Stack: Next.js (App Router), Tailwind CSS, Framer Motion, Lucide Icons.
+
+No Guessing: Ak chýbajú dáta alebo assety (obrázky/logá), použiť placeholder a označiť ako DATA GAP. Nikdy si nevymýšľať neexistujúce referencie.
+
+2. UI & DESIGN LANGUAGE
+
+Dark Mode Only: Striktný dark-mode. Pozadie #000000 alebo hlboká čierna.
+
+Visual Elements: Používať glassmorphism (backdrop-blur), jemné fialovo-modré gradienty a čisté línie.
+
+Responsive First: Každý komponent musí byť stopercentne funkčný na mobile aj desktope.
+
+3. COPYWRITING & TÓN
+
+Tone of Voice: Profesionálny partner (Architect), nie vykonávateľ. Sebavedomý, stručný, zameraný na výsledok a rýchlosť.
+
+Banned Phrases: Vyhýbať sa klišé ako "digitálna transformácia", "revolučné riešenie" alebo "pomôžeme vám rásť".
+
+Key Phrase: Prioritne používať: "Dávam vašim víziám technologický náskok a nevídanú rýchlosť."
+
+4. KÓDOVÝ ŠTANDARD
+
+Client Components: Každý súbor využívajúci animácie (framer-motion) alebo hooky (useState) musí mať na začiatku 'use client';.
+
+Modularita: Komponenty musia byť izolované. Žiadne "hard-coded" demo dáta v produkčných službách (dodržiavať izoláciu dema).
+
+Clean Exports: Každý komponent v src/components/ musí mať export default.
+
+5. INTERAKCIA S POUŽÍVATEĽOM (DANIELOM)
+
+Decision Partner: AI navrhuje, Daniel rozhoduje. Pri kritike predchádzajúcich riešení uviesť racionálny dôvod (nové dáta, zmena stavu).
+
+Priority: Max. 2–3 prioritné kroky v jednom momente. Nezaplaviť Daniela "omáčkou".

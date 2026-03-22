@@ -1,0 +1,224 @@
+"use client";
+
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { 
+  Mail, 
+  Phone, 
+  User, 
+  MessageSquare, 
+  Send,
+  Globe,
+  Linkedin,
+  Github
+} from 'lucide-react';
+
+const Contact: React.FC = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    // Simulate API call
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setSubmitted(true);
+      setFormData({ name: '', email: '', phone: '', message: '' });
+    }, 1500);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  return (
+    <div className="min-h-screen bg-[#030303] text-white font-inter selection:bg-indigo-500/30 overflow-x-hidden">
+      <section className="pt-40 pb-20 px-6 relative overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.05)_0%,transparent_70%)] pointer-events-none" />
+        
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+            
+            {/* Left Side: Info */}
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="space-y-12"
+            >
+              <div className="space-y-6">
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500">KONTAKT</p>
+                <h1 className="text-5xl md:text-7xl font-sora font-black tracking-tighter leading-tight">
+                  Poďme sa <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">porozprávať.</span>
+                </h1>
+                <p className="text-slate-400 text-lg leading-relaxed max-w-md">
+                  Máte projekt, nápad alebo hľadáte technologického partnera? Napíšte mi a spoločne nájdeme riešenie.
+                </p>
+              </div>
+
+              <div className="space-y-8">
+                <div className="flex items-start space-x-6 group">
+                  <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
+                    <User size={20} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">MENO</p>
+                    <p className="text-xl font-bold">Mgr. Daniel Budziňák</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-6 group">
+                  <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-cyan-400 group-hover:bg-cyan-500 group-hover:text-white transition-all">
+                    <Mail size={20} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">EMAIL</p>
+                    <a href="mailto:daniel.budzinak@gmail.com" className="text-xl font-bold hover:text-indigo-400 transition-colors">daniel.budzinak@gmail.com</a>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-6 group">
+                  <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                    <Phone size={20} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">TELEFÓN</p>
+                    <a href="tel:+421911694025" className="text-xl font-bold hover:text-indigo-400 transition-colors">+421 911 694 025</a>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-8 flex items-center space-x-6">
+                <a href="https://www.linkedin.com/in/daniel-budzi%C5%88%C3%A1k-505532378/" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-white transition-colors">
+                  <Linkedin size={20} />
+                </a>
+                <div className="h-4 w-px bg-white/10" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">SÍDLO: SLOVENSKO / REMOTE</span>
+              </div>
+            </motion.div>
+
+            {/* Right Side: Form */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <div className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden shadow-2xl">
+                {submitted ? (
+                  <div className="py-20 text-center space-y-6">
+                    <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-500 mx-auto">
+                      <Send size={32} />
+                    </div>
+                    <h3 className="text-3xl font-sora font-black tracking-tighter">Správa odoslaná!</h3>
+                    <p className="text-slate-400">Ďakujem za váš záujem. Ozvem sa vám čo najskôr.</p>
+                    <button 
+                      onClick={() => setSubmitted(false)}
+                      className="text-indigo-400 font-bold uppercase tracking-widest text-xs hover:text-white transition-colors"
+                    >
+                      Poslať ďalšiu správu
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-4">Vaše meno</label>
+                      <input 
+                        required
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        placeholder="Meno a priezvisko"
+                        className="w-full px-6 py-4 bg-transparent border border-white/10 rounded-2xl focus:outline-none focus:border-indigo-500/50 transition-all text-white placeholder:text-slate-600"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-4">Email</label>
+                        <input 
+                          required
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          placeholder="vas@email.com"
+                          className="w-full px-6 py-4 bg-transparent border border-white/10 rounded-2xl focus:outline-none focus:border-indigo-500/50 transition-all text-white placeholder:text-slate-600"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-4">Telefón (nepovinné)</label>
+                        <input 
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          placeholder="+421 ..."
+                          className="w-full px-6 py-4 bg-transparent border border-white/10 rounded-2xl focus:outline-none focus:border-indigo-500/50 transition-all text-white placeholder:text-slate-600"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-4">Vaša správa</label>
+                      <textarea 
+                        required
+                        name="message"
+                        value={formData.message}
+                        onChange={handleChange}
+                        rows={5}
+                        placeholder="O čom budeme hovoriť?"
+                        className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-indigo-500/50 transition-all text-white placeholder:text-slate-600 resize-none"
+                      />
+                    </div>
+
+                    <button 
+                      disabled={isSubmitting}
+                      type="submit"
+                      className="w-full group relative px-10 py-5 bg-white text-black rounded-2xl font-black text-sm uppercase tracking-widest overflow-hidden transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+                    >
+                      <span className="relative z-10 flex items-center justify-center space-x-3">
+                        <span>{isSubmitting ? 'Odosielam...' : 'Odoslať dopyt'}</span>
+                        {!isSubmitting && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}
+                      </span>
+                    </button>
+                  </form>
+                )}
+              </div>
+            </motion.div>
+
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+const ArrowRight: React.FC<{ size?: number, className?: string }> = ({ size = 20, className = "" }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <line x1="5" y1="12" x2="19" y2="12"></line>
+    <polyline points="12 5 19 12 12 19"></polyline>
+  </svg>
+);
+
+export default Contact;
