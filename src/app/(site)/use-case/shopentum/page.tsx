@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ShopentumUseCase from "@/components/ShopentumUseCase";
+import { ShopentumProductJsonLd } from "@/components/ShopentumProductJsonLd";
 import { siteName, siteUrl } from "@/lib/site";
 
 const path = "/use-case/shopentum";
@@ -29,5 +30,10 @@ export const metadata: Metadata = {
 };
 
 export default function ShopentumCasePage() {
-  return <ShopentumUseCase />;
+  return (
+    <>
+      <ShopentumProductJsonLd />
+      <ShopentumUseCase />
+    </>
+  );
 }
