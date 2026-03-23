@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import {
@@ -12,7 +11,6 @@ import {
   BrainCircuit,
   TrendingUp,
   ShieldCheck,
-  LayoutGrid,
   Search,
   Activity,
   Bot,
@@ -295,67 +293,7 @@ const ShopentumUseCase: React.FC = () => {
       {/* 5️⃣ DÔKAZ (KRITICKÉ) */}
       <section className="py-32 px-6">
         <div className="max-w-7xl mx-auto space-y-24">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Visual A: Dashboard */}
-            <div className="space-y-4">
-              <div className="aspect-square rounded-3xl bg-white/5 border border-white/10 overflow-hidden relative group">
-                <Image
-                  src="https://picsum.photos/seed/dashboard/800/800?grayscale"
-                  alt=""
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-cover opacity-20 group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 flex items-center justify-center p-8">
-                  <LayoutGrid size={48} className="text-purple-500/50" />
-                </div>
-                <div className="absolute bottom-6 left-6 right-6 p-4 bg-black/60 backdrop-blur-md rounded-2xl border border-white/10">
-                  <p className="text-xs font-black uppercase tracking-widest">{t("visuals.dashboardLabel")}</p>
-                </div>
-              </div>
-              <h4 className="text-xl font-bold text-center">{t("visuals.dashboardTitle")}</h4>
-            </div>
-
-            {/* Visual B: Findings */}
-            <div className="space-y-4">
-              <div className="aspect-square rounded-3xl bg-white/5 border border-white/10 overflow-hidden relative group">
-                <Image
-                  src="https://picsum.photos/seed/findings/800/800?grayscale"
-                  alt=""
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-cover opacity-20 group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 flex items-center justify-center p-8">
-                  <BrainCircuit size={48} className="text-blue-500/50" />
-                </div>
-                <div className="absolute bottom-6 left-6 right-6 p-4 bg-black/60 backdrop-blur-md rounded-2xl border border-white/10">
-                  <p className="text-xs font-black uppercase tracking-widest">{t("visuals.findingsLabel")}</p>
-                </div>
-              </div>
-              <h4 className="text-xl font-bold text-center">{t("visuals.findingsTitle")}</h4>
-            </div>
-
-            {/* Visual C: Audit */}
-            <div className="space-y-4">
-              <div className="aspect-square rounded-3xl bg-white/5 border border-white/10 overflow-hidden relative group">
-                <Image
-                  src="https://picsum.photos/seed/audit/800/800?grayscale"
-                  alt=""
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-cover opacity-20 group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 flex items-center justify-center p-8">
-                  <ShieldCheck size={48} className="text-emerald-500/50" />
-                </div>
-                <div className="absolute bottom-6 left-6 right-6 p-4 bg-black/60 backdrop-blur-md rounded-2xl border border-white/10">
-                  <p className="text-xs font-black uppercase tracking-widest">{t("visuals.auditLabel")}</p>
-                </div>
-              </div>
-              <h4 className="text-xl font-bold text-center">{t("visuals.auditTitle")}</h4>
-            </div>
-          </div>
+          {/* Visual previews are temporarily hidden until real assets are ready. */}
 
           <div className="p-12 rounded-[3rem] bg-gradient-to-br from-white/5 to-transparent border border-white/10">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
