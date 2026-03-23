@@ -58,25 +58,15 @@ export const PageTransition: React.FC<{ children: React.ReactNode }> = ({ childr
         )}
       </AnimatePresence>
 
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
-          key={pathname}
-          initial={{ opacity: 0.98 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0.98 }}
-          transition={{ duration: 0.22, ease: "easeInOut" }}
-        >
-          {children}
-        </motion.div>
-      </AnimatePresence>
+      {children}
 
       <AnimatePresence mode="sync" initial={false}>
         <motion.div
           key={`route-overlay-${pathname}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: [0, 0.35, 0] }}
+          initial={{ opacity: 0.35 }}
+          animate={{ opacity: 0 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.55, times: [0, 0.45, 1], ease: "easeInOut" }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
           className="fixed inset-0 z-[60] pointer-events-none bg-black"
         />
       </AnimatePresence>
