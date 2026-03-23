@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Geist, Geist_Mono, Sora } from "next/font/google";
+import { headers } from "next/headers";
 import {
   defaultTitle,
   seoDescription,
@@ -62,17 +63,26 @@ export const metadata: Metadata = {
     title: defaultTitle,
     description: seoDescription,
   },
+  alternates: {
+    languages: {
+      sk: siteUrl,
+      en: `${siteUrl}/en`,
+      "x-default": siteUrl,
+    },
+  },
   category: "technology",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: ReactNode;
 }>) {
+  const locale = (await headers()).get("x-next-intl-locale") ?? "sk";
+
   return (
     <html
-      lang="sk"
+      lang={locale}
       className={`${geistSans.variable} ${geistMono.variable} ${sora.variable} h-full antialiased bg-black`}
     >
       <body className="min-h-full flex flex-col bg-black text-zinc-100">

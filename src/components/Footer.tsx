@@ -1,10 +1,13 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { AIFreelancerLogo } from "./AIFreelancerLogo";
 
 export const Footer: React.FC = () => {
+  const t = useTranslations("Footer");
+
   return (
     <footer className="py-12 px-6 border-t border-white/5 bg-black">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
@@ -23,19 +26,19 @@ export const Footer: React.FC = () => {
             href="/cookies"
             className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors"
           >
-            Cookies
+            {t("cookies")}
           </Link>
           <Link
             href="/gdpr"
             className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors"
           >
-            GDPR
+            {t("gdpr")}
           </Link>
         </div>
       </div>
 
       <p className="mt-8 max-w-3xl mx-auto text-center text-[10px] sm:text-xs leading-relaxed text-slate-600 tracking-tight px-4">
-        AI-native vývoj a decision intelligence riešenia pre firmy v celej SR.
+        {t("geoSignal")}
       </p>
     </footer>
   );

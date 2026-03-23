@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { Mail, Phone, User, Send, Linkedin } from "lucide-react";
 
 const WEB3FORMS_URL = "https://api.web3forms.com/submit";
 
 const Contact: React.FC = () => {
+  const tContact = useTranslations("Contact");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -21,7 +23,7 @@ const Contact: React.FC = () => {
     e.preventDefault();
     const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
     if (!accessKey?.trim()) {
-      setSubmitError("Chýba NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY v .env.local (reštartuj dev server).");
+      setSubmitError(tContact("error_missing_key"));
       return;
     }
 
@@ -37,7 +39,7 @@ const Contact: React.FC = () => {
         },
         body: JSON.stringify({
           access_key: accessKey,
-          subject: `Dopyt aifreelancer.sk — ${formData.name}`,
+          subject: `${tContact("subject_prefix")} — ${formData.name}`,
           name: formData.name,
           email: formData.email,
           phone: formData.phone || "",
@@ -48,13 +50,13 @@ const Contact: React.FC = () => {
       const data = (await res.json()) as { success?: boolean; message?: string };
 
       if (!res.ok || !data.success) {
-        throw new Error(data.message || "Odoslanie zlyhalo. Skús to prosím znova.");
+        throw new Error(data.message || tContact("error_submit_failed"));
       }
 
       setSubmitted(true);
       setFormData({ name: "", email: "", phone: "", message: "" });
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Nastala neočakávaná chyba.");
+      setSubmitError(err instanceof Error ? err.message : tContact("error_unexpected"));
     } finally {
       setIsSubmitting(false);
     }
@@ -82,13 +84,12 @@ const Contact: React.FC = () => {
               className="space-y-12"
             >
               <div className="space-y-6">
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500">KONTAKT</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500">{tContact("eyebrow")}</p>
                 <h1 className="text-5xl md:text-7xl font-sora font-black tracking-tighter leading-tight">
-                  Poďme sa <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">porozprávať.</span>
+                  {tContact("title")}
                 </h1>
                 <p className="text-slate-400 text-lg leading-relaxed max-w-md">
-                  Máte projekt, nápad alebo hľadáte technologického partnera? Napíšte mi a spoločne nájdeme riešenie.
+                  {tContact("lead")}
                 </p>
               </div>
 
@@ -98,8 +99,8 @@ const Contact: React.FC = () => {
                     <User size={20} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">MENO</p>
-                    <p className="text-xl font-bold">Mgr. Daniel Budziňák</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">{tContact("labels.name")}</p>
+                    <p className="text-xl font-bold">{tContact("identity_name")}</p>
                   </div>
                 </div>
 
@@ -108,7 +109,7 @@ const Contact: React.FC = () => {
                     <Mail size={20} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">EMAIL</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">{tContact("labels.email")}</p>
                     <a href="mailto:daniel.budzinak@gmail.com" className="text-xl font-bold hover:text-indigo-400 transition-colors">daniel.budzinak@gmail.com</a>
                   </div>
                 </div>
@@ -118,7 +119,7 @@ const Contact: React.FC = () => {
                     <Phone size={20} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">TELEFÓN</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">{tContact("labels.phone")}</p>
                     <a href="tel:+421911694025" className="text-xl font-bold hover:text-indigo-400 transition-colors">+421 911 694 025</a>
                   </div>
                 </div>
@@ -129,7 +130,7 @@ const Contact: React.FC = () => {
                   <Linkedin size={20} />
                 </a>
                 <div className="h-4 w-px bg-white/10" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">SÍDLO: SLOVENSKO / REMOTE</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">{tContact("location")}</span>
               </div>
             </motion.div>
 
@@ -145,8 +146,8 @@ const Contact: React.FC = () => {
                     <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-500 mx-auto">
                       <Send size={32} />
                     </div>
-                    <h3 className="text-3xl font-sora font-black tracking-tighter">Správa odoslaná!</h3>
-                    <p className="text-slate-400">Ďakujem za váš záujem. Ozvem sa vám čo najskôr.</p>
+                    <h3 className="text-3xl font-sora font-black tracking-tighter">{tContact("success_title")}</h3>
+                    <p className="text-slate-400">{tContact("status_success")}</p>
                     <button
                       type="button"
                       onClick={() => {
@@ -155,7 +156,7 @@ const Contact: React.FC = () => {
                       }}
                       className="text-indigo-400 font-bold uppercase tracking-widest text-xs hover:text-white transition-colors"
                     >
-                      Poslať ďalšiu správu
+                      {tContact("send_another")}
                     </button>
                   </div>
                 ) : (
@@ -169,53 +170,53 @@ const Contact: React.FC = () => {
                       </p>
                     )}
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-4">Vaše meno</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-4">{tContact("form.name_label")}</label>
                       <input 
                         required
                         type="text"
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        placeholder="Meno a priezvisko"
+                        placeholder={tContact("placeholder_name")}
                         className="w-full px-6 py-4 bg-transparent border border-white/10 rounded-2xl focus:outline-none focus:border-indigo-500/50 transition-all text-white placeholder:text-slate-600"
                       />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-4">Email</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-4">{tContact("form.email_label")}</label>
                         <input 
                           required
                           type="email"
                           name="email"
                           value={formData.email}
                           onChange={handleChange}
-                          placeholder="vas@email.com"
+                          placeholder={tContact("form.email_placeholder")}
                           className="w-full px-6 py-4 bg-transparent border border-white/10 rounded-2xl focus:outline-none focus:border-indigo-500/50 transition-all text-white placeholder:text-slate-600"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-4">Telefón (nepovinné)</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-4">{tContact("form.phone_label")}</label>
                         <input 
                           type="tel"
                           name="phone"
                           value={formData.phone}
                           onChange={handleChange}
-                          placeholder="+421 ..."
+                          placeholder={tContact("form.phone_placeholder")}
                           className="w-full px-6 py-4 bg-transparent border border-white/10 rounded-2xl focus:outline-none focus:border-indigo-500/50 transition-all text-white placeholder:text-slate-600"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-4">Vaša správa</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-4">{tContact("form.message_label")}</label>
                       <textarea 
                         required
                         name="message"
                         value={formData.message}
                         onChange={handleChange}
                         rows={5}
-                        placeholder="O čom budeme hovoriť?"
+                        placeholder={tContact("placeholder_message")}
                         className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-indigo-500/50 transition-all text-white placeholder:text-slate-600 resize-none"
                       />
                     </div>
@@ -226,7 +227,7 @@ const Contact: React.FC = () => {
                       className="w-full group relative px-10 py-5 bg-white text-black rounded-2xl font-black text-sm uppercase tracking-widest overflow-hidden transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
                     >
                       <span className="relative z-10 flex items-center justify-center space-x-3">
-                        <span>{isSubmitting ? 'Odosielam...' : 'Odoslať dopyt'}</span>
+                        <span>{isSubmitting ? tContact("status_sending") : tContact("cta")}</span>
                         {!isSubmitting && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}
                       </span>
                     </button>

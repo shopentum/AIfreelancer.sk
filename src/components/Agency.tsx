@@ -2,6 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import {
   Zap,
   BrainCircuit,
@@ -20,6 +21,7 @@ import { useRouter } from "next/navigation";
 
 const Agency: React.FC = () => {
   const router = useRouter();
+  const t = useTranslations("Agency");
 
   return (
     <div className="min-h-screen bg-[#030303] text-white font-inter selection:bg-blue-500/30 overflow-x-hidden">
@@ -40,30 +42,26 @@ const Agency: React.FC = () => {
           >
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-purple-400">
               <Terminal size={12} />
-              <span>Externý AI Engine pre Agentúry</span>
+              <span>{t("eyebrow")}</span>
             </div>
             
             <h1 className="text-4xl md:text-[4.5rem] font-sora font-black tracking-tighter leading-[1.05] text-white">
-              Staviam moderné produkty <br />
-              s AI-native architektúrou <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400">
-                v rekordnom čase.
-              </span>
+              {t("heroTitle")}
             </h1>
 
             <div className="max-w-4xl mx-auto space-y-8 text-xl md:text-2xl text-slate-400 font-medium leading-relaxed">
               <div className="space-y-6">
                 <p>
-                  Pomáham agentúram a tímom doručovať projekty, ktoré by inak boli technicky a časovo náročné.
+                  {t("heroLead1")}
                 </p>
                 <p>
-                  Staviam riešenia, ktoré sú pripravené na produkciu - nie len demo alebo prototyp. Od Figma dizajnu cez frontend a backend až po AI workflow.
+                  {t("heroLead2")}
                 </p>
               </div>
               
               <div className="relative mt-12 p-8 md:px-12 md:py-8 rounded-[2rem] bg-white/[0.03] border border-white/10 max-w-xl mx-auto overflow-hidden group shadow-2xl flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
                 <p className="text-white font-black not-italic text-lg md:text-xl tracking-tight">
-                  Výsledok: funkčný web alebo aplikácia, nie prototyp
+                  {t("heroResult")}
                 </p>
                 <span className="px-3 py-1 bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-full shadow-lg whitespace-nowrap">
                   FAST DELIVERY
@@ -79,7 +77,7 @@ const Agency: React.FC = () => {
                 className="group relative px-10 py-5 bg-white text-black rounded-2xl font-black text-sm uppercase tracking-widest overflow-hidden transition-all hover:scale-105 active:scale-95 text-center"
               >
                 <span className="relative z-10 flex items-center justify-center space-x-3">
-                  <span>Prebrať váš projekt (15 min)</span>
+                  <span>{t("heroPrimaryCta")}</span>
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </span>
               </button>
@@ -99,8 +97,8 @@ const Agency: React.FC = () => {
       <section id="services" className="pt-40 pb-20 px-6 relative">
         <div className="max-w-7xl mx-auto space-y-20">
           <div className="text-center space-y-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-purple-500">Najčastejšie spolupráce:</p>
-            <h2 className="text-3xl md:text-5xl font-sora font-black tracking-tighter uppercase">3 EXKLUZÍVNE SLUŽBY</h2>
+            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-purple-500">{t("servicesEyebrow")}</p>
+            <h2 className="text-3xl md:text-5xl font-sora font-black tracking-tighter uppercase">{t("servicesTitle")}</h2>
             <div className="w-20 h-1 bg-purple-500 mx-auto"></div>
           </div>
 
@@ -114,13 +112,13 @@ const Agency: React.FC = () => {
                 <Layers size={32} />
               </div>
               <div className="space-y-4">
-                <h3 className="text-2xl font-sora font-black tracking-tight">Produkčný frontend</h3>
+                <h3 className="text-2xl font-sora font-black tracking-tight">{t("services.s1.title")}</h3>
                 <p className="text-slate-400 text-sm leading-relaxed font-medium">
-                  Vysoko výkonné a škálovateľné rozhrania postavené na modernom stacku. Zameriavam sa na rýchlosť, stabilitu a bezchybný používateľský zážitok.
+                  {t("services.s1.desc")}
                 </p>
               </div>
               <ul className="space-y-3 pt-4">
-                {['pixel-accurate implementácia', 'komponentová štruktúra', 'pripravené na backend / integrácie', 'rýchle nasadenie'].map((item, i) => (
+                {[t("services.s1.f1"), t("services.s1.f2"), t("services.s1.f3"), t("services.s1.f4")].map((item, i) => (
                   <li key={i} className="flex items-center space-x-3 text-[10px] font-black uppercase tracking-widest text-slate-500">
                     <Zap size={12} className="text-purple-500" />
                     <span>{item}</span>
@@ -138,13 +136,13 @@ const Agency: React.FC = () => {
                 <BrainCircuit size={32} />
               </div>
               <div className="space-y-4">
-                <h3 className="text-2xl font-sora font-black tracking-tight">AI workflow & automatizácia</h3>
+                <h3 className="text-2xl font-sora font-black tracking-tight">{t("services.s2.title")}</h3>
                 <p className="text-slate-400 text-sm leading-relaxed font-medium">
-                  Zefektívňovanie procesov pomocou inteligentných nástrojov a automatizovaných tokov dát. Šetrím váš čas a eliminujem manuálne chyby.
+                  {t("services.s2.desc")}
                 </p>
               </div>
               <ul className="space-y-3 pt-4">
-                {['AI asistované workflow', 'prepojenie nástrojov (API, data flow)', 'interné nástroje pre tímy', 'decision support systémy'].map((item, i) => (
+                {[t("services.s2.f1"), t("services.s2.f2"), t("services.s2.f3"), t("services.s2.f4")].map((item, i) => (
                   <li key={i} className="flex items-center space-x-3 text-[10px] font-black uppercase tracking-widest text-slate-500">
                     <Zap size={12} className="text-blue-500" />
                     <span>{item}</span>
@@ -162,13 +160,13 @@ const Agency: React.FC = () => {
                 <Rocket size={32} />
               </div>
               <div className="space-y-4">
-                <h3 className="text-2xl font-sora font-black tracking-tight">Od nápadu k funkčnému produktu</h3>
+                <h3 className="text-2xl font-sora font-black tracking-tight">{t("services.s3.title")}</h3>
                 <p className="text-slate-400 text-sm leading-relaxed font-medium">
-                  Kompletné zastrešenie vývoja od prvotného konceptu až po finálne nasadenie. Rýchlo a efektívne mením nápady na realitu.
+                  {t("services.s3.desc")}
                 </p>
               </div>
               <ul className="space-y-3 pt-4">
-                {['MVP development', 'rýchle prototypovanie → produkcia', 'validácia nápadu', 'škálovateľný základ'].map((item, i) => (
+                {[t("services.s3.f1"), t("services.s3.f2"), t("services.s3.f3"), t("services.s3.f4")].map((item, i) => (
                   <li key={i} className="flex items-center space-x-3 text-[10px] font-black uppercase tracking-widest text-slate-500">
                     <Zap size={12} className="text-emerald-500" />
                     <span>{item}</span>
@@ -184,19 +182,19 @@ const Agency: React.FC = () => {
       <section className="pt-20 pb-12 px-6 border-t border-white/5 bg-white/[0.02]">
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-blue-500">MODERN AI STACK</p>
-            <h2 className="text-3xl md:text-5xl font-sora font-black tracking-tighter uppercase">Nástroje, ktoré menia pravidlá hry</h2>
+            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-blue-500">{t("stackEyebrow")}</p>
+            <h2 className="text-3xl md:text-5xl font-sora font-black tracking-tighter uppercase">{t("stackTitle")}</h2>
             <div className="w-20 h-1 bg-blue-500 mx-auto"></div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 md:gap-8">
             {[
-              { name: "Cursor", icon: Terminal, desc: "AI-Native IDE", color: "text-sky-400" },
-              { name: "Builder.io", icon: LayoutGrid, desc: "Visual CMS & AI", color: "text-blue-500" },
-              { name: "API First", icon: Network, desc: "Connected Logic", color: "text-purple-500" },
-              { name: "Github", icon: Github, desc: "Version Control", color: "text-slate-200" },
-              { name: "Supabase", icon: Database, desc: "Backend & Auth", color: "text-emerald-500" },
-              { name: "Vercel", icon: Zap, desc: "Deployment & Edge", color: "text-white" }
+              { name: "Cursor", icon: Terminal, desc: t("stack.cursor"), color: "text-sky-400" },
+              { name: "Builder.io", icon: LayoutGrid, desc: t("stack.builder"), color: "text-blue-500" },
+              { name: "API First", icon: Network, desc: t("stack.api"), color: "text-purple-500" },
+              { name: "Github", icon: Github, desc: t("stack.github"), color: "text-slate-200" },
+              { name: "Supabase", icon: Database, desc: t("stack.supabase"), color: "text-emerald-500" },
+              { name: "Vercel", icon: Zap, desc: t("stack.vercel"), color: "text-white" }
             ].map((tech, i) => (
               <motion.div 
                 key={i}
@@ -233,18 +231,18 @@ const Agency: React.FC = () => {
               className="p-10 rounded-[3rem] bg-white/[0.08] border border-white/20 space-y-8 shadow-[0_0_50px_rgba(0,0,0,0.3)] hover:bg-white/[0.1] transition-all"
             >
               <div className="space-y-2 pb-6 border-b border-white/20">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-purple-500">TECH STACK / SYSTEM LAYER</p>
-                <h2 className="text-3xl md:text-4xl font-sora font-black tracking-tighter">Ako sú moje systémy postavené</h2>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-purple-500">{t("systemLayerEyebrow")}</p>
+                <h2 className="text-3xl md:text-4xl font-sora font-black tracking-tighter">{t("systemLayerTitle")}</h2>
               </div>
               
               <div className="grid gap-6">
                 {[
-                  { title: "Pipeline-based architektúra", desc: "Žiadne ad-hoc skripty, ale robustné, zreťazené procesy." },
-                  { title: "Data Gap detection", desc: "Systém aktívne identifikuje slepé miesta v dátach." },
-                  { title: "Deterministic výstupy", desc: "Prísna kontrola nad výstupmi, eliminácia halucinácií." },
-                  { title: "Auditovateľné rozhodnutia", desc: "Kompletný trace: od vstupu cez logiku až po výsledok." },
-                  { title: "Runtime vs Snapshot logika", desc: "Jasné oddelenie okamžitého spracovania od historických dát." },
-                  { title: "Production-first návrh", desc: "Staviam systémy pripravené na záťaž, nie len demá." }
+                  { title: t("systemList.i1.title"), desc: t("systemList.i1.desc") },
+                  { title: t("systemList.i2.title"), desc: t("systemList.i2.desc") },
+                  { title: t("systemList.i3.title"), desc: t("systemList.i3.desc") },
+                  { title: t("systemList.i4.title"), desc: t("systemList.i4.desc") },
+                  { title: t("systemList.i5.title"), desc: t("systemList.i5.desc") },
+                  { title: t("systemList.i6.title"), desc: t("systemList.i6.desc") }
                 ].map((item, i) => (
                   <div key={i} className="flex items-start space-x-4 group">
                     <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-purple-500 group-hover:scale-150 transition-transform" />
@@ -265,25 +263,25 @@ const Agency: React.FC = () => {
               className="p-10 rounded-[3rem] bg-white/[0.08] border border-white/20 space-y-8 shadow-[0_0_50px_rgba(0,0,0,0.3)] hover:bg-white/[0.1] transition-all"
             >
               <div className="space-y-2 pb-6 border-b border-white/20">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500">AKO PRACUJEM S AI</p>
-                <h2 className="text-3xl md:text-4xl font-sora font-black tracking-tighter">Ako pristupujem k AI systémom</h2>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500">{t("approachEyebrow")}</p>
+                <h2 className="text-3xl md:text-4xl font-sora font-black tracking-tighter">{t("approachTitle")}</h2>
               </div>
 
               <div className="space-y-6">
                 <p className="text-lg text-slate-300 font-medium italic">
-                  „AI nepoužívam ako black box.“
+                  {t("approachQuote")}
                 </p>
                 
                 <div className="space-y-6">
                   <p className="text-sm text-slate-400 leading-relaxed">
-                    Každý systém navrhujem ako riadený proces:
+                    {t("approachLead")}
                   </p>
                   <ul className="space-y-4">
                     {[
-                      { label: "Jasný vstup", val: "data contract" },
-                      { label: "Kontrolovaný výstup", val: "no guessing" },
-                      { label: "Validácia rozhodnutí", val: "confidence, trace" },
-                      { label: "Oddelenie interpretácie", val: "fakty vs. odhady" }
+                      { label: t("approachList.i1.label"), val: t("approachList.i1.val") },
+                      { label: t("approachList.i2.label"), val: t("approachList.i2.val") },
+                      { label: t("approachList.i3.label"), val: t("approachList.i3.val") },
+                      { label: t("approachList.i4.label"), val: t("approachList.i4.val") }
                     ].map((item, i) => (
                       <li key={i} className="flex items-center justify-between border-b border-white/5 pb-2">
                         <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{item.label}</span>
@@ -294,8 +292,8 @@ const Agency: React.FC = () => {
                 </div>
 
                 <div className="pt-4">
-                  <p className="text-sm font-bold text-white">Výsledok:</p>
-                  <p className="text-sm text-slate-400 mt-1">AI, ktorá sa dá riadiť, nie len “používať”.</p>
+                  <p className="text-sm font-bold text-white">{t("approachResultLabel")}</p>
+                  <p className="text-sm text-slate-400 mt-1">{t("approachResultText")}</p>
                 </div>
               </div>
             </motion.div>
@@ -310,11 +308,10 @@ const Agency: React.FC = () => {
         <div className="max-w-4xl mx-auto text-center space-y-12 relative z-10">
           <div className="space-y-4">
             <h2 className="text-4xl md:text-6xl font-sora font-black tracking-tighter leading-tight">
-              Posuňte hranice toho, <br />
-              čo je možné.
+              {t("ctaTitle")}
             </h2>
             <p className="text-xl text-slate-400 font-medium italic leading-relaxed max-w-2xl mx-auto">
-              Či už budujete komplexnú infraštruktúru alebo hľadáte technologický motor pre vaše štúdio, som tu, aby som vaše vízie zhmotnil. Premeňme vašu kreativitu na funkčný, high-end softvér bez zbytočných prieťahov.
+              {t("ctaLead")}
             </p>
           </div>
 
@@ -326,7 +323,7 @@ const Agency: React.FC = () => {
             >
               <span className="relative z-10 flex items-center space-x-4">
                 <Calendar size={24} />
-                <span>Prebrať váš projekt (15 min)</span>
+                <span>{t("heroPrimaryCta")}</span>
               </span>
             </button>
             

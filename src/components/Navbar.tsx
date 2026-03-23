@@ -1,22 +1,24 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Globe } from "lucide-react";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { AIFreelancerLogo } from "./AIFreelancerLogo";
 
 const navLinks = [
-  { name: "About", href: "/o-mne" },
-  { name: "Agency", href: "/agency" },
-  { name: "Case Study", href: "/use-case/shopentum" },
+  { key: "about", href: "/o-mne" },
+  { key: "agency", href: "/agency" },
+  { key: "caseStudy", href: "/use-case/shopentum" },
 ] as const;
 
 export const Navbar: React.FC = () => {
+  const t = useTranslations("Navbar");
+  const locale = useLocale();
+  const router = useRouter();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [lang, setLang] = useState<"SK" | "EN">("SK");
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -28,7 +30,11 @@ export const Navbar: React.FC = () => {
   }, []);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  const toggleLang = () => setLang(lang === "SK" ? "EN" : "SK");
+  const toggleLang = () => {
+    const nextLocale = locale === "sk" ? "en" : "sk";
+    router.replace(pathname, { locale: nextLocale });
+    setIsMenuOpen(false);
+  };
 
   const linkActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
@@ -58,7 +64,9 @@ export const Navbar: React.FC = () => {
             className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all group"
           >
             <Globe size={12} className="text-blue-400 group-hover:rotate-12 transition-transform" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-white">{lang}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-white">
+              {locale.toUpperCase()}
+            </span>
           </button>
 
           {navLinks.map((link) => (
@@ -69,7 +77,7 @@ export const Navbar: React.FC = () => {
                 linkActive(link.href) ? "text-white" : "text-slate-400 hover:text-white"
               }`}
             >
-              {link.name}
+              {t(`links.${link.key}`)}
             </Link>
           ))}
 
@@ -82,7 +90,7 @@ export const Navbar: React.FC = () => {
                   : "bg-white text-black hover:bg-blue-500 hover:text-white"
               }`}
             >
-              Contact
+              {t("contact")}
             </Link>
           </div>
         </div>
@@ -93,7 +101,9 @@ export const Navbar: React.FC = () => {
             onClick={toggleLang}
             className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10"
           >
-            <span className="text-[10px] font-black text-white tracking-widest">{lang}</span>
+            <span className="text-[10px] font-black text-white tracking-widest">
+              {locale.toUpperCase()}
+            </span>
           </button>
 
           <button
@@ -125,7 +135,7 @@ export const Navbar: React.FC = () => {
                     linkActive(link.href) ? "text-blue-400" : "text-white"
                   }`}
                 >
-                  {link.name}
+                  {t(`links.${link.key}`)}
                 </Link>
               ))}
               <Link
@@ -133,31 +143,31 @@ export const Navbar: React.FC = () => {
                 onClick={() => setIsMenuOpen(false)}
                 className="w-full py-5 bg-white text-black rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all text-center"
               >
-                Contact
+                {t("contact")}
               </Link>
 
               <div className="pt-8 border-t border-white/5 flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <Globe size={16} className="text-slate-500" />
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                    Language
+                    {t("language")}
                   </span>
                 </div>
                 <div className="flex bg-white/5 rounded-lg p-1">
                   <button
                     type="button"
-                    onClick={() => setLang("SK")}
+                    onClick={() => router.replace(pathname, { locale: "sk" })}
                     className={`px-3 py-1 rounded-md text-[10px] font-black transition-all ${
-                      lang === "SK" ? "bg-blue-500 text-white" : "text-slate-500"
+                      locale === "sk" ? "bg-blue-500 text-white" : "text-slate-500"
                     }`}
                   >
                     SK
                   </button>
                   <button
                     type="button"
-                    onClick={() => setLang("EN")}
+                    onClick={() => router.replace(pathname, { locale: "en" })}
                     className={`px-3 py-1 rounded-md text-[10px] font-black transition-all ${
-                      lang === "EN" ? "bg-blue-500 text-white" : "text-slate-500"
+                      locale === "en" ? "bg-blue-500 text-white" : "text-slate-500"
                     }`}
                   >
                     EN

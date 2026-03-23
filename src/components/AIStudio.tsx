@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import {
   Zap,
@@ -18,6 +19,10 @@ import { AIFreelancerLogo } from "./AIFreelancerLogo";
 
 const AIStudio: React.FC = () => {
   const router = useRouter();
+  const tHero = useTranslations("Hero");
+  const tServices = useTranslations("Services");
+  const tCase = useTranslations("CaseStudy");
+  const tStudio = useTranslations("Studio");
 
   return (
     <div className="min-h-screen bg-[#030303] text-white font-inter selection:bg-blue-500/30 overflow-x-hidden">
@@ -38,19 +43,15 @@ const AIStudio: React.FC = () => {
           >
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-blue-400">
               <Sparkles size={12} />
-              <span>AI-DRIVEN DEVELOPMENT PARTNER</span>
+              <span>{tStudio("eyebrow")}</span>
             </div>
             
             <h1 className="text-5xl md:text-8xl font-sora font-black tracking-tighter leading-[0.9] text-white max-w-5xl">
-              Staviam systémy, <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">
-                ktoré premieňajú
-              </span> <br />
-              dáta na rozhodnutia.
+              {tHero("title")}
             </h1>
 
             <p className="max-w-4xl text-xl md:text-2xl text-slate-400 font-medium italic leading-relaxed">
-              Firmy dnes majú viac dát než kedykoľvek predtým, no rozhodnutia sú stále pomalé a nejasné. Staviam systémy, ktoré tieto dáta prepájajú, vyhodnocujú a premieňajú na jasné výstupy. Tvorím architektúru, ktorá dáva dátam kontext a mení ich na konkrétne kroky.
+              {tHero("subtitle")}
             </p>
 
             <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-8">
@@ -60,7 +61,7 @@ const AIStudio: React.FC = () => {
                 className="group relative px-10 py-5 bg-white text-black rounded-2xl font-black text-sm uppercase tracking-widest overflow-hidden transition-all hover:scale-105 active:scale-95"
               >
                 <span className="relative z-10 flex items-center space-x-3">
-                  <span>Pozrieť Case Study</span>
+                  <span>{tCase("cta")}</span>
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </span>
               </button>
@@ -69,7 +70,7 @@ const AIStudio: React.FC = () => {
                 onClick={() => router.push("/kontakt")}
                 className="px-10 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-white/10 transition-all"
               >
-                Konzultovať váš projekt
+                {tHero("cta")}
               </button>
             </div>
           </motion.div>
@@ -78,27 +79,32 @@ const AIStudio: React.FC = () => {
 
       {/* Tech Stack / Studio Principles */}
       <section className="py-20 px-6 border-y border-white/5 bg-white/[0.02]">
+        <div className="max-w-7xl mx-auto mb-10 text-center">
+          <h2 className="text-3xl md:text-4xl font-sora font-black tracking-tighter">
+            {tServices("title")}
+          </h2>
+        </div>
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
           <div className="space-y-4">
             <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400 border border-blue-500/20">
               <Cpu size={24} />
             </div>
-            <h3 className="text-xl font-bold">AI-Native Execution</h3>
-            <p className="text-slate-500 text-sm leading-relaxed">Využívam plný potenciál LLM orchestrácie na generovanie produkčného kódu v reálnom čase. Skracujem cestu od konceptu k deployu o 90 % bez kompromisov v kvalite.</p>
+            <h3 className="text-xl font-bold">{tServices("service1")}</h3>
+            <p className="text-slate-500 text-sm leading-relaxed">{tStudio("services.s1Desc")}</p>
           </div>
           <div className="space-y-4">
             <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-400 border border-purple-500/20">
               <BrainCircuit size={24} />
             </div>
-            <h3 className="text-xl font-bold">Decision Intelligence</h3>
-            <p className="text-slate-500 text-sm leading-relaxed">Navrhujem systémy, ktoré nečakajú na povel. Staviam architektúry, ktoré autonómne analyzujú dáta a transformujú ich na okamžité biznis rozhodnutia.</p>
+            <h3 className="text-xl font-bold">{tServices("service2")}</h3>
+            <p className="text-slate-500 text-sm leading-relaxed">{tStudio("services.s2Desc")}</p>
           </div>
           <div className="space-y-4">
             <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-400 border border-emerald-500/20">
               <Zap size={24} />
             </div>
-            <h3 className="text-xl font-bold">Enterprise-Ready Agility</h3>
-            <p className="text-slate-500 text-sm leading-relaxed">Moderný stack a modulárna architektúra umožňujú extrémnu flexibilitu. Škálovateľnosť, stabilita a bezpečnosť sú v DNA každého riadku kódu.</p>
+            <h3 className="text-xl font-bold">{tServices("service3")}</h3>
+            <p className="text-slate-500 text-sm leading-relaxed">{tStudio("services.s3Desc")}</p>
           </div>
         </div>
       </section>
@@ -117,14 +123,16 @@ const AIStudio: React.FC = () => {
             >
               <div className="space-y-4">
                 <div className="inline-block px-4 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-black uppercase tracking-widest text-blue-400">
-                  Veľa dát, málo jasných rozhodnutí.
+                  {tStudio("caseEyebrow")}
                 </div>
                 <h2 className="text-4xl md:text-6xl font-sora font-black tracking-tighter leading-tight">
-                  Shopentum Decision <br />
-                  <span className="text-blue-500">Intelligence System</span>
+                  {tCase("title")}
                 </h2>
                 <p className="text-xl text-slate-400 font-medium italic leading-relaxed">
-                  Implementácia vlastného AI jadra, ktoré neriadi len chat, ale celú logiku objednávkového toku a personalizáciu v reálnom čase.
+                  {tCase("description")}
+                </p>
+                <p className="text-sm font-black uppercase tracking-[0.2em] text-blue-400 pt-2">
+                  {tCase("metric")}
                 </p>
               </div>
 
@@ -134,8 +142,8 @@ const AIStudio: React.FC = () => {
                     <Activity size={24} />
                   </div>
                   <div>
-                    <h4 className="text-lg font-bold mb-1">Vývoj: 10x rýchlejšia iterácia</h4>
-                    <p className="text-slate-500 text-sm">Vďaka AI-Native workflow a unifikovanému frameworku AI WORKS sme skrátili vývojový cyklus o 90%.</p>
+                    <h4 className="text-lg font-bold mb-1">{tStudio("highlights.h1Title")}</h4>
+                    <p className="text-slate-500 text-sm">{tStudio("highlights.h1Desc")}</p>
                   </div>
                 </div>
                 <div className="p-8 rounded-3xl bg-white/5 border border-white/10 flex items-start space-x-6 group hover:bg-white/[0.08] transition-all">
@@ -143,8 +151,8 @@ const AIStudio: React.FC = () => {
                     <Globe size={24} />
                   </div>
                   <div>
-                    <h4 className="text-lg font-bold mb-1">Stav: Globálna škálovateľnosť</h4>
-                    <p className="text-slate-500 text-sm">Plne škálovateľná architektúra postavená na serverless princípoch, pripravená na okamžitú globálnu expanziu.</p>
+                    <h4 className="text-lg font-bold mb-1">{tStudio("highlights.h2Title")}</h4>
+                    <p className="text-slate-500 text-sm">{tStudio("highlights.h2Desc")}</p>
                   </div>
                 </div>
                 <div className="p-8 rounded-3xl bg-white/5 border border-white/10 flex items-start space-x-6 group hover:bg-white/[0.08] transition-all">
@@ -152,8 +160,8 @@ const AIStudio: React.FC = () => {
                     <TrendingUp size={24} />
                   </div>
                   <div>
-                    <h4 className="text-lg font-bold mb-1">Výsledok: Data-Driven Decisions</h4>
-                    <p className="text-slate-500 text-sm">Systém, ktorý sa rozhoduje na základe reálnych dát a prediktívnych modelov, nie na základe odhadov.</p>
+                    <h4 className="text-lg font-bold mb-1">{tStudio("highlights.h3Title")}</h4>
+                    <p className="text-slate-500 text-sm">{tStudio("highlights.h3Desc")}</p>
                   </div>
                 </div>
               </div>
@@ -172,7 +180,7 @@ const AIStudio: React.FC = () => {
                   className="group relative px-8 py-4 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-white/5"
                 >
                   <span className="relative z-10 flex items-center space-x-3">
-                    <span>Zobraziť demo</span>
+                    <span>{tCase("cta")}</span>
                     <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                   </span>
                 </button>
@@ -180,7 +188,7 @@ const AIStudio: React.FC = () => {
                 <div className="aspect-[3/4] rounded-[3rem] bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-white/10 overflow-hidden relative shadow-2xl">
                   <Image
                     src="/img/case-study-1.png"
-                    alt="Shopentum — ukážka Decision Intelligence System"
+                    alt={tStudio("caseImageAlt")}
                     fill
                     sizes="(max-width: 1024px) 100vw, 45vw"
                     className="object-cover object-top opacity-90 group-hover:scale-105 transition-transform duration-1000"
@@ -195,7 +203,7 @@ const AIStudio: React.FC = () => {
                       </div>
                       <div>
                         <p className="text-[10px] font-black uppercase tracking-widest text-white">Shopentum OS</p>
-                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Decision Engine</p>
+                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{tStudio("badgeSub")}</p>
                       </div>
                     </div>
                   </div>
@@ -209,7 +217,7 @@ const AIStudio: React.FC = () => {
                     <Activity size={20} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Uptime</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">{tStudio("uptimeLabel")}</p>
                     <p className="text-xl font-bold">99.99%</p>
                   </div>
                 </div>
@@ -220,7 +228,7 @@ const AIStudio: React.FC = () => {
                     <Zap size={20} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Latency</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">{tStudio("latencyLabel")}</p>
                     <p className="text-xl font-bold">42ms</p>
                   </div>
                 </div>

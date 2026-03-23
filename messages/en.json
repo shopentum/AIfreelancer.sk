@@ -1,0 +1,285 @@
+{
+  "Hero": {
+    "title": "AI-Native Systems Architect & Product Strategist",
+    "subtitle": "Engineering deterministic AI workflows and Decision Intelligence layers for the Enterprise era.",
+    "cta": "Initialize Collaboration"
+  },
+  "Philosophy": {
+    "title": "The AI WORKS Constitution",
+    "principle": "AI Proposes. Intelligence Decides.",
+    "description": "Moving beyond stochastic chatbots. I architect structured agentic systems where every output is traceable, audited and state-aware."
+  },
+  "Services": {
+    "title": "Core Competencies",
+    "service1": "AI-Native Workflow Architecture (Cursor, Next.js, LLM integration)",
+    "service2": "Decision Support Systems and Data Auditing",
+    "service3": "Digital Product Strategy and Systematic Automation"
+  },
+  "CaseStudy": {
+    "title": "Impact Audit: Shopentum",
+    "description": "Transitioning legacy e-commerce management into a data-driven Decision Engine.",
+    "metric": "Operational Latency Reduction: -40%",
+    "cta": "View Technical Audit"
+  },
+  "Studio": {
+    "eyebrow": "AI-Driven Development Partner",
+    "services": {
+      "s1Desc": "I use full LLM orchestration potential to generate production code in real time and reduce concept-to-deploy cycles by up to 90% without quality compromise.",
+      "s2Desc": "I design systems that do not wait for prompts. They analyze signals autonomously and transform data into immediate business decisions.",
+      "s3Desc": "A modern stack and modular architecture deliver flexibility, scalability, stability, and security as default behavior."
+    },
+    "caseEyebrow": "High data volume, low decision clarity.",
+    "highlights": {
+      "h1Title": "Development: 10x faster iteration",
+      "h1Desc": "With AI-native workflows and a unified AI WORKS framework, we shortened development cycles by 90%.",
+      "h2Title": "State: Global scalability",
+      "h2Desc": "Serverless-first architecture ready for immediate global expansion.",
+      "h3Title": "Outcome: Data-Driven Decisions",
+      "h3Desc": "A system that decides using real data and predictive models, not assumptions."
+    },
+    "caseImageAlt": "Shopentum — Decision Intelligence System showcase",
+    "badgeSub": "Decision Engine",
+    "uptimeLabel": "Uptime",
+    "latencyLabel": "Latency"
+  },
+  "About": {
+    "title": "Mgr. Daniel Budziňák",
+    "bio": "Specializing at the intersection of Product Logic and AI Inference. I do not just prompt. I architect systems where AI operates as a reliable extension of human decision-making."
+  },
+  "AboutPage": {
+    "heroTitlePrefix": "I build bridges between",
+    "heroTitleAccent": "business and AI.",
+    "location": "Location: Slovakia",
+    "philosophyTitle": "My philosophy",
+    "philosophyText": "I do not seek the most complex solution. I seek the most effective one. My work connects business needs, data, and technology into practical systems that help teams validate ideas faster and execute with confidence.",
+    "stackTitle": "Technology stack",
+    "skills": {
+      "s1": "AI Workflow Design",
+      "s2": "Product Architecture",
+      "s3": "Cursor",
+      "s4": "Supabase",
+      "s5": "Vercel",
+      "s6": "Make / n8n",
+      "s7": "API",
+      "s8": "Notion / Jira"
+    },
+    "timelineTitle": "My path",
+    "timeline": {
+      "t1": {
+        "period": "2025 – Present",
+        "company": "SHOPENTUM",
+        "role": "AI Product Owner / Systems Architect",
+        "desc": "Development of an AI-driven decision intelligence system that transforms marketing and UX data into structured workflows."
+      },
+      "t2": {
+        "period": "2020 – 2025",
+        "company": "AIfreelancer.sk",
+        "role": "AI Workflow & Automation Consultant",
+        "desc": "Implementation of AI-assisted workflows and automation systems for digital projects."
+      },
+      "t3": {
+        "period": "2013 – 2019",
+        "company": "WebRoyal",
+        "role": "Digital Project Manager",
+        "desc": "Management of complex web application and e-commerce solution delivery."
+      }
+    },
+    "personalTitle": "Beyond the screen",
+    "personal": {
+      "p1": {
+        "title": "Travel",
+        "desc": "I enjoy discovering new cultures and cuisine, with Italy and Spain as recurring destinations."
+      },
+      "p2": {
+        "title": "Music",
+        "desc": "It supports both my work and recovery rhythm and helps me keep high focus."
+      },
+      "p3": {
+        "title": "Family",
+        "desc": "My free time belongs to family moments and work in the garden."
+      }
+    }
+  },
+  "Contact": {
+    "eyebrow": "Contact",
+    "title": "Contact the Architect",
+    "lead": "If you have a project, idea, or need a technical partner, send a message and we will define the right execution path.",
+    "identity_name": "Mgr. Daniel Budziňák",
+    "location": "Location: Slovakia / Remote",
+    "subject_prefix": "Inquiry aifreelancer.sk",
+    "success_title": "Message sent!",
+    "send_another": "Send another message",
+    "error_missing_key": "Missing NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY in .env.local (restart dev server).",
+    "error_submit_failed": "Submission failed. Please try again.",
+    "error_unexpected": "Unexpected error occurred.",
+    "labels": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone"
+    },
+    "form": {
+      "name_label": "Your name",
+      "email_label": "Email",
+      "email_placeholder": "you@email.com",
+      "phone_label": "Phone (optional)",
+      "phone_placeholder": "+421 ...",
+      "message_label": "Your message"
+    },
+    "placeholder_name": "Identity / Entity",
+    "placeholder_message": "Define Challenge / Scope",
+    "status_sending": "Establishing secure uplink...",
+    "status_success": "Transmission received. Protocol initiated.",
+    "cta": "Submit Protocol"
+  },
+  "Agency": {
+    "eyebrow": "External AI Engine for Agencies",
+    "heroTitle": "AI-Native Execution Layer for high-velocity product delivery.",
+    "heroLead1": "I architect and deploy production systems for agencies and teams operating under delivery pressure.",
+    "heroLead2": "From Figma through frontend and backend to AI workflow logic. Production state, no demo artifacts.",
+    "heroResult": "Output: production-ready web application, not a prototype.",
+    "heroPrimaryCta": "Review your project scope (15 min)",
+    "servicesEyebrow": "Most common engagements",
+    "servicesTitle": "Core Service Blocks",
+    "services": {
+      "s1": {
+        "title": "Production frontend",
+        "desc": "High-performance and scalable interfaces built on a modern stack with focus on speed, reliability, and user experience.",
+        "f1": "pixel-accurate implementation",
+        "f2": "component-first structure",
+        "f3": "ready for backend/integrations",
+        "f4": "fast deployment"
+      },
+      "s2": {
+        "title": "AI workflow & automation",
+        "desc": "Process optimization with intelligent tools and automated data flows that reduce manual errors and save execution time.",
+        "f1": "AI-assisted workflows",
+        "f2": "tool integration (API, data flow)",
+        "f3": "internal team tools",
+        "f4": "decision support systems"
+      },
+      "s3": {
+        "title": "From concept to product",
+        "desc": "End-to-end product delivery from concept through production release with an execution-first approach.",
+        "f1": "MVP development",
+        "f2": "rapid prototyping to production",
+        "f3": "idea validation",
+        "f4": "scalable foundations"
+      }
+    },
+    "stackEyebrow": "Modern AI Stack",
+    "stackTitle": "Tools that define the execution layer",
+    "stack": {
+      "cursor": "AI-Native IDE",
+      "builder": "Visual CMS & AI",
+      "api": "Connected logic",
+      "github": "Version control",
+      "supabase": "Backend & auth",
+      "vercel": "Deployment & edge"
+    },
+    "systemLayerEyebrow": "Tech stack / system layer",
+    "systemLayerTitle": "How my systems are built",
+    "systemList": {
+      "i1": { "title": "Pipeline-based architecture", "desc": "No ad-hoc scripts. Robust chained processes." },
+      "i2": { "title": "Data gap detection", "desc": "The system actively identifies blind spots in data." },
+      "i3": { "title": "Deterministic outputs", "desc": "Strict output control with hallucination mitigation." },
+      "i4": { "title": "Auditable decisions", "desc": "Full traceability from input to logic to outcome." },
+      "i5": { "title": "Runtime vs snapshot logic", "desc": "Clear split between live processing and historical state." },
+      "i6": { "title": "Production-first design", "desc": "Systems built for load, not demo conditions." }
+    },
+    "approachEyebrow": "How I work with AI",
+    "approachTitle": "My approach to AI systems",
+    "approachQuote": "\"I don't use AI as a black box.\"",
+    "approachLead": "Every system is designed as a managed process:",
+    "approachList": {
+      "i1": { "label": "Clear input", "val": "data contract" },
+      "i2": { "label": "Controlled output", "val": "no guessing" },
+      "i3": { "label": "Decision validation", "val": "confidence, trace" },
+      "i4": { "label": "Interpretation split", "val": "facts vs estimates" }
+    },
+    "approachResultLabel": "Result:",
+    "approachResultText": "AI you can govern, not just use.",
+    "ctaTitle": "Expand the boundary of what can be deployed.",
+    "ctaLead": "If you need infrastructure depth or an execution engine for your studio, we can define architecture and delivery logic in one pass."
+  },
+  "Shopentum": {
+    "eyebrow": "Use Case: Shopentum",
+    "heroTitle": "High data volume. Low decision clarity.",
+    "heroSubTitle": "Decision Intelligence System",
+    "heroLead": "E-commerce teams process fragmented data across systems without clear inference. Shopentum introduces a deterministic decision layer.",
+    "diagramTitle": "Shopentum connects data and turns it into clear decisions.",
+    "diagramLead": "By connecting marketing and technical signals, we identify the most critical growth barriers in e-commerce operations.",
+    "inputsTitle": "Data Inputs",
+    "inputs": { "i1": "GA4 Data", "i2": "Google Ads", "i3": "Meta Ads", "i4": "Search Console" },
+    "engineLabel": "Decision Intelligence Engine",
+    "engineLead": "Stores context, evaluates audit data, GA4, and Google/Meta Ads signals in real time, then drives execution based on market reality and business goals.",
+    "modulesTitle": "Execution Modules",
+    "modules": { "i1": "AI Marketing", "i2": "Task Manager", "i3": "Growth Engine", "i4": "Ads Engine" },
+    "problemEyebrow": "Problem / Reality",
+    "problemTitle": "The store operated, but decision logic was weak.",
+    "problems": {
+      "i1": "Decisions were manual and feeling-based",
+      "i2": "Marketing and data were not connected (data silos)",
+      "i3": "Optimization was slow, reactive, and expensive",
+      "i4": "The system did not scale without constant team growth"
+    },
+    "architectureEyebrow": "Architecture / Approach",
+    "architectureTitle": "Next-generation architecture: Decision Intelligence System",
+    "architectureLead": "I designed a custom decision layer architecture built on AI WORKS principles.",
+    "architectureCards": {
+      "c1": { "title": "Runtime vs Snapshot", "desc": "Strict separation between real-time processing and immutable historical states for fully auditable decisions." },
+      "c2": { "title": "Pipeline-based Processing", "desc": "No ad-hoc scripts. Chained data pipeline from raw collection to strategic insight." },
+      "c3": { "title": "Delta Engine", "desc": "Continuously compares current state against benchmarks and explains cause and business impact over time." },
+      "c4": { "title": "Findings Engine", "desc": "Multi-layer analytics that detects critical barriers and growth opportunities in data noise." }
+    },
+    "log": {
+      "file": "shopentum_os_core.log",
+      "l1": "[SYSTEM] Initializing Decision Layer...",
+      "l2": "[DATA] Fetching snapshots from GA4 & Meta API",
+      "l3": "[ENGINE] Delta analysis complete: +14% deviation in ROAS",
+      "l4": "[FINDINGS] Critical issue identified: Checkout drop-off",
+      "l5": "[ACTION] Generating recommendations..."
+    },
+    "solutionEyebrow": "Solution / Logic",
+    "solutionTitle": "Shopentum was built",
+    "solutionList": {
+      "i1": "A system that tracks marketing state over time",
+      "i2": "Automatically identifies issues and shifts",
+      "i3": "Generates recommendations from real data",
+      "i4": "Prepares evidence for strategic decisions"
+    },
+    "visuals": {
+      "dashboardLabel": "Unified Dashboard",
+      "dashboardTitle": "Dashboard",
+      "findingsLabel": "AI Findings Engine",
+      "findingsTitle": "Findings",
+      "auditLabel": "Automated Audit",
+      "auditTitle": "Audit"
+    },
+    "metrics": {
+      "m1": { "label": "Speed", "val": "Faster decisions", "desc": "Data is interpreted immediately." },
+      "m2": { "label": "Efficiency", "val": "Less manual work", "desc": "Automation of routine analysis." },
+      "m3": { "label": "Control", "val": "Clearer performance visibility", "desc": "No blind spots in marketing." },
+      "m4": { "label": "Scaling", "val": "Growth readiness", "desc": "No need to constantly increase team size." }
+    },
+    "ctaTitle": "Need a technical architect for your AI initiative?",
+    "ctaLead": "Define the challenge. I will design the logic layer and deploy a system that turns data into decisions.",
+    "ctaPrimary": "Schedule architecture consultation",
+    "ctaSecondary": "Back to AI Studio"
+  },
+  "Navbar": {
+    "links": {
+      "about": "About",
+      "agency": "Agency",
+      "caseStudy": "Case Study"
+    },
+    "contact": "Contact",
+    "language": "Language"
+  },
+  "Footer": {
+    "cookies": "Cookies",
+    "gdpr": "GDPR",
+    "geoSignal": "AI-native development and decision intelligence layers for companies across Slovakia.",
+    "legal": "AI-native development and decision intelligence systems. EU-based, globally scalable."
+  }
+}
+
