@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { 
   BrainCircuit, 
@@ -34,12 +35,14 @@ const AboutMe: React.FC = () => {
               className="shrink-0"
             >
               <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-2 border-indigo-500/20 p-1 bg-gradient-to-b from-indigo-500/10 to-transparent">
-                <div className="w-full h-full rounded-full overflow-hidden grayscale hover:grayscale-0 transition-all duration-700">
-                  <img 
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&h=400&auto=format&fit=crop" 
-                    alt="Daniel Budziňák" 
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
+                <div className="relative w-full h-full rounded-full overflow-hidden grayscale hover:grayscale-0 transition-all duration-700">
+                  <Image
+                    src="/img/daniel.png"
+                    alt="Daniel Budziňák"
+                    fill
+                    sizes="(max-width: 768px) 128px, 160px"
+                    className="object-cover"
+                    priority
                   />
                 </div>
               </div>

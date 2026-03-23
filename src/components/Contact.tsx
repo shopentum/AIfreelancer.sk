@@ -2,36 +2,62 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { 
-  Mail, 
-  Phone, 
-  User, 
-  MessageSquare, 
-  Send,
-  Globe,
-  Linkedin,
-  Github
-} from 'lucide-react';
+import { Mail, Phone, User, Send, Linkedin } from "lucide-react";
+
+const WEB3FORMS_URL = "https://api.web3forms.com/submit";
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    message: ''
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
+    if (!accessKey?.trim()) {
+      setSubmitError("Chýba NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY v .env.local (reštartuj dev server).");
+      return;
+    }
+
     setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
+    setSubmitError(null);
+
+    try {
+      const res = await fetch(WEB3FORMS_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          access_key: accessKey,
+          subject: `Dopyt aifreelancer.sk — ${formData.name}`,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone || "",
+          message: formData.message,
+        }),
+      });
+
+      const data = (await res.json()) as { success?: boolean; message?: string };
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Odoslanie zlyhalo. Skús to prosím znova.");
+      }
+
       setSubmitted(true);
-      setFormData({ name: '', email: '', phone: '', message: '' });
-    }, 1500);
+      setFormData({ name: "", email: "", phone: "", message: "" });
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Nastala neočakávaná chyba.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -121,8 +147,12 @@ const Contact: React.FC = () => {
                     </div>
                     <h3 className="text-3xl font-sora font-black tracking-tighter">Správa odoslaná!</h3>
                     <p className="text-slate-400">Ďakujem za váš záujem. Ozvem sa vám čo najskôr.</p>
-                    <button 
-                      onClick={() => setSubmitted(false)}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSubmitted(false);
+                        setSubmitError(null);
+                      }}
                       className="text-indigo-400 font-bold uppercase tracking-widest text-xs hover:text-white transition-colors"
                     >
                       Poslať ďalšiu správu
@@ -130,6 +160,14 @@ const Contact: React.FC = () => {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
+                    {submitError && (
+                      <p
+                        className="rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200"
+                        role="alert"
+                      >
+                        {submitError}
+                      </p>
+                    )}
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-4">Vaše meno</label>
                       <input 
