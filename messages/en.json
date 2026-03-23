@@ -1,5 +1,8 @@
 {
   "Hero": {
+    "titlePrefix": "I build systems",
+    "titleAccent": "that transform",
+    "titleSuffix": "data into decisions.",
     "title": "AI-Native Systems Architect & Product Strategist",
     "subtitle": "Engineering deterministic AI workflows and Decision Intelligence layers for the Enterprise era.",
     "cta": "Initialize Collaboration"
@@ -103,6 +106,8 @@
   "Contact": {
     "eyebrow": "Contact",
     "title": "Contact the Architect",
+    "titlePrefix": "Let's",
+    "titleAccent": "talk.",
     "lead": "If you have a project, idea, or need a technical partner, send a message and we will define the right execution path.",
     "identity_name": "Mgr. Daniel Budziňák",
     "location": "Location: Slovakia / Remote",
@@ -133,6 +138,8 @@
   },
   "Agency": {
     "eyebrow": "External AI Engine for Agencies",
+    "heroTitlePrefix": "I build modern products with AI-native architecture",
+    "heroTitleAccent": "at high speed.",
     "heroTitle": "AI-Native Execution Layer for high-velocity product delivery.",
     "heroLead1": "I architect and deploy production systems for agencies and teams operating under delivery pressure.",
     "heroLead2": "From Figma through frontend and backend to AI workflow logic. Production state, no demo artifacts.",

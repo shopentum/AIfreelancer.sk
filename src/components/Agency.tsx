@@ -46,7 +46,10 @@ const Agency: React.FC = () => {
             </div>
             
             <h1 className="text-4xl md:text-[4.5rem] font-sora font-black tracking-tighter leading-[1.05] text-white">
-              {t("heroTitle")}
+              {t("heroTitlePrefix")} <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400">
+                {t("heroTitleAccent")}
+              </span>
             </h1>
 
             <div className="max-w-4xl mx-auto space-y-8 text-xl md:text-2xl text-slate-400 font-medium leading-relaxed">

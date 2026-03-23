@@ -86,7 +86,10 @@ const Contact: React.FC = () => {
               <div className="space-y-6">
                 <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500">{tContact("eyebrow")}</p>
                 <h1 className="text-5xl md:text-7xl font-sora font-black tracking-tighter leading-tight">
-                  {tContact("title")}
+                  {tContact("titlePrefix")} <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">
+                    {tContact("titleAccent")}
+                  </span>
                 </h1>
                 <p className="text-slate-400 text-lg leading-relaxed max-w-md">
                   {tContact("lead")}
