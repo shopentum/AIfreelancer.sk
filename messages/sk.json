@@ -2,7 +2,7 @@
   "Hero": {
     "title": "AI-Native Systems Architect & Product Strategist",
     "subtitle": "Navrhujem deterministické AI workflowy a vrstvy Decision Intelligence pre enterprise éru.",
-    "cta": "Inicializovať spoluprácu"
+    "cta": "Initialize Collaboration"
   },
   "Philosophy": {
     "title": "The AI WORKS Constitution",
@@ -10,16 +10,16 @@
     "description": "Posun za hranicu stochastických chatbotov. Architektujem agentné systémy, kde je každý výstup trasovateľný, auditovateľný a stavovo konzistentný."
   },
   "Services": {
-    "title": "Kľúčové kompetencie",
+    "title": "Core Competencies",
     "service1": "AI-Native Workflow Architecture (Cursor, Next.js, LLM integration)",
     "service2": "Decision Support Systems & Data Auditing",
     "service3": "Digital Product Strategy & Systematic Automation"
   },
   "CaseStudy": {
-    "title": "Dopadový audit: Shopentum",
+    "title": "Impact Audit: Shopentum",
     "description": "Transformácia legacy e-commerce manažmentu na data-driven Decision Engine.",
     "metric": "Operational Latency Reduction: -40%",
-    "cta": "Zobraziť technický audit"
+    "cta": "View Technical Audit"
   },
   "Studio": {
     "eyebrow": "AI-Driven Development Partner",
@@ -102,7 +102,7 @@
   },
   "Contact": {
     "eyebrow": "Kontakt",
-    "title": "Kontaktujte architekta",
+    "title": "Contact the Architect",
     "lead": "Máte projekt, nápad alebo hľadáte technologického partnera? Napíšte mi a spolu nájdeme vhodné riešenie.",
     "identity_name": "Mgr. Daniel Budziňák",
     "location": "Sídlo: Slovensko / Remote",
@@ -268,12 +268,12 @@
   },
   "Navbar": {
     "links": {
-      "about": "O mne",
-      "agency": "Agentúra",
-      "caseStudy": "Prípadová štúdia"
+      "about": "About",
+      "agency": "Agency",
+      "caseStudy": "Case Study"
     },
-    "contact": "Kontakt",
-    "language": "Jazyk"
+    "contact": "Contact",
+    "language": "Language"
   },
   "Footer": {
     "cookies": "Cookies",
