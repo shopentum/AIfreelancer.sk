@@ -58,13 +58,13 @@ export const PageTransition: React.FC<{ children: React.ReactNode }> = ({ childr
         )}
       </AnimatePresence>
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={pathname}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.35, ease: "easeInOut" }}
+          initial={{ opacity: 0.45, filter: "brightness(0.7)" }}
+          animate={{ opacity: 1, filter: "brightness(1)" }}
+          exit={{ opacity: 0.45, filter: "brightness(0.7)" }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
         >
           {children}
         </motion.div>

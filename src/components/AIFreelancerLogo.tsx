@@ -23,7 +23,7 @@ export const AIFreelancerLogo: React.FC<LogoProps> = ({
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setHydrated(true);
+    queueMicrotask(() => setHydrated(true));
   }, []);
 
   const skipIntro =

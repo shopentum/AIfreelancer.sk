@@ -1,25 +1,23 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
-import { 
-  ArrowRight, 
-  CheckCircle2, 
-  AlertCircle, 
-  Zap, 
-  Layers, 
-  BrainCircuit, 
-  TrendingUp, 
+import {
+  ArrowRight,
+  AlertCircle,
+  Zap,
+  Layers,
+  BrainCircuit,
+  TrendingUp,
   ShieldCheck,
   LayoutGrid,
-  BarChart3,
   Search,
-  ChevronLeft,
   Activity,
   Bot,
   ShoppingCart,
-  Target
-} from 'lucide-react';
+  Target,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const ShopentumUseCase: React.FC = () => {
@@ -299,7 +297,13 @@ const ShopentumUseCase: React.FC = () => {
             {/* Visual A: Dashboard */}
             <div className="space-y-4">
               <div className="aspect-square rounded-3xl bg-white/5 border border-white/10 overflow-hidden relative group">
-                <img src="https://picsum.photos/seed/dashboard/800/800?grayscale" alt="Dashboard" className="w-full h-full object-cover opacity-20 group-hover:scale-110 transition-transform duration-500" referrerPolicy="no-referrer" />
+                <Image
+                  src="https://picsum.photos/seed/dashboard/800/800?grayscale"
+                  alt=""
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover opacity-20 group-hover:scale-110 transition-transform duration-500"
+                />
                 <div className="absolute inset-0 flex items-center justify-center p-8">
                   <LayoutGrid size={48} className="text-purple-500/50" />
                 </div>
@@ -313,7 +317,13 @@ const ShopentumUseCase: React.FC = () => {
             {/* Visual B: Findings */}
             <div className="space-y-4">
               <div className="aspect-square rounded-3xl bg-white/5 border border-white/10 overflow-hidden relative group">
-                <img src="https://picsum.photos/seed/findings/800/800?grayscale" alt="Findings" className="w-full h-full object-cover opacity-20 group-hover:scale-110 transition-transform duration-500" referrerPolicy="no-referrer" />
+                <Image
+                  src="https://picsum.photos/seed/findings/800/800?grayscale"
+                  alt=""
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover opacity-20 group-hover:scale-110 transition-transform duration-500"
+                />
                 <div className="absolute inset-0 flex items-center justify-center p-8">
                   <BrainCircuit size={48} className="text-blue-500/50" />
                 </div>
@@ -327,7 +337,13 @@ const ShopentumUseCase: React.FC = () => {
             {/* Visual C: Audit */}
             <div className="space-y-4">
               <div className="aspect-square rounded-3xl bg-white/5 border border-white/10 overflow-hidden relative group">
-                <img src="https://picsum.photos/seed/audit/800/800?grayscale" alt="Audit" className="w-full h-full object-cover opacity-20 group-hover:scale-110 transition-transform duration-500" referrerPolicy="no-referrer" />
+                <Image
+                  src="https://picsum.photos/seed/audit/800/800?grayscale"
+                  alt=""
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover opacity-20 group-hover:scale-110 transition-transform duration-500"
+                />
                 <div className="absolute inset-0 flex items-center justify-center p-8">
                   <ShieldCheck size={48} className="text-emerald-500/50" />
                 </div>

@@ -1,5 +1,14 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { Geist, Geist_Mono, Sora } from "next/font/google";
+import {
+  defaultTitle,
+  seoDescription,
+  seoKeywords,
+  siteName,
+  siteUrl,
+} from "@/lib/site";
+import { ProfessionalServiceJsonLd } from "@/components/ProfessionalServiceJsonLd";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -18,23 +27,58 @@ const sora = Sora({
   weight: ["400", "600", "700", "800"],
 });
 
+const keywordString = [...seoKeywords].join(", ");
+
 export const metadata: Metadata = {
-  title: "aifreelancer.sk · Decision Intelligence",
-  description:
-    "Technologický partner pre AI-native produkty a rozhodovacie systémy. aifreelancer.sk — AI Works Foundry.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: defaultTitle,
+    template: `%s · ${siteName}`,
+  },
+  description: seoDescription,
+  keywords: keywordString,
+  authors: [{ name: "Mgr. Daniel Budziňák", url: siteUrl }],
+  creator: "Mgr. Daniel Budziňák",
+  publisher: siteName,
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "sk_SK",
+    alternateLocale: ["en_US"],
+    url: siteUrl,
+    siteName,
+    title: defaultTitle,
+    description: seoDescription,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: defaultTitle,
+    description: seoDescription,
+  },
+  category: "technology",
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html
       lang="sk"
       className={`${geistSans.variable} ${geistMono.variable} ${sora.variable} h-full antialiased bg-black`}
     >
-      <body className="min-h-full flex flex-col bg-black text-zinc-100">{children}</body>
+      <body className="min-h-full flex flex-col bg-black text-zinc-100">
+        <ProfessionalServiceJsonLd />
+        {children}
+      </body>
     </html>
   );
 }

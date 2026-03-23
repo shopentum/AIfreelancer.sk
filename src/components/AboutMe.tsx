@@ -3,20 +3,16 @@
 import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { 
-  BrainCircuit, 
-  Code2, 
-  Cpu, 
-  Globe, 
-  Mail, 
-  Phone, 
-  Linkedin, 
-  Github,
+import {
+  BrainCircuit,
+  Globe,
+  Mail,
+  Phone,
   Music,
   Plane,
   Heart,
-  Terminal
-} from 'lucide-react';
+  Terminal,
+} from "lucide-react";
 
 const AboutMe: React.FC = () => {
   return (

@@ -4,22 +4,16 @@ import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { 
-  Zap, 
-  Cpu, 
-  BrainCircuit, 
-  ArrowRight, 
-  Code, 
-  Database, 
-  Activity, 
-  Sparkles, 
-  ChevronRight,
-  ShieldCheck,
+import {
+  Zap,
+  Cpu,
+  BrainCircuit,
+  ArrowRight,
+  Activity,
+  Sparkles,
   TrendingUp,
-  LayoutGrid,
   Globe,
-  BarChart3
-} from 'lucide-react';
+} from "lucide-react";
 import { AIFreelancerLogo } from "./AIFreelancerLogo";
 
 const AIStudio: React.FC = () => {

@@ -2,29 +2,20 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { 
-  Zap, 
-  Cpu, 
-  BrainCircuit, 
-  ArrowRight, 
-  Code, 
-  Database, 
-  Activity, 
-  Sparkles, 
-  ChevronRight,
-  ShieldCheck,
-  TrendingUp,
-  LayoutGrid,
-  Globe,
-  BarChart3,
+import {
+  Zap,
+  BrainCircuit,
+  ArrowRight,
   Layers,
   Rocket,
   Terminal,
   Mail,
   Calendar,
+  Network,
   Github,
-  Network
-} from 'lucide-react';
+  Database,
+  LayoutGrid,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const Agency: React.FC = () => {

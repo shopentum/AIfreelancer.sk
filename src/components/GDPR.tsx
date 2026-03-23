@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ShieldCheck } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 const GDPR: React.FC = () => {
   const router = useRouter();
 

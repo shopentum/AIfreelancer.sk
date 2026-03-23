@@ -33,6 +33,10 @@ export const Footer: React.FC = () => {
           </Link>
         </div>
       </div>
+
+      <p className="mt-8 max-w-3xl mx-auto text-center text-[10px] sm:text-xs leading-relaxed text-slate-600 tracking-tight px-4">
+        AI-native vývoj a decision intelligence riešenia pre firmy v celej SR.
+      </p>
     </footer>
   );
 };
