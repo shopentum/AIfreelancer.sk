@@ -1,0 +1,94 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+
+  --color-navy: #0F172A;
+  --color-navy-light: #1E293B;
+  --color-beige: #D4B996;
+  --color-beige-dark: #B69A78;
+  --color-ivory: #F8FAFC;
+  --color-ink: #0F172A;
+}
+
+@layer base {
+  body {
+    @apply bg-navy text-ivory font-sans antialiased;
+  }
+  
+  h1, h2, h3, h4 {
+    @apply font-serif text-ivory;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 1.2s ease-out forwards;
+}
+
+.bg-gradient-mesh {
+  background: 
+    radial-gradient(at 0% 0%, #0e397f 0%, transparent 50%),
+    radial-gradient(at 100% 0%, #0b1b3b 0%, transparent 50%),
+    radial-gradient(at 50% 50%, #0e397f 20%, transparent 100%);
+  background-color: #0b1b3b;
+  position: relative;
+}
+
+.bg-gradient-mesh::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 70% 30%, rgba(212, 185, 150, 0.05) 0%, transparent 40%),
+              radial-gradient(circle at 30% 70%, rgba(14, 57, 127, 0.3) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bg-vibrant-blue {
+  background: 
+    radial-gradient(at 0% 0%, #f1f5f9 0%, transparent 50%),
+    radial-gradient(at 100% 0%, #e2e8f0 0%, transparent 50%),
+    radial-gradient(at 50% 50%, #f8fafc 20%, transparent 100%);
+  background-color: #f8fafc;
+  position: relative;
+}
+
+.bg-vibrant-blue::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(15, 23, 42, 0.02) 0%, transparent 30%),
+              radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.5) 0%, transparent 30%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.theme-light h1, .theme-light h2, .theme-light h3, .theme-light h4, .theme-light p, .theme-light span, .theme-light a {
+  color: #0f172a !important;
+}
+
+.theme-light .text-ivory\/70, .theme-light .text-ivory\/60, .theme-light .text-ivory\/50, .theme-light .text-ivory\/40, .theme-light .text-ivory\/30, .theme-light .text-ivory\/20 {
+  color: rgba(15, 23, 42, 0.6) !important;
+}
+
+.theme-light .bg-navy-light\/30, .theme-light .bg-navy-light\/20 {
+  background-color: rgba(255, 255, 255, 0.4) !important;
+  border-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+.theme-light .border-white\/5, .theme-light .border-white\/10 {
+  border-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
