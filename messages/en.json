@@ -299,10 +299,92 @@
     "ctaPrimary": "Schedule architecture consultation",
     "ctaSecondary": "Back to home"
   },
+  "AIArchitecture": {
+    "heroBadge": "Enterprise AI architecture",
+    "heroTitleLine1": "Enterprise AI architecture:",
+    "heroTitleAccent": "From chaos to governed performance",
+    "heroLead": "I design and implement decision intelligence systems that are secure, auditable, and fully embedded in your business processes.",
+    "quote": "Twenty years in digital taught me the biggest risk is not technology — it is chaos. My AI architecture brings order and business logic to generative workflows. I do not sell prompts; I sell infrastructure for how you decide.",
+    "quoteRole": "AI architect & strategist",
+    "diagramTitle": "Use case: Intelligence Engine",
+    "diagramLead": "Example of a state-driven architecture where agents activate dynamically based on the current state of the object.",
+    "governance": {
+      "title": "Governance, Security & Control Layer",
+      "sub": "Policy • Risk • Human Authority • Publish Gate"
+    },
+    "discovery": {
+      "title": "Discovery & Analysis",
+      "i1": "Audience signals & analytics",
+      "i2": "Market trends & signals",
+      "i3": "Authoritative sources",
+      "i4": "Competitive gaps",
+      "i5": "Topic prioritization"
+    },
+    "validation": {
+      "title": "Validation & Verification",
+      "i1": "Claim extraction",
+      "i2": "Source verification & comparison",
+      "i3": "Editorial & policy check",
+      "i4": "Risk scoring & trust",
+      "i5": "Risk heatmap (targeted review)"
+    },
+    "creation": {
+      "title": "Creation & Optimization",
+      "i1": "Brand context & memory",
+      "i2": "Content modes: fact • value • opinion",
+      "i3": "Structure & intent",
+      "i4": "Source-based drafting",
+      "i5": "Variations & optimization"
+    },
+    "distribution": {
+      "title": "Distribution & Performance",
+      "i1": "Channel selection",
+      "i2": "Timing optimization",
+      "i3": "A/B testing",
+      "i4": "Audience targeting",
+      "i5": "Performance feedback loop"
+    },
+    "publishGate": {
+      "line1": "Publish Gate",
+      "line2": "Explicit Commit"
+    },
+    "identity": {
+      "title": "Brand Identity Layer",
+      "desc": "Every brand has its own tone, rules, and risk profile. (Multi-brand / multi-tenant architecture)."
+    },
+    "core": {
+      "title": "Common Intelligence Core",
+      "sub": "Shared Memory • Audit Trail • Decision Context • Content • Claims • Policy • Events"
+    },
+    "benefits": {
+      "b1": {
+        "title": "Security & compliance",
+        "desc": "Full control over data and outputs (governance). Your know-how never leaves a secure perimeter."
+      },
+      "b2": {
+        "title": "Scalability",
+        "desc": "Multi-tenant architecture supports one system for multiple brands, markets, or departments while preserving identity."
+      },
+      "b3": {
+        "title": "Auditability",
+        "desc": "Every AI decision is recorded in an audit trail and verifiable afterward. No more black box."
+      },
+      "b4": {
+        "title": "Efficiency",
+        "desc": "Automation of routine analytical and creative work frees senior experts for strategic work."
+      }
+    },
+    "cta": {
+      "title": "AI architecture under control",
+      "lead": "I will design a closed Intelligence Engine that respects your identity and security rules — architecture that keeps your business governable.",
+      "button": "Discuss AI strategy"
+    }
+  },
   "Navbar": {
     "links": {
       "about": "About",
       "agency": "Agency",
+      "aiArch": "AI architecture",
       "caseStudy": "Case Study"
     },
     "contact": "Contact",

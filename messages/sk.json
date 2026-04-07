@@ -299,10 +299,92 @@
     "ctaPrimary": "Dohodnúť konzultáciu",
     "ctaSecondary": "Späť na úvod"
   },
+  "AIArchitecture": {
+    "heroBadge": "Enterprise AI architektúra",
+    "heroTitleLine1": "Enterprise AI architektúra:",
+    "heroTitleAccent": "Od chaosu k riadenému výkonu",
+    "heroLead": "Navrhujem a implementujem systémy rozhodovacej inteligencie (Decision Intelligence), ktoré sú bezpečné, auditovateľné a plne integrované do vašich biznis procesov.",
+    "quote": "Za 20 rokov v digitále som pochopil, že najväčšie riziko nie je technológia, ale chaos. Moja AI architektúra prináša do generatívnych procesov poriadok a biznisovú logiku. Nepredávam prompty, predávam infraštruktúru pre vaše rozhodovanie.",
+    "quoteRole": "AI architekt & stratég",
+    "diagramTitle": "Use case: Intelligence Engine",
+    "diagramLead": "Príklad architektúry systému riadeného stavom, kde sú agenti aktivovaní dynamicky podľa aktuálneho stavu objektu.",
+    "governance": {
+      "title": "Governance, Security & Control Layer",
+      "sub": "Policy • Risk • Human Authority • Publish Gate"
+    },
+    "discovery": {
+      "title": "Discovery & Analysis",
+      "i1": "Signály publika a analytika",
+      "i2": "Trhové trendy a signály",
+      "i3": "Autoritatívne zdroje",
+      "i4": "Konkurenčné medzery",
+      "i5": "Prioritizácia tém"
+    },
+    "validation": {
+      "title": "Validation & Verification",
+      "i1": "Extrakcia tvrdení",
+      "i2": "Overenie zdrojov a porovnanie",
+      "i3": "Editorial a policy kontrola",
+      "i4": "Risk scoring a dôvera",
+      "i5": "Risk heatmap (cieľový review)"
+    },
+    "creation": {
+      "title": "Creation & Optimization",
+      "i1": "Brand kontext a pamäť",
+      "i2": "Režimy obsahu: fakt • hodnota • názor",
+      "i3": "Štruktúra a zámer",
+      "i4": "Drafting na základe zdrojov",
+      "i5": "Varianty a optimalizácia"
+    },
+    "distribution": {
+      "title": "Distribution & Performance",
+      "i1": "Výber kanálov",
+      "i2": "Optimalizácia načasovania",
+      "i3": "A/B testovanie",
+      "i4": "Cielenie publika",
+      "i5": "Spätná väzba výkonu"
+    },
+    "publishGate": {
+      "line1": "Publish Gate",
+      "line2": "Explicit Commit"
+    },
+    "identity": {
+      "title": "Brand Identity Layer",
+      "desc": "Každá značka má vlastný tón, pravidlá a risk profil. (Multi-brand / multi-tenant architektúra)."
+    },
+    "core": {
+      "title": "Common Intelligence Core",
+      "sub": "Shared Memory • Audit Trail • Decision Context • Content • Claims • Policy • Events"
+    },
+    "benefits": {
+      "b1": {
+        "title": "Bezpečnosť a súlad",
+        "desc": "Plná kontrola nad dátami a výstupmi (governance). Vaše know-how nikdy neopustí bezpečný perimeter."
+      },
+      "b2": {
+        "title": "Škálovateľnosť",
+        "desc": "Multi-tenant architektúra umožňuje jeden systém pre viacero značiek, trhov alebo oddelení pri zachovaní identity."
+      },
+      "b3": {
+        "title": "Auditovateľnosť",
+        "desc": "Každé rozhodnutie AI je v audit trail a spätne overiteľné. Koniec „čiernej skrinky“."
+      },
+      "b4": {
+        "title": "Efektivita",
+        "desc": "Automatizácia rutinných analytických a kreatívnych úloh uvoľní seniorov na strategickú prácu."
+      }
+    },
+    "cta": {
+      "title": "AI architektúra pod kontrolou",
+      "lead": "Navrhnem vám uzavretý Intelligence Engine, ktorý rešpektuje vašu identitu a bezpečnostné pravidlá. Architektúra, ktorá váš biznis udrží pod kontrolou.",
+      "button": "Konzultovať AI stratégiu"
+    }
+  },
   "Navbar": {
     "links": {
       "about": "About",
       "agency": "Agency",
+      "aiArch": "AI architektúra",
       "caseStudy": "Case Study"
     },
     "contact": "Contact",

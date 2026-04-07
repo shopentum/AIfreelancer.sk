@@ -4,6 +4,7 @@ import { siteUrl } from "@/lib/site";
 const paths: MetadataRoute.Sitemap = [
   { url: siteUrl, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
   { url: `${siteUrl}/agency`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
+  { url: `${siteUrl}/ai-architektura`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.85 },
   { url: `${siteUrl}/use-case/shopentum`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
   { url: `${siteUrl}/o-mne`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
   { url: `${siteUrl}/kontakt`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.85 },
