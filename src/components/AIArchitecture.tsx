@@ -128,15 +128,19 @@ const AIArchitecture: React.FC = () => {
         </div>
       </section>
 
-      <section className="pt-4 pb-8 px-6 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-6xl font-sora font-black tracking-tighter mb-6">{t("diagramTitle")}</h2>
-            <p className="text-slate-400 text-lg md:text-xl max-w-3xl mx-auto font-medium">{t("diagramLead")}</p>
+      <section className="pt-4 pb-8 px-3 sm:px-6 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto relative z-10 w-full min-w-0">
+          <div className="text-center mb-12 sm:mb-20 px-1">
+            <h2 className="text-3xl sm:text-4xl md:text-6xl font-sora font-black tracking-tighter mb-6 text-balance">
+              {t("diagramTitle")}
+            </h2>
+            <p className="text-slate-400 text-base sm:text-lg md:text-xl max-w-3xl mx-auto font-medium text-balance">
+              {t("diagramLead")}
+            </p>
           </div>
 
-          <div className="relative p-8 md:pt-16 md:pb-10 bg-white/[0.02] backdrop-blur-sm rounded-[4rem] border border-white/5 shadow-2xl">
-            <div className="flex justify-center mb-0">
+          <div className="relative p-4 sm:p-6 md:p-8 lg:pt-16 lg:pb-10 bg-white/[0.02] backdrop-blur-sm rounded-[2rem] sm:rounded-[3rem] lg:rounded-[4rem] border border-white/5 shadow-2xl w-full min-w-0">
+            <div className="flex justify-center mb-0 w-full min-w-0">
               <motion.div
                 whileHover={{
                   scale: 1.02,
@@ -151,15 +155,19 @@ const AIArchitecture: React.FC = () => {
                   ],
                 }}
                 transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
-                className="w-full max-w-4xl bg-white/5 p-10 rounded-3xl border border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.1)] text-center relative z-20 transition-all"
+                className="w-full min-w-0 bg-white/5 p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl border border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.1)] text-center relative z-20 transition-all"
               >
-                <div className="flex items-center justify-center space-x-4 mb-3">
-                  <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-3">
+                  <div className="shrink-0 p-2 bg-blue-500/20 rounded-lg text-blue-400">
                     <Lock size={24} />
                   </div>
-                  <h3 className="text-2xl font-black text-white uppercase tracking-tight">{t("governance.title")}</h3>
+                  <h3 className="font-black text-white uppercase tracking-tight text-base sm:text-lg md:text-2xl text-balance max-w-full leading-snug">
+                    {t("governance.title")}
+                  </h3>
                 </div>
-                <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">{t("governance.sub")}</p>
+                <p className="text-[10px] sm:text-xs md:text-sm font-bold text-slate-400 uppercase tracking-wider sm:tracking-widest text-balance px-1">
+                  {t("governance.sub")}
+                </p>
               </motion.div>
             </div>
 
@@ -239,24 +247,26 @@ const AIArchitecture: React.FC = () => {
               </svg>
             </div>
 
-            <div className="p-8 md:p-10 border-2 border-dashed border-white/5 rounded-[3rem] relative bg-black/20">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 relative items-stretch">
-                <div className="lg:col-span-9 grid grid-cols-1 md:grid-cols-2 gap-10 relative">
+            <div className="p-3 sm:p-5 md:p-8 lg:p-10 border-2 border-dashed border-white/5 rounded-[1.5rem] sm:rounded-[2rem] lg:rounded-[3rem] relative bg-black/20 w-full min-w-0">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 relative items-stretch w-full min-w-0">
+                <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 lg:gap-8 relative w-full min-w-0">
                   <motion.div
                     whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(245, 158, 11, 0.4)" }}
-                    className="bg-white/[0.03] p-8 rounded-3xl border border-amber-500/30 shadow-sm space-y-6 transition-all"
+                    className="bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-amber-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
                   >
-                    <div className="flex items-center space-x-4">
-                      <div className="p-2 bg-amber-500/10 rounded-lg text-amber-400">
-                        <Search size={24} />
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className="shrink-0 p-2 bg-amber-500/10 rounded-lg text-amber-400">
+                        <Search size={22} className="sm:w-6 sm:h-6" />
                       </div>
-                      <h4 className="font-black text-white uppercase tracking-tight text-lg">{t("discovery.title")}</h4>
+                      <h4 className="font-black text-white uppercase tracking-tight text-sm sm:text-base md:text-lg leading-snug text-balance min-w-0 flex-1">
+                        {t("discovery.title")}
+                      </h4>
                     </div>
-                    <ul className="text-sm space-y-3 text-slate-400 font-medium">
+                    <ul className="text-xs sm:text-sm space-y-2.5 sm:space-y-3 text-slate-400 font-medium">
                       {LIST_KEYS.map((k) => (
-                        <li key={k} className="flex items-center space-x-3">
-                          <div className="w-1.5 h-1.5 bg-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
-                          <span>{t(`discovery.${k}`)}</span>
+                        <li key={k} className="flex items-start gap-2.5 sm:gap-3">
+                          <div className="mt-1.5 shrink-0 w-1.5 h-1.5 bg-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+                          <span className="min-w-0 leading-snug">{t(`discovery.${k}`)}</span>
                         </li>
                       ))}
                     </ul>
@@ -264,22 +274,24 @@ const AIArchitecture: React.FC = () => {
 
                   <motion.div
                     whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(239, 68, 68, 0.4)" }}
-                    className="bg-white/[0.03] p-8 rounded-3xl border border-red-500/30 shadow-sm space-y-6 transition-all"
+                    className="bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-red-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="p-2 bg-red-500/10 rounded-lg text-red-400">
-                          <ShieldCheck size={24} />
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="flex items-start gap-3 min-w-0 flex-1">
+                        <div className="shrink-0 p-2 bg-red-500/10 rounded-lg text-red-400">
+                          <ShieldCheck size={22} className="sm:w-6 sm:h-6" />
                         </div>
-                        <h4 className="font-black text-white uppercase tracking-tight text-lg">{t("validation.title")}</h4>
+                        <h4 className="font-black text-white uppercase tracking-tight text-sm sm:text-base md:text-lg leading-snug text-balance min-w-0">
+                          {t("validation.title")}
+                        </h4>
                       </div>
-                      <CheckCircle2 size={20} className="text-red-500/50" />
+                      <CheckCircle2 size={20} className="text-red-500/50 shrink-0 hidden sm:block" />
                     </div>
-                    <ul className="text-sm space-y-3 text-slate-400 font-medium">
+                    <ul className="text-xs sm:text-sm space-y-2.5 sm:space-y-3 text-slate-400 font-medium">
                       {LIST_KEYS.map((k) => (
-                        <li key={k} className="flex items-center space-x-3">
-                          <div className="w-1.5 h-1.5 bg-red-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
-                          <span>{t(`validation.${k}`)}</span>
+                        <li key={k} className="flex items-start gap-2.5 sm:gap-3">
+                          <div className="mt-1.5 shrink-0 w-1.5 h-1.5 bg-red-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+                          <span className="min-w-0 leading-snug">{t(`validation.${k}`)}</span>
                         </li>
                       ))}
                     </ul>
@@ -287,19 +299,21 @@ const AIArchitecture: React.FC = () => {
 
                   <motion.div
                     whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(59, 130, 246, 0.4)" }}
-                    className="bg-white/[0.03] p-8 rounded-3xl border border-blue-500/30 shadow-sm space-y-6 transition-all"
+                    className="bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-blue-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
                   >
-                    <div className="flex items-center space-x-4">
-                      <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
-                        <PenTool size={24} />
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className="shrink-0 p-2 bg-blue-500/10 rounded-lg text-blue-400">
+                        <PenTool size={22} className="sm:w-6 sm:h-6" />
                       </div>
-                      <h4 className="font-black text-white uppercase tracking-tight text-lg">{t("creation.title")}</h4>
+                      <h4 className="font-black text-white uppercase tracking-tight text-sm sm:text-base md:text-lg leading-snug text-balance min-w-0 flex-1">
+                        {t("creation.title")}
+                      </h4>
                     </div>
-                    <ul className="text-sm space-y-3 text-slate-400 font-medium">
+                    <ul className="text-xs sm:text-sm space-y-2.5 sm:space-y-3 text-slate-400 font-medium">
                       {LIST_KEYS.map((k) => (
-                        <li key={k} className="flex items-center space-x-3">
-                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-                          <span>{t(`creation.${k}`)}</span>
+                        <li key={k} className="flex items-start gap-2.5 sm:gap-3">
+                          <div className="mt-1.5 shrink-0 w-1.5 h-1.5 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                          <span className="min-w-0 leading-snug">{t(`creation.${k}`)}</span>
                         </li>
                       ))}
                     </ul>
@@ -307,26 +321,28 @@ const AIArchitecture: React.FC = () => {
 
                   <motion.div
                     whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(16, 185, 129, 0.4)" }}
-                    className="bg-white/[0.03] p-8 rounded-3xl border border-emerald-500/30 shadow-sm space-y-6 transition-all"
+                    className="bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-emerald-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
                   >
-                    <div className="flex items-center space-x-4">
-                      <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
-                        <Share2 size={24} />
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className="shrink-0 p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
+                        <Share2 size={22} className="sm:w-6 sm:h-6" />
                       </div>
-                      <h4 className="font-black text-white uppercase tracking-tight text-lg">{t("distribution.title")}</h4>
+                      <h4 className="font-black text-white uppercase tracking-tight text-sm sm:text-base md:text-lg leading-snug text-balance min-w-0 flex-1">
+                        {t("distribution.title")}
+                      </h4>
                     </div>
-                    <ul className="text-sm space-y-3 text-slate-400 font-medium">
+                    <ul className="text-xs sm:text-sm space-y-2.5 sm:space-y-3 text-slate-400 font-medium">
                       {LIST_KEYS.map((k) => (
-                        <li key={k} className="flex items-center space-x-3">
-                          <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                          <span>{t(`distribution.${k}`)}</span>
+                        <li key={k} className="flex items-start gap-2.5 sm:gap-3">
+                          <div className="mt-1.5 shrink-0 w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                          <span className="min-w-0 leading-snug">{t(`distribution.${k}`)}</span>
                         </li>
                       ))}
                     </ul>
                   </motion.div>
 
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none">
-                    <div className="bg-blue-600 px-6 py-3 rounded-full border-2 border-[#030303] shadow-[0_0_20px_rgba(37,99,235,0.4)] text-[10px] font-black text-white uppercase tracking-widest text-center leading-tight">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none max-w-[min(100%,220px)] sm:max-w-none">
+                    <div className="bg-blue-600 px-4 py-2.5 sm:px-6 sm:py-3 rounded-full border-2 border-[#030303] shadow-[0_0_20px_rgba(37,99,235,0.4)] text-[9px] sm:text-[10px] font-black text-white uppercase tracking-wide sm:tracking-widest text-center leading-tight">
                       {t("publishGate.line1")}
                       <br />
                       {t("publishGate.line2")}
@@ -334,21 +350,25 @@ const AIArchitecture: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="lg:col-span-3">
+                <div className="lg:col-span-4 w-full min-w-0">
                   <motion.div
                     whileHover={{
                       scale: 1.02,
                       backgroundColor: "rgba(255, 255, 255, 0.1)",
                       boxShadow: "0 0 30px rgba(59,130,246,0.3)",
                     }}
-                    className="h-full bg-white/[0.08] p-8 rounded-3xl border border-blue-500/30 shadow-xl flex flex-col items-center justify-center text-center space-y-8 transition-all"
+                    className="h-full min-h-[280px] sm:min-h-0 bg-white/[0.08] p-6 sm:p-8 rounded-2xl sm:rounded-3xl border border-blue-500/30 shadow-xl flex flex-col items-center justify-center text-center gap-6 sm:gap-8 transition-all w-full"
                   >
-                    <div className="w-24 h-24 bg-blue-500/20 rounded-full flex items-center justify-center shadow-inner border border-blue-500/30">
-                      <Fingerprint size={48} className="text-blue-400" />
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-blue-500/20 rounded-full flex items-center justify-center shadow-inner border border-blue-500/30 shrink-0">
+                      <Fingerprint size={44} className="text-blue-400 max-sm:scale-90" />
                     </div>
-                    <div className="space-y-4">
-                      <h4 className="font-black text-white uppercase tracking-tight text-xl">{t("identity.title")}</h4>
-                      <p className="text-sm text-slate-400 font-medium leading-relaxed">{t("identity.desc")}</p>
+                    <div className="space-y-3 sm:space-y-4 w-full min-w-0 px-1">
+                      <h4 className="font-black text-white uppercase tracking-tight text-base sm:text-lg md:text-xl text-balance leading-snug">
+                        {t("identity.title")}
+                      </h4>
+                      <p className="text-xs sm:text-sm text-slate-400 font-medium leading-relaxed text-balance">
+                        {t("identity.desc")}
+                      </p>
                     </div>
                   </motion.div>
                 </div>
@@ -357,7 +377,7 @@ const AIArchitecture: React.FC = () => {
 
             <VerticalFlowBridge variant="toCore" />
 
-            <div className="flex justify-center mt-2">
+            <div className="flex justify-center mt-2 w-full min-w-0">
               <motion.div
                 whileHover={{ scale: 1.02, backgroundColor: "rgba(255, 255, 255, 0.08)" }}
                 animate={{
@@ -368,15 +388,19 @@ const AIArchitecture: React.FC = () => {
                   ],
                 }}
                 transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
-                className="w-full max-w-4xl bg-white/5 p-10 rounded-3xl border border-blue-500/20 shadow-md text-center relative z-20 transition-colors"
+                className="w-full min-w-0 bg-white/5 p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl border border-blue-500/20 shadow-md text-center relative z-20 transition-colors"
               >
-                <div className="flex items-center justify-center space-x-4 mb-3">
-                  <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-3">
+                  <div className="shrink-0 p-2 bg-blue-500/10 rounded-lg text-blue-400">
                     <Database size={24} />
                   </div>
-                  <h3 className="text-2xl font-black text-white uppercase tracking-tight">{t("core.title")}</h3>
+                  <h3 className="font-black text-white uppercase tracking-tight text-base sm:text-lg md:text-2xl text-balance max-w-full leading-snug">
+                    {t("core.title")}
+                  </h3>
                 </div>
-                <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">{t("core.sub")}</p>
+                <p className="text-[10px] sm:text-xs md:text-sm font-bold text-slate-400 uppercase tracking-wide sm:tracking-[0.15em] md:tracking-[0.2em] text-balance px-1 leading-relaxed">
+                  {t("core.sub")}
+                </p>
               </motion.div>
             </div>
           </div>
