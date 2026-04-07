@@ -249,105 +249,109 @@ const AIArchitecture: React.FC = () => {
 
             <div className="p-3 sm:p-5 md:p-8 lg:p-10 border-2 border-dashed border-white/5 rounded-[1.5rem] sm:rounded-[2rem] lg:rounded-[3rem] relative bg-black/20 w-full min-w-0">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 relative items-stretch w-full min-w-0">
-                <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-[auto_auto_auto] gap-5 sm:gap-6 lg:gap-8 w-full min-w-0">
-                  <motion.div
-                    whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(245, 158, 11, 0.4)" }}
-                    className="order-1 sm:order-none sm:col-start-1 sm:row-start-1 bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-amber-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
-                  >
-                    <div className="flex items-start gap-3 min-w-0">
-                      <div className="shrink-0 p-2 bg-amber-500/10 rounded-lg text-amber-400">
-                        <Search size={22} className="sm:w-6 sm:h-6" />
-                      </div>
-                      <h4 className="font-black text-white uppercase tracking-tight text-sm sm:text-base md:text-lg leading-snug text-balance min-w-0 flex-1">
-                        {t("discovery.title")}
-                      </h4>
-                    </div>
-                    <ul className="text-xs sm:text-sm space-y-2.5 sm:space-y-3 text-slate-400 font-medium">
-                      {LIST_KEYS.map((k) => (
-                        <li key={k} className="flex items-start gap-2.5 sm:gap-3">
-                          <div className="mt-1.5 shrink-0 w-1.5 h-1.5 bg-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
-                          <span className="min-w-0 leading-snug">{t(`discovery.${k}`)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </motion.div>
-
-                  <motion.div
-                    whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(239, 68, 68, 0.4)" }}
-                    className="order-2 sm:order-none sm:col-start-2 sm:row-start-1 bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-red-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <div className="flex items-start gap-3 min-w-0 flex-1">
-                        <div className="shrink-0 p-2 bg-red-500/10 rounded-lg text-red-400">
-                          <ShieldCheck size={22} className="sm:w-6 sm:h-6" />
+                <div className="lg:col-span-8 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:items-start sm:gap-6 lg:gap-8 w-full min-w-0">
+                  <div className="max-sm:contents flex flex-col gap-5 sm:gap-6 sm:row-span-2 min-w-0">
+                    <motion.div
+                      whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(245, 158, 11, 0.4)" }}
+                      className="order-1 sm:order-none bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-amber-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
+                    >
+                      <div className="flex items-start gap-3 min-w-0">
+                        <div className="shrink-0 p-2 bg-amber-500/10 rounded-lg text-amber-400">
+                          <Search size={22} className="sm:w-6 sm:h-6" />
                         </div>
-                        <h4 className="font-black text-white uppercase tracking-tight text-sm sm:text-base md:text-lg leading-snug text-balance min-w-0">
-                          {t("validation.title")}
+                        <h4 className="font-black text-white uppercase tracking-tight text-sm sm:text-base md:text-lg leading-snug text-balance min-w-0 flex-1">
+                          {t("discovery.title")}
                         </h4>
                       </div>
-                      <CheckCircle2 size={20} className="text-red-500/50 shrink-0 hidden sm:block" />
-                    </div>
-                    <ul className="text-xs sm:text-sm space-y-2.5 sm:space-y-3 text-slate-400 font-medium">
-                      {LIST_KEYS.map((k) => (
-                        <li key={k} className="flex items-start gap-2.5 sm:gap-3">
-                          <div className="mt-1.5 shrink-0 w-1.5 h-1.5 bg-red-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
-                          <span className="min-w-0 leading-snug">{t(`validation.${k}`)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </motion.div>
+                      <ul className="text-xs sm:text-sm space-y-2.5 sm:space-y-3 text-slate-400 font-medium">
+                        {LIST_KEYS.map((k) => (
+                          <li key={k} className="flex items-start gap-2.5 sm:gap-3">
+                            <div className="mt-1.5 shrink-0 w-1.5 h-1.5 bg-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+                            <span className="min-w-0 leading-snug">{t(`discovery.${k}`)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </motion.div>
 
-                  <motion.div
-                    whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(59, 130, 246, 0.4)" }}
-                    className="order-5 sm:order-none sm:col-start-1 sm:row-start-2 bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-blue-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
-                  >
-                    <div className="flex items-start gap-3 min-w-0">
-                      <div className="shrink-0 p-2 bg-blue-500/10 rounded-lg text-blue-400">
-                        <PenTool size={22} className="sm:w-6 sm:h-6" />
+                    <motion.div
+                      whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(59, 130, 246, 0.4)" }}
+                      className="order-5 sm:order-none bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-blue-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
+                    >
+                      <div className="flex items-start gap-3 min-w-0">
+                        <div className="shrink-0 p-2 bg-blue-500/10 rounded-lg text-blue-400">
+                          <PenTool size={22} className="sm:w-6 sm:h-6" />
+                        </div>
+                        <h4 className="font-black text-white uppercase tracking-tight text-sm sm:text-base md:text-lg leading-snug text-balance min-w-0 flex-1">
+                          {t("creation.title")}
+                        </h4>
                       </div>
-                      <h4 className="font-black text-white uppercase tracking-tight text-sm sm:text-base md:text-lg leading-snug text-balance min-w-0 flex-1">
-                        {t("creation.title")}
-                      </h4>
-                    </div>
-                    <ul className="text-xs sm:text-sm space-y-2.5 sm:space-y-3 text-slate-400 font-medium">
-                      {LIST_KEYS.map((k) => (
-                        <li key={k} className="flex items-start gap-2.5 sm:gap-3">
-                          <div className="mt-1.5 shrink-0 w-1.5 h-1.5 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-                          <span className="min-w-0 leading-snug">{t(`creation.${k}`)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </motion.div>
-
-                  <div className="order-3 sm:order-none sm:col-start-2 sm:row-start-2 flex justify-center items-center py-2 sm:py-3 pointer-events-none w-full min-w-0">
-                    <div className="bg-blue-600 px-4 py-2.5 sm:px-6 sm:py-3 rounded-full border-2 border-[#030303] shadow-[0_0_20px_rgba(37,99,235,0.4)] text-[9px] sm:text-[10px] font-black text-white uppercase tracking-wide sm:tracking-widest text-center leading-tight max-w-[min(100%,240px)] sm:max-w-none">
-                      {t("publishGate.line1")}
-                      <br />
-                      {t("publishGate.line2")}
-                    </div>
+                      <ul className="text-xs sm:text-sm space-y-2.5 sm:space-y-3 text-slate-400 font-medium">
+                        {LIST_KEYS.map((k) => (
+                          <li key={k} className="flex items-start gap-2.5 sm:gap-3">
+                            <div className="mt-1.5 shrink-0 w-1.5 h-1.5 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                            <span className="min-w-0 leading-snug">{t(`creation.${k}`)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </motion.div>
                   </div>
 
-                  <motion.div
-                    whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(16, 185, 129, 0.4)" }}
-                    className="order-4 sm:order-none sm:col-start-2 sm:row-start-3 bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-emerald-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
-                  >
-                    <div className="flex items-start gap-3 min-w-0">
-                      <div className="shrink-0 p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
-                        <Share2 size={22} className="sm:w-6 sm:h-6" />
+                  <div className="max-sm:contents flex flex-col gap-5 sm:gap-6 sm:row-span-2 min-w-0">
+                    <motion.div
+                      whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(239, 68, 68, 0.4)" }}
+                      className="order-2 sm:order-none bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-red-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div className="flex items-start gap-3 min-w-0 flex-1">
+                          <div className="shrink-0 p-2 bg-red-500/10 rounded-lg text-red-400">
+                            <ShieldCheck size={22} className="sm:w-6 sm:h-6" />
+                          </div>
+                          <h4 className="font-black text-white uppercase tracking-tight text-sm sm:text-base md:text-lg leading-snug text-balance min-w-0">
+                            {t("validation.title")}
+                          </h4>
+                        </div>
+                        <CheckCircle2 size={20} className="text-red-500/50 shrink-0 hidden sm:block" />
                       </div>
-                      <h4 className="font-black text-white uppercase tracking-tight text-sm sm:text-base md:text-lg leading-snug text-balance min-w-0 flex-1">
-                        {t("distribution.title")}
-                      </h4>
+                      <ul className="text-xs sm:text-sm space-y-2.5 sm:space-y-3 text-slate-400 font-medium">
+                        {LIST_KEYS.map((k) => (
+                          <li key={k} className="flex items-start gap-2.5 sm:gap-3">
+                            <div className="mt-1.5 shrink-0 w-1.5 h-1.5 bg-red-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+                            <span className="min-w-0 leading-snug">{t(`validation.${k}`)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </motion.div>
+
+                    <div className="order-3 sm:order-none flex justify-center pointer-events-none w-full min-w-0 shrink-0 sm:-my-4 z-10 relative">
+                      <div className="bg-blue-600 px-4 py-2.5 sm:px-6 sm:py-3 rounded-full border-2 border-[#030303] shadow-[0_0_20px_rgba(37,99,235,0.4)] text-[9px] sm:text-[10px] font-black text-white uppercase tracking-wide sm:tracking-widest text-center leading-tight max-w-[min(100%,240px)] sm:max-w-none">
+                        {t("publishGate.line1")}
+                        <br />
+                        {t("publishGate.line2")}
+                      </div>
                     </div>
-                    <ul className="text-xs sm:text-sm space-y-2.5 sm:space-y-3 text-slate-400 font-medium">
-                      {LIST_KEYS.map((k) => (
-                        <li key={k} className="flex items-start gap-2.5 sm:gap-3">
-                          <div className="mt-1.5 shrink-0 w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                          <span className="min-w-0 leading-snug">{t(`distribution.${k}`)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </motion.div>
+
+                    <motion.div
+                      whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(16, 185, 129, 0.4)" }}
+                      className="order-4 sm:order-none bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-emerald-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
+                    >
+                      <div className="flex items-start gap-3 min-w-0">
+                        <div className="shrink-0 p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
+                          <Share2 size={22} className="sm:w-6 sm:h-6" />
+                        </div>
+                        <h4 className="font-black text-white uppercase tracking-tight text-sm sm:text-base md:text-lg leading-snug text-balance min-w-0 flex-1">
+                          {t("distribution.title")}
+                        </h4>
+                      </div>
+                      <ul className="text-xs sm:text-sm space-y-2.5 sm:space-y-3 text-slate-400 font-medium">
+                        {LIST_KEYS.map((k) => (
+                          <li key={k} className="flex items-start gap-2.5 sm:gap-3">
+                            <div className="mt-1.5 shrink-0 w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                            <span className="min-w-0 leading-snug">{t(`distribution.${k}`)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </motion.div>
+                  </div>
                 </div>
 
                 <div className="lg:col-span-4 w-full min-w-0">
