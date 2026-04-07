@@ -250,7 +250,7 @@ const AIArchitecture: React.FC = () => {
             <div className="p-3 sm:p-5 md:p-8 lg:p-10 border-2 border-dashed border-white/5 rounded-[1.5rem] sm:rounded-[2rem] lg:rounded-[3rem] relative bg-black/20 w-full min-w-0">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 relative items-stretch w-full min-w-0">
                 <div className="lg:col-span-8 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:items-start sm:gap-6 lg:gap-8 w-full min-w-0">
-                  <div className="max-sm:contents flex flex-col gap-5 sm:gap-6 sm:row-span-2 min-w-0">
+                  <div className="max-sm:contents sm:relative sm:flex sm:flex-col sm:gap-12 sm:row-span-2 min-w-0">
                     <motion.div
                       whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(245, 158, 11, 0.4)" }}
                       className="order-1 sm:order-none bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-amber-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
@@ -322,7 +322,7 @@ const AIArchitecture: React.FC = () => {
                       </ul>
                     </motion.div>
 
-                    <div className="order-3 sm:order-none flex justify-center pointer-events-none w-full min-w-0 shrink-0 sm:-my-4 z-10 relative">
+                    <div className="order-3 sm:order-none flex justify-center pointer-events-none w-full min-w-0 shrink-0 z-10 relative sm:absolute sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:z-20">
                       <div className="bg-blue-600 px-4 py-2.5 sm:px-6 sm:py-3 rounded-full border-2 border-[#030303] shadow-[0_0_20px_rgba(37,99,235,0.4)] text-[9px] sm:text-[10px] font-black text-white uppercase tracking-wide sm:tracking-widest text-center leading-tight max-w-[min(100%,240px)] sm:max-w-none">
                         {t("publishGate.line1")}
                         <br />

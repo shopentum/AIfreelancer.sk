@@ -347,7 +347,7 @@ const Agency: React.FC = () => {
                     alt={shot.alt}
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                    className="object-cover group-hover:scale-[1.1] transition-transform duration-700 ease-out"
                   />
                 </div>
               </button>
