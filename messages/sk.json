@@ -158,9 +158,9 @@
     },
     "placeholder_name": "Vaše meno",
     "placeholder_message": "Vaša správa",
-    "status_sending": "Establishing secure uplink...",
-    "status_success": "Transmission received. Protocol initiated.",
-    "cta": "Submit Protocol"
+    "status_sending": "Odosielam správu…",
+    "status_success": "Ďakujem, správa je u mňa. Ozvem sa čo najskôr.",
+    "cta": "Odoslať správu"
   },
   "Agency": {
     "eyebrow": "Externý AI Engine pre Agentúry",
@@ -297,7 +297,7 @@
     "ctaTitle": "Hľadáte technického partnera pre AI projekt?",
     "ctaLead": "Poďme to prebrať. Ukážem vám, ako môžeme transformovať vaše dáta na rozhodnutia.",
     "ctaPrimary": "Dohodnúť konzultáciu",
-    "ctaSecondary": "Späť do AI Studio"
+    "ctaSecondary": "Návrat do AI štúdia"
   },
   "Navbar": {
     "links": {

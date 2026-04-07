@@ -158,9 +158,9 @@
     },
     "placeholder_name": "Identity / Entity",
     "placeholder_message": "Define Challenge / Scope",
-    "status_sending": "Establishing secure uplink...",
-    "status_success": "Transmission received. Protocol initiated.",
-    "cta": "Submit Protocol"
+    "status_sending": "Sending your message…",
+    "status_success": "Thanks — I have your message and will get back to you soon.",
+    "cta": "Send message"
   },
   "Agency": {
     "eyebrow": "External AI Engine for Agencies",
@@ -297,7 +297,7 @@
     "ctaTitle": "Need a technical architect for your AI initiative?",
     "ctaLead": "Define the challenge. I will design the logic layer and deploy a system that turns data into decisions.",
     "ctaPrimary": "Schedule architecture consultation",
-    "ctaSecondary": "Back to AI Studio"
+    "ctaSecondary": "Back to the studio"
   },
   "Navbar": {
     "links": {
