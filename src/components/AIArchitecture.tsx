@@ -249,10 +249,10 @@ const AIArchitecture: React.FC = () => {
 
             <div className="p-3 sm:p-5 md:p-8 lg:p-10 border-2 border-dashed border-white/5 rounded-[1.5rem] sm:rounded-[2rem] lg:rounded-[3rem] relative bg-black/20 w-full min-w-0">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 relative items-stretch w-full min-w-0">
-                <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 lg:gap-8 relative w-full min-w-0">
+                <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-[auto_auto_auto] gap-5 sm:gap-6 lg:gap-8 w-full min-w-0">
                   <motion.div
                     whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(245, 158, 11, 0.4)" }}
-                    className="bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-amber-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
+                    className="order-1 sm:order-none sm:col-start-1 sm:row-start-1 bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-amber-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
                   >
                     <div className="flex items-start gap-3 min-w-0">
                       <div className="shrink-0 p-2 bg-amber-500/10 rounded-lg text-amber-400">
@@ -274,7 +274,7 @@ const AIArchitecture: React.FC = () => {
 
                   <motion.div
                     whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(239, 68, 68, 0.4)" }}
-                    className="bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-red-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
+                    className="order-2 sm:order-none sm:col-start-2 sm:row-start-1 bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-red-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div className="flex items-start gap-3 min-w-0 flex-1">
@@ -299,7 +299,7 @@ const AIArchitecture: React.FC = () => {
 
                   <motion.div
                     whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(59, 130, 246, 0.4)" }}
-                    className="bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-blue-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
+                    className="order-5 sm:order-none sm:col-start-1 sm:row-start-2 bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-blue-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
                   >
                     <div className="flex items-start gap-3 min-w-0">
                       <div className="shrink-0 p-2 bg-blue-500/10 rounded-lg text-blue-400">
@@ -319,9 +319,17 @@ const AIArchitecture: React.FC = () => {
                     </ul>
                   </motion.div>
 
+                  <div className="order-3 sm:order-none sm:col-start-2 sm:row-start-2 flex justify-center items-center py-2 sm:py-3 pointer-events-none w-full min-w-0">
+                    <div className="bg-blue-600 px-4 py-2.5 sm:px-6 sm:py-3 rounded-full border-2 border-[#030303] shadow-[0_0_20px_rgba(37,99,235,0.4)] text-[9px] sm:text-[10px] font-black text-white uppercase tracking-wide sm:tracking-widest text-center leading-tight max-w-[min(100%,240px)] sm:max-w-none">
+                      {t("publishGate.line1")}
+                      <br />
+                      {t("publishGate.line2")}
+                    </div>
+                  </div>
+
                   <motion.div
                     whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(16, 185, 129, 0.4)" }}
-                    className="bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-emerald-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
+                    className="order-4 sm:order-none sm:col-start-2 sm:row-start-3 bg-white/[0.03] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-emerald-500/30 shadow-sm space-y-5 sm:space-y-6 transition-all w-full min-w-0"
                   >
                     <div className="flex items-start gap-3 min-w-0">
                       <div className="shrink-0 p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
@@ -340,14 +348,6 @@ const AIArchitecture: React.FC = () => {
                       ))}
                     </ul>
                   </motion.div>
-
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none max-w-[min(100%,220px)] sm:max-w-none">
-                    <div className="bg-blue-600 px-4 py-2.5 sm:px-6 sm:py-3 rounded-full border-2 border-[#030303] shadow-[0_0_20px_rgba(37,99,235,0.4)] text-[9px] sm:text-[10px] font-black text-white uppercase tracking-wide sm:tracking-widest text-center leading-tight">
-                      {t("publishGate.line1")}
-                      <br />
-                      {t("publishGate.line2")}
-                    </div>
-                  </div>
                 </div>
 
                 <div className="lg:col-span-4 w-full min-w-0">
