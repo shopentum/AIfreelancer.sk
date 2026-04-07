@@ -47,14 +47,24 @@
   },
   "About": {
     "title": "MGR. DANIEL BUDZIŇÁK",
-    "bio": "Som produktový a projektový manažér, ktorý verí, že technológia má slúžiť ľuďom, nie naopak. Pomáham firmám robiť lepšie rozhodnutia cez dáta a inteligentné workflowy."
+    "bio": "Produktový manažér prepájajúci biznis, dáta a inteligentné workflowy — technológia má ľuďom vracať čas, nie ho brať."
   },
   "AboutPage": {
     "heroTitlePrefix": "Staviam mosty medzi",
-    "heroTitleAccent": "biznisom a AI.",
+    "heroTitleAccent": "biznisovou logikou a inteligentnými systémami.",
     "location": "SÍDLO: SLOVENSKO",
-    "philosophyTitle": "Moja filozofia",
-    "philosophyText": "Nehľadám najkomplikovanejšie riešenie, hľadám to najefektívnejšie. Moja práca spočíva v prepájaní biznisových potrieb, dát a technológií do praktických systémov. Špecializujem sa na návrh produktov a systémové myslenie, ktoré firmám umožňuje rýchlo validovať nápady a zefektívňovať procesy.",
+    "intro": {
+      "lead": "Moja cesta nezačala pri AI. Za posledných 20 rokov som prešiel každou kľúčovou vrstvou digitálneho produktu:",
+      "b1": "Grafika a vizuálna komunikácia: Viem, čo robí dizajn „drahým“ a funkčným.",
+      "b2": "Marketing a UX/UI: Rozumiem psychológii používateľa a tomu, ako dáta menia konverzie.",
+      "b3": "Manažment projektov a produktov: Viem, ako riadiť priority, rozpočty a tímovú energiu.",
+      "closing": "Dnes tieto izolované svety spájam do jedného celku. Som produktový manažér, ktorý verí, že technológia má ľuďom čas vracať, nie ho brať. Pomáham firmám robiť lepšie rozhodnutia cez dáta a inteligentné workflowy."
+    },
+    "philosophyTitle": "Moja filozofia: Efektivita nad komplexnosťou",
+    "philosophyText": "Nehľadám najkomplikovanejšie riešenie, hľadám to, ktoré v danom momente prinesie najväčší dopad. Moja práca spočíva v prepájaní biznisových potrieb s technologickou realitou dneška.",
+    "valueTitle": "V čom je moja pridaná hodnota?",
+    "valueText": "Vďaka tomu, že som si prešiel celým procesom od prvého pixelu až po strategické riadenie, dokážem dnes cez AI nástroje (ako Cursor a Claude) validovať nápady a stavať systémy v tempe, ktoré bolo pred rokmi nemožné. Špecializujem sa na systémové myslenie, ktoré firmám umožňuje rýchlo rásť bez zbytočného technologického dlhu.",
+    "stackEyebrow": "TECH STACK",
     "stackTitle": "Technologický stack",
     "skills": {
       "s1": "AI Workflow Design",
@@ -65,6 +75,16 @@
       "s6": "Make / N8N",
       "s7": "API",
       "s8": "Notion / Jira"
+    },
+    "stackDesc": {
+      "s1": "Workflow & automatizácia",
+      "s2": "Štruktúra produktu",
+      "s3": "AI-native IDE",
+      "s4": "Backend & dáta",
+      "s5": "Deployment & edge",
+      "s6": "No-code integrácie",
+      "s7": "Connected logic",
+      "s8": "Delivery & dokumentácia"
     },
     "timelineTitle": "Moja cesta",
     "timeline": {
@@ -85,6 +105,12 @@
         "company": "WebRoyal",
         "role": "Digital Project Manager",
         "desc": "Riadenie vývoja komplexných webových aplikácií a e-commerce riešení."
+      },
+      "t4": {
+        "period": "2005 – 2013",
+        "company": "MediaHelp",
+        "role": "Owner štúdia",
+        "desc": "Vlastníctvo digitálneho štúdia — vizuálna komunikácia, web a projekty pre klientov; veľmi podobný typ práce ako neskôr pri WebRoyal."
       }
     },
     "personalTitle": "Mimo obrazovky",

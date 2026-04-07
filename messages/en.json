@@ -47,14 +47,24 @@
   },
   "About": {
     "title": "Mgr. Daniel Budziňák",
-    "bio": "Specializing at the intersection of Product Logic and AI Inference. I do not just prompt. I architect systems where AI operates as a reliable extension of human decision-making."
+    "bio": "Product manager connecting business, data, and intelligent workflows — technology should give people time back, not take it."
   },
   "AboutPage": {
     "heroTitlePrefix": "I build bridges between",
-    "heroTitleAccent": "business and AI.",
+    "heroTitleAccent": "business logic and intelligent systems.",
     "location": "Location: Slovakia",
-    "philosophyTitle": "My philosophy",
-    "philosophyText": "I do not seek the most complex solution. I seek the most effective one. My work connects business needs, data, and technology into practical systems that help teams validate ideas faster and execute with confidence.",
+    "intro": {
+      "lead": "My journey did not start with AI. Over the last 20 years I have worked across every key layer of a digital product:",
+      "b1": "Graphic design and visual communication: I know what makes design feel premium and functional.",
+      "b2": "Marketing and UX/UI: I understand user psychology and how data shifts conversions.",
+      "b3": "Project and product management: I know how to steer priorities, budgets, and team energy.",
+      "closing": "Today I connect those isolated worlds into one whole. I am a product manager who believes technology should give people time back, not take it. I help companies make better decisions through data and intelligent workflows."
+    },
+    "philosophyTitle": "My philosophy: impact over complexity",
+    "philosophyText": "I do not chase the most complicated solution — I look for the one that delivers the greatest impact right now. My work is about aligning business needs with today’s technological reality.",
+    "valueTitle": "What value do I add?",
+    "valueText": "Because I have walked the full path from the first pixel to strategic leadership, I can today use AI tools (such as Cursor and Claude) to validate ideas and build systems at a pace that was impossible years ago. I focus on systems thinking that lets companies grow fast without unnecessary technical debt.",
+    "stackEyebrow": "TECH STACK",
     "stackTitle": "Technology stack",
     "skills": {
       "s1": "AI Workflow Design",
@@ -65,6 +75,16 @@
       "s6": "Make / n8n",
       "s7": "API",
       "s8": "Notion / Jira"
+    },
+    "stackDesc": {
+      "s1": "Workflow & automation",
+      "s2": "Product structure",
+      "s3": "AI-native IDE",
+      "s4": "Backend & data",
+      "s5": "Deployment & edge",
+      "s6": "No-code integrations",
+      "s7": "Connected logic",
+      "s8": "Delivery & documentation"
     },
     "timelineTitle": "My path",
     "timeline": {
@@ -85,6 +105,12 @@
         "company": "WebRoyal",
         "role": "Digital Project Manager",
         "desc": "Management of complex web application and e-commerce solution delivery."
+      },
+      "t4": {
+        "period": "2005 – 2013",
+        "company": "MediaHelp",
+        "role": "Studio owner",
+        "desc": "Running a digital studio — visual communication, web, and client projects; very similar in nature to my later work at WebRoyal."
       }
     },
     "personalTitle": "Beyond the screen",
