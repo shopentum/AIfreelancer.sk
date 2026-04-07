@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import {
@@ -16,12 +17,33 @@ import {
   Github,
   Database,
   LayoutGrid,
+  X,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import dashboard01 from "@/app/(site)/img/shopentum_dashboard_01.webp";
+import dashboard02 from "@/app/(site)/img/shopentum_dashboard_02.webp";
+import dashboard03 from "@/app/(site)/img/shopentum_dashboard_03.webp";
 
 const Agency: React.FC = () => {
   const router = useRouter();
   const t = useTranslations("Agency");
+  const [activeImageIndex, setActiveImageIndex] = React.useState<number | null>(null);
+
+  // NOTE: Keep these three files in public/img (or adjust paths below).
+  const dashboardShots = [
+    { src: dashboard01, alt: "Shopentum dashboard screenshot 1" },
+    { src: dashboard02, alt: "Shopentum dashboard screenshot 2" },
+    { src: dashboard03, alt: "Shopentum dashboard screenshot 3" },
+  ];
+
+  const openImage = (index: number) => setActiveImageIndex(index);
+  const closeImage = () => setActiveImageIndex(null);
+  const showPrev = () =>
+    setActiveImageIndex((prev) => (prev === null ? null : (prev - 1 + dashboardShots.length) % dashboardShots.length));
+  const showNext = () =>
+    setActiveImageIndex((prev) => (prev === null ? null : (prev + 1) % dashboardShots.length));
 
   return (
     <div className="min-h-screen bg-[#030303] text-white font-inter selection:bg-blue-500/30 overflow-x-hidden">
@@ -301,6 +323,39 @@ const Agency: React.FC = () => {
         </div>
       </section>
 
+      {/* Shopentum Dashboard Gallery */}
+      <section className="py-24 px-6 border-t border-white/5 bg-black/20">
+        <div className="max-w-7xl mx-auto space-y-10">
+          <div className="text-center space-y-3">
+            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-fuchsia-400">SHOPENTUM PREVIEW</p>
+            <h2 className="text-3xl md:text-5xl font-sora font-black tracking-tighter uppercase">
+              Ukážky dashboardu
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {dashboardShots.map((shot, index) => (
+              <button
+                key={index}
+                type="button"
+                onClick={() => openImage(index)}
+                className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] hover:border-fuchsia-500/40 transition-all text-left"
+              >
+                <div className="relative aspect-[16/10] w-full">
+                  <Image
+                    src={shot.src}
+                    alt={shot.alt}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                  />
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Contact / Footer Section */}
       <section className="py-40 px-6 bg-gradient-to-b from-transparent to-purple-900/20 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent"></div>
@@ -338,6 +393,52 @@ const Agency: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Lightbox */}
+      {activeImageIndex !== null && (
+        <div className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-sm">
+          <button
+            type="button"
+            onClick={closeImage}
+            className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
+            aria-label="Close gallery"
+          >
+            <X size={18} />
+          </button>
+
+          <button
+            type="button"
+            onClick={showPrev}
+            className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
+            aria-label="Previous image"
+          >
+            <ChevronLeft size={20} />
+          </button>
+
+          <button
+            type="button"
+            onClick={showNext}
+            className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
+            aria-label="Next image"
+          >
+            <ChevronRight size={20} />
+          </button>
+
+          <div className="w-full h-full overflow-auto px-4 py-20 md:px-12">
+            <div className="mx-auto w-[95vw] max-w-[1600px]">
+              <Image
+                src={dashboardShots[activeImageIndex].src}
+                alt={dashboardShots[activeImageIndex].alt}
+                width={1600}
+                height={1000}
+                sizes="95vw"
+                className="w-full h-auto rounded-2xl border border-white/10"
+                priority
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
