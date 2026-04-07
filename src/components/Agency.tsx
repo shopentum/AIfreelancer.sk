@@ -62,14 +62,11 @@ const Agency: React.FC = () => {
                 </p>
               </div>
               
-              <div className="relative mt-12 p-8 md:px-12 md:py-8 rounded-[2rem] bg-white/[0.03] border border-white/10 max-w-xl mx-auto overflow-hidden group shadow-2xl flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-                <p className="text-white font-black not-italic text-lg md:text-xl tracking-tight">
-                  {t("heroResult")}
-                </p>
-                <span className="px-3 py-1 bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-full shadow-lg whitespace-nowrap">
+              <div className="mt-8 flex items-center justify-center">
+                <span className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white text-xs md:text-sm font-black uppercase tracking-[0.24em] rounded-full shadow-lg whitespace-nowrap">
+                  <Zap size={14} className="shrink-0" />
                   FAST DELIVERY
                 </span>
-                <div className="absolute -bottom-12 -right-12 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000"></div>
               </div>
             </div>
 
