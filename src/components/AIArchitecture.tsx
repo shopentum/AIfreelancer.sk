@@ -34,6 +34,12 @@ const FLOW_PARTICLES: Array<{
   { cx: [900, 900], cy: [300, 600], fill: "#ef4444", duration: 3, r: 4 },
   { cx: [900, 300], cy: [600, 600], fill: "#10b981", duration: 4, r: 4 },
   { cx: [300, 300], cy: [600, 300], fill: "#3b82f6", duration: 3, r: 4 },
+  /* Vertical: governance → engine */
+  { cx: [600, 600], cy: [120, 280], fill: "#60a5fa", duration: 2.8, r: 3 },
+  { cx: [600, 600], cy: [120, 280], fill: "#93c5fd", duration: 2.8, delay: 1.4, r: 2.5 },
+  /* Vertical: engine → core */
+  { cx: [600, 600], cy: [520, 700], fill: "#60a5fa", duration: 2.6, r: 3 },
+  { cx: [600, 600], cy: [520, 700], fill: "#93c5fd", duration: 2.6, delay: 1.3, r: 2.5 },
 ];
 
 const NOISE_PARTICLES: Array<{ cx: number[]; cy: number[]; duration: number }> = [
@@ -59,6 +65,30 @@ const BENEFITS: Array<{
 ];
 
 const LIST_KEYS = ["i1", "i2", "i3", "i4", "i5"] as const;
+
+/** Vertikálny „tok“ medzi vrstvami architektúry */
+function VerticalFlowBridge({ variant }: { variant: "toEngine" | "toCore" }) {
+  const trackClass =
+    variant === "toEngine"
+      ? "bg-gradient-to-b from-blue-500/80 via-blue-400/35 to-transparent"
+      : "bg-gradient-to-b from-transparent via-blue-400/30 to-blue-500/75";
+  const duration = variant === "toEngine" ? 2.35 : 2.15;
+
+  return (
+    <div
+      className="relative z-[6] flex flex-col items-center justify-center py-2 pointer-events-none"
+      aria-hidden
+    >
+      <div className={`relative h-20 w-[2px] rounded-full ${trackClass}`}>
+        <motion.div
+          className="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 rounded-full bg-sky-300 shadow-[0_0_14px_rgba(125,211,252,0.95)]"
+          animate={{ y: [0, 72] }}
+          transition={{ duration, repeat: Infinity, ease: "linear" }}
+        />
+      </div>
+    </div>
+  );
+}
 
 const AIArchitecture: React.FC = () => {
   const t = useTranslations("AIArchitecture");
@@ -91,33 +121,9 @@ const AIArchitecture: React.FC = () => {
               </span>
             </h1>
 
-            <p className="max-w-4xl text-xl md:text-2xl text-slate-400 font-medium italic leading-relaxed">
+            <p className="w-full max-w-5xl md:max-w-6xl text-xl md:text-2xl text-slate-400 font-medium italic leading-relaxed text-balance px-2">
               {t("heroLead")}
             </p>
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="pt-16 pb-8 px-6 relative">
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="bg-white/[0.03] backdrop-blur-xl rounded-[3rem] p-10 md:p-16 border border-white/10 relative overflow-hidden shadow-2xl"
-          >
-            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 blur-[100px] rounded-full -mr-32 -mt-32" />
-            <div className="relative z-10 flex flex-col md:flex-row items-center gap-12">
-              <div className="space-y-4">
-                <p className="text-xl md:text-2xl font-sora font-light leading-tight italic text-slate-200">
-                  &ldquo;{t("quote")}&rdquo;
-                </p>
-                <div className="flex items-center space-x-4 pt-1">
-                  <div className="h-px w-12 bg-blue-500/50" />
-                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-400">{t("quoteRole")}</p>
-                </div>
-              </div>
-            </div>
           </motion.div>
         </div>
       </section>
@@ -130,13 +136,21 @@ const AIArchitecture: React.FC = () => {
           </div>
 
           <div className="relative p-8 md:pt-16 md:pb-10 bg-white/[0.02] backdrop-blur-sm rounded-[4rem] border border-white/5 shadow-2xl">
-            <div className="flex justify-center mb-16">
+            <div className="flex justify-center mb-0">
               <motion.div
                 whileHover={{
                   scale: 1.02,
                   backgroundColor: "rgba(255, 255, 255, 0.08)",
                   boxShadow: "0 0 30px rgba(59,130,246,0.2)",
                 }}
+                animate={{
+                  boxShadow: [
+                    "0 0 28px rgba(59,130,246,0.12)",
+                    "0 0 48px rgba(59,130,246,0.22)",
+                    "0 0 28px rgba(59,130,246,0.12)",
+                  ],
+                }}
+                transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
                 className="w-full max-w-4xl bg-white/5 p-10 rounded-3xl border border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.1)] text-center relative z-20 transition-all"
               >
                 <div className="flex items-center justify-center space-x-4 mb-3">
@@ -149,6 +163,8 @@ const AIArchitecture: React.FC = () => {
               </motion.div>
             </div>
 
+            <VerticalFlowBridge variant="toEngine" />
+
             <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
               <svg className="w-full h-full opacity-80" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <defs>
@@ -159,7 +175,38 @@ const AIArchitecture: React.FC = () => {
                       <feMergeNode in="SourceGraphic" />
                     </feMerge>
                   </filter>
+                  <linearGradient id="arch-connector-v" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.85" />
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.15" />
+                  </linearGradient>
                 </defs>
+
+                <motion.line
+                  x1="600"
+                  y1="88"
+                  x2="600"
+                  y2="278"
+                  stroke="url(#arch-connector-v)"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeDasharray="6 14"
+                  initial={{ opacity: 0.2 }}
+                  animate={{ opacity: [0.18, 0.5, 0.18] }}
+                  transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <motion.line
+                  x1="600"
+                  y1="518"
+                  x2="600"
+                  y2="712"
+                  stroke="url(#arch-connector-v)"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeDasharray="6 14"
+                  initial={{ opacity: 0.2 }}
+                  animate={{ opacity: [0.18, 0.48, 0.18] }}
+                  transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
+                />
 
                 {FLOW_PARTICLES.map((p, i) => (
                   <motion.circle
@@ -308,9 +355,19 @@ const AIArchitecture: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex justify-center mt-10">
+            <VerticalFlowBridge variant="toCore" />
+
+            <div className="flex justify-center mt-2">
               <motion.div
                 whileHover={{ scale: 1.02, backgroundColor: "rgba(255, 255, 255, 0.08)" }}
+                animate={{
+                  boxShadow: [
+                    "0 0 22px rgba(59,130,246,0.1)",
+                    "0 0 40px rgba(59,130,246,0.2)",
+                    "0 0 22px rgba(59,130,246,0.1)",
+                  ],
+                }}
+                transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
                 className="w-full max-w-4xl bg-white/5 p-10 rounded-3xl border border-blue-500/20 shadow-md text-center relative z-20 transition-colors"
               >
                 <div className="flex items-center justify-center space-x-4 mb-3">
@@ -346,6 +403,28 @@ const AIArchitecture: React.FC = () => {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="pt-4 pb-10 px-6 relative">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="bg-white/[0.03] backdrop-blur-xl rounded-[3rem] p-10 md:p-16 border border-white/10 relative overflow-hidden shadow-2xl"
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 blur-[100px] rounded-full -mr-32 -mt-32" />
+            <div className="relative z-10">
+              <p className="text-lg md:text-2xl font-sora font-extralight leading-snug text-slate-200/95 text-balance">
+                &ldquo;{t("quote")}&rdquo;
+              </p>
+              <div className="flex items-center space-x-4 pt-6">
+                <div className="h-px w-12 bg-blue-500/40" />
+                <p className="text-[10px] font-medium uppercase tracking-[0.35em] text-blue-400/90">{t("quoteRole")}</p>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
