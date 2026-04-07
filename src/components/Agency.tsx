@@ -212,7 +212,7 @@ const Agency: React.FC = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 md:gap-8">
             {[
               { name: "Cursor", icon: Terminal, desc: t("stack.cursor"), color: "text-sky-400" },
-              { name: "Builder.io", icon: LayoutGrid, desc: t("stack.builder"), color: "text-blue-500" },
+              { name: "Claude", icon: LayoutGrid, desc: t("stack.builder"), color: "text-blue-500" },
               { name: "API First", icon: Network, desc: t("stack.api"), color: "text-purple-500" },
               { name: "Github", icon: Github, desc: t("stack.github"), color: "text-slate-200" },
               { name: "Supabase", icon: Database, desc: t("stack.supabase"), color: "text-emerald-500" },
