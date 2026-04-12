@@ -67,7 +67,7 @@ export default function NmhPasswordGate({ children }: Props) {
               }}
               placeholder="Heslo"
               className={[
-                "w-full rounded-lg border px-4 py-3 text-sm outline-none transition-all",
+                "w-full rounded-lg border px-4 py-3 text-sm text-gray-900 outline-none transition-all",
                 error
                   ? "border-red-400 bg-red-50 focus:ring-1 focus:ring-red-400"
                   : "border-gray-300 focus:border-[#2C5282] focus:ring-1 focus:ring-[#2C5282]",
