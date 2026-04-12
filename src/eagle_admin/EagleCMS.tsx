@@ -96,6 +96,61 @@ function slugifyForUrl(input: string): string {
     .slice(0, 120);
 }
 
+const RISK_ORDER: Record<Claim["risk"], number> = {
+  high: 0,
+  medium: 1,
+  low: 2,
+};
+
+function sortClaimsByRisk(a: Claim, b: Claim) {
+  return RISK_ORDER[a.risk] - RISK_ORDER[b.risk];
+}
+
+/** +2 alebo +3 body na Readiness po vyriešení nálezu (prototyp). */
+function nextReadinessBump(score: number): number {
+  const delta = 2 + Math.floor(Math.random() * 2);
+  return Math.min(100, score + delta);
+}
+
+const SEO_FIELD_LABEL: Record<SeoAuditKey, string> = {
+  title: "Titulok",
+  seoTitle: "SEO titulok",
+  url: "Titulok pre URL",
+  perex: "Perex",
+};
+
+/** Správa po použití AI návrhu v SEO (redakčný tón). */
+const SEO_APPLIED_MESSAGE =
+  "Tip z kontroly sme prepísali do formulára. Skontrolujte ešte raz znenie, či sedí tón a zodpovedá zvyklostiam Nového Času.";
+
+type SeoChangeEntry = {
+  key: SeoAuditKey;
+  before: string;
+  after: string;
+  appliedAt: number;
+};
+
+type ResolvedClaimRecord = {
+  claim: Claim;
+  tab: "trust" | "linguistic";
+  beforeText: string;
+  afterText: string;
+  resolvedAt: number;
+};
+
+/** Ukážkový text článku (~2× pôvodná dĺžka) pre realistický scroll a highlight. */
+const EAGLE_DEMO_ARTICLE = [
+  "Podľa najnovších štúdií publikovaných v prestížnom vedeckom časopise Nature, by kreatín monohydrát mohol predstavovať prelom v doplnkovej liečbe neurodegeneratívnych ochorení. Tento doplnok, ktorý si väčšina ľudí spája s nárastom svalovej hmoty a kulturistikou, teraz šokuje vedecký svet svojimi účinkami na mozog. Populárny prášok z fitness centier sa totiž dostáva do centra pozornosti neurovedcov ako možná podpora v boji proti Alzheimerovej chorobe.",
+  "Neurofyziologička Louisa Nichola v nedávnom podcaste The Diary of a CEO prezradila, že túto dostupnú zložku považuje za mimoriadne prospešnú pre zdravie mozgu. „Kreatín nie je len pre svaly. Esenciálny hráč v energetickom metabolizme mozgu,“ vysvetľuje odborníčka. Podľa jej slov ho dokonca podáva aj svojim 71-ročným rodičom ako preventívne opatrenie.",
+  "Vedecký tím z University of Sydney pod vedením doktorky Caroline Rae už v minulosti preukázal, že suplementácia kreatínom môže viesť k výraznému zlepšeniu pracovnej pamäte a inteligencie u zdravých jedincov. Mechanizmus účinku spočíva v tom, že kreatín zvyšuje dostupnosť ATP (adenozíntrifosfátu) v neurónoch, čo umožňuje mozgu pracovať efektívnejšie pri náročných kognitívnych úlohách.",
+  "Pre milióny rodín, ktoré denne zápasia s demenciou, to znie ako veľká nádej. Je však dôležité poznamenať, že hoci sú doterajšie výsledky sľubné, kreatín nie je zázračným liekom. Odborníci varujú pred nekontrolovaným užívaním vysokých dávok bez konzultácie s lekárom, najmä u pacientov s existujúcimi ochoreniami obličiek. Napriek tomu, vzhľadom na nízku cenu a vysoký bezpečnostný profil, sa kreatín javí ako jeden z najzaujímavejších kandidátov na poli neuroprotektívnych látok súčasnosti. V titulkoch sa často objaví, že doplnok „stojí pár eur“ — to je presne typ vágnosti, ktorú kontrola označuje pri cenových tvrdeniach.",
+  "Európsky úrad pre bezpečnosť potravín (EFSA) v minulosti posúdil kreatín ako zložku s dobre zdokumentovaným bezpečnostným profilom pri odporúčaných dávkach. Aj preto sa nachádza v mnohých doplnkoch výživy, ktoré sú voľne predajné. Rozdiel je však v tom, či ide o krátkodobé užívanie športovcami, alebo o dlhodobé podávanie starším ľuďom s rôznymi diagnózami — tam chýbajú veľké randomizované štúdie.",
+  "Na Slovensku zatiaľ neexistuje oficiálna kampaň, ktorá by rodinám Alzheimerovej choroby vysvetľovala riziká a prínosy doplnkov. Neurológovia v súkromných ambulanciách často počujú otázky typu: „Môže to aspoň trochu spomaliť zhoršovanie?“ Odpoveď znie opatrne: skoré štúdie sú sľubné, no neznamenajú to isté ako odporúčanie v praxi.",
+  "Časť výskumu sa uberá aj smerom k tomu, či kreatín pomáha pri spánkovom deficite a únave mozgu, čo sú faktory, ktoré demenciu zhoršujú. Ak by sa potvrdil aj tento efekt, išlo by o ďalší argument pre starších ľudí, ktorí z rôznych dôvodov nespia dostatočne — no znovu platí, že samoliečba bez dohľadu lekára je riziková.",
+  "Farmaceutické firmy zatiaľ nehlásia pripravovaný liek na báze kreatínu špecificky proti Alzheimerovej chorobe. Dôvod je prozaický: patentová ochrana a marža sú pri doplnkoch výrazne iné ako pri liečivých registráciách. Pre bežného čitateľa to znamená, že to, čo kúpi v lekárni alebo online, nie je to isté, čo prechádza klinickými fázami ako liečivo.",
+  "Rodiny, ktoré sa o tému zaujímajú, by si mali poznamenať tri veci: vždy čítať zloženie a dávkovanie, nekombinovať doplnky „naslepo“ a pri prvých známkach zhoršovania pamäti vyhľadať odborníka namiesto spoliehania sa na internetové rady. Kreatín môže byť zaujímavou kapitolou vo výskume — no príbeh pacienta a jeho lekára má vždy prednosť pred titulkom.",
+].join("\n\n");
+
 const EagleCMS_Split: React.FC = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('Interný');
@@ -104,7 +159,7 @@ const EagleCMS_Split: React.FC = () => {
   const [seoTitle, setSeoTitle] = useState('O krok bližšie k liečbe Alzheimera? Stojí pár eur!');
   const [urlTitle, setUrlTitle] = useState('o-krok-blizsie-k-liecbe-alzheimera-vedci-odhalili-dostupny-zazrak-v-prasku-stoji-par-eur');
   const [perex, setPerex] = useState('Doplnok, ktorý si väčšina ľudí spája s kulturistikou, teraz šokuje vedecký svet. Populárny prášok z fitness centier sa totiž dostáva do centra pozornosti neurovedcov ako možná podpora v boji proti rozšírenej chorobe.');
-  const [content, setContent] = useState('Podľa najnovších štúdií publikovaných v prestížnom vedeckom časopise Nature, by kreatín monohydrát mohol predstavovať prelom v doplnkovej liečbe neurodegeneratívnych ochorení. Tento doplnok, ktorý si väčšina ľudí spája s nárastom svalovej hmoty a kulturistikou, teraz šokuje vedecký svet svojimi účinkami na mozog. Populárny prášok z fitness centier sa totiž dostáva do centra pozornosti neurovedcov ako možná podpora v boji proti Alzheimerovej chorobe.\n\nNeurofyziologička Louisa Nichola v nedávnom podcaste The Diary of a CEO prezradila, že túto dostupnú zložku považuje za mimoriadne prospešnú pre zdravie mozgu. "Kreatín nie je len pre svaly. Esenciálny hráč v energetickom metabolizme mozgu," vysvetľuje odborníčka. Podľa jej slov ho dokonca podáva aj svojim 71-ročným rodičom ako preventívne opatrenie.\n\nVedecký tím z University of Sydney pod vedením doktorky Caroline Rae už v minulosti preukázal, že suplementácia kreatínom môže viesť k výraznému zlepšeniu pracovnej pamäte a inteligencie u zdravých jedincov. Mechanizmus účinku spočíva v tom, že kreatín zvyšuje dostupnosť ATP (adenozíntrifosfátu) v neurónoch, čo umožňuje mozgu pracovať efektívnejšie pri náročných kognitívnych úlohách.\n\nPre milióny rodín, ktoré denne zápasia s demenciou, to znie ako veľká nádej. Je však dôležité poznamenať, že hoci sú doterajšie výsledky sľubné, kreatín nie je zázračným liekom. Odborníci varujú pred nekontrolovaným užívaním vysokých dávok bez konzultácie s lekárom, najmä u pacientov s existujúcimi ochoreniami obličiek. Napriek tomu, vzhľadom na nízku cenu a vysoký bezpečnostný profil, sa kreatín javí ako jeden z najzaujímavejších kandidátov na poli neuroprotektívnych látok súčasnosti.');
+  const [content, setContent] = useState(EAGLE_DEMO_ARTICLE);
   const [brand, setBrand] = useState('Nový Čas');
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const scrollRafRef = useRef<number | null>(null);
@@ -123,6 +178,8 @@ const EagleCMS_Split: React.FC = () => {
   const [activeAuditTab, setActiveAuditTab] = useState<'trust' | 'linguistic' | 'seo'>('trust');
   const [auditError, setAuditError] = useState<string | null>(null);
   const [rightPanelMode, setRightPanelMode] = useState<'settings' | 'ai'>('settings');
+  const [seoChangeLog, setSeoChangeLog] = useState<SeoChangeEntry[]>([]);
+  const [resolvedClaims, setResolvedClaims] = useState<ResolvedClaimRecord[]>([]);
 
   const handleValidate = async () => {
     setIsValidating(true);
@@ -217,6 +274,8 @@ const EagleCMS_Split: React.FC = () => {
     };
 
     setAudit(mockAudit);
+    setSeoChangeLog([]);
+    setResolvedClaims([]);
     setIsValidating(false);
   };
 
@@ -228,6 +287,27 @@ const EagleCMS_Split: React.FC = () => {
     if (index === -1) return;
     ta.focus();
     ta.setSelectionRange(index, index + claim.text.length);
+    const lh = parseFloat(getComputedStyle(ta).lineHeight);
+    const lineHeight = Number.isFinite(lh) && lh > 0 ? lh : 26;
+    let line = 0;
+    for (let i = 0; i < index; i++) {
+      if (content[i] === "\n") line++;
+    }
+    ta.scrollTop = Math.max(0, line * lineHeight - ta.clientHeight * 0.2);
+    setScrollTop(ta.scrollTop);
+  };
+
+  const handleResolvedCardClick = (r: ResolvedClaimRecord) => {
+    setSelectedClaimId(r.claim.id);
+    const ta = editorRef.current;
+    if (!ta) return;
+    const index = content.indexOf(r.afterText);
+    if (index === -1) return;
+    ta.focus();
+    ta.setSelectionRange(
+      index,
+      Math.min(index + r.afterText.length, content.length),
+    );
     const lh = parseFloat(getComputedStyle(ta).lineHeight);
     const lineHeight = Number.isFinite(lh) && lh > 0 ? lh : 26;
     let line = 0;
@@ -276,9 +356,27 @@ const EagleCMS_Split: React.FC = () => {
       fadeClearRef.current = null;
     }, 2800);
 
+    const tab: "trust" | "linguistic" = (audit?.linguisticClaims ?? []).some(
+      (c) => c.id === claim.id,
+    )
+      ? "linguistic"
+      : "trust";
+
+    setResolvedClaims((prev) => [
+      ...prev,
+      {
+        claim,
+        tab,
+        beforeText: claim.text,
+        afterText: fixedText,
+        resolvedAt: Date.now(),
+      },
+    ]);
+
     if (audit) {
       setAudit({
         ...audit,
+        readinessScore: nextReadinessBump(audit.readinessScore),
         claims: audit.claims.filter((c) => c.id !== claim.id),
         linguisticClaims: audit.linguisticClaims?.filter((c) => c.id !== claim.id),
       });
@@ -299,22 +397,47 @@ const EagleCMS_Split: React.FC = () => {
           .replace(/^["']|["']$/g, "")
           .trim();
 
-      if (key === "title") setTitle(stripTitle(raw));
-      else if (key === "seoTitle") setSeoTitle(raw);
-      else if (key === "url") setUrlTitle(slugifyForUrl(raw));
-      else if (key === "perex") setPerex(raw);
+      const beforeVal =
+        key === "title"
+          ? title
+          : key === "seoTitle"
+            ? seoTitle
+            : key === "url"
+              ? urlTitle
+              : perex;
+
+      let afterVal = beforeVal;
+      if (key === "title") {
+        afterVal = stripTitle(raw);
+        setTitle(afterVal);
+      } else if (key === "seoTitle") {
+        afterVal = raw;
+        setSeoTitle(afterVal);
+      } else if (key === "url") {
+        afterVal = slugifyForUrl(raw);
+        setUrlTitle(afterVal);
+      } else if (key === "perex") {
+        afterVal = raw;
+        setPerex(afterVal);
+      }
+
+      setSeoChangeLog((log) => [
+        ...log,
+        { key, before: beforeVal, after: afterVal, appliedAt: Date.now() },
+      ]);
 
       setAudit((prev) => {
         if (!prev) return prev;
         const prevItem = prev.seoAudit[key];
         return {
           ...prev,
+          readinessScore: nextReadinessBump(prev.readinessScore),
           seoAudit: {
             ...prev.seoAudit,
             [key]: {
               ...prevItem,
               status: "pass",
-              message: "Úprava bola použitá z AI návrhu.",
+              message: SEO_APPLIED_MESSAGE,
               suggestion: undefined,
             },
           },
@@ -322,7 +445,7 @@ const EagleCMS_Split: React.FC = () => {
       });
       setSelectedClaimId(null);
     },
-    [audit],
+    [audit, perex, seoTitle, title, urlTitle],
   );
 
   const highlightNodes = useMemo(() => {
@@ -1071,10 +1194,66 @@ const EagleCMS_Split: React.FC = () => {
                               </button>
                               
                               {(() => {
-                                const claim = audit?.claims.find(c => c.id === selectedClaimId) || 
-                                              audit?.linguisticClaims?.find(c => c.id === selectedClaimId);
-                                const seoItem = audit?.seoAudit[selectedClaimId as keyof typeof audit.seoAudit] as { status: string; message: string; suggestion?: string } | undefined;
-                                
+                                const resolved = resolvedClaims.find(
+                                  (r) => r.claim.id === selectedClaimId,
+                                );
+                                if (resolved) {
+                                  return (
+                                    <div className="space-y-6">
+                                      <div className="flex items-start gap-2 rounded-2xl border border-emerald-200 bg-emerald-50/50 p-4">
+                                        <CheckCircle2
+                                          className="mt-0.5 shrink-0 text-emerald-600"
+                                          size={20}
+                                        />
+                                        <div>
+                                          <p className="text-[10px] font-black uppercase tracking-widest text-emerald-800">
+                                            Vyriešené
+                                          </p>
+                                          <p className="text-sm font-semibold text-emerald-950">
+                                            {resolved.tab === "trust"
+                                              ? "Dôvera — úprava v článku"
+                                              : "Štýl — úprava v článku"}
+                                          </p>
+                                          <p className="mt-1 text-xs text-emerald-900/80">
+                                            {resolved.claim.reason}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <div className="grid gap-4 md:grid-cols-2">
+                                        <div className="rounded-xl border border-gray-200 bg-white p-3">
+                                          <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                            Pred úpravou
+                                          </p>
+                                          <p className="text-sm leading-relaxed text-gray-800">
+                                            {resolved.beforeText}
+                                          </p>
+                                        </div>
+                                        <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/30 p-3">
+                                          <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-emerald-800">
+                                            Po úprave
+                                          </p>
+                                          <p className="text-sm leading-relaxed text-gray-900">
+                                            {resolved.afterText}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                }
+
+                                const claim =
+                                  audit?.claims.find((c) => c.id === selectedClaimId) ||
+                                  audit?.linguisticClaims?.find(
+                                    (c) => c.id === selectedClaimId,
+                                  );
+                                const seoKey = isSeoAuditKey(selectedClaimId)
+                                  ? selectedClaimId
+                                  : null;
+                                const seoItem =
+                                  audit && seoKey
+                                    ? audit.seoAudit[seoKey]
+                                    : undefined;
+
                                 if (claim) {
                                   return (
                                     <div className="space-y-6">
@@ -1098,19 +1277,23 @@ const EagleCMS_Split: React.FC = () => {
                                           {claim.recommendedAction}
                                         </p>
                                         <div className="grid grid-cols-1 gap-2 pt-2">
-                                          <button 
+                                          <button
+                                            type="button"
                                             onClick={() => handleFixWithAI(claim)}
-                                            className="w-full bg-purple-600 text-white py-3 rounded-xl text-xs font-bold flex items-center justify-center hover:bg-purple-700 transition-all shadow-lg shadow-purple-100"
+                                            className="flex w-full items-center justify-center rounded-xl bg-purple-600 py-3 text-xs font-bold text-white shadow-lg shadow-purple-100 transition-all hover:bg-purple-700"
                                           >
-                                            <Sparkles size={14} className="mr-2" /> 
-                                            {activeAuditTab === 'trust' ? 'Opraviť pomocou AI' : 'Upraviť na štýl Nového Času'}
+                                            <Sparkles size={14} className="mr-2" />
+                                            {activeAuditTab === "trust"
+                                              ? "Opraviť pomocou AI"
+                                              : "Upraviť na štýl Nového Času"}
                                           </button>
-                                          <button 
+                                          <button
+                                            type="button"
                                             onClick={() => {
                                               handleClaimClick(claim);
                                               editorRef.current?.focus();
                                             }}
-                                            className="w-full bg-white text-gray-700 border border-gray-200 py-3 rounded-xl text-xs font-bold flex items-center justify-center hover:bg-gray-50 transition-all"
+                                            className="flex w-full items-center justify-center rounded-xl border border-gray-200 bg-white py-3 text-xs font-bold text-gray-700 transition-all hover:bg-gray-50"
                                           >
                                             <Edit3 size={14} className="mr-2" /> Upraviť ručne
                                           </button>
@@ -1120,13 +1303,46 @@ const EagleCMS_Split: React.FC = () => {
                                   );
                                 }
 
-                                if (seoItem) {
+                                if (seoItem && seoKey) {
+                                  const logEntry = [...seoChangeLog]
+                                    .reverse()
+                                    .find((e) => e.key === seoKey);
+                                  const showDiff =
+                                    seoItem.status === "pass" && Boolean(logEntry);
+
                                   return (
                                     <div className="space-y-6">
                                       <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-4">
-                                        <p className="text-sm font-semibold text-gray-900">{seoItem.message}</p>
+                                        <p className="text-sm font-semibold text-gray-900">
+                                          {seoItem.message}
+                                        </p>
                                       </div>
-                                      {seoItem.suggestion && (
+                                      {showDiff && logEntry && (
+                                        <div className="space-y-3">
+                                          <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                            Čo sa zmenilo ({SEO_FIELD_LABEL[seoKey]})
+                                          </p>
+                                          <div className="grid gap-4 md:grid-cols-2">
+                                            <div className="rounded-xl border border-gray-200 bg-white p-3">
+                                              <p className="mb-2 text-[10px] font-black uppercase text-gray-500">
+                                                Predtým
+                                              </p>
+                                              <p className="text-sm leading-relaxed text-gray-800">
+                                                {logEntry.before}
+                                              </p>
+                                            </div>
+                                            <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/25 p-3">
+                                              <p className="mb-2 text-[10px] font-black uppercase text-emerald-800">
+                                                Teraz
+                                              </p>
+                                              <p className="text-sm leading-relaxed text-gray-900">
+                                                {logEntry.after}
+                                              </p>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+                                      {seoItem.suggestion ? (
                                         <div className="space-y-3">
                                           <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                                             AI návrh
@@ -1139,20 +1355,14 @@ const EagleCMS_Split: React.FC = () => {
                                               type="button"
                                               className="mt-4 w-full rounded-lg bg-purple-600 py-2 text-xs font-bold text-white transition-all hover:bg-purple-700"
                                               onClick={() => {
-                                                if (
-                                                  isSeoAuditKey(selectedClaimId)
-                                                ) {
-                                                  applySeoSuggestion(
-                                                    selectedClaimId,
-                                                  );
-                                                }
+                                                applySeoSuggestion(seoKey);
                                               }}
                                             >
                                               Použiť návrh
                                             </button>
                                           </div>
                                         </div>
-                                      )}
+                                      ) : null}
                                     </div>
                                   );
                                 }
@@ -1168,30 +1378,75 @@ const EagleCMS_Split: React.FC = () => {
                             >
                               {activeAuditTab === 'trust' && (
                                 <div className="space-y-3">
-                                  {audit?.claims.map(claim => (
-                                    <div 
-                                      key={claim.id}
-                                      onClick={() => handleClaimClick(claim)}
-                                      className={cn(
-                                        "group cursor-pointer rounded-xl border border-gray-200 p-3 shadow-sm transition-all",
-                                        claim.risk === "high"
-                                          ? "border-l-[3px] border-l-rose-400 bg-rose-50/40"
-                                          : claim.risk === "medium"
-                                            ? "border-l-[3px] border-l-amber-400 bg-amber-50/35"
-                                            : "border-l-[3px] border-l-emerald-400 bg-emerald-50/35",
-                                        selectedClaimId === claim.id
-                                          ? "ring-1 ring-purple-300/90 ring-offset-2 ring-offset-[#F0F2F5]"
-                                          : "hover:border-gray-300 hover:shadow",
-                                      )}
-                                    >
-                                      <p className="mb-1 text-[10px] font-black uppercase text-gray-500">
-                                        {claim.reason}
-                                      </p>
-                                      <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-gray-900">
-                                        „{claim.text}“
-                                      </p>
-                                    </div>
-                                  ))}
+                                  {[...(audit?.claims ?? [])]
+                                    .sort(sortClaimsByRisk)
+                                    .map((claim) => (
+                                      <div
+                                        key={claim.id}
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={() => handleClaimClick(claim)}
+                                        onKeyDown={(e) => {
+                                          if (e.key === "Enter" || e.key === " ") {
+                                            e.preventDefault();
+                                            handleClaimClick(claim);
+                                          }
+                                        }}
+                                        className={cn(
+                                          "group cursor-pointer rounded-xl border border-gray-200 p-3 shadow-sm transition-all",
+                                          claim.risk === "high"
+                                            ? "border-l-[3px] border-l-rose-400 bg-rose-50/40"
+                                            : claim.risk === "medium"
+                                              ? "border-l-[3px] border-l-amber-400 bg-amber-50/35"
+                                              : "border-l-[3px] border-l-emerald-400 bg-emerald-50/35",
+                                          selectedClaimId === claim.id
+                                            ? "ring-1 ring-purple-300/90 ring-offset-2 ring-offset-[#F0F2F5]"
+                                            : "hover:border-gray-300 hover:shadow",
+                                        )}
+                                      >
+                                        <p className="mb-1 text-[10px] font-black uppercase text-gray-500">
+                                          {claim.reason}
+                                        </p>
+                                        <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-gray-900">
+                                          „{claim.text}“
+                                        </p>
+                                      </div>
+                                    ))}
+                                  {resolvedClaims.filter((r) => r.tab === "trust").length > 0 && (
+                                    <p className="pt-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                      Vyriešené
+                                    </p>
+                                  )}
+                                  {resolvedClaims
+                                    .filter((r) => r.tab === "trust")
+                                    .map((r) => (
+                                      <div
+                                        key={`done-trust-${r.claim.id}-${r.resolvedAt}`}
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={() => handleResolvedCardClick(r)}
+                                        onKeyDown={(e) => {
+                                          if (e.key === "Enter" || e.key === " ") {
+                                            e.preventDefault();
+                                            handleResolvedCardClick(r);
+                                          }
+                                        }}
+                                        className={cn(
+                                          "group cursor-pointer rounded-xl border border-gray-200 border-l-[3px] border-l-emerald-500 bg-emerald-50/40 p-3 shadow-sm transition-all hover:border-gray-300 hover:shadow",
+                                          selectedClaimId === r.claim.id
+                                            ? "ring-1 ring-purple-300/90 ring-offset-2 ring-offset-[#F0F2F5]"
+                                            : "",
+                                        )}
+                                      >
+                                        <p className="mb-1 flex items-center gap-1.5 text-[10px] font-black uppercase text-emerald-800">
+                                          <CheckCircle2 size={12} className="shrink-0" />
+                                          Hotové
+                                        </p>
+                                        <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-gray-800">
+                                          „{r.afterText.length > 120 ? `${r.afterText.slice(0, 120)}…` : r.afterText}“
+                                        </p>
+                                      </div>
+                                    ))}
                                 </div>
                               )}
                               {activeAuditTab === 'linguistic' && (
@@ -1202,38 +1457,105 @@ const EagleCMS_Split: React.FC = () => {
                                     </p>
                                     <p className="text-sm font-bold text-gray-900">{audit?.editorialAudit.tone}</p>
                                   </div>
-                                  {audit?.linguisticClaims?.map(claim => (
-                                    <div 
-                                      key={claim.id}
-                                      onClick={() => handleClaimClick(claim)}
-                                      className={cn(
-                                        "group cursor-pointer rounded-xl border border-gray-200 p-3 shadow-sm transition-all",
-                                        claim.risk === "high"
-                                          ? "border-l-[3px] border-l-rose-400 bg-rose-50/40"
-                                          : "border-l-[3px] border-l-amber-400 bg-amber-50/35",
-                                        selectedClaimId === claim.id
-                                          ? "ring-1 ring-purple-300/90 ring-offset-2 ring-offset-[#F0F2F5]"
-                                          : "hover:border-gray-300 hover:shadow",
-                                      )}
-                                    >
-                                      <p className="mb-1 text-[10px] font-black uppercase text-gray-500">
-                                        {claim.reason}
-                                      </p>
-                                      <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-gray-900">
-                                        „{claim.text}“
-                                      </p>
-                                    </div>
-                                  ))}
+                                  {[...(audit?.linguisticClaims ?? [])]
+                                    .sort(sortClaimsByRisk)
+                                    .map((claim) => (
+                                      <div
+                                        key={claim.id}
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={() => handleClaimClick(claim)}
+                                        onKeyDown={(e) => {
+                                          if (e.key === "Enter" || e.key === " ") {
+                                            e.preventDefault();
+                                            handleClaimClick(claim);
+                                          }
+                                        }}
+                                        className={cn(
+                                          "group cursor-pointer rounded-xl border border-gray-200 p-3 shadow-sm transition-all",
+                                          claim.risk === "high"
+                                            ? "border-l-[3px] border-l-rose-400 bg-rose-50/40"
+                                            : "border-l-[3px] border-l-amber-400 bg-amber-50/35",
+                                          selectedClaimId === claim.id
+                                            ? "ring-1 ring-purple-300/90 ring-offset-2 ring-offset-[#F0F2F5]"
+                                            : "hover:border-gray-300 hover:shadow",
+                                        )}
+                                      >
+                                        <p className="mb-1 text-[10px] font-black uppercase text-gray-500">
+                                          {claim.reason}
+                                        </p>
+                                        <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-gray-900">
+                                          „{claim.text}“
+                                        </p>
+                                      </div>
+                                    ))}
+                                  {resolvedClaims.filter((r) => r.tab === "linguistic").length >
+                                    0 && (
+                                    <p className="pt-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                      Vyriešené
+                                    </p>
+                                  )}
+                                  {resolvedClaims
+                                    .filter((r) => r.tab === "linguistic")
+                                    .map((r) => (
+                                      <div
+                                        key={`done-ling-${r.claim.id}-${r.resolvedAt}`}
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={() => handleResolvedCardClick(r)}
+                                        onKeyDown={(e) => {
+                                          if (e.key === "Enter" || e.key === " ") {
+                                            e.preventDefault();
+                                            handleResolvedCardClick(r);
+                                          }
+                                        }}
+                                        className={cn(
+                                          "group cursor-pointer rounded-xl border border-gray-200 border-l-[3px] border-l-emerald-500 bg-emerald-50/40 p-3 shadow-sm transition-all hover:border-gray-300 hover:shadow",
+                                          selectedClaimId === r.claim.id
+                                            ? "ring-1 ring-purple-300/90 ring-offset-2 ring-offset-[#F0F2F5]"
+                                            : "",
+                                        )}
+                                      >
+                                        <p className="mb-1 flex items-center gap-1.5 text-[10px] font-black uppercase text-emerald-800">
+                                          <CheckCircle2 size={12} className="shrink-0" />
+                                          Hotové
+                                        </p>
+                                        <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-gray-800">
+                                          „{r.afterText.length > 120 ? `${r.afterText.slice(0, 120)}…` : r.afterText}“
+                                        </p>
+                                      </div>
+                                    ))}
                                 </div>
                               )}
                               {activeAuditTab === 'seo' && (
                                 <div className="space-y-3">
                                   {Object.entries(audit?.seoAudit || {})
-                                    .sort(([, a], [, b]) => {
-                                      const order = { fail: 0, warning: 1, pass: 2 };
-                                      const statusA = (a as { status: string }).status as keyof typeof order;
-                                      const statusB = (b as { status: string }).status as keyof typeof order;
-                                      return order[statusA] - order[statusB];
+                                    .sort(([keyA, a], [keyB, b]) => {
+                                      const order = {
+                                        fail: 0,
+                                        warning: 1,
+                                        pass: 2,
+                                      } as const;
+                                      const sa = (a as { status: string })
+                                        .status as keyof typeof order;
+                                      const sb = (b as { status: string })
+                                        .status as keyof typeof order;
+                                      if (order[sa] !== order[sb])
+                                        return order[sa] - order[sb];
+                                      if (sa === "pass" && sb === "pass") {
+                                        const appliedA = seoChangeLog.some(
+                                          (e) => e.key === keyA,
+                                        )
+                                          ? 1
+                                          : 0;
+                                        const appliedB = seoChangeLog.some(
+                                          (e) => e.key === keyB,
+                                        )
+                                          ? 1
+                                          : 0;
+                                        return appliedA - appliedB;
+                                      }
+                                      return 0;
                                     })
                                     .map(([key, res]) => {
                                       const item = res as { status: string; message: string; suggestion?: string };
