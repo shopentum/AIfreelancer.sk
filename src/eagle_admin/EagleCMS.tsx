@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, {
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useRouter } from "@/i18n/navigation";
 import { 
   LayoutDashboard, 
@@ -56,10 +62,34 @@ import {
   fixClaimWithAI,
   type Claim,
   type ArticleAudit,
+  type SeoAuditKey,
 } from "@/eagle_admin/geminiService";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+/** Shared by mirror + textarea so line boxes match (reduces highlight ghosting). */
+const EAGLE_EDITOR_SURFACE_CLASS =
+  "box-border w-full min-h-full p-8 text-sm font-medium leading-relaxed tracking-normal text-[#1f2937] subpixel-antialiased [font-kerning:normal] [font-feature-settings:'kern'_1] [tab-size:8] whitespace-pre-wrap break-words [overflow-wrap:anywhere]";
+
+function isSeoAuditKey(id: string | null): id is SeoAuditKey {
+  return (
+    id === "title" ||
+    id === "seoTitle" ||
+    id === "url" ||
+    id === "perex"
+  );
+}
+
+function slugifyForUrl(input: string): string {
+  return input
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 120);
 }
 
 const EagleCMS_Split: React.FC = () => {
@@ -73,6 +103,7 @@ const EagleCMS_Split: React.FC = () => {
   const [content, setContent] = useState('Podľa najnovších štúdií publikovaných v prestížnom vedeckom časopise Nature, by kreatín monohydrát mohol predstavovať prelom v doplnkovej liečbe neurodegeneratívnych ochorení. Tento doplnok, ktorý si väčšina ľudí spája s nárastom svalovej hmoty a kulturistikou, teraz šokuje vedecký svet svojimi účinkami na mozog. Populárny prášok z fitness centier sa totiž dostáva do centra pozornosti neurovedcov ako možná podpora v boji proti Alzheimerovej chorobe.\n\nNeurofyziologička Louisa Nichola v nedávnom podcaste The Diary of a CEO prezradila, že túto dostupnú zložku považuje za mimoriadne prospešnú pre zdravie mozgu. "Kreatín nie je len pre svaly. Esenciálny hráč v energetickom metabolizme mozgu," vysvetľuje odborníčka. Podľa jej slov ho dokonca podáva aj svojim 71-ročným rodičom ako preventívne opatrenie.\n\nVedecký tím z University of Sydney pod vedením doktorky Caroline Rae už v minulosti preukázal, že suplementácia kreatínom môže viesť k výraznému zlepšeniu pracovnej pamäte a inteligencie u zdravých jedincov. Mechanizmus účinku spočíva v tom, že kreatín zvyšuje dostupnosť ATP (adenozíntrifosfátu) v neurónoch, čo umožňuje mozgu pracovať efektívnejšie pri náročných kognitívnych úlohách.\n\nPre milióny rodín, ktoré denne zápasia s demenciou, to znie ako veľká nádej. Je však dôležité poznamenať, že hoci sú doterajšie výsledky sľubné, kreatín nie je zázračným liekom. Odborníci varujú pred nekontrolovaným užívaním vysokých dávok bez konzultácie s lekárom, najmä u pacientov s existujúcimi ochoreniami obličiek. Napriek tomu, vzhľadom na nízku cenu a vysoký bezpečnostný profil, sa kreatín javí ako jeden z najzaujímavejších kandidátov na poli neuroprotektívnych látok súčasnosti.');
   const [brand, setBrand] = useState('Nový Čas');
   const editorRef = useRef<HTMLTextAreaElement>(null);
+  const scrollRafRef = useRef<number | null>(null);
   const [scrollTop, setScrollTop] = useState(0);
 
   // Validation States
@@ -95,9 +126,23 @@ const EagleCMS_Split: React.FC = () => {
       readinessScore: 84,
       seoAudit: {
         title: { status: 'fail', message: 'Titulok je príliš dlhý (92 znakov). Odporúčané maximum je 70.', suggestion: 'Skráťte titulok na: O krok bližšie k liečbe Alzheimera? Vedci odhalili zázrak v prášku' },
-        seoTitle: { status: 'warning', message: 'SEO Titulok by mohol byť údernejší.', suggestion: 'Pridajte akčné slovo na začiatok.' },
-        url: { status: 'pass', message: 'URL slug je správne naformátovaný a obsahuje kľúčové slová.' },
-        perex: { status: 'pass', message: 'Perex má ideálnu dĺžku a obsahuje hlavnú tému.' }
+        seoTitle: {
+          status: "warning",
+          message: "SEO Titulok by mohol byť údernejší.",
+          suggestion:
+            "EXKLUZÍVNE: O krok bližšie k liečbe Alzheimera? Stojí pár eur!",
+        },
+        url: {
+          status: "warning",
+          message: "Slug je dlhý; kratší URL môže zlepšiť zdieľanie.",
+          suggestion: "alzheimer-kreatin-doplnok-studia",
+        },
+        perex: {
+          status: "warning",
+          message: "Perex môže byť konkrétnejší v prvej vete.",
+          suggestion:
+            "Kreatín z fitiek mieri do výskumu Alzheimerovej choroby. Čo zatiaľ ukazujú dáta a čo odborníci odporúčajú?",
+        },
       },
       editorialAudit: {
         tone: 'Informatívny / Bulvárny (vhodný pre Nový Čas)',
@@ -167,18 +212,40 @@ const EagleCMS_Split: React.FC = () => {
 
   const handleClaimClick = (claim: Claim) => {
     setSelectedClaimId(claim.id);
-    if (editorRef.current) {
-      const index = content.indexOf(claim.text);
-      if (index !== -1) {
-        editorRef.current.focus();
-        editorRef.current.setSelectionRange(index, index + claim.text.length);
-        
-        // Calculate scroll position
-        const linesBefore = content.substring(0, index).split('\n').length;
-        editorRef.current.scrollTop = (linesBefore - 1) * 24; // 24 is line-height
-      }
+    const ta = editorRef.current;
+    if (!ta) return;
+    const index = content.indexOf(claim.text);
+    if (index === -1) return;
+    ta.focus();
+    ta.setSelectionRange(index, index + claim.text.length);
+    const lh = parseFloat(getComputedStyle(ta).lineHeight);
+    const lineHeight = Number.isFinite(lh) && lh > 0 ? lh : 26;
+    let line = 0;
+    for (let i = 0; i < index; i++) {
+      if (content[i] === "\n") line++;
     }
+    ta.scrollTop = Math.max(0, line * lineHeight - ta.clientHeight * 0.2);
+    setScrollTop(ta.scrollTop);
   };
+
+  const onEditorScroll = useCallback((e: React.UIEvent<HTMLTextAreaElement>) => {
+    const next = e.currentTarget.scrollTop;
+    if (scrollRafRef.current !== null) {
+      cancelAnimationFrame(scrollRafRef.current);
+    }
+    scrollRafRef.current = requestAnimationFrame(() => {
+      setScrollTop(next);
+      scrollRafRef.current = null;
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    return () => {
+      if (scrollRafRef.current !== null) {
+        cancelAnimationFrame(scrollRafRef.current);
+      }
+    };
+  }, []);
 
   const handleFixWithAI = async (claim: Claim) => {
     const fixedText = await fixClaimWithAI(claim.text, content);
@@ -195,6 +262,77 @@ const EagleCMS_Split: React.FC = () => {
     }
     if (selectedClaimId === claim.id) setSelectedClaimId(null);
   };
+
+  const applySeoSuggestion = useCallback(
+    (key: SeoAuditKey) => {
+      if (!audit) return;
+      const item = audit.seoAudit[key];
+      const raw = item.suggestion?.trim();
+      if (!raw) return;
+
+      const stripTitle = (s: string) =>
+        s
+          .replace(/^(Skráťte titulok na:|Skráťte na:)\s*/i, "")
+          .replace(/^["']|["']$/g, "")
+          .trim();
+
+      if (key === "title") setTitle(stripTitle(raw));
+      else if (key === "seoTitle") setSeoTitle(raw);
+      else if (key === "url") setUrlTitle(slugifyForUrl(raw));
+      else if (key === "perex") setPerex(raw);
+
+      setAudit((prev) => {
+        if (!prev) return prev;
+        const prevItem = prev.seoAudit[key];
+        return {
+          ...prev,
+          seoAudit: {
+            ...prev.seoAudit,
+            [key]: {
+              ...prevItem,
+              status: "pass",
+              message: "Úprava bola použitá z AI návrhu.",
+              suggestion: undefined,
+            },
+          },
+        };
+      });
+      setSelectedClaimId(null);
+    },
+    [audit],
+  );
+
+  const highlightNodes = useMemo(() => {
+    const claims = [
+      ...(audit?.claims ?? []),
+      ...(audit?.linguisticClaims ?? []),
+    ];
+    return content.split(/(\s+)/).map((part, i) => {
+      const trimmed = part.trim();
+      if (trimmed.length < 3) return <span key={i}>{part}</span>;
+      const claim = claims.find((c) => c.text.includes(trimmed));
+      if (claim) {
+        return (
+          <span
+            key={i}
+            className={cn(
+              "rounded-sm transition-all duration-300",
+              selectedClaimId === claim.id
+                ? "bg-yellow-200/80 ring-2 ring-yellow-400"
+                : claim.risk === "high"
+                  ? "bg-red-100/50"
+                  : claim.risk === "medium"
+                    ? "bg-yellow-100/50"
+                    : "bg-green-100/50",
+            )}
+          >
+            {part}
+          </span>
+        );
+      }
+      return <span key={i}>{part}</span>;
+    });
+  }, [audit?.claims, audit?.linguisticClaims, content, selectedClaimId]);
 
   const sidebarItems = [
     { icon: BarChart3, label: 'Realtime štatistiky' },
@@ -367,12 +505,11 @@ const EagleCMS_Split: React.FC = () => {
           </div>
         </div>
 
-        {/* Editor Area */}
-        <main className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-[1800px] mx-auto grid grid-cols-12 gap-6 h-full">
-            
+        {/* Editor Area: main nesmie mať overflow-y-auto, inak sticky pravého panelu zlyhá. */}
+        <main className="flex min-h-0 flex-1 flex-col overflow-hidden p-6">
+          <div className="mx-auto grid min-h-0 flex-1 grid-cols-12 gap-6 max-w-[1800px]">
             {/* Left Column: Content */}
-            <div className="col-span-12 lg:col-span-8 space-y-6">
+            <div className="col-span-12 flex max-h-[min(calc(100vh-9.5rem),1080px)] min-h-0 flex-col gap-6 overflow-y-auto pr-1 lg:col-span-8">
               
               {/* Hlavný obsah Card */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -528,12 +665,12 @@ const EagleCMS_Split: React.FC = () => {
               </div>
 
               {/* Text článku Card */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col min-h-[600px]">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col">
                 <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                   <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Text článku <span className="text-red-500">*</span></h3>
                 </div>
                 
-                  <div className="flex-1 p-0 relative flex flex-col overflow-hidden">
+                  <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden p-0">
                     {/* Toolbar */}
                     <div className="px-4 py-2 border-b border-gray-100 flex items-center flex-wrap gap-1 bg-gray-50/30 shrink-0">
                       {[
@@ -574,54 +711,32 @@ const EagleCMS_Split: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex-1 relative overflow-hidden">
-                      {/* Highlight Layer - Synced with textarea scroll */}
-                      <div 
-                        className="absolute inset-0 p-8 pointer-events-none text-sm font-medium text-transparent whitespace-pre-wrap break-words overflow-hidden"
-                        style={{ 
-                          lineHeight: '1.625',
-                          fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, sans-serif',
-                          transform: `translateY(${-scrollTop}px)`
-                        }}
-                      >
-                        {content.split(/(\s+)/).map((part, i) => {
-                          const trimmed = part.trim();
-                          if (trimmed.length < 3) return <span key={i}>{part}</span>;
-                          
-                          const claim = [...(audit?.claims || []), ...(audit?.linguisticClaims || [])].find(c => c.text.includes(trimmed));
-                          if (claim) {
-                            return (
-                              <span 
-                                key={i} 
-                                className={cn(
-                                  "rounded-sm transition-all duration-300",
-                                  selectedClaimId === claim.id ? "bg-yellow-200/80 ring-2 ring-yellow-400" :
-                                  claim.risk === 'high' ? "bg-red-100/50" : 
-                                  claim.risk === 'medium' ? "bg-yellow-100/50" : 
-                                  "bg-green-100/50"
-                                )}
-                              >
-                                {part}
-                              </span>
-                            );
-                          }
-                          return <span key={i}>{part}</span>;
-                        })}
+                    <div className="relative min-h-[22rem] h-[clamp(22rem,52vh,36rem)] shrink-0 overflow-hidden">
+                      {/* Mirror: rovnaká typografia ako textarea; scrollbar skrytý = rovnaká šírka textu. */}
+                      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+                        <div
+                          className={cn(
+                            EAGLE_EDITOR_SURFACE_CLASS,
+                            "text-transparent caret-transparent [text-shadow:none]",
+                          )}
+                          style={{
+                            transform: `translate3d(0, ${-scrollTop}px, 0)`,
+                            willChange: "transform",
+                          }}
+                        >
+                          {highlightNodes}
+                        </div>
                       </div>
-                      
-                      {/* Editor Layer */}
-                      <textarea 
+                      <textarea
                         ref={editorRef}
                         value={content}
-                        onScroll={(e) => {
-                          setScrollTop(e.currentTarget.scrollTop);
-                        }}
+                        spellCheck={false}
+                        onScroll={onEditorScroll}
                         onChange={(e) => setContent(e.target.value)}
-                        className="w-full h-full p-8 border-none outline-none text-sm font-medium text-gray-800 resize-none bg-transparent relative z-10 overflow-y-auto custom-scrollbar"
-                        style={{ 
-                          lineHeight: '1.625',
-                          fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, sans-serif'
-                        }}
+                        className={cn(
+                          EAGLE_EDITOR_SURFACE_CLASS,
+                          "absolute inset-0 z-10 h-full resize-none overflow-y-auto border-0 bg-transparent text-[#1f2937] outline-none [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-gray-400 [&::-webkit-scrollbar]:hidden",
+                        )}
                         placeholder="Začnite písať váš článok..."
                       />
                     </div>
@@ -630,7 +745,7 @@ const EagleCMS_Split: React.FC = () => {
             </div>
 
             {/* Right Column: Split Intelligence / Settings */}
-            <div className="col-span-12 lg:col-span-4 flex flex-col space-y-6 overflow-hidden sticky top-6 h-[calc(100vh-160px)]">
+            <div className="col-span-12 flex min-h-0 max-h-[min(calc(100vh-9.5rem),1080px)] flex-col gap-4 overflow-hidden lg:sticky lg:top-4 lg:col-span-4 lg:self-start">
               
               {/* Toggle Header */}
               <div className="flex bg-white rounded-xl p-1 border border-gray-200 shadow-sm shrink-0">
@@ -660,7 +775,7 @@ const EagleCMS_Split: React.FC = () => {
                 </button>
               </div>
 
-              <div className="flex-1 overflow-hidden">
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
                 <AnimatePresence mode="wait">
                   {rightPanelMode === 'settings' ? (
                     <motion.div 
@@ -668,7 +783,7 @@ const EagleCMS_Split: React.FC = () => {
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      className="h-full overflow-y-auto space-y-6 custom-scrollbar pr-2"
+                      className="h-full min-h-0 flex-1 overflow-y-auto space-y-6 pr-2 custom-scrollbar"
                     >
                       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                         <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50">
@@ -833,7 +948,7 @@ const EagleCMS_Split: React.FC = () => {
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      className="h-full flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+                      className="flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
                     >
                       {/* AI Tabs */}
                       <div className="flex border-b border-gray-100 shrink-0">
@@ -893,7 +1008,7 @@ const EagleCMS_Split: React.FC = () => {
                       </div>
 
                       {/* AI Content Area */}
-                      <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                      <div className="min-h-0 flex-1 overflow-y-auto p-4 custom-scrollbar">
                         <AnimatePresence mode="wait">
                           {isValidating ? (
                             <div className="h-full flex flex-col items-center justify-center space-y-4 py-12">
@@ -967,7 +1082,19 @@ const EagleCMS_Split: React.FC = () => {
                                           <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">AI Návrh</p>
                                           <div className="bg-purple-50 p-4 rounded-2xl border border-purple-100">
                                             <p className="text-xs font-medium text-gray-900 leading-relaxed">{seoItem.suggestion}</p>
-                                            <button className="mt-4 w-full bg-purple-600 text-white py-2 rounded-lg text-xs font-bold hover:bg-purple-700 transition-all">
+                                            <button
+                                              type="button"
+                                              className="mt-4 w-full rounded-lg bg-purple-600 py-2 text-xs font-bold text-white transition-all hover:bg-purple-700"
+                                              onClick={() => {
+                                                if (
+                                                  isSeoAuditKey(selectedClaimId)
+                                                ) {
+                                                  applySeoSuggestion(
+                                                    selectedClaimId,
+                                                  );
+                                                }
+                                              }}
+                                            >
                                               Použiť návrh
                                             </button>
                                           </div>

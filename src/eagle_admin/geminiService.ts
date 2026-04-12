@@ -39,6 +39,8 @@ export type ArticleAudit = {
   linguisticClaims?: Claim[];
 };
 
+export type SeoAuditKey = keyof ArticleAudit["seoAudit"];
+
 /** Reserved for future holistic analysis — prototype uses inline mock in UI. */
 export async function analyzeArticleHolistic(
   _plainText: string,
