@@ -10,7 +10,6 @@ import { AIFreelancerLogo } from "./AIFreelancerLogo";
 const navLinks = [
   { key: "about", href: "/o-mne" },
   { key: "agency", href: "/agency" },
-  { key: "aiArch", href: "/ai-architektura" },
   { key: "caseStudy", href: "/use-case/shopentum" },
 ] as const;
 
