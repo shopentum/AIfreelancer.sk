@@ -1,0 +1,361 @@
+# KOMPLETNÉ TEXTY WEBU AIFREELANCER.SK
+
+Tento súbor obsahuje všetky texty extrahované z jednotlivých podstránok a komponentov webu.
+
+================================================================================
+1. LANDING PAGE (LandingPage.tsx)
+================================================================================
+
+TAGLINE: JEDINÝ AUDIT S REÁLNOU ROI PREDIKCIOU
+TITLE: Pozrite sa pravde do očí.
+SUBTITLE: Väčšina e-shopov páli peniaze v marketingu kvôli technickým a psychologickým bariéram, ktoré majitelia nevidia. My ich nájdeme a opravíme.
+
+SEKCIA: PREČO RAST STAGNUJE? (Reality Check)
+- Investujete do marketingu, ale tržby stoja.
+- Konverzný pomer je nízky, nikto nevie prečo.
+- Analytika je neprehľadná a bez akčných krokov.
+- Chýba prepojenie medzi reklamným sľubom a realitou webu.
+
+SEKCIA: SHOPENTUM OPTIKA (Business Perspective)
+- EKONOMICKÉ ÚNIKY: Nehľadáme teoretické chyby, ale miesta, kde reálne prichádzate o čistú maržu.
+- DÁTOVÁ PRAVDA: Surový kód a signály z Google API namiesto pocitov a odhadov agentúr.
+- ROI PRIORITA: Úlohy radíme výhradne podľa vplyvu na váš cashflow, nie podľa náročnosti.
+
+SEKCIA: SUCCESS STORY: LA HERBA (Case Study)
+- Zvýšenie konverzie o 142%.
+- "AI identifikovala technickú bariéru v checkout procese, ktorú žiadny iný audit za 5 rokov neuvidel."
+- LCP (Largest Contentful Paint): 4.2s -> 0.8s
+- CLS (Cumulative Layout Shift): 0.45 -> 0.02
+- FID (First Input Delay): 120ms -> 14ms
+- "Odstránenie asynchrónneho preťaženia procesora v nákupnom košíku priamo znížilo mieru odchodov o 22%."
+
+SEKCIA: ROZDIEL V DNA (Methodology Comparison)
+BEŽNÁ AGENTÚRA:
+- Zoznam stoviek chýb bez reálnej priority
+- Statický PDF report, ktorý nikto nečíta
+- Teoretické rady od junior špecialistov
+- Zameranie na krásu nad čistým ziskom
+
+SHOPENTUM FACTORY:
+- Presné poradie úloh podľa dopadu na zisk
+- Interaktívny dashboard úloh a progresu
+- Hĺbková analýza nákupnej psychológie
+- Technická korekcia priamo na úrovni kódu
+
+SEKCIA: VÝSTUPY ANALÝZY (Deliverables Grid)
+- Technický výkon: Identifikácia bariéry, ktorá vyháňa ľudí ešte pred načítaním.
+- Sémantika webu: Odhalenie dier v tom, ako váš web interpretujú nákupné roboty.
+- Nákupná cesta: Presné pomenovanie miesta úniku marže v checkout procese.
+- Psychológia dôvery: Pomenovanie prvkov, ktoré brzdia prvý nákup u nového zákazníka.
+- Marketingová pravda: Odhalenie rozporu medzi reklamným sľubom a realitou webu.
+- A ďalších 15+ hĺbkových nálezov.
+
+CITÁT (Trust Quote):
+- "Shopentum nie je agentúra, je to technológia rastu. Ich audit nám otvoril oči v miestach, kde sme roky pálili peniaze."
+- Marek Šándor, CEO & FOUNDER • LA HERBA
+
+FINAL CTA:
+- Ste pripravení na rast?
+- CHCIEM SPUSŤIŤ AUDIT
+
+================================================================================
+2. AI STUDIO (AIStudio.tsx)
+================================================================================
+
+TAGLINE: AI STUDIO • FUTURE OF E-COMMERCE
+TITLE: Budujeme e-shopy, ktoré myslia.
+SUBTITLE: Spájame špičkový dizajn s hĺbkovou AI integráciou. Výsledkom je nákupný zážitok, ktorý sa učí a predáva sám.
+
+SEKCIA: NAŠE PRINCÍPY (Tech Stack)
+- DETERMINISTICKÁ AI: Nepoužívame AI na generovanie textov, ale na predikciu nákupného správania a automatizáciu marže.
+- HEADLESS ARCHITEKTÚRA: Oddeľujeme frontend od backendu pre bleskovú rýchlosť a neobmedzenú škálovateľnosť.
+- DATA-DRIVEN DESIGN: Každý pixel na webe má svoj ekonomický význam potvrdený dátami z tisícov interakcií.
+
+SEKCIA: CASE STUDY: SHOPENTUM (Reference)
+- "Platforma, ktorá zmenila pravidlá hry v slovenskom e-commerce."
+- 100% Google Lighthouse skóre
+- 0.4s Rýchlosť odozvy servera
+- 3x Vyšší konverzný pomer
+- POZRIEŤ CASE STUDY
+
+FINAL CTA:
+- Máte projekt pre AI Studio?
+- DOHODNÚŤ KONZULTÁCIU
+
+================================================================================
+3. AGENCY (Agency.tsx)
+================================================================================
+
+TAGLINE: AI AGENCY • PERFORMANCE REIMAGINED
+TITLE: Marketing riadený inteligenciou.
+SUBTITLE: Prestaňte hádať. Naša AI agentúra analyzuje milióny dátových bodov, aby doručila zákazníkov s najvyššou celoživotnou hodnotou.
+
+SEKCIA: SLUŽBY (Services)
+- AI PERFORMANCE: Automatizované kampane, ktoré sa optimalizujú v reálnom čase podľa vašich skladových zásob a marže.
+- PREDIKTÍVNE SEO: Nečakáme na výsledky mesiace. AI predpovedá trendy a pripravuje obsah skôr, než ho konkurencia začne hľadať.
+- AUTOMATIZÁCIA TRŽIEB: Budujeme systémy, ktoré automaticky reagujú na správanie zákazníka a vracajú ho späť do nákupného cyklu.
+
+SEKCIA: TECH STACK (Agency Tech)
+- GOOGLE ADS AI: Pokročilé skriptovanie a integrácia s vaším CRM pre maximálnu relevanciu.
+- META ADVANTAGE+: Využitie hĺbkového učenia pre doručenie kreatívy, ktorá reálne konvertuje.
+- CUSTOM ANALYTICS: Vlastné dashboardy, ktoré ukazujú čistý zisk, nie len "pocity" z klikov.
+
+SEKCIA: CASE STUDY (Agency Case Study)
+- "Ako sme pre Shopentum vybudovali marketingový ekosystém budúcnosti."
+- CASE STUDY
+- DOHODNÚŤ STRATÉGIU
+
+================================================================================
+4. CASE STUDY: SHOPENTUM (ShopentumUseCase.tsx)
+================================================================================
+
+TITLE: Shopentum: Revolúcia v e-commerce
+SUBTITLE: Ako sme vytvorili najrýchlejšiu e-commerce platformu na trhu pomocou AI a moderných technológií.
+
+SEKCIA: VÝZVA
+- Vytvoriť systém, ktorý prekoná limity krabicových riešení a poskytne majiteľom e-shopov nástroje, ktoré doteraz mali len globálni hráči.
+
+SEKCIA: RIEŠENIE
+- Implementácia headless architektúry, AI analytiky v reálnom čase a ultra-rýchleho frontendu postaveného na Reacte.
+
+VÝSLEDKY:
+- Rýchlosť načítania: < 1s
+- Konverzný pomer: +85%
+- Náklady na prevádzku: -40%
+
+CTA: Späť do AI Studio
+
+================================================================================
+5. O MNE (AboutMe.tsx)
+================================================================================
+
+TITLE: Daniel Budziňák
+SUBTITLE: AI Strategist & E-commerce Architect
+BIO: Pomáham firmám rásť pomocou technológií a dát. Moja vášeň je spájanie biznisovej logiky s najmodernejšími AI nástrojmi.
+
+SKILLS:
+- AI Stratégia & Implementácia
+- E-commerce Architektúra
+- Performance Marketing
+- Dátová Analytika
+
+================================================================================
+6. KONTAKT (Contact.tsx)
+================================================================================
+
+TITLE: Poďme budovať budúcnosť.
+SUBTITLE: Máte otázky alebo projekt, na ktorom by sme mohli spolupracovať? Napíšte mi.
+
+FORMULÁR:
+- Meno
+- E-mail
+- Správa
+- ODOSLAŤ SPRÁVU
+
+KONTAKTNÉ ÚDAJE:
+- E-mail: daniel.budzinak@gmail.com
+- LinkedIn: Daniel Budziňák
+
+================================================================================
+7. MARKETINGOVÝ PREHĽAD (MarketingOverview.tsx)
+================================================================================
+
+TITLE: Marketingový prehľad
+SUBTITLE: „Vaša celková efektivita marketingu (MER) je na úrovni 4.2. Odporúčame presunúť 15 % rozpočtu z Meta Ads do Google Ads kvôli lepšej stabilite PNO.“
+
+ŠTATISTIKY:
+- CELKOVÝ OBRAT: 24 850 € (+12%)
+- PNO (CELKOVÉ): 18.5% (-2%)
+- MER (EFEKTIVITA): 4.2 (+0.4)
+- NOVÍ ZÁKAZNÍCI: 842 (+15%)
+
+SEKCIA: TRENDY VÝKONU (Marketing Trends)
+- "Sledujeme nárast konverzného pomeru o 0.4% vďaka optimalizácii mobilnej verzie."
+
+SEKCIA: MARKETING MIX (Marketing Mix)
+- Google Ads: 45%
+- Meta Ads: 35%
+- SEO: 15%
+- Email: 5%
+
+SEKCIA: DETAIL KANÁLOV (Channel Summary)
+- GOOGLE ADS: PNO 12%, ROI 8.3x
+- META ADS: PNO 24%, ROI 4.1x
+- SEO: PNO 0%, ROI ∞
+
+================================================================================
+8. MARKETINGOVÉ CENTRUM (MarketingCenter.tsx)
+================================================================================
+
+TITLE: Marketingové centrum
+SUBTITLE: „Vaša marketingová stratégia je zameraná na akvizíciu. Odporúčame zvýšiť retenciu o 10 % pre stabilizáciu cashflow.“
+
+SEKCIA: STRATEGICKÝ PREHĽAD ZISKU (Strategic Profit)
+- "Každé 1 € investované do marketingu generuje 4.20 € v obrate."
+
+SEKCIA: MARKETINGOVÉ KANÁLY (Marketing Channels)
+- Google Ads, Meta Ads, SEO, Email Marketing.
+
+================================================================================
+9. DETAIL KANÁLU (ChannelDetail.tsx)
+================================================================================
+
+TITLE: Google Ads / Meta Ads
+SUBTITLE: „Výkon Google Ads je stabilný. Odporúčame škálovať kampaň 'CBD Oleje' o 20 %.“
+
+ŠTATISTIKY:
+- SPEND: 4 250 €
+- OBRAT: 28 400 €
+- PNO: 14.9%
+- ROAS: 6.7x
+
+SEKCIA: AKTÍVNE NÁLEZY (Active Findings)
+- "Kampaň 'Retinol' má vysoké CTR, ale nízky konverzný pomer na landing page."
+- "Publikum 'Lookalike 1%' vykazuje najlepšiu stabilitu v posledných 14 dňoch."
+
+SEKCIA: STRATEGICKÉ TIPY (Strategic Tips)
+- "Vyskúšajte Performance Max kampaň pre segment 'Doplnky výživy'."
+- "Zvýšte rozpočet na remarketing o 10 % počas víkendov."
+
+================================================================================
+10. SEO OPTIMALIZÁCIA (SEOOptimization.tsx & SEOModulesV2.tsx)
+================================================================================
+
+TITLE: SEO optimalizácia
+SUBTITLE: „Vaše SEO zdravie je stabilné. Organika tvorí 20 % tržieb, no máme kritické výpadky na kľúčových slovách.“
+
+ŠTATISTIKY (SEO Score):
+- 68 / 100 (+8 bodov za 30 dní)
+- POSLEDNÝ SCAN: DNES 14:30
+
+ZHRNUTIE:
+- „SEO je stabilné, no máme 42 slov tesne pod TOP 10 a 2 technické riziká v kategórii CBD produktov.“
+
+SEO VÝKONNOSTNÝ PREHĽAD:
+- VIDITEĽNOSŤ: Návštevy 4 850, Podiel 20%, TOP10 slov 142
+- KVALITA: CTR 3.8%, Bounce 42%, Indexácia 1 240
+- HODNOTA: Obrat 4 850 €, Konv. pomer 2.4%, Podiel zisku 18%
+
+TOP KĽÚČOVÉ SLOVÁ:
+- cbd olej pre psov (#1, CTR 12%, Obrat 1 240 €)
+- retinolové sérum cena (#3, CTR 8%, Obrat 850 €)
+- najlepší kolagén recenzie (#2, CTR 15%, Obrat 420 €)
+- biokozmetika slovensko (#1, CTR 5%, Obrat 310 €)
+- krémy na vrásky test (#4, CTR 3%, Obrat 280 €)
+- cbd kvapky účinky (#2, CTR 11%, Obrat 240 €)
+- nočné sérum na tvár (#5, CTR 4%, Obrat 210 €)
+- ako užívať kolagén (#1, CTR 18%, Obrat 190 €)
+- prirodna kozmetika e-shop (#3, CTR 6%, Obrat 150 €)
+- najlepšie cbd 2025 (#2, CTR 9%, Obrat 120 €)
+- TOP 10 SLOV TVORÍ 64 % ORGANICKÉHO OBRATU
+
+STRATEGICKÉ SEO ODPORÚČANIA:
+- Rozšírenie obsahu kategórií: Kategórie s textom nad 300 slov majú o 40 % vyššiu viditeľnosť. (OBSAH)
+- Oprava interného prelinkovania: Hlavné kategórie nie sú dostatočne linkované z blogových článkov. (TECHNICKÉ SEO)
+- Zlepšenie Core Web Vitals: Rýchlosť LCP na mobile je 2.8s. Cieľ je pod 2.0s. (TECHNICKÉ SEO)
+- Backlink profil - Partneri: Máme šancu získať spätné odkazy z 5 relevantných beauty magazínov. (AUTORITA)
+
+================================================================================
+11. VÝSLEDOK AUDITU (AuditResult.tsx & VerdictOverlay.tsx)
+================================================================================
+
+TITLE: Váš web vykazuje vážne bariéry v nákupnom procese.
+SUBTITLE: Kam vám máme poslať výsledok, aby ste sa k nemu mohli kedykoľvek vrátiť?
+
+IDENTIFIKOVANÉ BARIÉRY:
+- Kritická rýchlosť na mobile: "Web sa na zariadeniach iPhone načítava viac ako 4.2s, čo je 2x nad limitom."
+- DOPAD NA ROI: Strácate približne 15% marže denne kvôli odchodom z nákupného košíka.
+
+ŠTATISTIKY:
+- SCORE INDEX: 42 / 100
+- "Systémové nezrovnalosti v konverznom cykle blokujú váš rast."
+
+CTA:
+- STIAHNUŤ DETAILNÝ REPORT
+- ODOMLKNÚŤ VŠETKY NÁLEZY
+
+================================================================================
+12. KOMPLETNÝ AUDIT (FullAudit.tsx)
+================================================================================
+
+TITLE: Kompletný Audit
+SUBTITLE: „Analýza odhalila 12 kritických bariér. Najväčší únik marže (15 %) spôsobuje rýchlosť košíka na mobile.“
+
+SEKCIA: STAV SYSTÉMU (Audit Status)
+- "Všetky testy prebehli úspešne. Dáta sú pripravené na analýzu."
+
+SEKCIA: KĽÚČOVÉ NÁLEZY (Key Findings)
+- "Rýchlosť košíka: 4.2s (Kritické)"
+- "SEO Indexácia: 85% (Dobré)"
+- "Konverzný pomer: 1.2% (Podpriemerné)"
+
+================================================================================
+13. OCHRANA OSOBNÝCH ÚDAJOV (GDPR.tsx)
+================================================================================
+
+TITLE: Ochrana osobných údajov (GDPR).
+1. Prevádzkovateľ: Mgr. Daniel Budziňák, daniel.budzinak@gmail.com.
+2. Účel spracúvania: Odpovedanie na dopyty, Analýza návštevnosti, Marketing.
+3. Rozsah spracúvaných údajov: meno, e-mailová adresa, telefónne číslo a IP adresa.
+4. Vaše práva: prístup, oprava, vymazanie, obmedzenie, prenosnosť, námietka.
+5. Zabezpečenie: moderné bezpečnostné technológie a šifrovanie.
+6. Kontakt: daniel.budzinak@gmail.com.
+
+================================================================================
+14. ZÁSADY POUŽÍVANIA COOKIES (Cookies.tsx)
+================================================================================
+
+TITLE: Zásady používania cookies.
+1. Čo sú súbory cookie? Malé textové súbory ukladané do vášho zariadenia.
+2. Ako používame súbory cookie? Nevyhnutné, Analytické, Funkčné.
+3. Kontrola súborov cookie: Možnosť zmazania v prehliadači.
+4. Kontakt: daniel.budzinak@gmail.com.
+
+================================================================================
+15. DASHBOARD (DashboardV1.tsx)
+================================================================================
+
+TITLE: Ahoj, Daniel.
+SUBTITLE: "Váš nákupný lievik vykazuje mierne zlepšenie v kroku Checkout. Dobrá práca."
+
+ŠTATISTIKY (Audit Score):
+- 75 / 100 (+15 bodov, Pôvodné: 60 b.)
+
+INTEGRÁCIE:
+- Google Analytics 4 (Nepripojené)
+- Google Ads (Pripojené)
+- Server-side (Pripojené)
+- GTM (Pripojené)
+- Meta Ads (Nepripojené)
+- Heureka (Pripojené)
+
+KARTY AKTIVITY:
+- Aktuálne úlohy: 12 (8 kritických)
+- Hotové: 4 (Za 7 dní)
+- Posledné nálezy: 8 (Z auditu)
+- Profil podnikania: 85% (Kompletný)
+
+================================================================================
+16. AUDIT CONSOLE (AuditConsole.tsx)
+================================================================================
+
+LOGY (Príklady):
+- INICIALIZÁCIA SHOPENTUM ENGINE v4.2...
+- PRIPÁJANIE K GOOGLE SEARCH CONSOLE API...
+- ANALÝZA SÉMANTICKEJ ŠTRUKTÚRY WEBU...
+- KONTROLA CORE WEB VITALS (MOBILE)...
+- IDENTIFIKÁCIA KONVERZNÝCH BARIÉR...
+- GENEROVANIE ROI PREDIKČNÉHO MODELU...
+- AUDIT KOMPLETNÝ. PRIPRAVUJEM VERDIKT...
+
+================================================================================
+17. OSTATNÉ (Footer.tsx, AIFreelancerLogo.tsx)
+================================================================================
+
+FOOTER:
+- © 2026 AIfreelancer.sk | Built with Cursor
+- Cookies
+- GDPR
+
+LOGO TEXT:
+- aifreelancer.sk

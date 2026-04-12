@@ -10,6 +10,8 @@ export type Claim = {
   risk: RiskLevel;
   reason: string;
   explanation: string;
+  /** Jedna veta „education layer“ — prečo model nález zdvihol (nie len názov kategórie). */
+  whyFlagged?: string;
   recommendedAction: string;
   startIndex: number;
   endIndex: number;

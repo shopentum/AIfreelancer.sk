@@ -55,7 +55,9 @@ import {
   Edit3,
   ArrowLeft,
   Lock,
+  Download,
 } from "lucide-react";
+import { flushSync } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -130,7 +132,11 @@ const PROTOTYPE_SESSION_USER = {
   email: "Lukas.Saghy@newsandmedia.sk",
 } as const;
 
-/** Simulácia: druhý editor drží zámok — accountability + konflikt v newsroom. */
+/**
+ * Simulácia: druhý editor drží zámok (read-only). Pre NMH „Časť C“ / schválený obsah:
+ * v produkcii zámok + kolízie typicky cez optimistic locking (verzia dokumentu, If-Match)
+ * alebo real-time presence (WebSocket).
+ */
 const PROTOTYPE_COLLAB_LOCK_HOLDER = "Jana Kováčová";
 
 function formatAuditTimestamp(ts: number): string {
@@ -142,6 +148,63 @@ function formatAuditTimestamp(ts: number): string {
   } catch {
     return new Date(ts).toISOString();
   }
+}
+
+/** Relatívny čas pre pätičky kariet („pred 2 min.“). */
+function formatRelativeAudit(ts: number): string {
+  const diffMin = Math.floor((Date.now() - ts) / 60_000);
+  if (diffMin < 1) return "pred chvíľou";
+  if (diffMin < 60) return `pred ${diffMin} min.`;
+  const diffH = Math.floor(diffMin / 60);
+  if (diffH < 24) return `pred ${diffH} h`;
+  const diffD = Math.floor(diffH / 24);
+  if (diffD < 7) return `pred ${diffD} d`;
+  return formatAuditTimestamp(ts);
+}
+
+/** Snapshot článku pred AI zásahom (frontend-only undo; produkcia: + audit verzie). */
+type ArticleSnapshot = {
+  content: string;
+  title: string;
+  seoTitle: string;
+  urlTitle: string;
+  perex: string;
+};
+
+type ArticleFieldKey = keyof ArticleSnapshot;
+
+const MAX_ARTICLE_HISTORY = 5;
+
+type StudyExportEvent =
+  | { type: "audit_completed"; at: number; readinessScore: number }
+  | { type: "audit_failed_unavailable"; at: number; reason: "simulated_api_failure" }
+  | {
+      type: "ai_fix_applied";
+      claimId: string;
+      tab: "trust" | "linguistic";
+      timeToFixMs: number;
+      timeToFixUnder5s: boolean;
+      appliedAt: number;
+      claimReason: string;
+    }
+  | {
+      type: "seo_suggestion_applied";
+      key: SeoAuditKey;
+      appliedAt: number;
+      timeSinceAuditMs: number | null;
+    };
+
+function downloadJsonFile(filename: string, data: unknown) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json;charset=utf-8",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.rel = "noopener";
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 type SeoChangeEntry = {
@@ -187,6 +250,13 @@ const EagleCMS_Split: React.FC = () => {
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const scrollRafRef = useRef<number | null>(null);
   const fadeClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const undoFlashClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Telemetria pre export (testy / Time-to-Fix). */
+  const studyLogRef = useRef<StudyExportEvent[]>([]);
+  /** Prvý moment, keď redaktor otvoril nález (klik na kartu). */
+  const claimFirstSeenRef = useRef<Record<string, number>>({});
+  /** Čas dokončenia poslednej úspešnej validácie (fallback pre Time-to-Fix). */
+  const auditCompletedAtRef = useRef<number | null>(null);
   const [scrollTop, setScrollTop] = useState(0);
   /** Po AI úprave: rozsah znakov v `content` pre zelený fade v editore. */
   const [fadeRange, setFadeRange] = useState<{
@@ -205,15 +275,149 @@ const EagleCMS_Split: React.FC = () => {
   const [resolvedClaims, setResolvedClaims] = useState<ResolvedClaimRecord[]>([]);
   /** Prototyp: simuluje druhého editora v článku → read-only pre AI a telo textu. */
   const [collaborationLockDemo, setCollaborationLockDemo] = useState(false);
+  /** Simulácia výpadku Intelligence API (resilience / happy path). */
+  const [simulateIntelligenceApiFailure, setSimulateIntelligenceApiFailure] =
+    useState(false);
+  /** Správa v pravom paneli pri nedostupnosti AI. */
+  const [sidebarAiBanner, setSidebarAiBanner] = useState<string | null>(null);
+  /**
+   * Posledných max. 5 stavov pred AI fixom / SEO návrhom (Omega: safety net).
+   * Produkcia: optimistic locking alebo presence (WebSocket) + serverové verzie.
+   */
+  const [articleHistory, setArticleHistory] = useState<ArticleSnapshot[]>([]);
+  /** Po Unde: ktoré polia vizuálne „zablikajú“ (1 s, fialová). */
+  const [undoFlash, setUndoFlash] = useState<{
+    keys: ArticleFieldKey[];
+    nonce: number;
+  } | null>(null);
+
+  const pushArticleSnapshot = useCallback(() => {
+    setArticleHistory((h) => {
+      const snap: ArticleSnapshot = {
+        content,
+        title,
+        seoTitle,
+        urlTitle,
+        perex,
+      };
+      const next = [...h, snap];
+      return next.length > MAX_ARTICLE_HISTORY
+        ? next.slice(-MAX_ARTICLE_HISTORY)
+        : next;
+    });
+  }, [content, perex, seoTitle, title, urlTitle]);
+
+  const undoLastArticleSnapshot = useCallback(() => {
+    if (collaborationLockDemo) return;
+    let flashKeys: ArticleFieldKey[] = [];
+    flushSync(() => {
+      setArticleHistory((h) => {
+        if (h.length === 0) return h;
+        const snap = h[h.length - 1];
+        flashKeys = [];
+        if (content !== snap.content) flashKeys.push("content");
+        if (title !== snap.title) flashKeys.push("title");
+        if (seoTitle !== snap.seoTitle) flashKeys.push("seoTitle");
+        if (urlTitle !== snap.urlTitle) flashKeys.push("urlTitle");
+        if (perex !== snap.perex) flashKeys.push("perex");
+        setContent(snap.content);
+        setTitle(snap.title);
+        setSeoTitle(snap.seoTitle);
+        setUrlTitle(snap.urlTitle);
+        setPerex(snap.perex);
+        setFadeRange(null);
+        return h.slice(0, -1);
+      });
+    });
+    if (undoFlashClearRef.current !== null) {
+      clearTimeout(undoFlashClearRef.current);
+      undoFlashClearRef.current = null;
+    }
+    if (flashKeys.length > 0) {
+      setUndoFlash({ keys: flashKeys, nonce: Date.now() });
+      undoFlashClearRef.current = setTimeout(() => {
+        setUndoFlash(null);
+        undoFlashClearRef.current = null;
+      }, 1000);
+    } else {
+      setUndoFlash(null);
+    }
+  }, [
+    collaborationLockDemo,
+    content,
+    perex,
+    seoTitle,
+    title,
+    urlTitle,
+  ]);
+
+  const exportStudyLog = useCallback(() => {
+    const events = [...studyLogRef.current];
+    const aiFixes = events.filter(
+      (e): e is Extract<StudyExportEvent, { type: "ai_fix_applied" }> =>
+        e.type === "ai_fix_applied",
+    );
+    const under5 = aiFixes.filter((f) => f.timeToFixUnder5s).length;
+    const avgMs =
+      aiFixes.length > 0
+        ? Math.round(
+            aiFixes.reduce((acc, f) => acc + f.timeToFixMs, 0) / aiFixes.length,
+          )
+        : null;
+    downloadJsonFile(`eagle-test-log-${Date.now()}.json`, {
+      exportVersion: 1,
+      exportedAt: new Date().toISOString(),
+      prototype: "EAGLE_ADMIN",
+      session: {
+        displayName: PROTOTYPE_SESSION_USER.displayName,
+        email: PROTOTYPE_SESSION_USER.email,
+      },
+      metrics: {
+        aiFixCount: aiFixes.length,
+        timeToFixMsAvg: avgMs,
+        timeToFixUnder5SecondsCount: under5,
+        timeToFixUnder5SecondsRate:
+          aiFixes.length > 0 ? under5 / aiFixes.length : null,
+        timeToFixDefinition:
+          "Milliseconds from first claim card open (or audit completion if never opened) until click on AI fix.",
+      },
+      events,
+      resolvedClaims,
+      seoChangeLog,
+    });
+  }, [resolvedClaims, seoChangeLog]);
 
   const handleValidate = async () => {
     if (collaborationLockDemo) return;
     setIsValidating(true);
     setRightPanelMode('ai');
     setAuditError(null);
-    
+    setSidebarAiBanner(null);
+
     // Simulate API delay for "Intelligence Engine" feel
     await new Promise(resolve => setTimeout(resolve, 1500));
+
+    if (simulateIntelligenceApiFailure) {
+      setAudit(null);
+      setSeoChangeLog([]);
+      setResolvedClaims([]);
+      setArticleHistory([]);
+      if (undoFlashClearRef.current !== null) {
+        clearTimeout(undoFlashClearRef.current);
+        undoFlashClearRef.current = null;
+      }
+      setUndoFlash(null);
+      setSidebarAiBanner(
+        "AI Validácia je dočasne nedostupná. Môžete pokračovať v manuálnej editácii.",
+      );
+      studyLogRef.current.push({
+        type: "audit_failed_unavailable",
+        at: Date.now(),
+        reason: "simulated_api_failure",
+      });
+      setIsValidating(false);
+      return;
+    }
 
     const mockAudit: ArticleAudit = {
       readinessScore: 84,
@@ -250,6 +454,8 @@ const EagleCMS_Split: React.FC = () => {
           risk: 'high',
           reason: 'Príliš silné medicínske tvrdenie',
           explanation: 'Slovo "prelom" v kontexte liečby Alzheimera môže byť vnímané ako zavádzajúce, pokiaľ nie je podložené finálnymi klinickými štúdiami na ľuďoch.',
+          whyFlagged:
+            "Systém nenašiel v texte konkrétny zdroj (citáciu alebo odkaz na štúdiu), ktorý by podložil toto medicínske tvrdenie ako hotovú istotu.",
           recommendedAction: 'Zmiernite tón tvrdenia na "potenciálny prínos" alebo "predmet skúmania".',
           startIndex: 0,
           endIndex: 0
@@ -260,6 +466,8 @@ const EagleCMS_Split: React.FC = () => {
           risk: 'medium',
           reason: 'Vágne cenové tvrdenie',
           explanation: 'Výraz "pár eur" je subjektívny. Pre niekoho to môže byť 2€, pre iného 20€.',
+          whyFlagged:
+            "Pri cenovom tvrdení v článku chýba konkrétna suma, rozpätie alebo porovnanie s overiteľným referenčným zdrojom.",
           recommendedAction: 'Uveďte približnú cenovú reláciu alebo porovnanie s inými doplnkami.',
           startIndex: 0,
           endIndex: 0
@@ -270,6 +478,8 @@ const EagleCMS_Split: React.FC = () => {
           risk: 'low',
           reason: 'Názor expertky',
           explanation: 'Tvrdenie je pripísané konkrétnej osobe, čo znižuje riziko, ale stále ide o silné vyjadrenie.',
+          whyFlagged:
+            "Tvrdenie je priradené k citovanému názoru, no model stále hládi riziko zovšeobecnenia bez kontextu dávkovania a indikácie.",
           recommendedAction: 'Ponechať, ale uistiť sa, že meno expertky je správne uvedené.',
           startIndex: 0,
           endIndex: 0
@@ -282,6 +492,8 @@ const EagleCMS_Split: React.FC = () => {
           risk: 'medium',
           reason: 'Príliš odborný úvod',
           explanation: 'Tento odsek začína veľmi technicky. Čitatelia Nového Času preferujú priamejší a akčnejší štart.',
+          whyFlagged:
+            "Systém vyhodnotil úvod ako veľmi hustý odborný blok bez postupného vysvetlenia pre bežného čitateľa.",
           recommendedAction: 'Preformulujte úvod na niečo údernejšie, napríklad: "Zabudnite na svaly! Populárny fitness prášok môže zachrániť váš mozog."',
           startIndex: 0,
           endIndex: 0
@@ -292,6 +504,8 @@ const EagleCMS_Split: React.FC = () => {
           risk: 'high',
           reason: 'Vysoká kognitívna záťaž',
           explanation: 'Použitie odborných termínov ako "adenozíntrifosfát" v texte pre širokú verejnosť pôsobí odradzujúco.',
+          whyFlagged:
+            "V tomto odseku chýba laický „mostík“ medzi odborným termínom a jeho významom v bežnom jazyku.",
           recommendedAction: 'Nahraďte odborné termíny jednoduchším vysvetlením: "Kreatín funguje ako turbo palivo pre mozgové bunky."',
           startIndex: 0,
           endIndex: 0
@@ -299,14 +513,32 @@ const EagleCMS_Split: React.FC = () => {
       ]
     };
 
+    claimFirstSeenRef.current = {};
+    auditCompletedAtRef.current = Date.now();
+    studyLogRef.current.push({
+      type: "audit_completed",
+      at: auditCompletedAtRef.current,
+      readinessScore: mockAudit.readinessScore,
+    });
+
     setAudit(mockAudit);
     setSeoChangeLog([]);
     setResolvedClaims([]);
+    setArticleHistory([]);
+    if (undoFlashClearRef.current !== null) {
+      clearTimeout(undoFlashClearRef.current);
+      undoFlashClearRef.current = null;
+    }
+    setUndoFlash(null);
+    setSidebarAiBanner(null);
     setIsValidating(false);
   };
 
   const handleClaimClick = (claim: Claim) => {
     setSelectedClaimId(claim.id);
+    if (!claimFirstSeenRef.current[claim.id]) {
+      claimFirstSeenRef.current[claim.id] = Date.now();
+    }
     const ta = editorRef.current;
     if (!ta) return;
     const index = content.indexOf(claim.text);
@@ -363,15 +595,32 @@ const EagleCMS_Split: React.FC = () => {
       if (fadeClearRef.current !== null) {
         clearTimeout(fadeClearRef.current);
       }
+      if (undoFlashClearRef.current !== null) {
+        clearTimeout(undoFlashClearRef.current);
+      }
     };
   }, []);
 
   const handleFixWithAI = async (claim: Claim) => {
     if (collaborationLockDemo) return;
+    if (simulateIntelligenceApiFailure) {
+      setSidebarAiBanner(
+        "AI funkcie sú dočasne nedostupné. Môžete pokračovať v manuálnej editácii článku v editore.",
+      );
+      return;
+    }
     const idx = content.indexOf(claim.text);
     if (idx === -1) return;
+    const fixClickAt = Date.now();
+    const seenAt =
+      claimFirstSeenRef.current[claim.id] ??
+      auditCompletedAtRef.current ??
+      fixClickAt;
+    const timeToFixMs = fixClickAt - seenAt;
     const fixedText = await fixClaimWithAI(claim.text, content);
     if (collaborationLockDemo) return;
+    if (simulateIntelligenceApiFailure) return;
+    pushArticleSnapshot();
     const newContent =
       content.slice(0, idx) + fixedText + content.slice(idx + claim.text.length);
     setContent(newContent);
@@ -389,6 +638,16 @@ const EagleCMS_Split: React.FC = () => {
     )
       ? "linguistic"
       : "trust";
+
+    studyLogRef.current.push({
+      type: "ai_fix_applied",
+      claimId: claim.id,
+      tab,
+      timeToFixMs,
+      timeToFixUnder5s: timeToFixMs < 5000,
+      appliedAt: Date.now(),
+      claimReason: claim.reason,
+    });
 
     setResolvedClaims((prev) => [
       ...prev,
@@ -416,6 +675,12 @@ const EagleCMS_Split: React.FC = () => {
   const applySeoSuggestion = useCallback(
     (key: SeoAuditKey) => {
       if (collaborationLockDemo) return;
+      if (simulateIntelligenceApiFailure) {
+        setSidebarAiBanner(
+          "AI návrhy sú dočasne nedostupné. Polia môžete vyplniť ručne.",
+        );
+        return;
+      }
       if (!audit) return;
       const item = audit.seoAudit[key];
       const raw = item.suggestion?.trim();
@@ -437,6 +702,7 @@ const EagleCMS_Split: React.FC = () => {
               : perex;
 
       let afterVal = beforeVal;
+      pushArticleSnapshot();
       if (key === "title") {
         afterVal = stripTitle(raw);
         setTitle(afterVal);
@@ -451,16 +717,27 @@ const EagleCMS_Split: React.FC = () => {
         setPerex(afterVal);
       }
 
+      const appliedSeoAt = Date.now();
       setSeoChangeLog((log) => [
         ...log,
         {
           key,
           before: beforeVal,
           after: afterVal,
-          appliedAt: Date.now(),
+          appliedAt: appliedSeoAt,
           actorName: PROTOTYPE_SESSION_USER.displayName,
         },
       ]);
+
+      studyLogRef.current.push({
+        type: "seo_suggestion_applied",
+        key,
+        appliedAt: appliedSeoAt,
+        timeSinceAuditMs:
+          auditCompletedAtRef.current != null
+            ? appliedSeoAt - auditCompletedAtRef.current
+            : null,
+      });
 
       setAudit((prev) => {
         if (!prev) return prev;
@@ -481,7 +758,16 @@ const EagleCMS_Split: React.FC = () => {
       });
       setSelectedClaimId(null);
     },
-    [audit, collaborationLockDemo, perex, seoTitle, title, urlTitle],
+    [
+      audit,
+      collaborationLockDemo,
+      perex,
+      pushArticleSnapshot,
+      seoTitle,
+      simulateIntelligenceApiFailure,
+      title,
+      urlTitle,
+    ],
   );
 
   const highlightNodes = useMemo(() => {
@@ -688,43 +974,106 @@ const EagleCMS_Split: React.FC = () => {
                 </div>
               </div>
               
-              <button
-                type="button"
-                onClick={handleValidate}
-                disabled={isValidating || collaborationLockDemo}
-                title={
-                  collaborationLockDemo
-                    ? "Článok upravuje iný editor — validáciu spustíte po uvoľnení zámku."
-                    : undefined
-                }
-                className={cn(
-                  "flex items-center rounded-xl px-4 py-2 text-xs font-bold transition-all",
-                  isValidating || collaborationLockDemo
-                    ? "cursor-not-allowed bg-gray-100 text-gray-400"
-                    : "bg-purple-600 text-white shadow-lg shadow-purple-100 hover:bg-purple-700 active:scale-95",
-                )}
-              >
-                {isValidating ? (
-                  <RefreshCw size={14} className="mr-2 animate-spin" />
-                ) : (
-                  <Sparkles size={14} className="mr-2" />
-                )}
-                {isValidating ? "Audit v procese..." : "Validovať článok"}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleValidate}
+                  disabled={isValidating || collaborationLockDemo}
+                  title={
+                    collaborationLockDemo
+                      ? "Článok upravuje iný editor — validáciu spustíte po uvoľnení zámku."
+                      : undefined
+                  }
+                  className={cn(
+                    "flex items-center rounded-xl px-4 py-2 text-xs font-bold transition-all",
+                    isValidating || collaborationLockDemo
+                      ? "cursor-not-allowed bg-gray-100 text-gray-400"
+                      : "bg-purple-600 text-white shadow-lg shadow-purple-100 hover:bg-purple-700 active:scale-95",
+                  )}
+                >
+                  {isValidating ? (
+                    <RefreshCw size={14} className="mr-2 animate-spin" />
+                  ) : (
+                    <Sparkles size={14} className="mr-2" />
+                  )}
+                  {isValidating ? "Audit v procese..." : "Validovať článok"}
+                </button>
+                <button
+                  type="button"
+                  onClick={undoLastArticleSnapshot}
+                  disabled={articleHistory.length === 0 || collaborationLockDemo}
+                  title={
+                    collaborationLockDemo
+                      ? "Článok upravuje iný editor — vrátenie stavu až po uvoľnení zámku."
+                      : articleHistory.length === 0
+                        ? "Nie je čo vrátiť — zatiaľ ste nepoužili AI opravu nálezu ani SEO návrh."
+                        : `Späť (${articleHistory.length}) — obnoví posledný stav pred AI úpravou (prototyp, max. 5 krokov).`
+                  }
+                  aria-label={
+                    collaborationLockDemo
+                      ? "Späť — nedostupné, článok upravuje iný editor"
+                      : articleHistory.length === 0
+                        ? "Späť — nie je čo vrátiť"
+                        : `Späť (${articleHistory.length}) — vrátiť poslednú AI úpravu`
+                  }
+                  className={cn(
+                    "flex h-9 shrink-0 items-center justify-center gap-1 rounded-xl border text-gray-700 transition-all",
+                    articleHistory.length > 0 && !collaborationLockDemo
+                      ? "min-w-14 px-2"
+                      : "w-9 px-0",
+                    articleHistory.length === 0 || collaborationLockDemo
+                      ? "cursor-not-allowed border-gray-200 bg-gray-50 text-gray-300"
+                      : "border-gray-200 bg-white shadow-sm hover:border-purple-200 hover:bg-purple-50 hover:text-purple-700 active:scale-95",
+                  )}
+                >
+                  <History size={16} aria-hidden />
+                  {articleHistory.length > 0 && !collaborationLockDemo ? (
+                    <span className="text-[10px] font-black tabular-nums text-purple-900/90">
+                      ({articleHistory.length})
+                    </span>
+                  ) : null}
+                </button>
+                <button
+                  type="button"
+                  onClick={exportStudyLog}
+                  title="Stiahnuť JSON (udalosti, Time-to-Fix, SEO log) pre testy a grafy"
+                  className="flex h-9 shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-2.5 text-[11px] font-bold text-gray-700 shadow-sm transition-all hover:border-purple-200 hover:bg-purple-50 hover:text-purple-800 active:scale-95"
+                >
+                  <Download size={15} aria-hidden />
+                  <span className="hidden sm:inline">Export logu</span>
+                </button>
+              </div>
             </div>
           </div>
 
-          <label className="flex max-w-full cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-[11px] text-gray-600 shadow-sm select-none">
-            <input
-              type="checkbox"
-              checked={collaborationLockDemo}
-              onChange={(e) => setCollaborationLockDemo(e.target.checked)}
-              className="h-3.5 w-3.5 rounded border-gray-300 text-purple-600"
-            />
-            <span className="font-medium">
-              Prototyp: druhý editor v článku (read-only pre AI a text)
-            </span>
-          </label>
+          <div className="flex max-w-full flex-col gap-2 sm:items-end">
+            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-[11px] text-gray-600 shadow-sm select-none">
+              <input
+                type="checkbox"
+                checked={collaborationLockDemo}
+                onChange={(e) => setCollaborationLockDemo(e.target.checked)}
+                className="h-3.5 w-3.5 shrink-0 rounded border-gray-300 text-purple-600"
+              />
+              <span className="font-medium">
+                Prototyp: druhý editor v článku (read-only pre AI a text)
+              </span>
+            </label>
+            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2 text-[11px] text-amber-950 shadow-sm select-none">
+              <input
+                type="checkbox"
+                checked={simulateIntelligenceApiFailure}
+                onChange={(e) => {
+                  const on = e.target.checked;
+                  setSimulateIntelligenceApiFailure(on);
+                  if (!on) setSidebarAiBanner(null);
+                }}
+                className="h-3.5 w-3.5 shrink-0 rounded border-amber-400 text-amber-600"
+              />
+              <span className="font-medium">
+                Simulácia: výpadok Intelligence API (validácia / AI návrhy zlyhajú)
+              </span>
+            </label>
+          </div>
         </div>
 
         {collaborationLockDemo ? (
@@ -772,12 +1121,21 @@ const EagleCMS_Split: React.FC = () => {
                       <label className="text-xs font-bold text-gray-600">Titulok <span className="text-red-500">*</span></label>
                       <span className="text-[10px] text-gray-400 font-mono bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">{title.length}</span>
                     </div>
-                    <input 
-                      type="text" 
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-1 focus:ring-[#3182CE] focus:border-[#3182CE] outline-none text-sm font-medium"
-                    />
+                    <div className="relative">
+                      {undoFlash?.keys.includes("title") ? (
+                        <div
+                          key={`title-${undoFlash.nonce}`}
+                          aria-hidden
+                          className="pointer-events-none absolute inset-0 z-[1] rounded-md eagle-editor-fade-undo"
+                        />
+                      ) : null}
+                      <input
+                        type="text"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="relative z-0 w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-medium outline-none focus:border-[#3182CE] focus:ring-1 focus:ring-[#3182CE]"
+                      />
+                    </div>
                   </div>
 
                   {/* SEO Titulok */}
@@ -788,12 +1146,21 @@ const EagleCMS_Split: React.FC = () => {
                       </label>
                       <span className="text-[10px] text-gray-400 font-mono bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">{seoTitle.length}</span>
                     </div>
-                    <input 
-                      type="text" 
-                      value={seoTitle}
-                      onChange={(e) => setSeoTitle(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-1 focus:ring-[#3182CE] focus:border-[#3182CE] outline-none text-sm"
-                    />
+                    <div className="relative">
+                      {undoFlash?.keys.includes("seoTitle") ? (
+                        <div
+                          key={`seoTitle-${undoFlash.nonce}`}
+                          aria-hidden
+                          className="pointer-events-none absolute inset-0 z-[1] rounded-md eagle-editor-fade-undo"
+                        />
+                      ) : null}
+                      <input
+                        type="text"
+                        value={seoTitle}
+                        onChange={(e) => setSeoTitle(e.target.value)}
+                        className="relative z-0 w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#3182CE] focus:ring-1 focus:ring-[#3182CE]"
+                      />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-12 gap-6">
@@ -804,12 +1171,21 @@ const EagleCMS_Split: React.FC = () => {
                           <label className="text-xs font-bold text-gray-600">Titulok pre URL <span className="text-red-500">*</span></label>
                           <span className="text-[10px] text-gray-400 font-mono bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">{urlTitle.length}</span>
                         </div>
-                        <input 
-                          type="text" 
-                          value={urlTitle}
-                          onChange={(e) => setUrlTitle(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-1 focus:ring-[#3182CE] focus:border-[#3182CE] outline-none text-xs text-gray-500 bg-gray-50"
-                        />
+                        <div className="relative">
+                          {undoFlash?.keys.includes("urlTitle") ? (
+                            <div
+                              key={`urlTitle-${undoFlash.nonce}`}
+                              aria-hidden
+                              className="pointer-events-none absolute inset-0 z-[1] rounded-md eagle-editor-fade-undo"
+                            />
+                          ) : null}
+                          <input
+                            type="text"
+                            value={urlTitle}
+                            onChange={(e) => setUrlTitle(e.target.value)}
+                            className="relative z-0 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-xs text-gray-500 outline-none focus:border-[#3182CE] focus:ring-1 focus:ring-[#3182CE]"
+                          />
+                        </div>
                       </div>
 
                       {/* Perex */}
@@ -825,12 +1201,21 @@ const EagleCMS_Split: React.FC = () => {
                             <span className="text-[10px] text-gray-400 font-mono bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">{perex.length}</span>
                           </div>
                         </div>
-                        <textarea 
-                          value={perex}
-                          onChange={(e) => setPerex(e.target.value)}
-                          rows={4}
-                          className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-1 focus:ring-[#3182CE] focus:border-[#3182CE] outline-none text-sm leading-relaxed"
-                        />
+                        <div className="relative">
+                          {undoFlash?.keys.includes("perex") ? (
+                            <div
+                              key={`perex-${undoFlash.nonce}`}
+                              aria-hidden
+                              className="pointer-events-none absolute inset-0 z-[1] rounded-md eagle-editor-fade-undo"
+                            />
+                          ) : null}
+                          <textarea
+                            value={perex}
+                            onChange={(e) => setPerex(e.target.value)}
+                            rows={4}
+                            className="relative z-0 w-full rounded-md border border-gray-300 px-3 py-2 text-sm leading-relaxed outline-none focus:border-[#3182CE] focus:ring-1 focus:ring-[#3182CE]"
+                          />
+                        </div>
                       </div>
 
                       <div className="flex flex-col space-y-3">
@@ -977,6 +1362,13 @@ const EagleCMS_Split: React.FC = () => {
                         )}
                         placeholder="Začnite písať váš článok..."
                       />
+                      {undoFlash?.keys.includes("content") ? (
+                        <div
+                          key={`content-${undoFlash.nonce}`}
+                          aria-hidden
+                          className="pointer-events-none col-span-full row-span-full z-[15] block size-full min-h-0 rounded-md eagle-editor-fade-undo"
+                        />
+                      ) : null}
                     </div>
                   </div>
               </div>
@@ -1253,6 +1645,16 @@ const EagleCMS_Split: React.FC = () => {
 
                       {/* AI Content Area */}
                       <div className="min-h-0 flex-1 overflow-y-auto p-4 custom-scrollbar">
+                        {sidebarAiBanner ? (
+                          <div className="mb-3 flex gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs leading-snug text-amber-950">
+                            <AlertTriangle
+                              className="mt-0.5 shrink-0 text-amber-600"
+                              size={16}
+                              aria-hidden
+                            />
+                            <p>{sidebarAiBanner}</p>
+                          </div>
+                        ) : null}
                         <AnimatePresence mode="wait">
                           {isValidating ? (
                             <div className="h-full flex flex-col items-center justify-center space-y-4 py-12">
@@ -1298,8 +1700,11 @@ const EagleCMS_Split: React.FC = () => {
                                             {resolved.claim.reason}
                                           </p>
                                           <p className="mt-2 text-[11px] font-medium text-emerald-900/90">
-                                            {formatAuditTimestamp(resolved.resolvedAt)} ·{" "}
-                                            {resolved.actorName}
+                                            Opravil(a) {resolved.actorName} ·{" "}
+                                            {formatRelativeAudit(resolved.resolvedAt)}
+                                          </p>
+                                          <p className="text-[10px] text-emerald-900/60">
+                                            {formatAuditTimestamp(resolved.resolvedAt)}
                                           </p>
                                         </div>
                                       </div>
@@ -1352,6 +1757,11 @@ const EagleCMS_Split: React.FC = () => {
                                         </p>
                                         <p className="text-sm font-bold text-gray-800">{claim.reason}</p>
                                         <p className="text-xs leading-relaxed text-gray-600">{claim.explanation}</p>
+                                        {claim.whyFlagged ? (
+                                          <p className="rounded-lg border border-purple-100 bg-purple-50/60 px-3 py-2 text-xs italic leading-relaxed text-purple-950/90">
+                                            {claim.whyFlagged}
+                                          </p>
+                                        ) : null}
                                       </div>
                                       <div className="space-y-3 border-t border-gray-100 pt-4">
                                         <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
@@ -1410,8 +1820,11 @@ const EagleCMS_Split: React.FC = () => {
                                       {showDiff && logEntry && (
                                         <div className="space-y-3">
                                           <p className="text-[11px] font-medium text-gray-600">
-                                            {formatAuditTimestamp(logEntry.appliedAt)} ·{" "}
-                                            {logEntry.actorName}
+                                            Upravil(a) {logEntry.actorName} ·{" "}
+                                            {formatRelativeAudit(logEntry.appliedAt)}
+                                          </p>
+                                          <p className="text-[10px] text-gray-500">
+                                            {formatAuditTimestamp(logEntry.appliedAt)}
                                           </p>
                                           <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">
                                             Čo sa zmenilo ({SEO_FIELD_LABEL[seoKey]})
@@ -1507,6 +1920,11 @@ const EagleCMS_Split: React.FC = () => {
                                         <p className="mb-1 text-[10px] font-black uppercase text-gray-500">
                                           {claim.reason}
                                         </p>
+                                        {claim.whyFlagged ? (
+                                          <p className="mb-1 line-clamp-2 text-[10px] leading-snug text-gray-600">
+                                            {claim.whyFlagged}
+                                          </p>
+                                        ) : null}
                                         <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-gray-900">
                                           „{claim.text}“
                                         </p>
@@ -1543,7 +1961,8 @@ const EagleCMS_Split: React.FC = () => {
                                           Hotové
                                         </p>
                                         <p className="mb-1 text-[10px] text-gray-500">
-                                          {formatAuditTimestamp(r.resolvedAt)} · {r.actorName}
+                                          Opravil(a) {r.actorName} ·{" "}
+                                          {formatRelativeAudit(r.resolvedAt)}
                                         </p>
                                         <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-gray-800">
                                           „{r.afterText.length > 120 ? `${r.afterText.slice(0, 120)}…` : r.afterText}“
@@ -1587,6 +2006,11 @@ const EagleCMS_Split: React.FC = () => {
                                         <p className="mb-1 text-[10px] font-black uppercase text-gray-500">
                                           {claim.reason}
                                         </p>
+                                        {claim.whyFlagged ? (
+                                          <p className="mb-1 line-clamp-2 text-[10px] leading-snug text-gray-600">
+                                            {claim.whyFlagged}
+                                          </p>
+                                        ) : null}
                                         <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-gray-900">
                                           „{claim.text}“
                                         </p>
@@ -1624,7 +2048,8 @@ const EagleCMS_Split: React.FC = () => {
                                           Hotové
                                         </p>
                                         <p className="mb-1 text-[10px] text-gray-500">
-                                          {formatAuditTimestamp(r.resolvedAt)} · {r.actorName}
+                                          Opravil(a) {r.actorName} ·{" "}
+                                          {formatRelativeAudit(r.resolvedAt)}
                                         </p>
                                         <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-gray-800">
                                           „{r.afterText.length > 120 ? `${r.afterText.slice(0, 120)}…` : r.afterText}“
@@ -1698,12 +2123,24 @@ const EagleCMS_Split: React.FC = () => {
                                 </div>
                               )}
                               {!audit && !isValidating && (
-                                <div className="py-20 text-center space-y-4">
-                                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto text-gray-300">
-                                    <Sparkles size={32} />
+                                sidebarAiBanner ? (
+                                  <div className="space-y-3 py-12 text-center">
+                                    <p className="text-sm font-semibold text-gray-800">
+                                      Formulár a text článku môžete upravovať ďalej.
+                                    </p>
+                                    <p className="mx-auto max-w-xs text-xs text-gray-600">
+                                      Po obnove služby znova spustite validáciu alebo vypnite simuláciu výpadku v hornom
+                                      paneli.
+                                    </p>
                                   </div>
-                                  <p className="text-xs font-bold text-gray-400">Spustite audit pre analýzu</p>
-                                </div>
+                                ) : (
+                                  <div className="space-y-4 py-20 text-center">
+                                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 text-gray-300">
+                                      <Sparkles size={32} />
+                                    </div>
+                                    <p className="text-xs font-bold text-gray-400">Spustite audit pre analýzu</p>
+                                  </div>
+                                )
                               )}
                             </motion.div>
                           )}
