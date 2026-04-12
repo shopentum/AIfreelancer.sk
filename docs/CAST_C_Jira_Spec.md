@@ -55,25 +55,25 @@ Toto zadanie pokrýva výhradne Phase 1. Cieľom je dodať **funkčný, testovat
 - Jednoduché risk scoring: `low` / `medium` / `high`
 - Heatmap / highlight vizualizácia nálezov v editore
 - Základné akcie: „Opraviť pomocou AI", „Upraviť ručne" (s potvrdením), „Ignorovať"
-- Undo stack (max. 5 krokov, frontend-only v pilote)
-- Collab Lock (optimistic locking cez ETag)
-- Graceful degradation pri výpadku AI API
-- Export audit logu (JSON) pre vyhodnotenie pilotu
+- História zmien — Undo (max. 5 krokov, uložené v prehliadači v pilote)
+- Zamykanie článku pri súbežnej editácii — Collab Lock (cez ETag)
+- Záchranný režim pri výpadku AI — editor zostáva plne funkčný
+- Export záznamu o udalostiach (JSON) pre vyhodnotenie pilotu
 
 ### 3.2 Out of Scope (Phase 2+)
 
 Tieto funkcie sú architektonicky navrhnuté, ale **nie sú súčasťou pilotnej implementácie**:
 
-- Pokročilá source verification (integrácia na externé fact-check API)
-- Komplexný policy engine (plnohodnotný Editorial Identity Layer per tenant)
-- Multi-model routing (Tiered Routing, Tier 1 / Tier 2 — viď Časť B Príloha)
-- Pokročilá analytika a reporting (Time-to-Fix dashboard, agregované metriky)
-- Server-side Undo snapshots prepojené s Audit Trail
-- Real-time WebSocket presence (Collab Lock Phase 2)
+- Overovanie zdrojov cez externé fact-check API
+- Plnohodnotné pravidlá per redakcia / značka (Editorial Identity Layer)
+- Automatické smerovanie úloh na rôzne AI modely podľa náročnosti (viď Časť B Príloha)
+- Analytické dashboardy a agregované metriky (Time-to-Fix prehľady)
+- Zálohy stavu (Undo snapshots) uložené na serveri prepojené s Audit Trail
+- Živá prítomnosť editorov cez WebSocket (Collab Lock — 2. fáza)
 
-### 3.3 Execution Framing
+### 3.3 Ako budeme postupovať
 
-Tento návrh je navrhnutý ako **inkrementálne riešenie** — začína jednoduchým, ale vysoko hodnotným MVP a postupne sa rozširuje na plnohodnotný decision intelligence systém. Každá fáza je samostatne dodateľná a merateľná.
+Tento návrh je postavený tak, aby sa **dal spustiť rýchlo a rozširovať postupne** — začíname jednoduchým, ale hodnotným MVP a každá ďalšia fáza na ňom prirodzene stavia. Každá fáza je samostatne dodateľná a merateľná.
 
 ---
 
@@ -203,8 +203,8 @@ Aby som omylom neprepísal jeho prácu.
 - [ ] Po uvoľnení zámku sa všetky prvky obnovia automaticky (bez reloadu stránky)
 
 **Technická poznámka (pre produkciu):**  
-Pilot: optimistic locking cez `If-Match` / `ETag` header.  
-Full scale: real-time presence cez WebSocket (napr. Ably / Supabase Realtime).
+Pilot: zamykanie pomocou `If-Match` / `ETag` hlavičky (optimistic locking).  
+Plná prevádzka: živá prítomnosť editorov cez WebSocket (napr. Ably / Supabase Realtime).
 
 ---
 
@@ -380,13 +380,13 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 - [ ] Všetky tri akcie pridávajú body — Score = všetky nálezy vyriešené (úpravou alebo rozhodnutím)
 - [ ] Score nediferencuje kvalitu riešenia, ale mieru uzavretia nálezov; kvalita je zachytená v audit logu
 - [ ] Undo (max. 5 krokov) funguje pre AI fix aj SEO návrh
-- [ ] Collab Lock blokuje všetky mutácie vrátane Ignorovania; text ostáva readOnly
+- [ ] Collab Lock blokuje všetky zmeny vrátane Ignorovania; text ostáva len na čítanie
 - [ ] API degradation: editor ostáva plne editovateľný bez AI funkcií
 - [ ] Export JSON obsahuje `timeToFixMs` pre každý AI fix
 
 **Audit a bezpečnosť:**
 - [ ] Každá zmena má: `actorId`, `source` (ai/human), `resolutionType` (ai_fix/manual/ignored), `timestamp`, `documentVersion`, `claimId`
-- [ ] Audit log je append-only (žiadne mazanie)
+- [ ] Audit log je len na pridávanie — záznamy nie je možné mazať ani upravovať
 - [ ] `whyFlagged` je vždy generovaný systémom, nie editovateľný redaktorom
 
 **UX:**
@@ -396,15 +396,15 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 - [ ] Readiness Score sa animovane inkrementuje po každej oprave
 
 **Non-functional:**
-- [ ] Feature flag `mdie.fix.ai_enabled` vypne AI fix bez redeploymentu
-- [ ] Feature flag `mdie.validation.collab_lock` vypne collab lock pre konkrétneho tenanta
-- [ ] Všetky texty (copy) sú v centrálnom i18n súbore (nie hardcoded)
+- [ ] Prepínač `mdie.fix.ai_enabled` vypne AI fix bez nového nasadenia
+- [ ] Prepínač `mdie.validation.collab_lock` vypne zamykanie článkov pre konkrétnu redakciu
+- [ ] Všetky texty (copy) sú v centrálnom prekladovom súbore (nie pevne zadrôtované v kóde)
 
 ---
 
-## 10. DESIGN RATIONALE (Prototype Learnings)
+## 10. PREČO SME TO NAVRHLI TAKTO (Zistenia z prototypu)
 
-> *Táto sekcia zdôvodňuje prečo sú niektoré funkcie v zadaní navrhnuté práve takto. Nie sú to náhodné detaily — každý vzišiel z konkrétneho UX problému identifikovaného počas prototypovania.*
+> *Táto sekcia vysvetľuje, prečo sú niektoré funkcie navrhnuté práve takto. Nie sú to náhodné detaily — každý vzišiel z konkrétneho problému, ktorý sme objavili počas testovania prototypu.*
 
 ### 8.1 Education Layer (`whyFlagged`)
 **Problém:** Redaktori majú odpor voči AI, ktorá im "hovorí, že robia chyby" bez vysvetlenia.  
@@ -412,22 +412,22 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 **Príklad:** Namiesto „Príliš silné medicínske tvrdenie" → „Systém nenašiel v texte konkrétny zdroj, ktorý by podložil toto medicínske tvrdenie ako hotovú istotu."  
 **Výsledok:** Redaktor nevidí „chybu", ale „chýbajúci podklad". Znižuje to kognitívnu záťaž a odpor k zmene.
 
-### 8.2 Undo Stack ako „záchranná sieť"
+### 8.2 História zmien (Undo) ako „záchranná sieť"
 **Problém:** Redaktori sa boja kliknúť na „Opraviť pomocou AI", pretože sa obávajú nevratnej zmeny.  
-**Riešenie:** Snapshot logika pred každým AI fixom aj SEO návrhom (max. 5 krokov). Počítadlo krokov na tlačidle.  
-**Výsledok:** Redaktor si zachováva pocit kontroly. Experiment ukazuje, že samotná existencia Undo zvyšuje ochotu delegovať na AI — aj keď ho redaktor nakoniec nepoužije.  
-**Technická poznámka:** V prototype je Undo frontend-only (React state + `flushSync`). V produkcii: server-side snapshot verzie dokumentu prepojený s Audit Trail.
+**Riešenie:** Pred každou AI opravou aj SEO návrhom sa uloží záloha stavu (max. 5 krokov). Počet krokov je viditeľný priamo na tlačidle.  
+**Výsledok:** Redaktor má pocit kontroly. Samotná existencia možnosti vrátiť zmenu zvyšuje ochotu používať AI — aj keď ju nakoniec nevyužije.  
+**Technická poznámka:** V prototype je história zmien uložená v prehliadači (React state + `flushSync`). V produkcii: záloha verzie dokumentu na serveri prepojená s Audit Trail.
 
-### 8.3 Collab Lock / Read-Only Banner
-**Problém:** Race condition — dvaja redaktori prepisujú ten istý odsek súčasne.  
-**Riešenie:** Žltý banner s menom editora + read-only stav textarea + disabled všetky AI akcie.  
-**Dôvod viditeľnosti mena:** Redaktor nevolá na IT, že „tlačidlo nefunguje" — vie presne prečo a koho kontaktovať.  
-**Technická poznámka:** Pilot: optimistic locking (`ETag` / `If-Match`). Full scale: WebSocket presence (napr. Ably alebo Supabase Realtime) pre real-time stav.
+### 8.3 Collab Lock / Zamknutý článok
+**Problém:** Dvaja redaktori môžu súčasne prepisovať ten istý odsek a navzájom si mazať prácu.  
+**Riešenie:** Žltý banner s menom editora + editor iba na čítanie + všetky AI akcie vypnuté.  
+**Prečo vidieť meno:** Redaktor nevolá IT, že „tlačidlo nefunguje" — hneď vie prečo a koho kontaktovať.  
+**Technická poznámka:** Pilot: zamykanie cez `ETag` / `If-Match`. Plná prevádzka: živá prítomnosť editorov cez WebSocket (napr. Ably alebo Supabase Realtime).
 
-### 8.4 Graceful Degradation (API Resilience)
-**Problém:** „Čo ak vypadne AI?" — najčastejšia enterprise námietka.  
-**Riešenie:** Prepínač výpadku (v prototype ako checkbox, v produkcii: circuit breaker). Keď AI nedostupné → bannery + editor zostáva 100 % editovateľný.  
-**Kľúčový princíp:** MDIE nikdy **neblokuje** redakčný proces. Je to asistent, nie brána.
+### 8.4 Záchranný režim pri výpadku AI
+**Problém:** „Čo ak vypadne AI?" — najčastejšia námietka pri nasadzovaní AI v korporáte.  
+**Riešenie:** Prepínač výpadku (v prototype ako checkbox, v produkcii: automatická poistka). Keď AI nedostupná → bannery + editor zostáva 100 % funkčný.  
+**Kľúčový princíp:** MDIE nikdy **neblokuje** prácu redakcie. Je to asistent, nie strážca.
 
 ### 8.5 Attribution (Kto + Kedy)
 **Problém:** Korporátne právne oddelenia požadujú dohľadateľnosť každej zmeny v obsahu.  
