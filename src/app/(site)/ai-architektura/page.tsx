@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import AIArchitecture from "@/components/AIArchitecture";
 import { siteName, siteUrl } from "@/lib/site";
@@ -29,5 +30,5 @@ export const metadata: Metadata = {
 };
 
 export default function AIArchitecturePage() {
-  return <AIArchitecture />;
+  notFound();
 }
