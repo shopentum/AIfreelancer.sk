@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { ShieldAlert } from "lucide-react";
 
 const SESSION_KEY = "nmh_access_granted";
-const ACCESS_KEY = process.env.NEXT_PUBLIC_NMH_ACCESS_KEY ?? "";
+const ACCESS_KEY = (process.env.NEXT_PUBLIC_NMH_ACCESS_KEY ?? "").trim();
 
 interface Props {
   children: React.ReactNode;
@@ -26,7 +26,10 @@ export default function NmhPasswordGate({ children }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (input === ACCESS_KEY) {
+    if (process.env.NODE_ENV === "development") {
+      console.debug("[NmhGate] ACCESS_KEY length:", ACCESS_KEY.length, "| input length:", input.trim().length);
+    }
+    if (input.trim() === ACCESS_KEY) {
       sessionStorage.setItem(SESSION_KEY, "1");
       setGranted(true);
       setError(false);
@@ -75,7 +78,9 @@ export default function NmhPasswordGate({ children }: Props) {
             />
             {error && (
               <p className="mt-1.5 text-xs font-medium text-red-600">
-                Nesprávne heslo. Skúste znova.
+                {ACCESS_KEY === ""
+                  ? "Chyba konfigurácie: prístupový kľúč nie je nastavený (env var)."
+                  : "Nesprávne heslo. Skúste znova."}
               </p>
             )}
           </div>
