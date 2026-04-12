@@ -1,10 +1,20 @@
-# ČASŤ C — Produktové zadanie pre vývojový tím
+﻿# ČASŤ C — Produktové zadanie pre vývojový tím
 ## MDIE: Claim Validation & AI-Assisted Fix Feature
 > **Dokument:** Confluence / Jira Epic + Story + Design Rationale  
 > **Projekt:** Media Decision Intelligence Engine (MDIE)  
 > **Autor:** Daniel Budziňák — Solution Architect  
-> **Verzia:** 1.0 | Dátum: 2026-04-12  
+> **Verzia:** 2.1 | Dátum: 2026-04-12  
 > **Status:** Ready for Development
+
+---
+
+## 0. TECHNICKÝ KONTEXT A DATA GAP
+
+Tento dokument vychádza z funkčného prototypu a predpokladaného redakčného workflow.
+
+Zároveň pracuje s vedomým **DATA GAP** — bez detailného prístupu k internej architektúre existujúcich systémov (najmä Discovery a Creation vrstiev). Návrh preto predstavuje **cieľový smer a praktický základ pre pilotnú fázu**, v ktorej bude riešenie kalibrované podľa reálnych procesov, dát a technických limitov.
+
+Cieľom nebolo nahradiť existujúce vrstvy, ale nadviazať na ne a rozšíriť ich o **validačnú a rozhodovaciu logiku** (Validation & Governance Layer).
 
 ---
 
@@ -20,7 +30,54 @@ Redaktor pracuje pod časovým tlakom. Keď vidí len správu „Príliš silné
 
 ---
 
-## 2. EPIC
+## 2. FEATURE SUMMARY
+
+**Čo riešenie robí:** Claim Validation & AI-Assisted Fix je funkčná vrstva MDIE, ktorá počas editácie článku identifikuje rizikové tvrdenia, vizuálne ich zvýrazní a umožňuje redaktorovi jedným klikom aplikovať AI opravu — s plným auditným záznamom a možnosťou vrátenia zmeny.
+
+**Aký problém rieši:** Redaktor pracuje pod časovým tlakom a nemá kapacitu manuálne overovať každé faktické, právne alebo štylistické tvrdenie. Bežné AI systémy mu povedia „chyba", bez kontextu. Výsledkom je ignorovanie upozornení a rastúce právne riziko pre vydavateľa.
+
+**Ako funguje:** Editor odošle draft na validáciu → systém vráti štruktúrovaný zoznam nálezov (claims) s vysvetlením logiky → redaktor vyberie nález, opraví ho (AI alebo ručne) → zmena je zaznamenaná v audit logu → article postúpi cez Publish Gate.
+
+**Prečo je dôležité:** Systém neurčuje, čo bude publikované. Garantuje, že redaktor má pred publikáciou k dispozícii overený podklad pre vlastné rozhodnutie. MDIE je asistent, nie cenzor.
+
+**User Flow (príklad):**  
+Redaktor otvorí článok → klikne „Validovať" → systém zvýrazní 3 problémové pasáže → redaktor opraví 2–3 problémy v priebehu sekúnd → Readiness Score stúpne → článok je pripravený na publikáciu.
+
+---
+
+## 3. ROZSAH RIEŠENIA
+
+### 3.1 MVP Scope (Phase 1 — Pilot)
+
+Toto zadanie pokrýva výhradne Phase 1. Cieľom je dodať **funkčný, testovateľný MVP** v jednej redakcii:
+
+- Základná claim extraction z textu článku
+- Jednoduché risk scoring: `low` / `medium` / `high`
+- Heatmap / highlight vizualizácia nálezov v editore
+- Základné akcie: „Opraviť pomocou AI", „Upraviť ručne" (s potvrdením), „Ignorovať"
+- Undo stack (max. 5 krokov, frontend-only v pilote)
+- Collab Lock (optimistic locking cez ETag)
+- Graceful degradation pri výpadku AI API
+- Export audit logu (JSON) pre vyhodnotenie pilotu
+
+### 3.2 Out of Scope (Phase 2+)
+
+Tieto funkcie sú architektonicky navrhnuté, ale **nie sú súčasťou pilotnej implementácie**:
+
+- Pokročilá source verification (integrácia na externé fact-check API)
+- Komplexný policy engine (plnohodnotný Editorial Identity Layer per tenant)
+- Multi-model routing (Tiered Routing, Tier 1 / Tier 2 — viď Časť B Príloha)
+- Pokročilá analytika a reporting (Time-to-Fix dashboard, agregované metriky)
+- Server-side Undo snapshots prepojené s Audit Trail
+- Real-time WebSocket presence (Collab Lock Phase 2)
+
+### 3.3 Execution Framing
+
+Tento návrh je navrhnutý ako **inkrementálne riešenie** — začína jednoduchým, ale vysoko hodnotným MVP a postupne sa rozširuje na plnohodnotný decision intelligence systém. Každá fáza je samostatne dodateľná a merateľná.
+
+---
+
+## 4. EPIC
 
 **Názov epicu:** `[MDIE-EPIC-01] Claim Validation & AI-Assisted Fix`  
 **Priorita:** P0 (pilot blocker)  
@@ -29,7 +86,7 @@ Redaktor pracuje pod časovým tlakom. Keď vidí len správu „Príliš silné
 
 ---
 
-## 3. USER STORIES
+## 5. USER STORIES (MVP Scope)
 
 ### Story 1 — Spustenie validácie
 ```
@@ -65,12 +122,13 @@ Aby som rozumel logike AI a nemusel hádať, čo mám opraviť.
 ```
 
 **Acceptance Criteria:**
-- [ ] Každý nález v zozname zobrazuje: `risk badge` (vysoké / stredné / nízke), `reason` (názov kategórie), `whyFlagged` (jedna veta vysvetlenia)
+- [ ] Každý nález v zozname zobrazuje **iba**: `shortLabel` (krátky názov problému, pochopiteľný do 1 sekundy) + citovaný text z článku — bez dlhých popisov
+- [ ] Hodnoty `shortLabel` sú krátke a jednoznačné (príklady: „Tvrdenie je príliš silné", „Chýba konkrétna cena", „Text je príliš odborný")
 - [ ] Nálezy sú zoradené: vysoké riziko → stredné → nízke
 - [ ] Kliknutie na kartu nálezu otvorí detail v tom istom paneli
-- [ ] V detaile je: citovaný text z článku, dôvod, vysvetlenie, `whyFlagged` v odlíšenom fialovom boxe, odporúčaná akcia
+- [ ] V detaile je **na vrchu TL;DR box** (modrý, 1 veta z `whyFlagged` — prečo systém nález zdvihol), potom citácia, dôvod, vysvetlenie, odporúčaná akcia
 - [ ] Text z článku zodpovedajúci nálezu je vizuálne zvýraznený priamo v editore (highlight)
-- [ ] Vyriešené nálezy sa zobrazia v sekcii „Vyriešené" dole v zozname (s pätičkou: meno editora + relatívny čas)
+- [ ] Vyriešené nálezy sa zobrazia v sekcii „Vyriešené" dole v zozname s typom riešenia (viď Story 3)
 
 **Edge cases:**
 | Scenár | Správanie |
@@ -87,6 +145,9 @@ Aby som rozumel logike AI a nemusel hádať, čo mám opraviť.
 | Záložka SEO | SEO |
 | Sekcia vyriešených | Vyriešené |
 | Pätička karty | „Opravil(a) {meno} · pred {X} min." |
+| Typ riešenia — AI fix | „Opravené AI" |
+| Typ riešenia — ručne | „Upravené ručne" |
+| Typ riešenia — ignorované | „Ignorované (vedomé rozhodnutie)" |
 | Prázdny stav po vyriešení všetkých | „Všetky nálezy boli vyriešené. Skontrolujte Readiness Score." |
 
 ---
@@ -100,14 +161,15 @@ Aby som ušetril čas na rutinných opravách a mal garantovaný auditný zázna
 ```
 
 **Acceptance Criteria:**
-- [ ] Tlačidlo „Opraviť pomocou AI" je v detaile nálezu
-- [ ] Po kliknutí: AI opraví text priamo v editore, zelený fade-in efekt zvýrazní zmenenú pasáž (~2,5 s)
-- [ ] Nález sa presunie do sekcie „Vyriešené" s pätičkou: meno editora + čas
-- [ ] Readiness Score sa inkrementálne zvýši (+2 alebo +3 body)
-- [ ] Do audit logu sa zapíše: `actorId`, `actorType: human`, `source: ai`, `documentVersion`, `claimId`, `beforeText`, `afterText`, `timestamp`
-- [ ] Redaktor má možnosť vrátiť zmenu cez tlačidlo „Späť" (Undo stack, max. 5 krokov)
-- [ ] Tlačidlo „Späť" zobrazuje počet dostupných krokov: „Späť (3)"
-- [ ] Po Undo: fialový flash (~1 s) zvýrazní obnovené polia, aby redaktor videl, čo sa zmenilo
+- [ ] V detaile nálezu sú **tri akcie**: „Opraviť pomocou AI" (primárna), „Upraviť ručne", „Ignorovať"
+- [ ] **AI fix:** Po kliknutí AI opraví text v editore, zelený fade (~2,5 s), nález → „Vyriešené" s labelom „Opravené AI", Readiness Score +2/+3
+- [ ] **Upraviť ručne:** Po kliknutí sa editor fokusne, tlačidlo sa zmení na „Potvrdiť opravu" (zelené) → po potvrdení nález → „Vyriešené" s labelom „Upravené ručne", Readiness Score +2/+3
+- [ ] **Ignorovať:** Nález sa presunie do „Vyriešené" s labelom „Ignorované (vedomé rozhodnutie)", Readiness Score +2/+3
+- [ ] Všetky tri akcie **pridajú body** do Readiness Score — Score reprezentuje „všetky nálezy boli vyriešené (úpravou alebo rozhodnutím)"
+- [ ] Do audit logu sa zapíše pre každú akciu: `actorId`, `source` (ai/human), `resolutionType` (ai_fix/manual/ignored), `claimId`, `timestamp`
+- [ ] Redaktor má možnosť vrátiť AI fix cez „Späť" (Undo stack, max. 5 krokov)
+- [ ] Tlačidlo „Späť" zobrazuje počet krokov: „Späť (3)"
+- [ ] Po Undo: fialový flash (~1 s) na obnovených poliach
 
 **Edge cases:**
 | Scenár | Správanie | UI copy |
@@ -163,7 +225,7 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 
 ---
 
-## 4. WORKFLOW / LOGIKA PROCESU
+## 6. WORKFLOW / LOGIKA PROCESU
 
 ```
 [Redaktor otvorí článok]
@@ -196,27 +258,39 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
         │           ▼
         │    [AI opraví text v editore]
         │    [Zelený fade na zmenenom texte]
-        │    [Nález → "Vyriešené" + pätička]
+        │    [Nález → "Vyriešené" · label: "Opravené AI"]
         │    [Readiness Score +2/+3]
-        │    [Audit log: ai_fix_applied, timeToFixMs]
+        │    [Audit log: ai_fix_applied, resolutionType: ai_fix]
         │    [Snapshot do Undo stack (max. 5)]
         │
         ├──► [Upraviť ručne]
-        │    [Focus na text v editore, selection]
+        │    [Focus na text v editore]
+        │    [Tlačidlo → "Potvrdiť opravu" (zelené)]
+        │           │
+        │           ▼
+        │    [Redaktor potvrdí kliknutím]
+        │    [Nález → "Vyriešené" · label: "Upravené ručne"]
+        │    [Readiness Score +2/+3]
+        │    [Audit log: resolutionType: manual]
+        │
+        ├──► [Ignorovať]
+        │    [Nález → "Vyriešené" · label: "Ignorované (vedomé rozhodnutie)"]
+        │    [Readiness Score +2/+3]
+        │    [Audit log: resolutionType: ignored]
         │
         └──► [Späť (Undo)]
-             [Obnoví posledný snapshot]
+             [Obnoví posledný snapshot (len AI fix)]
              [Fialový flash na zmenených poliach]
              [Audit: undo_applied — produkcia; v prototype frontend-only]
                     │
                     ▼
-        [Redaktor spokojný → Publish Gate]
+        [Všetky nálezy vyriešené → Publish Gate]
         [Readiness Score ≥ threshold → povolené publikovanie]
 ```
 
 ---
 
-## 5. UI COPY — KOMPLETNÉ TEXTÁCIE
+## 7. UI COPY — KOMPLETNÉ TEXTÁCIE
 
 ### Tlačidlá a akcie
 
@@ -225,6 +299,8 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 | Validovať | „Validovať článok" | „Audit v procese…" | Sivé, cursor-not-allowed |
 | Opraviť pomocou AI | „Opraviť pomocou AI" | „Opravujem…" + spinner | Sivé (lock / API) |
 | Upraviť ručne | „Upraviť ručne" | – | – |
+|| Potvrdiť opravu | „Potvrdiť opravu“ | – | – |
+|| Ignorovať | „Ignorovať“ | – | Sivé (Collab Lock) |
 | Použiť návrh (SEO) | „Použiť návrh" | – | Sivé (lock / API) |
 | Späť (Undo) | „Späť (N)" | – | Sivé + bez počtu |
 | Export logu | „Export logu" | – | – |
@@ -236,6 +312,7 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 | Validovať (Collab Lock) | „Článok upravuje iný editor — validáciu spustíte po uvoľnení zámku." |
 | Opraviť pomocou AI (Collab Lock) | „Článok upravuje iný editor — AI úpravy sú pozastavené." |
 | Opraviť pomocou AI (API down) | „AI funkcie sú dočasne nedostupné." |
+|| Ignorovať (Collab Lock) | „Nemožno ignorovať počas zámku — článok upravuje iný editor.“ |
 | Späť — prázdna história | „Nie je čo vrátiť — zatiaľ ste nepoužili AI opravu nálezu ani SEO návrh." |
 | Späť — dostupný (N krokov) | „Späť (N) — obnoví posledný stav pred AI úpravou (max. 5 krokov)." |
 | Späť — Collab Lock | „Vrátenie stavu nie je dostupné, kým článok upravuje iný editor." |
@@ -262,14 +339,14 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 | Readiness label | „Readiness Score" |
 | Sekcia vyriešených | „Vyriešené" |
 | Prázdny stav (bez auditu) | „Spustite audit pre analýzu" |
-| Education layer box | *(fialový box, kurzíva, príklad:)* „Systém nenašiel v texte konkrétny zdroj pre toto medicínske tvrdenie." |
+| Education layer box (TL;DR) | *(modrý box, na vrchu detailu, príklad:)* „Systém nenaršiel v texte konkrétny zdroj pre toto medicínske tvrdenie.“ |
 | Pätička vyriešenej karty | „Opravil(a) {meno} · pred {X} min." |
 | Pätička SEO zmeny v detaile | „Upravil(a) {meno} · pred {X} min." |
 | Späť tlačidlo — label | „(N)" vedľa ikony histórie |
 
 ---
 
-## 6. EDGE CASES — KOMPLETNÁ TABUĽKA
+## 8. EDGE CASES — KOMPLETNÁ TABUĽKA
 
 | # | Scenár | Systémové správanie | UI reakcia |
 |---|--------|---------------------|------------|
@@ -285,22 +362,30 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 | E10 | Duplicitné kliknutie na „Validovať" počas loading | Tlačidlo disabled, druhý request sa nespustí | Spinner + „Audit v procese…" |
 | E11 | SEO návrh aplikovaný, potom Undo | Snapshot obnoví pôvodné SEO pole; seoChangeLog ostáva (iba append) | Fialový flash na SEO poli |
 | E12 | Článok bez textu, klik na Validovať | Guard na prázdny string, validácia sa nespustí | Tooltip: „Pridajte text článku pred spustením validácie." |
+| E13 | Ignorovanie pri aktívnom Collab Lock | Tlačidlo „Ignorovať" je disabled | Tooltip: „Nemožno ignorovať počas zámku." |
+| E14 | Redaktor klikne „Upraviť ručne" ale nepotvrdí (prepne view) | Pending stav sa zruší, nález ostáva v zozname otvorený | – |
 
 ---
 
-## 7. ACCEPTANCE CRITERIA — SÚHRNNÁ CHECKLIST
+## 9. ACCEPTANCE CRITERIA — SÚHRNNÁ CHECKLIST
 
 **Funkčnosť:**
 - [ ] Validácia sa spustí a zobrazí nálezy v < 3 s (UI loading)
-- [ ] Každý nález má `reason` + `whyFlagged` (education layer)
-- [ ] AI fix upraví text, zapíše audit záznam, presunie nález do „Vyriešené"
+- [ ] Každý nález v zozname zobrazuje iba: krátky názov problému (`shortLabel`) + citácia — bez dlhých popisov
+- [ ] Detail nálezu obsahuje TL;DR box (modrý, 1 veta) na vrchu, pred citáciou
+- [ ] V detaile nálezu sú tri akcie: „Opraviť pomocou AI", „Upraviť ručne" (s potvrdením), „Ignorovať"
+- [ ] AI fix upraví text, zapíše audit záznam, presunie nález do „Vyriešené" s labelom „Opravené AI"
+- [ ] Ignorácia presunie nález do „Vyriešené" s labelom „Ignorované (vedomé rozhodnutie)"; Readiness Score +2/+3
+- [ ] Potvrdená ručná úprava presunie nález do „Vyriešené" s labelom „Upravené ručne"; Readiness Score +2/+3
+- [ ] Všetky tri akcie pridávajú body — Score = všetky nálezy vyriešené (úpravou alebo rozhodnutím)
+- [ ] Score nediferencuje kvalitu riešenia, ale mieru uzavretia nálezov; kvalita je zachytená v audit logu
 - [ ] Undo (max. 5 krokov) funguje pre AI fix aj SEO návrh
-- [ ] Collab Lock blokuje všetky mutácie; text ostáva readOnly
+- [ ] Collab Lock blokuje všetky mutácie vrátane Ignorovania; text ostáva readOnly
 - [ ] API degradation: editor ostáva plne editovateľný bez AI funkcií
 - [ ] Export JSON obsahuje `timeToFixMs` pre každý AI fix
 
 **Audit a bezpečnosť:**
-- [ ] Každá zmena má: `actorId`, `source` (ai/human), `timestamp`, `documentVersion`, `claimId`
+- [ ] Každá zmena má: `actorId`, `source` (ai/human), `resolutionType` (ai_fix/manual/ignored), `timestamp`, `documentVersion`, `claimId`
 - [ ] Audit log je append-only (žiadne mazanie)
 - [ ] `whyFlagged` je vždy generovaný systémom, nie editovateľný redaktorom
 
@@ -317,7 +402,7 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 
 ---
 
-## 8. DESIGN RATIONALE (Prototype Learnings)
+## 10. DESIGN RATIONALE (Prototype Learnings)
 
 > *Táto sekcia zdôvodňuje prečo sú niektoré funkcie v zadaní navrhnuté práve takto. Nie sú to náhodné detaily — každý vzišiel z konkrétneho UX problému identifikovaného počas prototypovania.*
 
@@ -356,7 +441,7 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 
 ---
 
-## 9. WIREFRAME / UI NÁČRT
+## 11. WIREFRAME / UI NÁČRT
 
 > *Odkaz na živý prototyp (deploy): [EAGLE Admin — /eagle-admin](https://aifreelancer.sk/eagle-admin)*  
 > *(Prihlasovacie údaje k prototypu dostupné u autora)*
@@ -407,7 +492,7 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 
 ---
 
-## 10. TECHNICKÉ POZNÁMKY PRE DEV TÍM
+## 12. TECHNICKÉ POZNÁMKY PRE DEV TÍM
 
 ### Dátový model — Claim objekt
 ```typescript
@@ -415,9 +500,9 @@ type Claim = {
   id: string;
   text: string;                  // citovaný text z článku
   risk: "high" | "medium" | "low";
-  reason: string;                // kategória (zobrazená tučne)
-  explanation: string;           // podrobný popis
-  whyFlagged?: string;           // education layer — jedna veta prečo
+  shortLabel: string;            // krátky názov problému — zobrazený v list view aj detaile
+  explanation: string;           // podrobný popis (detail view)
+  whyFlagged?: string;           // TL;DR — jedna veta prečo systém nález zdvihol (detail view)
   recommendedAction: string;     // čo má redaktor urobiť
   startIndex: number;            // pozícia v dokumente (pre highlight)
   endIndex: number;
@@ -485,70 +570,7 @@ Response 200:
   { "status": "failed", "errorCode": "provider_unavailable" }
 ```
 
----
-
-## 11. OPTIMALIZÁCIA PREVÁDZKOVÝCH NÁKLADOV (Token Management)
-
-> *Pre zabezpečenie ekonomickej udržateľnosti pri spracovaní stoviek článkov denne MDIE implementuje štyri vrstvy optimalizácie nákladov na LLM volania.*
-
-### 11.1 Native Prompt Caching
-
-Redakčné kódexy, SEO manuály a statické inštrukcie Editorial Identity Layer sú uložené v **efemérnej cache na úrovni API providera**. Načítavajú sa raz za reláciu — opakované volania pre ďalšie články v tej istej session neopakujú prenos týchto inštrukcií.
-
-**Efekt:** Redukcia nákladov na vstupné (input) tokeny až o **90 %** pri opakovateľných systémových promptoch.  
-**Technická poznámka:** Implementácia závisí od support providera (Anthropic: prompt caching cez `cache_control`; OpenAI: analogicky cez system message caching). Cache TTL typicky 5 min — vhodné pre redakčné relácie.
-
----
-
-### 11.2 Stateless Context Management (Context Sharding)
-
-MDIE **neposiela do LLM celý archív dokumentov ani históriu** redakcie. Shared Intelligence Core filtruje a zostavuje len **relevantné fragmenty kontextu** pre konkrétny článok v reálnom čase (napr. policy danej značky, kategória obsahu, historické korekcie podobného typu).
-
-**Efekt:** Minimalizuje zbytočný tok dát cez API — platíme len za tokeny, ktoré priamo ovplyvňujú kvalitu výstupu.  
-**Implementácia (návrh):** Retrieval vrstva (napr. pgvector / Pinecone) zostaví kontext na základe sémantickej podobnosti so spracovávaným článkom pred každým LLM volaním.
-
----
-
-### 11.3 Tiered Model Routing (Smerovanie podľa náročnosti úlohy)
-
-MDIE implementuje **dvojúrovňové smerovanie**:
-
-| Tier | Typ úlohy | Model | Náklady |
-|------|-----------|-------|---------|
-| **Tier 1 — Lightweight** | Gramatika, základné SEO, formátovanie, rutinné štýlové kontroly | Rýchly a lacný model (napr. Haiku / GPT-4o-mini) | Nízke |
-| **Tier 2 — High-Intelligence** | Faktická verifikácia, medicínske/právne riziko, komplexné claim overenie | Silný model (napr. Sonnet / Opus) | Aktivuje sa len pri identifikácii rizika |
-
-**Logika smerovania:** Tier 1 prebehne vždy. Ak výsledok identifikuje `risk: high` nález, **až potom** sa aktivuje Tier 2 pre hĺbkovú analýzu daného úseku.  
-**Efekt:** Najdrahšie modely sa volajú **len keď je to odôvodnené rizikom** — nie pre každú kontrolu každého článku.
-
-**Feature flag:** `mdie.routing.tier2_threshold` — konfigurovateľný prah risk skóre pre aktiváciu Tier 2 (per tenant).
-
----
-
-### 11.4 Batch Processing (Dávkové spracovanie)
-
-Pre obsah **bez požiadavky na okamžitú publikáciu** (magazínové témy, nadčasové články, scheduled content) MDIE využíva **Batch API režim** providera:
-
-- Validácia sa zaradí do fronty a spracuje v čase **nižšej vyťaženosti infraštruktúry**
-- Cena: typicky **50 % bežnej ceny** API volaní (Anthropic Batch API, OpenAI Batch)
-- SLA: výsledok do 24 hodín (konfigurovateľné per článok)
-
-**Implementácia:** Pri ukladaní draftu redaktor volí `priority: immediate | scheduled`. Scheduled články idú do Batch queue; výsledok validácie sa zobrazí pri ďalšom otvorení článku.
-
-**Feature flag:** `mdie.batch.enabled`, `mdie.batch.max_latency_hours` (default: 12)
-
----
-
-### 11.5 Prehľad — ekonomický dopad kombinovaných techník
-
-| Technika | Typ úspory | Odhadovaný dopad |
-|----------|-----------|-----------------|
-| Prompt Caching | Input tokeny | −60 % až −90 % na systémové inštrukcie |
-| Context Sharding | Input tokeny | −30 % až −50 % na kontext |
-| Tiered Routing | Compute / output | −40 % až −70 % na drahých modeloch |
-| Batch Processing | Celková cena API | −50 % na non-urgent obsah |
-
-> **Poznámka:** Hodnoty sú odhadované na základe dostupných ceníkov AI providerov a typického redakčného workflow. Presné čísla sa stanovia po pilotnom meraní skutočného token usage v prostredí NMH.
+> **Poznámka k nákladovej optimalizácii:** Systém využíva Shared Intelligence Core s natívnou podporou Prompt Cachingu a Tiered Routingu pre optimalizáciu API volaní — viď Architektonickú prílohu (Časť B).
 
 ---
 
@@ -557,7 +579,9 @@ Pre obsah **bez požiadavky na okamžitú publikáciu** (magazínové témy, nad
 | Verzia | Dátum | Autor | Zmena |
 |--------|-------|-------|-------|
 | 1.0 | 2026-04-12 | Daniel Budziňák | Prvá verzia pre 2. kolo výberového konania NMH |
-| 1.1 | 2026-04-12 | Daniel Budziňák | Doplnená sekcia 11: Token Management & Cost Optimization |
+| 1.2 | 2026-04-12 | Daniel Budziňák | Token Management presunutý do Časti B (Príloha); C zameraná výhradne na feature spec |
+|| 2.0 | 2026-04-12 | Daniel Budzinák | Doplnené: DATA GAP, Feature Summary, MVP Scope, Out of Scope, Execution Framing |
+|| 2.1 | 2026-04-12 | Daniel Budziňák | Sync s prototypom: list view (iba reason+citácia), TL;DR detail, Ignorovať akcia, resolutionType, score logika |
 
 ---
 

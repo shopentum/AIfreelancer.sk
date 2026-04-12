@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, {
   useCallback,
@@ -222,6 +222,7 @@ type ResolvedClaimRecord = {
   afterText: string;
   resolvedAt: number;
   actorName: string;
+  resolutionType: "ai_fix" | "manual" | "ignored";
 };
 
 /** Ukážkový text článku (~2× pôvodná dĺžka) pre realistický scroll a highlight. */
@@ -290,6 +291,8 @@ const EagleCMS_Split: React.FC = () => {
     keys: ArticleFieldKey[];
     nonce: number;
   } | null>(null);
+  /** Nález čakajúci na potvrdenie ručnej úpravy. */
+  const [pendingManualEdit, setPendingManualEdit] = useState<string | null>(null);
 
   const pushArticleSnapshot = useCallback(() => {
     setArticleHistory((h) => {
@@ -452,7 +455,7 @@ const EagleCMS_Split: React.FC = () => {
           id: 'claim-1',
           text: 'kreatín monohydrát mohol predstavovať prelom v doplnkovej liečbe neurodegeneratívnych ochorení',
           risk: 'high',
-          reason: 'Príliš silné medicínske tvrdenie',
+          reason: 'Tvrdenie je príliš silné',
           explanation: 'Slovo "prelom" v kontexte liečby Alzheimera môže byť vnímané ako zavádzajúce, pokiaľ nie je podložené finálnymi klinickými štúdiami na ľuďoch.',
           whyFlagged:
             "Systém nenašiel v texte konkrétny zdroj (citáciu alebo odkaz na štúdiu), ktorý by podložil toto medicínske tvrdenie ako hotovú istotu.",
@@ -464,7 +467,7 @@ const EagleCMS_Split: React.FC = () => {
           id: 'claim-2',
           text: 'stojí pár eur',
           risk: 'medium',
-          reason: 'Vágne cenové tvrdenie',
+          reason: 'Chýba konkrétna cena',
           explanation: 'Výraz "pár eur" je subjektívny. Pre niekoho to môže byť 2€, pre iného 20€.',
           whyFlagged:
             "Pri cenovom tvrdení v článku chýba konkrétna suma, rozpätie alebo porovnanie s overiteľným referenčným zdrojom.",
@@ -490,7 +493,7 @@ const EagleCMS_Split: React.FC = () => {
           id: 'ling-1',
           text: 'Podľa najnovších štúdií publikovaných v prestížnom vedeckom časopise Nature, by kreatín monohydrát mohol predstavovať prelom v doplnkovej liečbe neurodegeneratívnych ochorení.',
           risk: 'medium',
-          reason: 'Príliš odborný úvod',
+          reason: 'Text je príliš odborný',
           explanation: 'Tento odsek začína veľmi technicky. Čitatelia Nového Času preferujú priamejší a akčnejší štart.',
           whyFlagged:
             "Systém vyhodnotil úvod ako veľmi hustý odborný blok bez postupného vysvetlenia pre bežného čitateľa.",
@@ -502,7 +505,7 @@ const EagleCMS_Split: React.FC = () => {
           id: 'ling-2',
           text: 'Mechanizmus účinku spočíva v tom, že kreatín zvyšuje dostupnosť ATP (adenozíntrifosfátu) v neurónoch, čo umožňuje mozgu pracovať efektívnejšie pri náročných kognitívnych úlohách.',
           risk: 'high',
-          reason: 'Vysoká kognitívna záťaž',
+          reason: 'Odborný výraz bez vysvetlenia',
           explanation: 'Použitie odborných termínov ako "adenozíntrifosfát" v texte pre širokú verejnosť pôsobí odradzujúco.',
           whyFlagged:
             "V tomto odseku chýba laický „mostík“ medzi odborným termínom a jeho významom v bežnom jazyku.",
@@ -658,6 +661,7 @@ const EagleCMS_Split: React.FC = () => {
         afterText: fixedText,
         resolvedAt: Date.now(),
         actorName: PROTOTYPE_SESSION_USER.displayName,
+        resolutionType: "ai_fix",
       },
     ]);
 
@@ -671,6 +675,79 @@ const EagleCMS_Split: React.FC = () => {
     }
     if (selectedClaimId === claim.id) setSelectedClaimId(null);
   };
+
+  const handleIgnoreClaim = useCallback(
+    (claim: Claim) => {
+      if (collaborationLockDemo) return;
+      const tab: "trust" | "linguistic" = (audit?.linguisticClaims ?? []).some(
+        (c) => c.id === claim.id,
+      )
+        ? "linguistic"
+        : "trust";
+      setResolvedClaims((prev) => [
+        ...prev,
+        {
+          claim,
+          tab,
+          beforeText: claim.text,
+          afterText: claim.text,
+          resolvedAt: Date.now(),
+          actorName: PROTOTYPE_SESSION_USER.displayName,
+          resolutionType: "ignored",
+        },
+      ]);
+      if (audit) {
+        setAudit({
+          ...audit,
+          readinessScore: nextReadinessBump(audit.readinessScore),
+          claims: audit.claims.filter((c) => c.id !== claim.id),
+          linguisticClaims: audit.linguisticClaims?.filter(
+            (c) => c.id !== claim.id,
+          ),
+        });
+      }
+      setPendingManualEdit(null);
+      if (selectedClaimId === claim.id) setSelectedClaimId(null);
+    },
+    [audit, collaborationLockDemo, selectedClaimId],
+  );
+
+  const handleConfirmManualEdit = useCallback(
+    (claim: Claim) => {
+      if (collaborationLockDemo) return;
+      const tab: "trust" | "linguistic" = (audit?.linguisticClaims ?? []).some(
+        (c) => c.id === claim.id,
+      )
+        ? "linguistic"
+        : "trust";
+      const currentText = content.includes(claim.text) ? claim.text : claim.text;
+      setResolvedClaims((prev) => [
+        ...prev,
+        {
+          claim,
+          tab,
+          beforeText: claim.text,
+          afterText: currentText,
+          resolvedAt: Date.now(),
+          actorName: PROTOTYPE_SESSION_USER.displayName,
+          resolutionType: "manual",
+        },
+      ]);
+      if (audit) {
+        setAudit({
+          ...audit,
+          readinessScore: nextReadinessBump(audit.readinessScore),
+          claims: audit.claims.filter((c) => c.id !== claim.id),
+          linguisticClaims: audit.linguisticClaims?.filter(
+            (c) => c.id !== claim.id,
+          ),
+        });
+      }
+      setPendingManualEdit(null);
+      if (selectedClaimId === claim.id) setSelectedClaimId(null);
+    },
+    [audit, collaborationLockDemo, content, selectedClaimId],
+  );
 
   const applySeoSuggestion = useCallback(
     (key: SeoAuditKey) => {
@@ -1745,10 +1822,20 @@ const EagleCMS_Split: React.FC = () => {
 
                                 if (claim) {
                                   return (
-                                    <div className="space-y-6">
+                                    <div className="space-y-5">
+                                      {/* TL;DR */}
+                                      {claim.whyFlagged ? (
+                                        <div className="rounded-xl border border-blue-100 bg-blue-50/60 px-3 py-2.5">
+                                          <p className="text-[9px] font-black uppercase tracking-widest text-blue-500 mb-1">TL;DR</p>
+                                          <p className="text-xs font-medium leading-relaxed text-blue-950/90">
+                                            {claim.whyFlagged}
+                                          </p>
+                                        </div>
+                                      ) : null}
+                                      {/* Citácia */}
                                       <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-4">
                                         <p className="text-sm font-semibold leading-relaxed text-gray-900">
-                                          „{claim.text}“
+                                          {"\u201E"}{claim.text}{"\u201C"}
                                         </p>
                                       </div>
                                       <div className="space-y-2">
@@ -1757,17 +1844,12 @@ const EagleCMS_Split: React.FC = () => {
                                         </p>
                                         <p className="text-sm font-bold text-gray-800">{claim.reason}</p>
                                         <p className="text-xs leading-relaxed text-gray-600">{claim.explanation}</p>
-                                        {claim.whyFlagged ? (
-                                          <p className="rounded-lg border border-purple-100 bg-purple-50/60 px-3 py-2 text-xs italic leading-relaxed text-purple-950/90">
-                                            {claim.whyFlagged}
-                                          </p>
-                                        ) : null}
                                       </div>
                                       <div className="space-y-3 border-t border-gray-100 pt-4">
                                         <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                                           Odporúčaná akcia
                                         </p>
-                                        <p className="text-[15px] font-bold leading-snug text-gray-900">
+                                        <p className="text-sm font-medium leading-snug text-gray-700">
                                           {claim.recommendedAction}
                                         </p>
                                         <div className="grid grid-cols-1 gap-2 pt-2">
@@ -1783,19 +1865,41 @@ const EagleCMS_Split: React.FC = () => {
                                             )}
                                           >
                                             <Sparkles size={14} className="mr-2" />
-                                            {activeAuditTab === "trust"
-                                              ? "Opraviť pomocou AI"
-                                              : "Upraviť na štýl Nového Času"}
+                                            Opraviť pomocou AI
                                           </button>
+                                          {pendingManualEdit === claim.id ? (
+                                            <button
+                                              type="button"
+                                              onClick={() => handleConfirmManualEdit(claim)}
+                                              className="flex w-full items-center justify-center rounded-xl border border-emerald-400 bg-emerald-50 py-3 text-xs font-bold text-emerald-800 transition-all hover:bg-emerald-100"
+                                            >
+                                              <CheckCircle2 size={14} className="mr-2" /> Potvrdiť opravu
+                                            </button>
+                                          ) : (
+                                            <button
+                                              type="button"
+                                              onClick={() => {
+                                                setPendingManualEdit(claim.id);
+                                                handleClaimClick(claim);
+                                                editorRef.current?.focus();
+                                              }}
+                                              className="flex w-full items-center justify-center rounded-xl border border-gray-200 bg-white py-3 text-xs font-bold text-gray-700 transition-all hover:bg-gray-50"
+                                            >
+                                              <Edit3 size={14} className="mr-2" /> Upraviť ručne
+                                            </button>
+                                          )}
                                           <button
                                             type="button"
-                                            onClick={() => {
-                                              handleClaimClick(claim);
-                                              editorRef.current?.focus();
-                                            }}
-                                            className="flex w-full items-center justify-center rounded-xl border border-gray-200 bg-white py-3 text-xs font-bold text-gray-700 transition-all hover:bg-gray-50"
+                                            disabled={collaborationLockDemo}
+                                            onClick={() => handleIgnoreClaim(claim)}
+                                            className={cn(
+                                              "flex w-full items-center justify-center rounded-xl border py-2.5 text-xs font-bold transition-all",
+                                              collaborationLockDemo
+                                                ? "cursor-not-allowed border-gray-100 bg-gray-50 text-gray-400"
+                                                : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700",
+                                            )}
                                           >
-                                            <Edit3 size={14} className="mr-2" /> Upraviť ručne
+                                            <X size={13} className="mr-2" /> Ignorovať
                                           </button>
                                         </div>
                                       </div>
@@ -1803,7 +1907,7 @@ const EagleCMS_Split: React.FC = () => {
                                   );
                                 }
 
-                                if (seoItem && seoKey) {
+                                                                if (seoItem && seoKey) {
                                   const logEntry = [...seoChangeLog]
                                     .reverse()
                                     .find((e) => e.key === seoKey);
@@ -1920,11 +2024,6 @@ const EagleCMS_Split: React.FC = () => {
                                         <p className="mb-1 text-[10px] font-black uppercase text-gray-500">
                                           {claim.reason}
                                         </p>
-                                        {claim.whyFlagged ? (
-                                          <p className="mb-1 line-clamp-2 text-[10px] leading-snug text-gray-600">
-                                            {claim.whyFlagged}
-                                          </p>
-                                        ) : null}
                                         <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-gray-900">
                                           „{claim.text}“
                                         </p>
@@ -1958,7 +2057,7 @@ const EagleCMS_Split: React.FC = () => {
                                       >
                                         <p className="mb-1 flex items-center gap-1.5 text-[10px] font-black uppercase text-emerald-800">
                                           <CheckCircle2 size={12} className="shrink-0" />
-                                          Hotové
+                                          {r.resolutionType === "ai_fix" ? "Opravené AI" : r.resolutionType === "manual" ? "Upravené ručne" : "Ignorované"}
                                         </p>
                                         <p className="mb-1 text-[10px] text-gray-500">
                                           Opravil(a) {r.actorName} ·{" "}
@@ -2006,11 +2105,6 @@ const EagleCMS_Split: React.FC = () => {
                                         <p className="mb-1 text-[10px] font-black uppercase text-gray-500">
                                           {claim.reason}
                                         </p>
-                                        {claim.whyFlagged ? (
-                                          <p className="mb-1 line-clamp-2 text-[10px] leading-snug text-gray-600">
-                                            {claim.whyFlagged}
-                                          </p>
-                                        ) : null}
                                         <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-gray-900">
                                           „{claim.text}“
                                         </p>
@@ -2045,7 +2139,7 @@ const EagleCMS_Split: React.FC = () => {
                                       >
                                         <p className="mb-1 flex items-center gap-1.5 text-[10px] font-black uppercase text-emerald-800">
                                           <CheckCircle2 size={12} className="shrink-0" />
-                                          Hotové
+                                          {r.resolutionType === "ai_fix" ? "Opravené AI" : r.resolutionType === "manual" ? "Upravené ručne" : "Ignorované"}
                                         </p>
                                         <p className="mb-1 text-[10px] text-gray-500">
                                           Opravil(a) {r.actorName} ·{" "}
