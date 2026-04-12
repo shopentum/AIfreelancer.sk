@@ -487,11 +487,77 @@ Response 200:
 
 ---
 
+## 11. OPTIMALIZÁCIA PREVÁDZKOVÝCH NÁKLADOV (Token Management)
+
+> *Pre zabezpečenie ekonomickej udržateľnosti pri spracovaní stoviek článkov denne MDIE implementuje štyri vrstvy optimalizácie nákladov na LLM volania.*
+
+### 11.1 Native Prompt Caching
+
+Redakčné kódexy, SEO manuály a statické inštrukcie Editorial Identity Layer sú uložené v **efemérnej cache na úrovni API providera**. Načítavajú sa raz za reláciu — opakované volania pre ďalšie články v tej istej session neopakujú prenos týchto inštrukcií.
+
+**Efekt:** Redukcia nákladov na vstupné (input) tokeny až o **90 %** pri opakovateľných systémových promptoch.  
+**Technická poznámka:** Implementácia závisí od support providera (Anthropic: prompt caching cez `cache_control`; OpenAI: analogicky cez system message caching). Cache TTL typicky 5 min — vhodné pre redakčné relácie.
+
+---
+
+### 11.2 Stateless Context Management (Context Sharding)
+
+MDIE **neposiela do LLM celý archív dokumentov ani históriu** redakcie. Shared Intelligence Core filtruje a zostavuje len **relevantné fragmenty kontextu** pre konkrétny článok v reálnom čase (napr. policy danej značky, kategória obsahu, historické korekcie podobného typu).
+
+**Efekt:** Minimalizuje zbytočný tok dát cez API — platíme len za tokeny, ktoré priamo ovplyvňujú kvalitu výstupu.  
+**Implementácia (návrh):** Retrieval vrstva (napr. pgvector / Pinecone) zostaví kontext na základe sémantickej podobnosti so spracovávaným článkom pred každým LLM volaním.
+
+---
+
+### 11.3 Tiered Model Routing (Smerovanie podľa náročnosti úlohy)
+
+MDIE implementuje **dvojúrovňové smerovanie**:
+
+| Tier | Typ úlohy | Model | Náklady |
+|------|-----------|-------|---------|
+| **Tier 1 — Lightweight** | Gramatika, základné SEO, formátovanie, rutinné štýlové kontroly | Rýchly a lacný model (napr. Haiku / GPT-4o-mini) | Nízke |
+| **Tier 2 — High-Intelligence** | Faktická verifikácia, medicínske/právne riziko, komplexné claim overenie | Silný model (napr. Sonnet / Opus) | Aktivuje sa len pri identifikácii rizika |
+
+**Logika smerovania:** Tier 1 prebehne vždy. Ak výsledok identifikuje `risk: high` nález, **až potom** sa aktivuje Tier 2 pre hĺbkovú analýzu daného úseku.  
+**Efekt:** Najdrahšie modely sa volajú **len keď je to odôvodnené rizikom** — nie pre každú kontrolu každého článku.
+
+**Feature flag:** `mdie.routing.tier2_threshold` — konfigurovateľný prah risk skóre pre aktiváciu Tier 2 (per tenant).
+
+---
+
+### 11.4 Batch Processing (Dávkové spracovanie)
+
+Pre obsah **bez požiadavky na okamžitú publikáciu** (magazínové témy, nadčasové články, scheduled content) MDIE využíva **Batch API režim** providera:
+
+- Validácia sa zaradí do fronty a spracuje v čase **nižšej vyťaženosti infraštruktúry**
+- Cena: typicky **50 % bežnej ceny** API volaní (Anthropic Batch API, OpenAI Batch)
+- SLA: výsledok do 24 hodín (konfigurovateľné per článok)
+
+**Implementácia:** Pri ukladaní draftu redaktor volí `priority: immediate | scheduled`. Scheduled články idú do Batch queue; výsledok validácie sa zobrazí pri ďalšom otvorení článku.
+
+**Feature flag:** `mdie.batch.enabled`, `mdie.batch.max_latency_hours` (default: 12)
+
+---
+
+### 11.5 Prehľad — ekonomický dopad kombinovaných techník
+
+| Technika | Typ úspory | Odhadovaný dopad |
+|----------|-----------|-----------------|
+| Prompt Caching | Input tokeny | −60 % až −90 % na systémové inštrukcie |
+| Context Sharding | Input tokeny | −30 % až −50 % na kontext |
+| Tiered Routing | Compute / output | −40 % až −70 % na drahých modeloch |
+| Batch Processing | Celková cena API | −50 % na non-urgent obsah |
+
+> **Poznámka:** Hodnoty sú odhadované na základe dostupných ceníkov AI providerov a typického redakčného workflow. Presné čísla sa stanovia po pilotnom meraní skutočného token usage v prostredí NMH.
+
+---
+
 ## HISTORIA DOKUMENTU
 
 | Verzia | Dátum | Autor | Zmena |
 |--------|-------|-------|-------|
 | 1.0 | 2026-04-12 | Daniel Budziňák | Prvá verzia pre 2. kolo výberového konania NMH |
+| 1.1 | 2026-04-12 | Daniel Budziňák | Doplnená sekcia 11: Token Management & Cost Optimization |
 
 ---
 
