@@ -443,8 +443,8 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 
 ## 11. WIREFRAME / UI NÁČRT
 
-> *Odkaz na živý prototyp (deploy): [EAGLE Admin — /eagle-admin](https://aifreelancer.sk/eagle-admin)*  
-> *(Prihlasovacie údaje k prototypu dostupné u autora)*
+> *Odkaz na živý prototyp: [https://www.aifreelancer.sk/nmh](https://www.aifreelancer.sk/nmh)*  
+> *Heslo: `nmh2026`*
 
 **Popis obrazovky (referencia k priloženým screenshotom z prototypu):**
 
