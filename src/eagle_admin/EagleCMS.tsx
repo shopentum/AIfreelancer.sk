@@ -53,8 +53,9 @@ import {
   ShieldAlert,
   MousePointer2,
   Edit3,
-  ArrowLeft
-} from 'lucide-react';
+  ArrowLeft,
+  Lock,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -123,11 +124,32 @@ const SEO_FIELD_LABEL: Record<SeoAuditKey, string> = {
 const SEO_APPLIED_MESSAGE =
   "Tip z kontroly sme prepísali do formulára. Skontrolujte ešte raz znenie, či sedí tón a zodpovedá zvyklostiam Nového Času.";
 
+/** Prototyp: v produkcii = prihlásený používateľ (Supabase Auth / SSO). */
+const PROTOTYPE_SESSION_USER = {
+  displayName: "Lukáš Sághy",
+  email: "Lukas.Saghy@newsandmedia.sk",
+} as const;
+
+/** Simulácia: druhý editor drží zámok — accountability + konflikt v newsroom. */
+const PROTOTYPE_COLLAB_LOCK_HOLDER = "Jana Kováčová";
+
+function formatAuditTimestamp(ts: number): string {
+  try {
+    return new Intl.DateTimeFormat("sk-SK", {
+      dateStyle: "short",
+      timeStyle: "short",
+    }).format(new Date(ts));
+  } catch {
+    return new Date(ts).toISOString();
+  }
+}
+
 type SeoChangeEntry = {
   key: SeoAuditKey;
   before: string;
   after: string;
   appliedAt: number;
+  actorName: string;
 };
 
 type ResolvedClaimRecord = {
@@ -136,6 +158,7 @@ type ResolvedClaimRecord = {
   beforeText: string;
   afterText: string;
   resolvedAt: number;
+  actorName: string;
 };
 
 /** Ukážkový text článku (~2× pôvodná dĺžka) pre realistický scroll a highlight. */
@@ -180,8 +203,11 @@ const EagleCMS_Split: React.FC = () => {
   const [rightPanelMode, setRightPanelMode] = useState<'settings' | 'ai'>('settings');
   const [seoChangeLog, setSeoChangeLog] = useState<SeoChangeEntry[]>([]);
   const [resolvedClaims, setResolvedClaims] = useState<ResolvedClaimRecord[]>([]);
+  /** Prototyp: simuluje druhého editora v článku → read-only pre AI a telo textu. */
+  const [collaborationLockDemo, setCollaborationLockDemo] = useState(false);
 
   const handleValidate = async () => {
+    if (collaborationLockDemo) return;
     setIsValidating(true);
     setRightPanelMode('ai');
     setAuditError(null);
@@ -341,9 +367,11 @@ const EagleCMS_Split: React.FC = () => {
   }, []);
 
   const handleFixWithAI = async (claim: Claim) => {
+    if (collaborationLockDemo) return;
     const idx = content.indexOf(claim.text);
     if (idx === -1) return;
     const fixedText = await fixClaimWithAI(claim.text, content);
+    if (collaborationLockDemo) return;
     const newContent =
       content.slice(0, idx) + fixedText + content.slice(idx + claim.text.length);
     setContent(newContent);
@@ -370,6 +398,7 @@ const EagleCMS_Split: React.FC = () => {
         beforeText: claim.text,
         afterText: fixedText,
         resolvedAt: Date.now(),
+        actorName: PROTOTYPE_SESSION_USER.displayName,
       },
     ]);
 
@@ -386,6 +415,7 @@ const EagleCMS_Split: React.FC = () => {
 
   const applySeoSuggestion = useCallback(
     (key: SeoAuditKey) => {
+      if (collaborationLockDemo) return;
       if (!audit) return;
       const item = audit.seoAudit[key];
       const raw = item.suggestion?.trim();
@@ -423,7 +453,13 @@ const EagleCMS_Split: React.FC = () => {
 
       setSeoChangeLog((log) => [
         ...log,
-        { key, before: beforeVal, after: afterVal, appliedAt: Date.now() },
+        {
+          key,
+          before: beforeVal,
+          after: afterVal,
+          appliedAt: Date.now(),
+          actorName: PROTOTYPE_SESSION_USER.displayName,
+        },
       ]);
 
       setAudit((prev) => {
@@ -445,7 +481,7 @@ const EagleCMS_Split: React.FC = () => {
       });
       setSelectedClaimId(null);
     },
-    [audit, perex, seoTitle, title, urlTitle],
+    [audit, collaborationLockDemo, perex, seoTitle, title, urlTitle],
   );
 
   const highlightNodes = useMemo(() => {
@@ -566,10 +602,10 @@ const EagleCMS_Split: React.FC = () => {
             <button className="flex items-center text-xs text-[#2C5282] font-medium hover:underline">
               <ExternalLink size={14} className="mr-1" /> Nový článok
             </button>
-            <div className="flex items-center space-x-2 border-l pl-4 border-gray-200">
+            <div className="flex items-center space-x-2 border-l border-gray-200 pl-4">
               <div className="text-right">
-                <p className="text-xs font-semibold">Lukas.Saghy@newsandmedia.sk</p>
-                <p className="text-[10px] text-gray-500">Lukas.Saghy@newsandmedia.sk</p>
+                <p className="text-xs font-semibold">{PROTOTYPE_SESSION_USER.email}</p>
+                <p className="text-[10px] text-gray-500">{PROTOTYPE_SESSION_USER.displayName}</p>
               </div>
               <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
                 <User size={18} />
@@ -619,8 +655,8 @@ const EagleCMS_Split: React.FC = () => {
         </div>
 
         {/* Intelligence Bar */}
-        <div className="h-16 bg-[#F8FAFC] border-b border-gray-200 px-6 flex items-center justify-between shrink-0 shadow-inner relative z-40">
-          <div className="flex items-center space-x-6">
+        <div className="flex min-h-16 shrink-0 flex-wrap items-center justify-between gap-3 border-b border-gray-200 bg-[#F8FAFC] px-6 py-2 shadow-inner relative z-40">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-white border border-gray-200 rounded-lg flex items-center justify-center text-gray-900 shadow-sm">
                 <ShieldAlert size={18} className="text-purple-600" />
@@ -652,22 +688,56 @@ const EagleCMS_Split: React.FC = () => {
                 </div>
               </div>
               
-              <button 
+              <button
+                type="button"
                 onClick={handleValidate}
-                disabled={isValidating}
+                disabled={isValidating || collaborationLockDemo}
+                title={
+                  collaborationLockDemo
+                    ? "Článok upravuje iný editor — validáciu spustíte po uvoľnení zámku."
+                    : undefined
+                }
                 className={cn(
-                  "flex items-center px-4 py-2 rounded-xl text-xs font-bold transition-all",
-                  isValidating 
-                    ? "bg-gray-100 text-gray-400" 
-                    : "bg-purple-600 text-white hover:bg-purple-700 shadow-lg shadow-purple-100 active:scale-95"
+                  "flex items-center rounded-xl px-4 py-2 text-xs font-bold transition-all",
+                  isValidating || collaborationLockDemo
+                    ? "cursor-not-allowed bg-gray-100 text-gray-400"
+                    : "bg-purple-600 text-white shadow-lg shadow-purple-100 hover:bg-purple-700 active:scale-95",
                 )}
               >
-                {isValidating ? <RefreshCw size={14} className="mr-2 animate-spin" /> : <Sparkles size={14} className="mr-2" />}
-                {isValidating ? 'Audit v procese...' : 'Validovať článok'}
+                {isValidating ? (
+                  <RefreshCw size={14} className="mr-2 animate-spin" />
+                ) : (
+                  <Sparkles size={14} className="mr-2" />
+                )}
+                {isValidating ? "Audit v procese..." : "Validovať článok"}
               </button>
             </div>
           </div>
+
+          <label className="flex max-w-full cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-[11px] text-gray-600 shadow-sm select-none">
+            <input
+              type="checkbox"
+              checked={collaborationLockDemo}
+              onChange={(e) => setCollaborationLockDemo(e.target.checked)}
+              className="h-3.5 w-3.5 rounded border-gray-300 text-purple-600"
+            />
+            <span className="font-medium">
+              Prototyp: druhý editor v článku (read-only pre AI a text)
+            </span>
+          </label>
         </div>
+
+        {collaborationLockDemo ? (
+          <div className="flex shrink-0 items-center gap-2 border-b border-amber-200 bg-amber-50 px-6 py-2 text-xs text-amber-950">
+            <Lock className="shrink-0 text-amber-700" size={14} aria-hidden />
+            <span>
+              <span className="font-bold">Aktuálne upravuje:</span>{" "}
+              {PROTOTYPE_COLLAB_LOCK_HOLDER}. Vy ste v režime čítania — AI
+              validáciu a úpravy textu môžete spustiť až po uvoľnení zámku (odškrtnite
+              simuláciu vyššie).
+            </span>
+          </div>
+        ) : null}
 
         {/* Editor Area: scroll na main — ľavý stĺpec prirodzene vysoký; pravý sticky v rámci main. */}
         <main className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain p-6">
@@ -894,12 +964,16 @@ const EagleCMS_Split: React.FC = () => {
                       <textarea
                         ref={editorRef}
                         value={content}
+                        readOnly={collaborationLockDemo}
                         spellCheck={false}
                         onScroll={onEditorScroll}
                         onChange={(e) => setContent(e.target.value)}
                         className={cn(
                           EAGLE_EDITOR_TYPO_CLASS,
-                          "col-span-full row-span-full z-10 block size-full min-h-0 resize-none overflow-y-auto border-0 bg-transparent text-[#1f2937] outline-none [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-gray-400 [&::-webkit-scrollbar]:hidden",
+                          "col-span-full row-span-full z-10 block size-full min-h-0 resize-none overflow-y-auto border-0 text-[#1f2937] outline-none [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-gray-400 [&::-webkit-scrollbar]:hidden",
+                          collaborationLockDemo
+                            ? "cursor-not-allowed bg-gray-100/40 text-gray-600"
+                            : "bg-transparent",
                         )}
                         placeholder="Začnite písať váš článok..."
                       />
@@ -913,25 +987,31 @@ const EagleCMS_Split: React.FC = () => {
               
               {/* Toggle Header */}
               <div className="flex bg-white rounded-xl p-1 border border-gray-200 shadow-sm shrink-0">
-                <button 
-                  onClick={() => setRightPanelMode('settings')}
+                <button
+                  type="button"
+                  onClick={() => setRightPanelMode("settings")}
                   className={cn(
-                    "flex-1 py-2 rounded-lg text-xs font-bold flex items-center justify-center transition-all",
-                    rightPanelMode === 'settings' ? "bg-gray-900 text-white shadow-md" : "text-gray-500 hover:bg-gray-50"
+                    "flex flex-1 items-center justify-center rounded-lg py-2 text-xs font-bold transition-all",
+                    rightPanelMode === "settings"
+                      ? "bg-gray-900 text-white shadow-md"
+                      : "text-gray-500 hover:bg-gray-50",
                   )}
                 >
                   <Settings size={14} className="mr-2" /> Nastavenia
                 </button>
-                <button 
+                <button
+                  type="button"
                   onClick={() => {
-                    setRightPanelMode('ai');
-                    if (!audit && !isValidating) {
+                    setRightPanelMode("ai");
+                    if (!audit && !isValidating && !collaborationLockDemo) {
                       handleValidate();
                     }
                   }}
                   className={cn(
-                    "flex-1 py-2 rounded-lg text-xs font-bold flex items-center justify-center transition-all relative",
-                    rightPanelMode === 'ai' ? "bg-purple-600 text-white shadow-md" : "text-gray-500 hover:bg-gray-50"
+                    "relative flex flex-1 items-center justify-center rounded-lg py-2 text-xs font-bold transition-all",
+                    rightPanelMode === "ai"
+                      ? "bg-purple-600 text-white shadow-md"
+                      : "text-gray-500 hover:bg-gray-50",
                   )}
                 >
                   <Sparkles size={14} className="mr-2" /> Validovať článok
@@ -1217,6 +1297,10 @@ const EagleCMS_Split: React.FC = () => {
                                           <p className="mt-1 text-xs text-emerald-900/80">
                                             {resolved.claim.reason}
                                           </p>
+                                          <p className="mt-2 text-[11px] font-medium text-emerald-900/90">
+                                            {formatAuditTimestamp(resolved.resolvedAt)} ·{" "}
+                                            {resolved.actorName}
+                                          </p>
                                         </div>
                                       </div>
                                       <div className="grid gap-4 md:grid-cols-2">
@@ -1279,8 +1363,14 @@ const EagleCMS_Split: React.FC = () => {
                                         <div className="grid grid-cols-1 gap-2 pt-2">
                                           <button
                                             type="button"
+                                            disabled={collaborationLockDemo}
                                             onClick={() => handleFixWithAI(claim)}
-                                            className="flex w-full items-center justify-center rounded-xl bg-purple-600 py-3 text-xs font-bold text-white shadow-lg shadow-purple-100 transition-all hover:bg-purple-700"
+                                            className={cn(
+                                              "flex w-full items-center justify-center rounded-xl py-3 text-xs font-bold shadow-lg transition-all",
+                                              collaborationLockDemo
+                                                ? "cursor-not-allowed bg-gray-200 text-gray-500 shadow-none"
+                                                : "bg-purple-600 text-white shadow-purple-100 hover:bg-purple-700",
+                                            )}
                                           >
                                             <Sparkles size={14} className="mr-2" />
                                             {activeAuditTab === "trust"
@@ -1319,6 +1409,10 @@ const EagleCMS_Split: React.FC = () => {
                                       </div>
                                       {showDiff && logEntry && (
                                         <div className="space-y-3">
+                                          <p className="text-[11px] font-medium text-gray-600">
+                                            {formatAuditTimestamp(logEntry.appliedAt)} ·{" "}
+                                            {logEntry.actorName}
+                                          </p>
                                           <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">
                                             Čo sa zmenilo ({SEO_FIELD_LABEL[seoKey]})
                                           </p>
@@ -1353,7 +1447,13 @@ const EagleCMS_Split: React.FC = () => {
                                             </p>
                                             <button
                                               type="button"
-                                              className="mt-4 w-full rounded-lg bg-purple-600 py-2 text-xs font-bold text-white transition-all hover:bg-purple-700"
+                                              disabled={collaborationLockDemo}
+                                              className={cn(
+                                                "mt-4 w-full rounded-lg py-2 text-xs font-bold transition-all",
+                                                collaborationLockDemo
+                                                  ? "cursor-not-allowed bg-gray-200 text-gray-500"
+                                                  : "bg-purple-600 text-white hover:bg-purple-700",
+                                              )}
                                               onClick={() => {
                                                 applySeoSuggestion(seoKey);
                                               }}
@@ -1442,6 +1542,9 @@ const EagleCMS_Split: React.FC = () => {
                                           <CheckCircle2 size={12} className="shrink-0" />
                                           Hotové
                                         </p>
+                                        <p className="mb-1 text-[10px] text-gray-500">
+                                          {formatAuditTimestamp(r.resolvedAt)} · {r.actorName}
+                                        </p>
                                         <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-gray-800">
                                           „{r.afterText.length > 120 ? `${r.afterText.slice(0, 120)}…` : r.afterText}“
                                         </p>
@@ -1519,6 +1622,9 @@ const EagleCMS_Split: React.FC = () => {
                                         <p className="mb-1 flex items-center gap-1.5 text-[10px] font-black uppercase text-emerald-800">
                                           <CheckCircle2 size={12} className="shrink-0" />
                                           Hotové
+                                        </p>
+                                        <p className="mb-1 text-[10px] text-gray-500">
+                                          {formatAuditTimestamp(r.resolvedAt)} · {r.actorName}
                                         </p>
                                         <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-gray-800">
                                           „{r.afterText.length > 120 ? `${r.afterText.slice(0, 120)}…` : r.afterText}“
