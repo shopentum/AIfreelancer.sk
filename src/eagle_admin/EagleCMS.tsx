@@ -69,9 +69,13 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-/** Shared by mirror + textarea so line boxes match (reduces highlight ghosting). */
-const EAGLE_EDITOR_SURFACE_CLASS =
-  "box-border w-full min-h-full p-8 text-sm font-medium leading-relaxed tracking-normal text-[#1f2937] subpixel-antialiased [font-kerning:normal] [font-feature-settings:'kern'_1] [tab-size:8] whitespace-pre-wrap break-words [overflow-wrap:anywhere]";
+/**
+ * Shared typography for mirror + textarea (pixel alignment).
+ * Do not put min-h-full here — textarea must use min-h-0 in grid so it fills the cell;
+ * mirror inner uses min-h-full so tall content scrolls in sync.
+ */
+const EAGLE_EDITOR_TYPO_CLASS =
+  "box-border w-full p-8 text-sm font-medium leading-relaxed tracking-normal subpixel-antialiased [font-kerning:normal] [font-feature-settings:'kern'_1] [tab-size:8] whitespace-pre-wrap break-words [overflow-wrap:anywhere]";
 
 function isSeoAuditKey(id: string | null): id is SeoAuditKey {
   return (
@@ -711,13 +715,13 @@ const EagleCMS_Split: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="relative min-h-[22rem] h-[clamp(22rem,52vh,36rem)] shrink-0 overflow-hidden">
-                      {/* Mirror: rovnaká typografia ako textarea; scrollbar skrytý = rovnaká šírka textu. */}
-                      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+                    {/* Grid: obe vrstvy majú presne rovnakú bunku (žiadne absolute + zlá výška textarea). */}
+                    <div className="relative isolate grid min-h-[22rem] h-[clamp(22rem,55vh,42rem)] shrink-0 grid-cols-1 grid-rows-1 overflow-hidden">
+                      <div className="pointer-events-none col-span-full row-span-full z-0 min-h-0 min-w-0 overflow-hidden">
                         <div
                           className={cn(
-                            EAGLE_EDITOR_SURFACE_CLASS,
-                            "text-transparent caret-transparent [text-shadow:none]",
+                            EAGLE_EDITOR_TYPO_CLASS,
+                            "min-h-full text-transparent caret-transparent [text-shadow:none]",
                           )}
                           style={{
                             transform: `translate3d(0, ${-scrollTop}px, 0)`,
@@ -734,8 +738,8 @@ const EagleCMS_Split: React.FC = () => {
                         onScroll={onEditorScroll}
                         onChange={(e) => setContent(e.target.value)}
                         className={cn(
-                          EAGLE_EDITOR_SURFACE_CLASS,
-                          "absolute inset-0 z-10 h-full resize-none overflow-y-auto border-0 bg-transparent text-[#1f2937] outline-none [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-gray-400 [&::-webkit-scrollbar]:hidden",
+                          EAGLE_EDITOR_TYPO_CLASS,
+                          "col-span-full row-span-full z-10 block size-full min-h-0 resize-none overflow-y-auto border-0 bg-transparent text-[#1f2937] outline-none [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-gray-400 [&::-webkit-scrollbar]:hidden",
                         )}
                         placeholder="Začnite písať váš článok..."
                       />
