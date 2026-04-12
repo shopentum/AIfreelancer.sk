@@ -51,13 +51,28 @@ export async function analyzeArticleHolistic(
 
 /**
  * Simulates targeted LLM rewrite for usability testing (no external API).
+ * Returns plain editorial text — no debug prefixes in the article body.
  */
 export async function fixClaimWithAI(
   claimText: string,
   _fullArticle: string,
 ): Promise<string> {
   await new Promise((r) => setTimeout(r, 900));
-  const trimmed = claimText.trim();
-  if (!trimmed) return claimText;
-  return `[Upravené — prototyp] ${trimmed}`;
+  const t = claimText.trim();
+  if (!t) return claimText;
+
+  let out = t;
+  out = out.replace(/\bprelom\b/gi, "možný prínos");
+  out = out.replace(/\bpár eur\b/gi, "niekoľko eur");
+  out = out.replace(/\bmimoriadne prospešn[úu]\b/gi, "prínosnú");
+  out = out.replace(
+    /\bATP\s*\(adenozíntrifosfátu?\)/gi,
+    "energiu v podobe ATP",
+  );
+
+  if (out === t) {
+    const soft = t.replace(/\s+/g, " ").trim();
+    return soft.length > 0 ? soft : t;
+  }
+  return out;
 }

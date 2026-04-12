@@ -108,7 +108,13 @@ const EagleCMS_Split: React.FC = () => {
   const [brand, setBrand] = useState('Nový Čas');
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const scrollRafRef = useRef<number | null>(null);
+  const fadeClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [scrollTop, setScrollTop] = useState(0);
+  /** Po AI úprave: rozsah znakov v `content` pre zelený fade v editore. */
+  const [fadeRange, setFadeRange] = useState<{
+    start: number;
+    end: number;
+  } | null>(null);
 
   // Validation States
   const [isValidating, setIsValidating] = useState(false);
@@ -248,20 +254,33 @@ const EagleCMS_Split: React.FC = () => {
       if (scrollRafRef.current !== null) {
         cancelAnimationFrame(scrollRafRef.current);
       }
+      if (fadeClearRef.current !== null) {
+        clearTimeout(fadeClearRef.current);
+      }
     };
   }, []);
 
   const handleFixWithAI = async (claim: Claim) => {
+    const idx = content.indexOf(claim.text);
+    if (idx === -1) return;
     const fixedText = await fixClaimWithAI(claim.text, content);
-    const newContent = content.replace(claim.text, fixedText);
+    const newContent =
+      content.slice(0, idx) + fixedText + content.slice(idx + claim.text.length);
     setContent(newContent);
-    
-    // Update claims locally
+
+    const fadeEnd = idx + fixedText.length;
+    setFadeRange({ start: idx, end: fadeEnd });
+    if (fadeClearRef.current !== null) clearTimeout(fadeClearRef.current);
+    fadeClearRef.current = setTimeout(() => {
+      setFadeRange(null);
+      fadeClearRef.current = null;
+    }, 2800);
+
     if (audit) {
       setAudit({
         ...audit,
-        claims: audit.claims.filter(c => c.id !== claim.id),
-        linguisticClaims: audit.linguisticClaims?.filter(c => c.id !== claim.id)
+        claims: audit.claims.filter((c) => c.id !== claim.id),
+        linguisticClaims: audit.linguisticClaims?.filter((c) => c.id !== claim.id),
       });
     }
     if (selectedClaimId === claim.id) setSelectedClaimId(null);
@@ -311,32 +330,50 @@ const EagleCMS_Split: React.FC = () => {
       ...(audit?.claims ?? []),
       ...(audit?.linguisticClaims ?? []),
     ];
-    return content.split(/(\s+)/).map((part, i) => {
+    let pos = 0;
+    const parts = content.split(/(\s+)/);
+    return parts.map((part, i) => {
+      const partStart = pos;
+      pos += part.length;
+      const partEnd = pos;
+      const inFade =
+        fadeRange !== null &&
+        partStart < fadeRange.end &&
+        partEnd > fadeRange.start;
+
+      if (inFade) {
+        return (
+          <span key={`f-${partStart}-${i}`} className="eagle-editor-fade-fix rounded-sm">
+            {part}
+          </span>
+        );
+      }
+
       const trimmed = part.trim();
-      if (trimmed.length < 3) return <span key={i}>{part}</span>;
+      if (trimmed.length < 3) return <span key={`t-${partStart}-${i}`}>{part}</span>;
       const claim = claims.find((c) => c.text.includes(trimmed));
       if (claim) {
         return (
           <span
-            key={i}
+            key={`c-${partStart}-${i}`}
             className={cn(
-              "rounded-sm transition-all duration-300",
+              "rounded-sm ring-1 transition-colors duration-300",
               selectedClaimId === claim.id
-                ? "bg-yellow-200/80 ring-2 ring-yellow-400"
+                ? "bg-amber-100/85 ring-amber-300/70"
                 : claim.risk === "high"
-                  ? "bg-red-100/50"
+                  ? "bg-rose-100/55 ring-rose-200/60"
                   : claim.risk === "medium"
-                    ? "bg-yellow-100/50"
-                    : "bg-green-100/50",
+                    ? "bg-amber-50/80 ring-amber-200/50"
+                    : "bg-emerald-50/70 ring-emerald-200/45",
             )}
           >
             {part}
           </span>
         );
       }
-      return <span key={i}>{part}</span>;
+      return <span key={`n-${partStart}-${i}`}>{part}</span>;
     });
-  }, [audit?.claims, audit?.linguisticClaims, content, selectedClaimId]);
+  }, [audit?.claims, audit?.linguisticClaims, content, fadeRange, selectedClaimId]);
 
   const sidebarItems = [
     { icon: BarChart3, label: 'Realtime štatistiky' },
@@ -509,11 +546,11 @@ const EagleCMS_Split: React.FC = () => {
           </div>
         </div>
 
-        {/* Editor Area: main nesmie mať overflow-y-auto, inak sticky pravého panelu zlyhá. */}
-        <main className="flex min-h-0 flex-1 flex-col overflow-hidden p-6">
-          <div className="mx-auto grid min-h-0 flex-1 grid-cols-12 gap-6 max-w-[1800px]">
+        {/* Editor Area: scroll na main — ľavý stĺpec prirodzene vysoký; pravý sticky v rámci main. */}
+        <main className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain p-6">
+          <div className="mx-auto grid w-full max-w-[1800px] grid-cols-12 items-start gap-6">
             {/* Left Column: Content */}
-            <div className="col-span-12 flex max-h-[min(calc(100vh-9.5rem),1080px)] min-h-0 flex-col gap-6 overflow-y-auto pr-1 lg:col-span-8">
+            <div className="col-span-12 flex flex-col gap-6 lg:col-span-8">
               
               {/* Hlavný obsah Card */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -748,8 +785,8 @@ const EagleCMS_Split: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Column: Split Intelligence / Settings */}
-            <div className="col-span-12 flex min-h-0 max-h-[min(calc(100vh-9.5rem),1080px)] flex-col gap-4 overflow-hidden lg:sticky lg:top-4 lg:col-span-4 lg:self-start">
+            {/* Right Column: sticky v scrollporte main; max-height len na LG kvôli vnútornému scrollu auditu. */}
+            <div className="col-span-12 flex min-h-0 flex-col gap-4 lg:sticky lg:top-3 lg:z-20 lg:col-span-4 lg:max-h-[min(calc(100dvh-7.5rem),920px)] lg:overflow-hidden lg:self-start">
               
               {/* Toggle Header */}
               <div className="flex bg-white rounded-xl p-1 border border-gray-200 shadow-sm shrink-0">
@@ -1041,17 +1078,25 @@ const EagleCMS_Split: React.FC = () => {
                                 if (claim) {
                                   return (
                                     <div className="space-y-6">
-                                      <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                                        <p className="text-xs font-bold text-gray-800 italic leading-relaxed">"{claim.text}"</p>
+                                      <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-4">
+                                        <p className="text-sm font-semibold leading-relaxed text-gray-900">
+                                          „{claim.text}“
+                                        </p>
                                       </div>
                                       <div className="space-y-2">
-                                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Dôvod nálezu</p>
-                                        <p className="text-xs font-bold text-gray-700">{claim.reason}</p>
-                                        <p className="text-[11px] text-gray-500 leading-relaxed">{claim.explanation}</p>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                          Dôvod nálezu
+                                        </p>
+                                        <p className="text-sm font-bold text-gray-800">{claim.reason}</p>
+                                        <p className="text-xs leading-relaxed text-gray-600">{claim.explanation}</p>
                                       </div>
-                                      <div className="space-y-3 pt-4 border-t border-gray-100">
-                                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Odporúčaná akcia</p>
-                                        <p className="text-sm font-bold text-gray-900">{claim.recommendedAction}</p>
+                                      <div className="space-y-3 border-t border-gray-100 pt-4">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                          Odporúčaná akcia
+                                        </p>
+                                        <p className="text-[15px] font-bold leading-snug text-gray-900">
+                                          {claim.recommendedAction}
+                                        </p>
                                         <div className="grid grid-cols-1 gap-2 pt-2">
                                           <button 
                                             onClick={() => handleFixWithAI(claim)}
@@ -1078,14 +1123,18 @@ const EagleCMS_Split: React.FC = () => {
                                 if (seoItem) {
                                   return (
                                     <div className="space-y-6">
-                                      <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                                        <p className="text-xs font-bold text-gray-800">{seoItem.message}</p>
+                                      <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-4">
+                                        <p className="text-sm font-semibold text-gray-900">{seoItem.message}</p>
                                       </div>
                                       {seoItem.suggestion && (
                                         <div className="space-y-3">
-                                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">AI Návrh</p>
-                                          <div className="bg-purple-50 p-4 rounded-2xl border border-purple-100">
-                                            <p className="text-xs font-medium text-gray-900 leading-relaxed">{seoItem.suggestion}</p>
+                                          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                            AI návrh
+                                          </p>
+                                          <div className="rounded-2xl border border-gray-200 bg-purple-50/60 p-4">
+                                            <p className="text-sm font-medium leading-relaxed text-gray-900">
+                                              {seoItem.suggestion}
+                                            </p>
                                             <button
                                               type="button"
                                               className="mt-4 w-full rounded-lg bg-purple-600 py-2 text-xs font-bold text-white transition-all hover:bg-purple-700"
@@ -1124,37 +1173,55 @@ const EagleCMS_Split: React.FC = () => {
                                       key={claim.id}
                                       onClick={() => handleClaimClick(claim)}
                                       className={cn(
-                                        "p-3 rounded-xl border transition-all cursor-pointer group",
-                                        claim.risk === 'high' ? "border-l-4 border-l-red-500 bg-red-50/30" : 
-                                        claim.risk === 'medium' ? "border-l-4 border-l-yellow-500 bg-yellow-50/30" : 
-                                        "border-l-4 border-l-emerald-500 bg-emerald-50/30",
-                                        selectedClaimId === claim.id ? "ring-2 ring-purple-500" : "hover:shadow-sm"
+                                        "group cursor-pointer rounded-xl border border-gray-200 p-3 shadow-sm transition-all",
+                                        claim.risk === "high"
+                                          ? "border-l-[3px] border-l-rose-400 bg-rose-50/40"
+                                          : claim.risk === "medium"
+                                            ? "border-l-[3px] border-l-amber-400 bg-amber-50/35"
+                                            : "border-l-[3px] border-l-emerald-400 bg-emerald-50/35",
+                                        selectedClaimId === claim.id
+                                          ? "ring-1 ring-purple-300/90 ring-offset-2 ring-offset-[#F0F2F5]"
+                                          : "hover:border-gray-300 hover:shadow",
                                       )}
                                     >
-                                      <p className="text-[10px] font-black text-gray-400 uppercase mb-1">{claim.reason}</p>
-                                      <p className="text-[11px] font-bold text-gray-800 line-clamp-2 italic">"{claim.text}"</p>
+                                      <p className="mb-1 text-[10px] font-black uppercase text-gray-500">
+                                        {claim.reason}
+                                      </p>
+                                      <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-gray-900">
+                                        „{claim.text}“
+                                      </p>
                                     </div>
                                   ))}
                                 </div>
                               )}
                               {activeAuditTab === 'linguistic' && (
                                 <div className="space-y-3">
-                                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 mb-4">
-                                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Celkový tón</p>
-                                    <p className="text-xs font-bold text-gray-800">{audit?.editorialAudit.tone}</p>
+                                  <div className="mb-4 rounded-xl border border-gray-200 bg-gray-50/80 p-4 shadow-sm">
+                                    <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                      Celkový tón
+                                    </p>
+                                    <p className="text-sm font-bold text-gray-900">{audit?.editorialAudit.tone}</p>
                                   </div>
                                   {audit?.linguisticClaims?.map(claim => (
                                     <div 
                                       key={claim.id}
                                       onClick={() => handleClaimClick(claim)}
                                       className={cn(
-                                        "p-3 rounded-xl border transition-all cursor-pointer group",
-                                        claim.risk === 'high' ? "border-l-4 border-l-red-500 bg-red-50/30" : "border-l-4 border-l-yellow-500 bg-yellow-50/30",
-                                        selectedClaimId === claim.id ? "ring-2 ring-purple-500" : "hover:shadow-sm"
+                                        "group cursor-pointer rounded-xl border border-gray-200 p-3 shadow-sm transition-all",
+                                        claim.risk === "high"
+                                          ? "border-l-[3px] border-l-rose-400 bg-rose-50/40"
+                                          : "border-l-[3px] border-l-amber-400 bg-amber-50/35",
+                                        selectedClaimId === claim.id
+                                          ? "ring-1 ring-purple-300/90 ring-offset-2 ring-offset-[#F0F2F5]"
+                                          : "hover:border-gray-300 hover:shadow",
                                       )}
                                     >
-                                      <p className="text-[10px] font-black text-gray-400 uppercase mb-1">{claim.reason}</p>
-                                      <p className="text-[11px] font-bold text-gray-800 line-clamp-2 italic">"{claim.text}"</p>
+                                      <p className="mb-1 text-[10px] font-black uppercase text-gray-500">
+                                        {claim.reason}
+                                      </p>
+                                      <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-gray-900">
+                                        „{claim.text}“
+                                      </p>
                                     </div>
                                   ))}
                                 </div>
@@ -1175,20 +1242,28 @@ const EagleCMS_Split: React.FC = () => {
                                           key={key}
                                           onClick={() => setSelectedClaimId(key)}
                                           className={cn(
-                                            "p-3 rounded-xl border transition-all cursor-pointer",
-                                            item.status === 'fail' ? "border-l-4 border-l-red-500 bg-red-50/30" : 
-                                            item.status === 'warning' ? "border-l-4 border-l-yellow-500 bg-yellow-50/30" : 
-                                            "border-l-4 border-l-emerald-500 bg-emerald-50/30"
+                                            "cursor-pointer rounded-xl border border-gray-200 p-3 shadow-sm transition-all hover:border-gray-300 hover:shadow",
+                                            item.status === "fail"
+                                              ? "border-l-[3px] border-l-rose-400 bg-rose-50/40"
+                                              : item.status === "warning"
+                                                ? "border-l-[3px] border-l-amber-400 bg-amber-50/35"
+                                                : "border-l-[3px] border-l-emerald-400 bg-emerald-50/35",
                                           )}
                                         >
-                                          <div className="flex justify-between items-center mb-1">
-                                            <p className="text-[9px] font-black text-gray-400 uppercase">{key}</p>
+                                          <div className="mb-1 flex items-center justify-between">
+                                            <p className="text-[10px] font-black uppercase text-gray-500">{key}</p>
                                             <div className={cn(
-                                              "w-2 h-2 rounded-full",
-                                              item.status === 'fail' ? "bg-red-500" : item.status === 'warning' ? "bg-yellow-500" : "bg-emerald-500"
-                                            )}></div>
+                                              "h-2 w-2 rounded-full",
+                                              item.status === "fail"
+                                                ? "bg-rose-500"
+                                                : item.status === "warning"
+                                                  ? "bg-amber-500"
+                                                  : "bg-emerald-500",
+                                            )} />
                                           </div>
-                                          <p className="text-[11px] font-bold text-gray-800">{item.message}</p>
+                                          <p className="text-[13px] font-semibold leading-snug text-gray-900">
+                                            {item.message}
+                                          </p>
                                         </div>
                                       );
                                     })}
