@@ -71,6 +71,7 @@ Tieto funkcie sú architektonicky navrhnuté, ale **nie sú súčasťou pilotnej
 - Analytické dashboardy a agregované metriky (Time-to-Fix prehľady)
 - Zálohy stavu (Undo snapshots) uložené na serveri prepojené s Audit Trail
 - Živá prítomnosť editorov cez WebSocket (Collab Lock — 2. fáza)
+- Feedback Loop & Model Calibration: Zber anonymizovaných dát z interakcií redaktorov (najmä akcie „Ignorovať") pre budúcu kalibráciu citlivosti validačných pravidiel a adaptáciu systému na špecifiká redakcie. V MVP fáze sa tieto dáta výhradne logujú v audit logu pre potreby analýzy. Aktívne učenie alebo automatická úprava modelu nie sú súčasťou pilotnej implementácie.
 
 ### 3.3 Ako budeme postupovať
 
@@ -447,6 +448,8 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 **Definícia:** Čas od prvého otvorenia karty nálezu po klik na AI fix.  
 **Prečo to meriame:** Ak je priemerný čas pod 10 sekúnd, systém funguje intuitívne. Ak je nad 2 minúty, education layer alebo UX potrebuje iteráciu.  
 **Dôležité:** Táto metrika je **indikátor použiteľnosti**, nie záväzný SLA. Produkčné čísla sa stanovia po pilote.
+
+Tlačidlo „Ignorovať" nie je len UX rozhodnutie, ale aj základ pre budúcu spätnoväzbovú slučku systému, ktorá umožní lepšie rozlíšiť medzi reálnym problémom a autorským zámerom redaktora.
 
 ---
 
