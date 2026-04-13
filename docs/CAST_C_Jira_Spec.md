@@ -20,7 +20,7 @@ Cieľom nebolo nahradiť existujúce vrstvy, ale nadviazať na ne a rozšíriť 
 
 ## 1. KONTEXT A PRODUKT RATIONALE
 
-Tento dokument je **produktová špecifikácia** pre jednu konkrétnu feature z MDIE Validation Layer: **Claim Validation & AI-Assisted Fix**.
+Tento dokument rieši konkrétnu feature v rámci **Validation Layeru** — jednej z vrstiev širšej MDIE architektúry. Samotný layer je rozsiahlejší, ale pre pilot som zámerne išiel do hĺbky jedného use case, ktorý má okamžitý dopad na kvalitu a riziko publikovaného obsahu: **Claim Validation & AI-Assisted Fix**.
 
 Redaktor pracuje pod časovým tlakom. Keď vidí len správu „Príliš silné medicínske tvrdenie", nevie prečo ani čo presne má urobiť. Výsledkom je odpor, ignorovanie upozornení a právne riziko. Táto feature rieši práve toto: **systém argumentuje, nie len posudzuje**.
 
