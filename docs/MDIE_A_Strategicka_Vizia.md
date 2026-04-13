@@ -1,4 +1,4 @@
-# ČASŤ A: STRATEGICKÁ VÍZIA A KONCEPT MDIE
+# MDIE A: STRATEGICKÁ VÍZIA A KONCEPT MDIE
 ## Enterprise Strategy & Architectural Vision
 
 > **Projekt:** Media Decision Intelligence Engine (MDIE)  
@@ -75,4 +75,4 @@ MDIE predstavuje novú kategóriu rozhodovacej inteligencie. Nie je to nástroj 
 
 ---
 
-*Dokument pripravený v rámci výberového konania na pozíciu PM/Produktový architekt. Nadväzuje na Časť B (`CAST_B_Projektovy_Ramec.md`) a Časť C (`CAST_C_Jira_Spec.md`).*
+*Dokument pripravený v rámci výberového konania na pozíciu PM/Produktový architekt. Nadväzuje na MDIE B (`MDIE_B_Projektovy_Ramec.md`) a MDIE C (`MDIE_C_Jira_Spec.md`).*

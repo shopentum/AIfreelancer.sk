@@ -1,4 +1,4 @@
-# ČASŤ B: PROJEKTOVÝ RÁMEC & DELIVERY
+# MDIE B: PROJEKTOVÝ RÁMEC & DELIVERY
 ## Media Decision Intelligence Engine (MDIE)
 > **Autor:** Daniel Budziňák, Solution Architect  
 > **Verzia:** 2.0 | Dátum: 2026-04-12
@@ -75,4 +75,4 @@ Pre úspech MDIE v prostredí NMH definujeme jasnú štruktúru zodpovednosti a 
 
 ---
 
-*Dokument pripravený v rámci výberového konania na pozíciu PM/Produktový architekt. Súvisí s Časťou A (MDIE stratégia) a Časťou C (Jira feature spec: `CAST_C_Jira_Spec.md`).*
+*Dokument pripravený v rámci výberového konania na pozíciu PM/Produktový architekt. Súvisí s MDIE A (strategická vízia) a MDIE C (Jira feature spec: `MDIE_C_Jira_Spec.md`).*

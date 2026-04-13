@@ -938,7 +938,7 @@ const EagleCMS_Split: React.FC = () => {
             className={cn(
               "rounded-sm ring-1 transition-colors duration-300",
               selectedClaimId === claim.id
-                ? "bg-amber-100/85 ring-amber-300/70"
+                ? "bg-violet-100/85 ring-violet-400/70"
                 : claim.risk === "high"
                   ? "bg-rose-100/55 ring-rose-200/60"
                   : claim.risk === "medium"
