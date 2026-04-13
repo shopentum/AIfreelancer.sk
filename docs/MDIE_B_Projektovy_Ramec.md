@@ -75,4 +75,4 @@ Pre úspech MDIE v prostredí NMH definujeme jasnú štruktúru zodpovednosti a 
 
 ---
 
-*Dokument pripravený v rámci výberového konania na pozíciu PM/Produktový architekt. Súvisí s MDIE A (strategická vízia) a MDIE C (Jira feature spec: `MDIE_C_Jira_Spec.md`).*
+*Dokument pripravený v rámci výberového konania na pozíciu PM/Produktový architekt. Súvisí s MDIE A (strategická vízia) a MDIE C (Jira feature spec: `MDIE_C_Jira_Spec.pdf`).*

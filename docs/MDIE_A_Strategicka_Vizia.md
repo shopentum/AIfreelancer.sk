@@ -73,4 +73,4 @@ MDIE predstavuje novú kategóriu rozhodovacej inteligencie. Nie je to nástroj 
 
 ---
 
-*Dokument pripravený v rámci výberového konania na pozíciu PM/Produktový architekt. Nadväzuje na MDIE B (`MDIE_B_Projektovy_Ramec.md`) a MDIE C (`MDIE_C_Jira_Spec.md`).*
+*Dokument pripravený v rámci výberového konania na pozíciu PM/Produktový architekt. Nadväzuje na MDIE B (`MDIE_B_Projektovy_Ramec.pdf`) a MDIE C (`MDIE_C_Jira_Spec.pdf`).*
