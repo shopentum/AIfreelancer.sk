@@ -540,6 +540,48 @@ const EagleCMS_Split: React.FC = () => {
     setIsValidating(false);
   };
 
+  /** Vráti nález s najvyšším rizikom, ktorého text pokrýva pozíciu `pos` v obsahu.
+   *  Ak na danom mieste nie je žiadny nález, vráti null. */
+  const getClaimAtPosition = useCallback(
+    (pos: number): Claim | null => {
+      if (!audit) return null;
+      const riskOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
+      const allClaims = [
+        ...(audit.claims ?? []),
+        ...(audit.linguisticClaims ?? []),
+      ];
+      const matching = allClaims
+        .map((c) => {
+          const idx = content.indexOf(c.text);
+          if (idx === -1) return null;
+          if (pos >= idx && pos <= idx + c.text.length) return c;
+          return null;
+        })
+        .filter((c): c is Claim => c !== null)
+        .sort((a, b) => (riskOrder[a.risk] ?? 2) - (riskOrder[b.risk] ?? 2));
+      return matching[0] ?? null;
+    },
+    [audit, content],
+  );
+
+  /** Click na textarea — ak kurzor pristál na zvýraznenom texte, otvorí zodpovedajúci
+   *  detail nálezu v pravom paneli a prepne na správnu záložku. */
+  const handleEditorClick = useCallback(() => {
+    const ta = editorRef.current;
+    if (!ta || !audit) return;
+    const claim = getClaimAtPosition(ta.selectionStart);
+    if (!claim) return;
+    const isLinguistic = (audit.linguisticClaims ?? []).some(
+      (c) => c.id === claim.id,
+    );
+    setRightPanelMode("ai");
+    setActiveAuditTab(isLinguistic ? "linguistic" : "trust");
+    setSelectedClaimId(claim.id);
+    if (!claimFirstSeenRef.current[claim.id]) {
+      claimFirstSeenRef.current[claim.id] = Date.now();
+    }
+  }, [audit, getClaimAtPosition]);
+
   const handleClaimClick = (claim: Claim) => {
     setSelectedClaimId(claim.id);
     if (!claimFirstSeenRef.current[claim.id]) {
@@ -1445,6 +1487,7 @@ const EagleCMS_Split: React.FC = () => {
                         spellCheck={false}
                         onScroll={onEditorScroll}
                         onChange={(e) => setContent(e.target.value)}
+                        onClick={handleEditorClick}
                         className={cn(
                           EAGLE_EDITOR_TYPO_CLASS,
                           "col-span-full row-span-full z-10 block size-full min-h-0 resize-none overflow-y-auto border-0 text-[#1f2937] outline-none [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-gray-400 [&::-webkit-scrollbar]:hidden",

@@ -130,6 +130,8 @@ Aby som rozumel logike AI a nemusel hádať, čo mám opraviť.
 - [ ] Kliknutie na kartu nálezu otvorí detail v tom istom paneli
 - [ ] V detaile je **na vrchu TL;DR box** (modrý, 1 veta z `whyFlagged`: prečo systém nález identifikoval), potom citácia, dôvod, vysvetlenie, odporúčaná akcia
 - [ ] Text z článku zodpovedajúci nálezu je vizuálne zvýraznený priamo v editore (highlight)
+- [ ] Kliknutie na zvýraznený úsek textu v editore otvorí zodpovedajúci detail nálezu v pravom paneli a automaticky prepne na správnu záložku (Dôvera / Štýl / SEO)
+- [ ] Ak sa na danom mieste prekrýva viac nálezov, aktivuje sa nález s najvyšším rizikom (high → medium → low)
 - [ ] Vyriešené nálezy (Dôvera/Štýl) sa zobrazia v sekcii „Vyriešené" dole v zozname s typom riešenia (viď Story 3)
 - [ ] SEO návrhy po akcii (Použiť / Ignorovať) sa zobrazia priamo v SEO zozname so stavom „Použité" alebo „Ignorované", bez presunu do samostatnej sekcie
 
@@ -248,6 +250,13 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
         ▼
 [Zobrazia sa nálezy v paneli]
 [Readiness Score %, záložky: Dôvera / Štýl / SEO]
+[Zvýraznené úseky textu v editore sú klikateľné]
+        │
+        ├──► [Redaktor klikne na zvýraznený text v editore]
+        │    [Pravý panel otvorí zodpovedajúci detail nálezu]
+        │    [Správna záložka sa aktivuje automaticky]
+        │    [Pri prekrytí viacerých nálezov: aktivuje sa nález s najvyšším rizikom]
+        │    [Audit: claimFirstSeenAt = now()]
         │
         ▼
 [Redaktor klikne na kartu nálezu]
@@ -404,6 +413,8 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 - [ ] Fialový flash po Undo na zmenených poliach (1 s)
 - [ ] Všetky disabled stavy majú tooltips
 - [ ] Readiness Score sa animovane zvyšuje po každej oprave
+- [ ] Kliknutie na zvýraznený text v editore otvorí detail nálezu a prepne záložku (navigačný mostík editor → panel)
+- [ ] Pri prekrytí viacerých nálezov na jednom mieste sa aktivuje nález s najvyšším rizikom
 
 **Non-functional:**
 - [ ] Prepínač `mdie.fix.ai_enabled` vypne AI fix bez nového nasadenia
@@ -458,6 +469,16 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 
 Tlačidlo „Ignorovať" nie je len UX rozhodnutie, ale aj základ pre budúcu spätnoväzbovú slučku systému, ktorá umožní lepšie rozlíšiť medzi reálnym problémom a autorským zámerom redaktora.
 
+### 8.7 Navigačný mostík: klik na zvýraznený text → detail nálezu
+
+**Problém:** Redaktor vidí farebné zvýraznenie v texte, ale nemusí vedieť, že má hľadať zodpovedajúci nález v pravom paneli. Zvlášť pri viacerých nálezoch je orientácia náročná: nález 3 v paneli zodpovedá ktorému úseku v texte?
+
+**Riešenie:** Kliknutie na zvýraznený text v editore priamo otvorí detail zodpovedajúceho nálezu v pravom paneli a automaticky prepne na správnu záložku (Dôvera / Štýl / SEO). Žiadne extra ikony ani tooltipy. Farebnézvýraznenie samo o sebe naznačuje, že ide o aktívny prvok.
+
+**Prečo bez hover efektu v textarea:** Editor je štandardná textarea s prekrývajúcou sa highlight vrstvou. Dynamická zmena kurzora nad konkrétnym slovom by si vyžadovala sledovanie pozície myši voči dátovým rozsahom textu (experimentálne API). Pre v1 je dostatočný samotný klik. Hover efekt je zámer pre v2.
+
+**Výsledok:** Redaktor prirodzene prechádza medzi textom a panelom bez straty kontextu. Znižuje sa kognitívna záťaž pri hľadaní správneho nálezu v zozname.
+
 ---
 
 ## 11. WIREFRAME / UI NÁČRT
@@ -487,7 +508,7 @@ Tlačidlo „Ignorovať" nie je len UX rozhodnutie, ale aj základ pre budúcu s
 │ ┌──────────────────────────┐   │ 🟡 Chýba konkrétna cena               │
 │ │ Text článku              │   │ Chýba konkrétna suma...               │
 │ │                          │   │ „stojí pár eur"                       │
-│ │ [highlight fialový]      │◄──┤ ─────────────────────────────────────  │
+│ │ [highlight — klikateľné] │◄──┤ ─────────────────────────────────────  │
 │ │ kreatín monohydrát       │   │ [Vyriešené]                           │
 │ │ [highlight zelený]       │   │ ✓ Opravil Daniel · pred 2 min.        │
 │ │                          │   │                                        │
@@ -601,6 +622,7 @@ Response 200:
 | 1.2 | 2026-04-12 | Daniel Budziňák | Token Management presunutý do Časti B (Príloha); C zameraná výhradne na feature spec |
 || 2.0 | 2026-04-12 | Daniel Budzinák | Doplnené: DATA GAP, Feature Summary, MVP Scope, Out of Scope, Execution Framing |
 || 2.1 | 2026-04-12 | Daniel Budziňák | Sync s prototypom: skrátené labels, TL;DR detail, Ignorovať akcia, resolutionType, score logika |
+|| 2.2 | 2026-04-12 | Daniel Budziňák | Navigačný mostík: klik na zvýraznený text → detail nálezu (Story 2 AC, Workflow, Design Rationale 8.7, AC Checklist) |
 
 ---
 
