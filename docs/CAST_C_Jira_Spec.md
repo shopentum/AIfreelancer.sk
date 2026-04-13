@@ -54,7 +54,8 @@ Toto zadanie pokrýva výhradne Phase 1. Cieľom je dodať **funkčný, testovat
 - Základná claim extraction z textu článku
 - Jednoduché risk scoring: `low` / `medium` / `high`
 - Heatmap / highlight vizualizácia nálezov v editore
-- Základné akcie: „Opraviť pomocou AI", „Upraviť ručne" (s potvrdením), „Ignorovať"
+- Základné akcie pre nálezy (Dôvera/Štýl): „Opraviť pomocou AI", „Upraviť ručne" (s potvrdením), „Ignorovať"
+- Základné akcie pre SEO návrhy: „Použiť návrh" (AI), „Ignorovať"
 - História zmien — Undo (max. 5 krokov, uložené v prehliadači v pilote)
 - Zamykanie článku pri súbežnej editácii — Collab Lock (cez ETag)
 - Záchranný režim pri výpadku AI — editor zostáva plne funkčný
@@ -128,7 +129,8 @@ Aby som rozumel logike AI a nemusel hádať, čo mám opraviť.
 - [ ] Kliknutie na kartu nálezu otvorí detail v tom istom paneli
 - [ ] V detaile je **na vrchu TL;DR box** (modrý, 1 veta z `whyFlagged` — prečo systém nález zdvihol), potom citácia, dôvod, vysvetlenie, odporúčaná akcia
 - [ ] Text z článku zodpovedajúci nálezu je vizuálne zvýraznený priamo v editore (highlight)
-- [ ] Vyriešené nálezy sa zobrazia v sekcii „Vyriešené" dole v zozname s typom riešenia (viď Story 3)
+- [ ] Vyriešené nálezy (Dôvera/Štýl) sa zobrazia v sekcii „Vyriešené" dole v zozname s typom riešenia (viď Story 3)
+- [ ] SEO návrhy po akcii (Použiť / Ignorovať) sa zobrazia priamo v SEO zozname so stavom „Použité" alebo „Ignorované" — bez presunu do samostatnej sekcie
 
 **Edge cases:**
 | Scenár | Správanie |
@@ -164,8 +166,10 @@ Aby som ušetril čas na rutinných opravách a mal garantovaný auditný zázna
 - [ ] V detaile nálezu sú **tri akcie**: „Opraviť pomocou AI" (primárna), „Upraviť ručne", „Ignorovať"
 - [ ] **AI fix:** Po kliknutí AI opraví text v editore, zelený fade (~2,5 s), nález → „Vyriešené" s labelom „Opravené AI", Readiness Score +2/+3
 - [ ] **Upraviť ručne:** Po kliknutí sa editor fokusne, tlačidlo sa zmení na „Potvrdiť opravu" (zelené) → po potvrdení nález → „Vyriešené" s labelom „Upravené ručne", Readiness Score +2/+3
-- [ ] **Ignorovať:** Nález sa presunie do „Vyriešené" s labelom „Ignorované (vedomé rozhodnutie)", Readiness Score +2/+3
-- [ ] Všetky tri akcie **pridajú body** do Readiness Score — Score reprezentuje „všetky nálezy boli vyriešené (úpravou alebo rozhodnutím)"
+- [ ] **Ignorovať (nález):** Nález sa presunie do „Vyriešené" s labelom „Ignorované (vedomé rozhodnutie)", Readiness Score +2/+3
+- [ ] Všetky tri akcie pre nálezy **pridajú body** do Readiness Score — Score reprezentuje „všetky nálezy boli vyriešené (úpravou alebo rozhodnutím)"
+- [ ] **SEO — Použiť návrh:** AI hodnota sa skopíruje do poľa, položka v SEO zozname zobrazí „Použité", Readiness Score +2/+3
+- [ ] **SEO — Ignorovať:** Položka v SEO zozname zobrazí „Ignorované", Readiness Score +2/+3; redaktor si zachová vlastný titulok
 - [ ] Do audit logu sa zapíše pre každú akciu: `actorId`, `source` (ai/human), `resolutionType` (ai_fix/manual/ignored), `claimId`, `timestamp`
 - [ ] Redaktor má možnosť vrátiť AI fix cez „Späť" (Undo stack, max. 5 krokov)
 - [ ] Tlačidlo „Späť" zobrazuje počet krokov: „Späť (3)"
@@ -302,6 +306,7 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 || Potvrdiť opravu | „Potvrdiť opravu“ | – | – |
 || Ignorovať | „Ignorovať“ | – | Sivé (Collab Lock) |
 | Použiť návrh (SEO) | „Použiť návrh" | – | Sivé (lock / API) |
+| Ignorovať (SEO) | „Ignorovať" | – | Sivé (Collab Lock) |
 | Späť (Undo) | „Späť (N)" | – | Sivé + bez počtu |
 | Export logu | „Export logu" | – | – |
 
@@ -364,6 +369,8 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 | E12 | Článok bez textu, klik na Validovať | Guard na prázdny string, validácia sa nespustí | Tooltip: „Pridajte text článku pred spustením validácie." |
 | E13 | Ignorovanie pri aktívnom Collab Lock | Tlačidlo „Ignorovať" je disabled | Tooltip: „Nemožno ignorovať počas zámku." |
 | E14 | Redaktor klikne „Upraviť ručne" ale nepotvrdí (prepne view) | Pending stav sa zruší, nález ostáva v zozname otvorený | – |
+| E15 | Redaktor ignoruje SEO titulok — má vlastný | SEO položka označená „Ignorované", Readiness Score +2/+3; pole ostáva nezmenené | – |
+| E16 | SEO návrh ignorovaný — detail sa zatvorí | „Ignorovať" tlačidlo sa skryje po akcii; bez novej validácie nie je možné zmeniť rozhodnutie | – |
 
 ---
 
@@ -379,6 +386,8 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 - [ ] Potvrdená ručná úprava presunie nález do „Vyriešené" s labelom „Upravené ručne"; Readiness Score +2/+3
 - [ ] Všetky tri akcie pridávajú body — Score = všetky nálezy vyriešené (úpravou alebo rozhodnutím)
 - [ ] Score nediferencuje kvalitu riešenia, ale mieru uzavretia nálezov; kvalita je zachytená v audit logu
+- [ ] SEO návrh: „Použiť návrh" skopíruje AI hodnotu do poľa, položka v SEO zozname zobrazí „Použité"
+- [ ] SEO návrh: „Ignorovať" označí položku v SEO zozname ako „Ignorované (vedomé rozhodnutie)", Readiness Score +2/+3; pole ostáva nezmenené
 - [ ] Undo (max. 5 krokov) funguje pre AI fix aj SEO návrh
 - [ ] Collab Lock blokuje všetky zmeny vrátane Ignorovania; text ostáva len na čítanie
 - [ ] API degradation: editor ostáva plne editovateľný bez AI funkcií
