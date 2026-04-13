@@ -1,6 +1,6 @@
-# ČASŤ B — PROJEKTOVÝ RÁMEC & DELIVERY
+# ČASŤ B: PROJEKTOVÝ RÁMEC & DELIVERY
 ## Media Decision Intelligence Engine (MDIE)
-> **Autor:** Daniel Budziňák — Solution Architect  
+> **Autor:** Daniel Budziňák, Solution Architect  
 > **Verzia:** 2.0 | Dátum: 2026-04-12
 
 ---
@@ -30,9 +30,9 @@ Pre úspech MDIE v prostredí NMH definujeme jasnú štruktúru zodpovednosti a 
 
 ## 3. Implementačný framework (Phasing)
 
-- **Fáza 1 — Pilot (4–6 týždňov):** Nasadenie MDIE cez CMS-nezávislé API; nastavenie Editorial Identity Layer (tón a pravidlá konkrétnej značky).
-- **Fáza 2 — Optimalizácia (4 týždne):** Iteratívne ladenie na základe reálnej prevádzky a kalibrácia pravidiel.
-- **Fáza 3 — Full Scale-up:** Postupné rozširovanie na celé portfólio NMH s centrálnym riadením cez Governance Layer.
+- **Fáza 1: Pilot (4–6 týždňov):** Nasadenie MDIE cez CMS-nezávislé API; nastavenie Editorial Identity Layer (tón a pravidlá konkrétnej značky).
+- **Fáza 2: Optimalizácia (4 týždne):** Iteratívne ladenie na základe reálnej prevádzky a kalibrácia pravidiel.
+- **Fáza 3: Full Scale-up:** Postupné rozširovanie na celé portfólio NMH s centrálnym riadením cez Governance Layer.
 
 ---
 
@@ -62,7 +62,7 @@ Pre úspech MDIE v prostredí NMH definujeme jasnú štruktúru zodpovednosti a 
 | Tiered Routing | Výpočtový čas | −40 % až −70 % |
 | Batch Processing | Celková cena API | −50 % |
 
-> **Metodická poznámka:** Hodnoty sú odhadované na základe dostupných ceníkov AI providerov. Presné čísla sa stanovia po pilotnom meraní skutočného token usage v prostredí NMH (Fáza 2 — Optimalizácia).
+> **Metodická poznámka:** Hodnoty sú odhadované na základe dostupných ceníkov AI providerov. Presné čísla sa stanovia po pilotnom meraní skutočného token usage v prostredí NMH (Fáza 2: Optimalizácia).
 
 ---
 
@@ -71,8 +71,8 @@ Pre úspech MDIE v prostredí NMH definujeme jasnú štruktúru zodpovednosti a 
 | Verzia | Dátum | Autor | Zmena |
 |--------|-------|-------|-------|
 | 1.0 | 2026-04-12 | Daniel Budziňák | Prvá verzia |
-| 2.0 | 2026-04-12 | Daniel Budziňák | Finálna verzia — kompaktná forma, Príloha Token Management |
+| 2.0 | 2026-04-12 | Daniel Budziňák | Finálna verzia, kompaktná forma, Príloha Token Management |
 
 ---
 
-*Dokument pripravený v rámci výberového konania na pozíciu PM/Produktový architekt. Súvisí s Časťou A (MDIE stratégia) a Časťou C (Jira feature spec — `CAST_C_Jira_Spec.md`).*
+*Dokument pripravený v rámci výberového konania na pozíciu PM/Produktový architekt. Súvisí s Časťou A (MDIE stratégia) a Časťou C (Jira feature spec: `CAST_C_Jira_Spec.md`).*

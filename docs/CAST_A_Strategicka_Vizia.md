@@ -1,8 +1,8 @@
-# ČASŤ A — STRATEGICKÁ VÍZIA A KONCEPT MDIE
+# ČASŤ A: STRATEGICKÁ VÍZIA A KONCEPT MDIE
 ## Enterprise Strategy & Architectural Vision
 
 > **Projekt:** Media Decision Intelligence Engine (MDIE)  
-> **Autor:** Daniel Budziňák — Solution Architect  
+> **Autor:** Daniel Budziňák, Solution Architect  
 > **Verzia:** 1.2 | Dátum: 2026-04-12
 
 ---
@@ -56,7 +56,7 @@ Každý článok pred publikáciou prechádza kvantitatívnym vyhodnotením prip
 MDIE je navrhnutý ako Enterprise-ready systém, ktorý počíta s reálnymi podmienkami prevádzky:
 
 - **Graceful Degradation:** V prípade výpadku AI služieb systém neblokuje redaktora, ale prechádza do Safety módu, pričom zachováva plnú editačnú schopnosť.
-- **Shared Intelligence Core:** Architektúra optimalizovaná na hromadné spracovanie článkov s minimálnymi nákladmi na tokeny (viď detail v Časti B — Príloha Token Management).
+- **Shared Intelligence Core:** Architektúra optimalizovaná na hromadné spracovanie článkov s minimálnymi nákladmi na tokeny (viď detail v Časti B, Príloha Token Management).
 
 ---
 
@@ -71,7 +71,7 @@ MDIE predstavuje novú kategóriu rozhodovacej inteligencie. Nie je to nástroj 
 | Verzia | Dátum | Autor | Zmena |
 |--------|-------|-------|-------|
 | 1.0 | 2026-04-12 | Daniel Budziňák | Prvá verzia |
-| 1.2 | 2026-04-12 | Daniel Budziňák | Finálna verzia — čistý Markdown pre PDF export |
+| 1.2 | 2026-04-12 | Daniel Budziňák | Finálna verzia, čistý Markdown pre PDF export |
 
 ---
 
