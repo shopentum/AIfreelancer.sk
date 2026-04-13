@@ -293,6 +293,8 @@ const EagleCMS_Split: React.FC = () => {
   } | null>(null);
   /** Nález čakajúci na potvrdenie ručnej úpravy. */
   const [pendingManualEdit, setPendingManualEdit] = useState<string | null>(null);
+  /** SEO kľúče, ktoré redaktor vedome ignoroval (namiesto aplikovania návrhu). */
+  const [ignoredSeoKeys, setIgnoredSeoKeys] = useState<Set<string>>(new Set());
 
   const pushArticleSnapshot = useCallback(() => {
     setArticleHistory((h) => {
@@ -528,6 +530,7 @@ const EagleCMS_Split: React.FC = () => {
     setSeoChangeLog([]);
     setResolvedClaims([]);
     setArticleHistory([]);
+    setIgnoredSeoKeys(new Set());
     if (undoFlashClearRef.current !== null) {
       clearTimeout(undoFlashClearRef.current);
       undoFlashClearRef.current = null;
@@ -747,6 +750,18 @@ const EagleCMS_Split: React.FC = () => {
       if (selectedClaimId === claim.id) setSelectedClaimId(null);
     },
     [audit, collaborationLockDemo, content, selectedClaimId],
+  );
+
+  const handleIgnoreSeoSuggestion = useCallback(
+    (key: string) => {
+      if (collaborationLockDemo) return;
+      setIgnoredSeoKeys((prev) => new Set([...prev, key]));
+      if (audit) {
+        setAudit({ ...audit, readinessScore: nextReadinessBump(audit.readinessScore) });
+      }
+      if (selectedClaimId === key) setSelectedClaimId(null);
+    },
+    [audit, collaborationLockDemo, selectedClaimId],
   );
 
   const applySeoSuggestion = useCallback(
@@ -1980,6 +1995,21 @@ const EagleCMS_Split: React.FC = () => {
                                           </div>
                                         </div>
                                       ) : null}
+                                      {!ignoredSeoKeys.has(seoKey) && !seoChangeLog.some((e) => e.key === seoKey) && (
+                                        <button
+                                          type="button"
+                                          disabled={collaborationLockDemo}
+                                          onClick={() => handleIgnoreSeoSuggestion(seoKey)}
+                                          className={cn(
+                                            "flex w-full items-center justify-center rounded-xl border py-2.5 text-xs font-bold transition-all",
+                                            collaborationLockDemo
+                                              ? "cursor-not-allowed border-gray-100 bg-gray-50 text-gray-400"
+                                              : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700",
+                                          )}
+                                        >
+                                          <X size={13} className="mr-2" /> Ignorovať
+                                        </button>
+                                      )}
                                     </div>
                                   );
                                 }
@@ -2184,31 +2214,42 @@ const EagleCMS_Split: React.FC = () => {
                                     })
                                     .map(([key, res]) => {
                                       const item = res as { status: string; message: string; suggestion?: string };
+                                      const isApplied = seoChangeLog.some((e) => e.key === key);
+                                      const isIgnored = ignoredSeoKeys.has(key);
+                                      const isResolved = isApplied || isIgnored;
                                       return (
-                                        <div 
+                                        <div
                                           key={key}
-                                          onClick={() => setSelectedClaimId(key)}
+                                          onClick={() => !isResolved && setSelectedClaimId(key)}
                                           className={cn(
-                                            "cursor-pointer rounded-xl border border-gray-200 p-3 shadow-sm transition-all hover:border-gray-300 hover:shadow",
-                                            item.status === "fail"
-                                              ? "border-l-[3px] border-l-rose-400 bg-rose-50/40"
-                                              : item.status === "warning"
-                                                ? "border-l-[3px] border-l-amber-400 bg-amber-50/35"
-                                                : "border-l-[3px] border-l-emerald-400 bg-emerald-50/35",
+                                            "rounded-xl border border-gray-200 p-3 shadow-sm transition-all",
+                                            isResolved
+                                              ? "border-l-[3px] border-l-emerald-400 bg-emerald-50/35 opacity-70"
+                                              : cn(
+                                                  "cursor-pointer hover:border-gray-300 hover:shadow",
+                                                  item.status === "fail"
+                                                    ? "border-l-[3px] border-l-rose-400 bg-rose-50/40"
+                                                    : item.status === "warning"
+                                                      ? "border-l-[3px] border-l-amber-400 bg-amber-50/35"
+                                                      : "border-l-[3px] border-l-emerald-400 bg-emerald-50/35",
+                                                ),
                                           )}
                                         >
                                           <div className="mb-1 flex items-center justify-between">
                                             <p className="text-[10px] font-black uppercase text-gray-500">{key}</p>
-                                            <div className={cn(
-                                              "h-2 w-2 rounded-full",
-                                              item.status === "fail"
-                                                ? "bg-rose-500"
-                                                : item.status === "warning"
-                                                  ? "bg-amber-500"
-                                                  : "bg-emerald-500",
-                                            )} />
+                                            {isResolved ? (
+                                              <span className="flex items-center gap-1 text-[10px] font-black uppercase text-emerald-700">
+                                                <CheckCircle2 size={11} />
+                                                {isApplied ? "Použité" : "Ignorované"}
+                                              </span>
+                                            ) : (
+                                              <div className={cn(
+                                                "h-2 w-2 rounded-full",
+                                                item.status === "fail" ? "bg-rose-500" : item.status === "warning" ? "bg-amber-500" : "bg-emerald-500",
+                                              )} />
+                                            )}
                                           </div>
-                                          <p className="text-[13px] font-semibold leading-snug text-gray-900">
+                                          <p className={cn("text-[13px] font-semibold leading-snug", isResolved ? "text-gray-500" : "text-gray-900")}>
                                             {item.message}
                                           </p>
                                         </div>
