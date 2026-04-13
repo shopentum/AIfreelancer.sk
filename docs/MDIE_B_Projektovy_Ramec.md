@@ -1,4 +1,4 @@
-# MDIE B: PROJEKTOVÝ RÁMEC & DELIVERY
+# MDIE B: Projektový rámec & delivery
 ## Media Decision Intelligence Engine (MDIE)
 > **Autor:** Daniel Budziňák, Solution Architect  
 > **Verzia:** 2.0 | Dátum: 2026-04-12
@@ -24,7 +24,7 @@ Pre úspech MDIE v prostredí NMH definujeme jasnú štruktúru zodpovednosti a 
 | **Solution Architect** | Stavová logika MDIE, systémová integrita a integrácia cez adaptér do EAGLE CMS |
 | **AI/Data Engineer** | Kalibrácia a správa validačných pravidiel v Shared Intelligence Core |
 | **Backend/Integration Dev** | Zabezpečenie prevádzkovej resiliencie a implementácia Explicit Commit logiky |
-| **Editorial Liaison** | Onboarding redaktorov, školenia a zber spätnej väzby pre znižovanie kognitívnej záťaže |
+| **Zástupca redakcie** | Onboarding redaktorov, školenia a zber spätnej väzby pre znižovanie kognitívnej záťaže |
 
 ---
 
@@ -41,7 +41,7 @@ Pre úspech MDIE v prostredí NMH definujeme jasnú štruktúru zodpovednosti a 
 - **Radikálne zrýchlenie korektúr:** MDIE skracuje čas na vyriešenie kritických nálezov z minút na desiatky sekúnd.
 - **Vysoká miera akceptácie:** Redaktori plynule delegujú rutinné SEO a štylistické úpravy na AI, čím sa uvoľňuje kapacita na exkluzívny obsah.
 - **Psychológia kontroly (Safety Net):** Mechanizmy ako Undo stack a Atribúcia zmien garantujú redaktorom status finálneho schvaľovateľa.
-- **Ekonomický potenciál:** Odhadovaná úspora v rádoch človekohodín denne na jednu veľkú značku.
+- **Ekonomický potenciál:** Odhadovaná úspora v rádoch hodín práce denne na jednu veľkú značku.
 
 ---
 
@@ -66,7 +66,7 @@ Pre úspech MDIE v prostredí NMH definujeme jasnú štruktúru zodpovednosti a 
 
 ---
 
-## HISTORIA DOKUMENTU
+## História dokumentu
 
 | Verzia | Dátum | Autor | Zmena |
 |--------|-------|-------|-------|

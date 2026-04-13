@@ -1,19 +1,17 @@
-# MDIE A: STRATEGICKÁ VÍZIA A KONCEPT MDIE
-## Enterprise Strategy & Architectural Vision
-
+# MDIE A: Strategická vízia a koncept
 > **Projekt:** Media Decision Intelligence Engine (MDIE)  
 > **Autor:** Daniel Budziňák, Solution Architect  
 > **Verzia:** 1.2 | Dátum: 2026-04-12
 
 ---
 
-## 1. EXECUTÍVNE ZHRNUTIE
+## 1. Executívne zhrnutie
 
 Media Decision Intelligence Engine (MDIE) nie je len ďalší AI asistent pre redaktorov. Je to operačný systém pre kvalitu a integritu obsahu v modernom newsroome. Cieľom systému je transformovať redakčný proces z reaktívneho (oprava chýb po publikácii) na proaktívny (prevencia rizík počas tvorby), a to pri súčasnom radikálnom znížení prevádzkových nákladov.
 
 ---
 
-## 2. ZÁKLADNÉ ARCHITEKTONICKÉ PRINCÍPY
+## 2. Základné architektonické princípy
 
 MDIE stojí na troch pilieroch, ktoré definujú jeho identitu a odlišujú ho od generických LLM riešení:
 
@@ -35,7 +33,7 @@ Odporúčania, UI prvky a kroky systému sú funkciou aktuálneho STATE (stavu) 
 
 ---
 
-## 3. KĽÚČOVÉ FUNKČNÉ VRSTVY
+## 3. Kľúčové funkčné vrstvy
 
 ### 3.1 Validation & Education Layer
 
@@ -51,22 +49,22 @@ Každý článok pred publikáciou prechádza kvantitatívnym vyhodnotením prip
 
 ---
 
-## 4. EKONOMICKÁ A TECHNICKÁ RESILIENCIA
+## 4. Nákladová efektivita a stabilita prevádzky
 
 MDIE je navrhnutý ako Enterprise-ready systém, ktorý počíta s reálnymi podmienkami prevádzky:
 
 - **Graceful Degradation:** V prípade výpadku AI služieb systém neblokuje redaktora, ale prechádza do Safety módu, pričom zachováva plnú editačnú schopnosť.
-- **Shared Intelligence Core:** Architektúra optimalizovaná na hromadné spracovanie článkov s minimálnymi nákladmi na tokeny (viď detail v Časti B, Príloha Token Management).
+- **Shared Intelligence Core:** Architektúra optimalizovaná na hromadné spracovanie článkov s minimálnymi nákladmi na tokeny (viď detail v MDIE B, Príloha Token Management).
 
 ---
 
-## 5. ZÁVER
+## 5. Záver
 
 MDIE predstavuje novú kategóriu rozhodovacej inteligencie. Nie je to nástroj na generovanie textu, ale nástroj na garanciu kvality, ktorý umožňuje NMH škálovať produkciu obsahu pri zachovaní najvyšších žurnalistických štandardov.
 
 ---
 
-## HISTORIA DOKUMENTU
+## História dokumentu
 
 | Verzia | Dátum | Autor | Zmena |
 |--------|-------|-------|-------|
