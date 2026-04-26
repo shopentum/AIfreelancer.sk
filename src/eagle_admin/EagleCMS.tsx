@@ -297,6 +297,28 @@ const EagleCMS_Split: React.FC = () => {
   /** SEO kľúče, ktoré redaktor vedome ignoroval (namiesto aplikovania návrhu). */
   const [ignoredSeoKeys, setIgnoredSeoKeys] = useState<Set<string>>(new Set());
 
+  /** Animovaný counter pre Readiness Score — beží od 0 po reálnu hodnotu pri validácii,
+   *  plynule inkrementuje pri každom ďalšom vyriešení nálezu. */
+  const [displayedScore, setDisplayedScore] = useState(0);
+  const prevScoreRef = useRef(0);
+  useEffect(() => {
+    const target = audit?.readinessScore ?? 0;
+    const start = prevScoreRef.current;
+    if (start === target) return;
+    const steps = Math.abs(target - start);
+    const stepMs = Math.max(Math.round(1100 / steps), 12);
+    let current = start;
+    const timer = setInterval(() => {
+      current = current < target ? current + 1 : current - 1;
+      setDisplayedScore(current);
+      if (current === target) {
+        clearInterval(timer);
+        prevScoreRef.current = target;
+      }
+    }, stepMs);
+    return () => clearInterval(timer);
+  }, [audit?.readinessScore]);
+
   /** Akcie redaktora na návrhy interných linkov: accepted | rejected. */
   const [linkActions, setLinkActions] = useState<Map<string, 'accepted' | 'rejected'>>(new Map());
 
@@ -1070,7 +1092,7 @@ const EagleCMS_Split: React.FC = () => {
           <div className="flex items-center space-x-2">
             <button className={cn(
               "px-3 py-1.5 rounded text-xs font-bold flex items-center transition-all",
-              (audit?.readinessScore || 0) > 80 ? "bg-[#48BB78] text-white hover:bg-[#38A169]" : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              displayedScore > 80 ? "bg-[#48BB78] text-white hover:bg-[#38A169]" : "bg-gray-300 text-gray-500 cursor-not-allowed"
             )}>
               <Upload size={14} className="mr-1.5" /> Publikovať
             </button>
@@ -1121,16 +1143,16 @@ const EagleCMS_Split: React.FC = () => {
               <div className="space-y-1">
                 <div className="flex justify-between text-[9px] font-bold text-gray-500 uppercase">
                   <span>Readiness Score</span>
-                  <span>{audit?.readinessScore || 0}%</span>
+                  <span>{displayedScore}%</span>
                 </div>
                 <div className="w-48 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
-                    animate={{ width: `${audit?.readinessScore || 0}%` }}
+                    animate={{ width: `${displayedScore}%` }}
                     className={cn(
                       "h-full transition-colors",
-                      (audit?.readinessScore || 0) > 80 ? "bg-emerald-500" : 
-                      (audit?.readinessScore || 0) > 50 ? "bg-yellow-500" : "bg-red-500"
+                      displayedScore > 80 ? "bg-emerald-500" : 
+                      displayedScore > 50 ? "bg-yellow-500" : "bg-red-500"
                     )}
                   />
                 </div>
@@ -1789,18 +1811,18 @@ const EagleCMS_Split: React.FC = () => {
                           <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Readiness Score</span>
                           <span className={cn(
                             "text-xs font-black",
-                            (audit?.readinessScore || 0) > 80 ? "text-emerald-600" : 
-                            (audit?.readinessScore || 0) > 50 ? "text-yellow-600" : "text-red-600"
-                          )}>{audit?.readinessScore || 0}%</span>
+                            displayedScore > 80 ? "text-emerald-600" : 
+                            displayedScore > 50 ? "text-yellow-600" : "text-red-600"
+                          )}>{displayedScore}%</span>
                         </div>
                         <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
                           <motion.div 
                             initial={{ width: 0 }}
-                            animate={{ width: `${audit?.readinessScore || 0}%` }}
+                            animate={{ width: `${displayedScore}%` }}
                             className={cn(
                               "h-full transition-all duration-1000",
-                              (audit?.readinessScore || 0) > 80 ? "bg-emerald-500" : 
-                              (audit?.readinessScore || 0) > 50 ? "bg-yellow-500" : "bg-red-500"
+                              displayedScore > 80 ? "bg-emerald-500" : 
+                              displayedScore > 50 ? "bg-yellow-500" : "bg-red-500"
                             )}
                           />
                         </div>
