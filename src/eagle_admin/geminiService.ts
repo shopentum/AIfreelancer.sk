@@ -39,9 +39,19 @@ export type ArticleAudit = {
   };
   claims: Claim[];
   linguisticClaims?: Claim[];
+  linkSuggestions?: LinkSuggestion[];
 };
 
 export type SeoAuditKey = keyof ArticleAudit["seoAudit"];
+
+/** Návrh interného linku od SEO Copilota (MVP1 flow). */
+export type LinkSuggestion = {
+  id: string;
+  anchor: string;       // text v článku, ktorý sa má zalinkovat
+  target: string;       // názov tagu
+  targetUrl: string;    // cieľová URL tagu
+  context: string;      // výrez vety pre kontext redaktora
+};
 
 /** Reserved for future holistic analysis — prototype uses inline mock in UI. */
 export async function analyzeArticleHolistic(

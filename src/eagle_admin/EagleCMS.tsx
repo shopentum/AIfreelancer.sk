@@ -66,6 +66,7 @@ import {
   type Claim,
   type ArticleAudit,
   type SeoAuditKey,
+  type LinkSuggestion,
 } from "@/eagle_admin/geminiService";
 
 function cn(...inputs: ClassValue[]) {
@@ -296,6 +297,9 @@ const EagleCMS_Split: React.FC = () => {
   /** SEO kľúče, ktoré redaktor vedome ignoroval (namiesto aplikovania návrhu). */
   const [ignoredSeoKeys, setIgnoredSeoKeys] = useState<Set<string>>(new Set());
 
+  /** Akcie redaktora na návrhy interných linkov: accepted | rejected. */
+  const [linkActions, setLinkActions] = useState<Map<string, 'accepted' | 'rejected'>>(new Map());
+
   const pushArticleSnapshot = useCallback(() => {
     setArticleHistory((h) => {
       const snap: ArticleSnapshot = {
@@ -452,6 +456,29 @@ const EagleCMS_Split: React.FC = () => {
         clickbaitScore: 6,
         suggestions: ['Zvážte pridanie viac citácií', 'Zvýšte počet interných prelinkov']
       },
+      linkSuggestions: [
+        {
+          id: 'link-1',
+          anchor: 'kreatín monohydrát',
+          target: 'Kreatín',
+          targetUrl: '/tag/kreatin',
+          context: '…výskumníci zistili, že kreatín monohydrát mohol predstavovať prelom v liečbe…',
+        },
+        {
+          id: 'link-2',
+          anchor: 'Alzheimerova choroba',
+          target: 'Alzheimerova choroba',
+          targetUrl: '/tag/alzheimerova-choroba',
+          context: '…nová štúdia sa zameriava na spojitosť medzi Alzheimerovou chorobou a mozgovým metabolizmom…',
+        },
+        {
+          id: 'link-3',
+          anchor: 'neurodegeneratívnych ochorení',
+          target: 'Neurodegeneratívne ochorenia',
+          targetUrl: '/tag/neurodegenerativne-ochorenia',
+          context: '…jednou z najnáročnejších skupín neurodegeneratívnych ochorení zostáva demencia…',
+        },
+      ],
       claims: [
         {
           id: 'claim-1',
@@ -531,6 +558,7 @@ const EagleCMS_Split: React.FC = () => {
     setResolvedClaims([]);
     setArticleHistory([]);
     setIgnoredSeoKeys(new Set());
+    setLinkActions(new Map());
     if (undoFlashClearRef.current !== null) {
       clearTimeout(undoFlashClearRef.current);
       undoFlashClearRef.current = null;
@@ -2298,6 +2326,72 @@ const EagleCMS_Split: React.FC = () => {
                                         </div>
                                       );
                                     })}
+                                </div>
+                              )}
+                              {/* Tagy & Interné linky — SEO Copilot MVP1 */}
+                              {activeAuditTab === 'seo' && audit?.linkSuggestions && audit.linkSuggestions.length > 0 && (
+                                <div className="mt-4 space-y-2">
+                                  <div className="flex items-center gap-2 pb-1">
+                                    <span className="text-[11px] font-black uppercase tracking-wide text-gray-500">Tagy & Interné linky</span>
+                                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">
+                                      {audit.linkSuggestions.filter(s => !linkActions.has(s.id)).length} nových
+                                    </span>
+                                  </div>
+                                  {audit.linkSuggestions.map((s) => {
+                                    const action = linkActions.get(s.id);
+                                    return (
+                                      <div
+                                        key={s.id}
+                                        className={cn(
+                                          "rounded-xl border p-3 shadow-sm transition-all",
+                                          action === 'accepted'
+                                            ? "border-l-[3px] border-l-emerald-400 border-gray-200 bg-emerald-50/35 opacity-70"
+                                            : action === 'rejected'
+                                              ? "border-l-[3px] border-l-gray-300 border-gray-200 bg-gray-50/50 opacity-60"
+                                              : "border-l-[3px] border-l-blue-400 border-gray-200 bg-blue-50/30 hover:border-gray-300 hover:shadow",
+                                        )}
+                                      >
+                                        <div className="mb-1 flex items-center justify-between">
+                                          <p className="text-[10px] font-black uppercase text-gray-500">Interný link</p>
+                                          {action ? (
+                                            <span className={cn(
+                                              "flex items-center gap-1 text-[10px] font-black uppercase",
+                                              action === 'accepted' ? "text-emerald-700" : "text-gray-500",
+                                            )}>
+                                              <CheckCircle2 size={11} />
+                                              {action === 'accepted' ? 'Pridané' : 'Odmietnuté'}
+                                            </span>
+                                          ) : (
+                                            <div className="h-2 w-2 rounded-full bg-blue-500" />
+                                          )}
+                                        </div>
+                                        <p className="text-[13px] font-semibold text-gray-900">
+                                          <span className="rounded bg-blue-100/70 px-1 text-blue-800">{s.anchor}</span>
+                                          <span className="mx-1.5 text-gray-400">→</span>
+                                          <span className="text-blue-700">{s.target}</span>
+                                        </p>
+                                        <p className="mt-1 text-[11px] leading-snug text-gray-500 italic">{s.context}</p>
+                                        {!action && (
+                                          <div className="mt-2.5 flex gap-2">
+                                            <button
+                                              type="button"
+                                              onClick={() => setLinkActions(prev => new Map(prev).set(s.id, 'accepted'))}
+                                              className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 py-1.5 text-[11px] font-bold text-emerald-800 transition-all hover:bg-emerald-100"
+                                            >
+                                              <CheckCircle2 size={12} /> Pridať link
+                                            </button>
+                                            <button
+                                              type="button"
+                                              onClick={() => setLinkActions(prev => new Map(prev).set(s.id, 'rejected'))}
+                                              className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-gray-200 bg-gray-50 py-1.5 text-[11px] font-bold text-gray-600 transition-all hover:bg-gray-100"
+                                            >
+                                              Odmietnuť
+                                            </button>
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
                                 </div>
                               )}
                               {!audit && !isValidating && (
