@@ -17,8 +17,8 @@ export default async function NmhPage({
   const { locale } = await params;
   setRequestLocale(locale);
   return (
-    <NmhPasswordGate>
+    // <NmhPasswordGate>
       <EagleCMS />
-    </NmhPasswordGate>
+    // </NmhPasswordGate>
   );
 }
