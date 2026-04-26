@@ -40,6 +40,7 @@ export type ArticleAudit = {
   claims: Claim[];
   linguisticClaims?: Claim[];
   linkSuggestions?: LinkSuggestion[];
+  tagSuggestions?: TagSuggestion[];
 };
 
 export type SeoAuditKey = keyof ArticleAudit["seoAudit"];
@@ -51,6 +52,13 @@ export type LinkSuggestion = {
   target: string;       // názov tagu
   targetUrl: string;    // cieľová URL tagu
   context: string;      // výrez vety pre kontext redaktora
+};
+
+/** Navrhovaný tag článku od SEO Copilota. */
+export type TagSuggestion = {
+  id: string;
+  label: string;
+  url: string;
 };
 
 /** Reserved for future holistic analysis — prototype uses inline mock in UI. */

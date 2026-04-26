@@ -67,6 +67,7 @@ import {
   type ArticleAudit,
   type SeoAuditKey,
   type LinkSuggestion,
+  type TagSuggestion,
 } from "@/eagle_admin/geminiService";
 
 function cn(...inputs: ClassValue[]) {
@@ -322,6 +323,10 @@ const EagleCMS_Split: React.FC = () => {
   /** Akcie redaktora na návrhy interných linkov: accepted | rejected. */
   const [linkActions, setLinkActions] = useState<Map<string, 'accepted' | 'rejected'>>(new Map());
 
+  /** Tagy odstraňuje redaktor ×; zostatok = schválený set. null = set zatiaľ nepridaný. */
+  const [removedTagIds, setRemovedTagIds] = useState<Set<string>>(new Set());
+  const [tagsCommitted, setTagsCommitted] = useState(false);
+
   const pushArticleSnapshot = useCallback(() => {
     setArticleHistory((h) => {
       const snap: ArticleSnapshot = {
@@ -501,6 +506,14 @@ const EagleCMS_Split: React.FC = () => {
           context: '…jednou z najnáročnejších skupín neurodegeneratívnych ochorení zostáva demencia…',
         },
       ],
+      tagSuggestions: [
+        { id: 'tag-1', label: 'Kreatín', url: '/tag/kreatin' },
+        { id: 'tag-2', label: 'Alzheimerova choroba', url: '/tag/alzheimerova-choroba' },
+        { id: 'tag-3', label: 'Neurodegeneratívne ochorenia', url: '/tag/neurodegenerativne-ochorenia' },
+        { id: 'tag-4', label: 'Výskum', url: '/tag/vyskum' },
+        { id: 'tag-5', label: 'Zdravie', url: '/tag/zdravie' },
+        { id: 'tag-6', label: 'Mozog', url: '/tag/mozog' },
+      ],
       claims: [
         {
           id: 'claim-1',
@@ -581,6 +594,8 @@ const EagleCMS_Split: React.FC = () => {
     setArticleHistory([]);
     setIgnoredSeoKeys(new Set());
     setLinkActions(new Map());
+    setRemovedTagIds(new Set());
+    setTagsCommitted(false);
     if (undoFlashClearRef.current !== null) {
       clearTimeout(undoFlashClearRef.current);
       undoFlashClearRef.current = null;
@@ -2348,6 +2363,73 @@ const EagleCMS_Split: React.FC = () => {
                                         </div>
                                       );
                                     })}
+                                </div>
+                              )}
+                              {/* Navrhované tagy — chip set */}
+                              {activeAuditTab === 'seo' && audit?.tagSuggestions && audit.tagSuggestions.length > 0 && (
+                                <div className="mt-4">
+                                  <div className="flex items-center justify-between pb-2">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-[11px] font-black uppercase tracking-wide text-gray-500">Navrhované tagy</span>
+                                      <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold text-violet-700">
+                                        {audit.tagSuggestions.filter(t => !removedTagIds.has(t.id)).length} tagov
+                                      </span>
+                                    </div>
+                                    {!tagsCommitted && audit.tagSuggestions.some(t => !removedTagIds.has(t.id)) && (
+                                      <button
+                                        type="button"
+                                        onClick={() => setTagsCommitted(true)}
+                                        className="rounded-lg border border-violet-300 bg-violet-50 px-2.5 py-1 text-[11px] font-bold text-violet-800 transition-all hover:bg-violet-100"
+                                      >
+                                        Pridať set
+                                      </button>
+                                    )}
+                                    {tagsCommitted && (
+                                      <span className="flex items-center gap-1 text-[10px] font-black uppercase text-emerald-700">
+                                        <CheckCircle2 size={11} /> Pridané
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {audit.tagSuggestions.map((tag) => {
+                                      const removed = removedTagIds.has(tag.id);
+                                      if (removed) return null;
+                                      return (
+                                        <div
+                                          key={tag.id}
+                                          className={cn(
+                                            "group flex items-center gap-1 rounded-full border px-2.5 py-1 text-[12px] font-semibold transition-all",
+                                            tagsCommitted
+                                              ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                                              : "border-violet-200 bg-violet-50 text-violet-800 hover:border-violet-300",
+                                          )}
+                                        >
+                                          <a
+                                            href={tag.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="hover:underline"
+                                            title={tag.url}
+                                          >
+                                            {tag.label}
+                                          </a>
+                                          {!tagsCommitted && (
+                                            <button
+                                              type="button"
+                                              onClick={() => setRemovedTagIds(prev => new Set(prev).add(tag.id))}
+                                              className="ml-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full text-violet-400 opacity-60 transition-opacity hover:bg-violet-200 hover:opacity-100"
+                                              title="Odstrániť tag"
+                                            >
+                                              ×
+                                            </button>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                  {audit.tagSuggestions.every(t => removedTagIds.has(t.id)) && (
+                                    <p className="mt-2 text-[11px] text-gray-400 italic">Všetky tagy boli odstránené.</p>
+                                  )}
                                 </div>
                               )}
                               {/* Tagy & Interné linky — SEO Copilot MVP1 */}
