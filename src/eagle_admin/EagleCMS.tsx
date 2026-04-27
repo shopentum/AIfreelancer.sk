@@ -1279,8 +1279,8 @@ const EagleCMS_Split: React.FC = () => {
                 <ShieldAlert size={18} className="text-purple-600" />
               </div>
               <div>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Intelligence Engine</p>
-                <p className="text-xs font-bold text-gray-700">Trust & Governance Layer</p>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">EAGLE CMS</p>
+                <p className="text-xs font-bold text-gray-700">Asistent kvality článku</p>
               </div>
             </div>
             
