@@ -1,90 +1,128 @@
 ﻿# MDIE C: Produktové zadanie pre vývojový tím
-## MDIE: Claim Validation & AI-Assisted Fix Feature
-> **Dokument:** Confluence / Jira Epic + Story + Design Zámer  
-> **Projekt:** Media Decision Intelligence Engine (MDIE)  
-> **Autor:** Daniel Budziňák, Solution Architect  
-> **Verzia:** 2.1 | Dátum: 2026-04-12  
-> **Status:** Ready for Development
+## Article Performance Layer — Validation, SEO & Linkbuilding Feature
+> **Dokument:** Confluence / Jira Epic + Story + Design Zámer
+> **Projekt:** Media Decision Intelligence Engine (MDIE) — Article Performance Layer
+> **Autor:** Daniel Budziňák, Senior Product Manager
+> **Verzia:** 3.0 | Dátum: 2026-04-27
+> **Status:** In Progress — Phase 1 aktívna implementácia
 
 ---
 
-## 0. TECHNICKÝ KONTEXT A DATA GAP
+## 0. KONTEXT A AKTUÁLNY DATA GAP
 
-Tento dokument vychádza z funkčného prototypu a predpokladaného redakčného workflow.
+Dokument vychádza z funkčného prototypu (aifreelancer.sk/nmh) a z kontextu získaného počas prvého týždňa v NMH.
 
-Zároveň pracuje s vedomým **DATA GAP**: bez detailného prístupu k internej architektúre existujúcich systémov (najmä Discovery a Creation vrstiev). Návrh preto predstavuje **cieľový smer a praktický základ pre pilotnú fázu**, v ktorej bude riešenie prispôsobené podľa reálnych procesov, dát a technických limitov.
+**Čo vieme:**
+- CMS architektúra: `Admin → Core → Data Composer → Content Provider → Frontend`
+- Validation layer sa napája na Admin — pracuje výhradne s **draftom** článku, nie s live verziou
+- AI service pre tagy a alternatívne titulky existuje; adopcia AI funkcií je ~75 %, ale hodnota (KPI) nie je jasne meraná
+- Tag API existuje; každá site má vlastnú množinu tagov; AI generovanie tagov funguje na ~95 % kvalite
+- Linkbuilding má komplexný architektonický návrh, ale bez produkčne overeného MVP
+- DataHub existuje ako cieľová analytická vrstva; baseline metriky nie sú vždy dostupné
 
-Cieľom nebolo nahradiť existujúce vrstvy, ale nadviazať na ne a rozšíriť ich o **validačnú a rozhodovaciu logiku** (Validation & Governance Layer).
+**Aktuálne DATA GAP `[DATA_GAP]`:**
+
+| # | Gap | Zodpovednosť |
+|---|-----|--------------|
+| DG-1 | Finálne váhy Readiness Score pilierov | `[PM DECISION]` PM + šéfredaktor pilota |
+| DG-2 | API kontrakt validation requestu: `article_id`, `site_id`, `article_type` — kto ich poskytuje? | Backend / Admin tím |
+| DG-3 | DataHub endpoint pre príjem suggestion eventov — existuje alebo treba nový? | DataHub tím |
+| DG-4 | Lifecycle stavu `ignored`: kedy sa návrh označí ako ignorovaný — pri zatvorení / publishi / konci session? | PM + Backend |
+| DG-5 | Pravidlá indexácie tagov dostupné cez API? | Backend / SEO tím |
 
 ---
 
 ## 1. KONTEXT A PRODUKT ZÁMER
 
-Tento dokument rieši konkrétnu feature v rámci **Validation Layeru**, jednej z vrstiev širšej MDIE architektúry. Samotný layer je rozsiahlejší, ale pre pilot som zámerne išiel do hĺbky jedného use case, ktorý má okamžitý dopad na kvalitu a riziko publikovaného obsahu: **Claim Validation & AI-Assisted Fix**.
+EAGLE CMS má vysokú adopciu AI funkcií (~75 % článkov). Problém nie je adopcia — je to chýbajúca **merateľná hodnota**. AI copilot pomáha tvoriť obsah, ale neexistuje vrstva, ktorá by redaktorovi aktívne pomáhala pripraviť článok na výkon: správne tagy, interné prelinkovanie, vyriešené rizikové tvrdenia, SEO polia.
 
-Redaktor pracuje pod časovým tlakom. Keď vidí len správu „Príliš silné medicínske tvrdenie", nevie prečo ani čo presne má urobiť. Výsledkom je odpor, ignorovanie upozornení a právne riziko. Táto feature rieši práve toto: **systém argumentuje, nie len posudzuje**.
+Táto feature rieši práve to: **Article Performance Layer** — rozšírenie existujúceho editora o validačný a optimalizačný panel, ktorý funguje na drafte článku, nezasahuje do publish flow a zbiera dáta pre meranie skutočného dopadu.
 
-> **Scope tohto zadania:** Validácia existujúceho draftu článku → zobrazenie nálezov (claimov) → redaktor vyberie nález → AI navrhne opravu → redaktor schváli → zmena sa zapíše do audit logu.
+> **Scope tohto zadania:** Validácia draftu článku → identifikácia rizikových tvrdení + SEO príležitostí + chýbajúcich tagov + príležitostí na interné prelinkovanie → redaktor rozhoduje o každom návrhu → systém loguje interakcie pre DataHub.
 
-**Čo tu nie je:** tvorba draftu (Creation), distribúcia (Distribution), integrácia na externé fact-check API (produkcia – mimo scope pilotu).
+**Čo tu nie je:** tvorba draftu (Creation layer), distribúcia, integrácia na externé fact-check API, automatické publikovanie, globálna optimalizácia tag databázy.
+
+**Pozícia v CMS architektúre:**
+```
+Admin (editor pracuje s draftom)
+  └─► Validation / Performance Layer (tento dokument)
+        ├─► AI service (tagy, linky, claim opravy)
+        └─► Event logging → DataHub
+Core (zdroj pravdy, draft → publish → Data Composer → Content Provider → Frontend)
+```
+
+**Kľúčový princíp:** AI navrhuje → redaktor rozhoduje → systém loguje → DataHub vyhodnocuje.
 
 ---
 
 ## 2. FEATURE SUMMARY
 
-**Čo riešenie robí:** Claim Validation & AI-Assisted Fix je funkčná vrstva MDIE, ktorá počas editácie článku identifikuje rizikové tvrdenia, vizuálne ich zvýrazní a umožňuje redaktorovi jedným klikom aplikovať AI opravu, s plným auditným záznamom a možnosťou vrátenia zmeny.
+**Čo riešenie robí:** Article Performance Layer je panel v pravej časti editora, ktorý počas práce s draftom identifikuje príležitosti na zlepšenie článku v štyroch oblastiach: dôveryhodnosť tvrdení, štýl, SEO a výkon (tagy + interné linky). Každý návrh je odôvodnený a redaktor ho môže jedným klikom prijať, upraviť alebo vedome ignorovať.
 
-**Aký problém rieši:** Redaktor pracuje pod časovým tlakom a nemá kapacitu manuálne overovať každé faktické, právne alebo štylistické tvrdenie. Bežné AI systémy mu povedia „chyba", bez kontextu. Výsledkom je ignorovanie upozornení a rastúce právne riziko pre vydavateľa.
+**Aký problém rieši:**
+- Adopcia AI ≠ hodnota. ~75 % článkov používa AI, ale KPI sú nejasné.
+- Redaktor nemá jednotné miesto, kde by videl, čo ešte chýba pre výkon článku.
+- Chýba closed-loop: feature → použitie → dopad na traffic/engagement.
 
-**Ako funguje:** Editor odošle draft na validáciu → systém vráti štruktúrovaný zoznam nálezov (claims) s vysvetlením logiky → redaktor vyberie nález, opraví ho (AI alebo ručne) → zmena je zaznamenaná v audit logu → article postúpi cez Publish Gate.
+**Ako funguje:** Redaktor otvorí draft → spustí validáciu → panel zobrazí návrhy v záložkách (Dôvera / Štýl / SEO) a sekciách (Navrhované tagy / Interné linky) → redaktor rozhoduje o každom návrhu → Readiness Score rastie → článok je pripravený na publikáciu.
 
-**Prečo je dôležité:** Systém neurčuje, čo bude publikované. Garantuje, že redaktor má pred publikáciou k dispozícii overený podklad pre vlastné rozhodnutie. MDIE je asistent, nie rozhodovací nástroj, ktorý riadi alebo blokuje prácu redakcie.
+**Prečo je dôležité:** Systém nepredpisuje obsah. Poskytuje redaktorovi kontext na rýchle rozhodnutie a zaznamenáva každú interakciu pre spätnú analýzu dopadu.
 
-**User Flow (príklad):**  
-Redaktor otvorí článok → klikne „Validovať" → systém zvýrazní 3 problémové pasáže → redaktor opraví 2–3 problémy v priebehu sekúnd → Readiness Score stúpne → článok je pripravený na publikáciu.
+**User Flow (príklad):**
+Redaktor otvorí draft → „Validovať" → systém navrhne 3 opravy tvrdení + 2 SEO úpravy + 5 tagov + 3 interné linky → redaktor vyrieši 8/10 návrhov za 2 minúty → Readiness Score: 91 % → publikuje.
 
 ---
 
-## 3. ROZSAH RIEŠENIA
+## 3. ROZSAH RIEŠENIA A FÁZOVANIE
 
-### 3.1 MVP Scope (Phase 1: Pilot)
+### 3.1 Phase 1 (Aktuálna implementácia): Tags & Linkbuilding MVP
 
-Toto zadanie pokrýva výhradne Phase 1. Cieľom je dodať **funkčný, testovateľný MVP** v rámci pilotného nasadenia v redakcii:
+Implementuje sa podľa samostatnej spec: `SEO_Copilot_Linkbuilding_MVP1.pdf`
 
-- Základná claim extraction z textu článku
-- Jednoduché risk scoring: `low` / `medium` / `high`
-- Heatmap / highlight vizualizácia nálezov v editore
-- Základné akcie pre nálezy (Dôvera/Štýl): „Opraviť pomocou AI", „Upraviť ručne" (s potvrdením), „Ignorovať"
-- Základné akcie pre SEO návrhy: „Použiť návrh" (AI), „Ignorovať"
-- História zmien / Undo (max. 5 krokov, uložené v prehliadači v pilote)
-- Zamykanie článku pri súbežnej editácii (Collab Lock cez ETag)
-- Záchranný režim pri výpadku AI: editor zostáva plne funkčný
-- Export záznamu o udalostiach (JSON) pre vyhodnotenie pilotu
+Zahrnuté:
+- Navrhované tagy pre článok (chip set, Pridať set / odstrániť individuálne)
+- Návrhy interných linkov (anchor → cieľový tag, Pridať link / Odmietnuť)
+- Základné pravidlá link density (max. 1 link/veta, max. 1–2/odstavec, žiadny link do perexu)
+- Hard filter: publikovaný tag, nie blacklistovaný, nie prázdny, nie duplikát existujúceho linku
+- Soft filter: relevancia, freshness, existencia obsahu, typ tagu
+- HITL: redaktor potvrdí každý návrh pred aplikovaním
+- Event logging: `suggestions_generated`, `suggestion_accepted`, `suggestion_rejected`, `suggestion_ignored` (kompatibilné s DataHub)
+- Fail-safe: ak API zlyhá, článok ostáva nezmenený
 
-### 3.2 Out of Scope (Phase 2+)
+### 3.2 Phase 2: Full Article Performance Layer
 
-Tieto funkcie sú architektonicky navrhnuté, ale **nie sú súčasťou pilotnej implementácie**:
+Integrácia validačného panela (Dôvera / Štýl / SEO) s Performance vrstvou (Tagy / Linky) v jednom paneli:
+- Claim validation a AI-Assisted Fix (Trust / Style)
+- SEO návrhy (titulok, SEO titulok, URL, perex)
+- Tagy + interné linky (z Phase 1)
+- Unified Readiness Score naprieč všetkými piliermi
+- Collab Lock (optimistic locking cez ETag)
+- Undo stack (max. 5 krokov)
+- Export audit logu (JSON → DataHub)
+
+### 3.3 Out of Scope (Phase 3+)
 
 - Overovanie zdrojov cez externé fact-check API
-- Plnohodnotné pravidlá pre jednotlivé redakcie / značky (Editorial Identity Layer)
-- Automatické smerovanie úloh na rôzne AI modely podľa náročnosti (viď MDIE B Príloha)
+- Plnohodnotné Editorial Identity Layer (tón a pravidlá per značka)
+- Automatické smerovanie úloh na rôzne AI modely (viď MDIE B Príloha)
 - Analytické dashboardy a prehľady Time-to-Fix
-- Zálohy stavu (Undo snapshots) uložené na serveri prepojené s Audit Trail
-- Živá prítomnosť editorov cez WebSocket (Collab Lock, 2. fáza)
-- Feedback Loop & Model Calibration: Zber anonymizovaných dát z interakcií redaktorov (najmä akcie „Ignorovať") pre budúcu kalibráciu citlivosti validačných pravidiel a adaptáciu systému na špecifiká redakcie. V MVP fáze sa tieto dáta výhradne logujú v audit logu pre potreby analýzy. Aktívne učenie alebo automatická úprava modelu nie sú súčasťou pilotnej implementácie.
+- Undo snapshots uložené na serveri prepojené s Audit Trail
+- Živá prítomnosť editorov cez WebSocket (Collab Lock 2. fáza)
+- Feedback Loop & Model Calibration: aktívne učenie modelu z dát (MVP: iba logging)
+- Výkon článku rozšírený o multimédiá, ankety, galérie, video (post-MVP)
 
-### 3.3 Ako budeme postupovať
+### 3.4 Ako budeme postupovať
 
-Tento návrh je postavený tak, aby sa **dal spustiť rýchlo a rozširovať postupne**: začíname jednoduchým, ale hodnotným MVP a každá ďalšia fáza na ňom prirodzene stavia. Každá fáza je samostatne dodateľná a merateľná.
+Phase 1 (Tags + Linkbuilding) → zbierame dáta (adoption rate, acceptance rate, CTR) → Phase 2 (Full Panel) stavia na overenom základe. Každá fáza je samostatne dodateľná a merateľná.
 
 ---
 
 ## 4. EPIC
 
-**Názov epicu:** `[MDIE-EPIC-01] Claim Validation & AI-Assisted Fix`  
-**Priorita:** P0 (pilot blocker)  
-**Labels:** `mdie`, `validation`, `audit`, `cms-adapter`, `resilience`  
-**Cieľ:** Redaktor dostane štruktúrovaný zoznam rizikových nálezov v texte článku, pochopí prečo systém nález identifikoval, a môže ho jedným klikom opraviť s plným auditným záznamom.
+**Názov epicu:** `[MDIE-EPIC-01] Article Performance Layer`
+**Priorita:** P0 (pilot blocker)
+**Labels:** `mdie`, `validation`, `performance-layer`, `linkbuilding`, `tags`, `audit`, `cms-adapter`, `resilience`
+**Cieľ:** Redaktor má v editore jeden panel, ktorý mu aktívne pomáha pripraviť článok na výkon — správne tvrdenia, SEO, tagy a interné linky — s plným auditným záznamom a bez blokovania publish flow.
 
 ---
 
@@ -94,24 +132,25 @@ Tento návrh je postavený tak, aby sa **dal spustiť rýchlo a rozširovať pos
 ```
 MDIE-101
 Ako redaktor
-Chcem spustiť validáciu môjho článku priamo z editora
-Aby som dostal štruktúrovaný prehľad rizík bez toho, aby som musel otvárať iný nástroj.
+Chcem spustiť validáciu môjho draftu priamo z editora
+Aby som dostal štruktúrovaný prehľad príležitostí bez toho, aby som musel otvárať iný nástroj.
 ```
 
 **Acceptance Criteria:**
 - [ ] Tlačidlo „Validovať článok" je viditeľné v Intelligence bare nad editorom
 - [ ] Po kliknutí sa spustí loading stav (spinner + text „Analyzujem…")
 - [ ] Po dokončení sa v pravom paneli zobrazia záložky: Dôvera | Štýl | SEO s počtom nálezov
-- [ ] Readiness Score (0–100 %) sa zobrazí v progress bare
+- [ ] Pod záložkami sú sekcie: Navrhované tagy | Interné linky
+- [ ] Readiness Score (0–100 %) sa zobrazí v progress bare s animovaným counterom od 0
 - [ ] Ak je validácia aktívna a redaktor klikne znova, tlačidlo je disabled (prevent duplicate)
-- [ ] Ak je článok uzamknutý iným editorom (Collab Lock), tlačidlo je disabled s tooltipom: „Článok upravuje iný editor — validáciu spustíte po uvoľnení zámku."
+- [ ] Ak je článok uzamknutý iným editorom (Collab Lock), tlačidlo je disabled s tooltipom
 
 **Edge cases:**
 | Scenár | Správanie | UI copy |
 |--------|-----------|---------|
 | API nedostupné / timeout | Validácia skončí bez výsledku, redaktor môže pokračovať | „AI Validácia je dočasne nedostupná. Môžete pokračovať v manuálnej editácii." |
 | Prázdny článok | Validácia sa nespustí | Tooltip: „Pridajte text článku pred spustením validácie." |
-| Collab Lock zapnutý | Tlačidlo disabled | Tooltip: viď vyššie |
+| Collab Lock zapnutý | Tlačidlo disabled | Tooltip: „Článok upravuje iný editor — validáciu spustíte po uvoľnení zámku." |
 
 ---
 
@@ -124,36 +163,20 @@ Aby som rozumel logike AI a nemusel hádať, čo mám opraviť.
 ```
 
 **Acceptance Criteria:**
-- [ ] Každý nález v zozname zobrazuje **iba**: `shortLabel` (krátky názov problému, pochopiteľný do 1 sekundy) + citovaný text z článku, bez dlhých popisov
-- [ ] Hodnoty `shortLabel` sú krátke a jednoznačné (príklady: „Tvrdenie je príliš silné", „Chýba konkrétna cena", „Text je príliš odborný")
+- [ ] Každý nález v zozname zobrazuje **iba**: `shortLabel` + citovaný text z článku, bez dlhých popisov
 - [ ] Nálezy sú zoradené: vysoké riziko → stredné → nízke
 - [ ] Kliknutie na kartu nálezu otvorí detail v tom istom paneli
-- [ ] V detaile je **na vrchu TL;DR box** (modrý, 1 veta z `whyFlagged`: prečo systém nález identifikoval), potom citácia, dôvod, vysvetlenie, odporúčaná akcia
+- [ ] V detaile je **na vrchu TL;DR box** (modrý, 1 veta z `whyFlagged`)
 - [ ] Text z článku zodpovedajúci nálezu je vizuálne zvýraznený priamo v editore (highlight)
 - [ ] Kliknutie na zvýraznený úsek textu v editore otvorí zodpovedajúci detail nálezu v pravom paneli a automaticky prepne na správnu záložku (Dôvera / Štýl / SEO)
 - [ ] Ak sa na danom mieste prekrýva viac nálezov, aktivuje sa nález s najvyšším rizikom (high → medium → low)
-- [ ] Vyriešené nálezy (Dôvera/Štýl) sa zobrazia v sekcii „Vyriešené" dole v zozname s typom riešenia (viď Story 3)
-- [ ] SEO návrhy po akcii (Použiť / Ignorovať) sa zobrazia priamo v SEO zozname so stavom „Použité" alebo „Ignorované", bez presunu do samostatnej sekcie
+- [ ] Vyriešené nálezy sa zobrazia v sekcii „Vyriešené" dole v zozname s typom riešenia
 
 **Edge cases:**
 | Scenár | Správanie |
 |--------|-----------|
 | Nález sa nenachádza v texte (text zmenený pred validáciou) | Highlight sa nezobrazí, nález ostáva v zozname bez zvýraznenia |
 | Viac nálezov na rovnakom texte | Zobrazí sa každý zvlášť; highlight sa kombinuje |
-
-**UI copy: kľúčové polia:**
-
-| Element | Text |
-|---------|------|
-| Záložka dôvery | Dôvera |
-| Záložka štýlu | Štýl |
-| Záložka SEO | SEO |
-| Sekcia vyriešených | Vyriešené |
-| Pätička karty | „Opravil(a) {meno} · pred {X} min." |
-| Typ riešenia: AI fix | „Opravené AI" |
-| Typ riešenia: ručne | „Upravené ručne" |
-| Typ riešenia: ignorované | „Ignorované (vedomé rozhodnutie)" |
-| Prázdny stav po vyriešení všetkých | „Všetky nálezy boli vyriešené. Skontrolujte Readiness Score." |
 
 ---
 
@@ -168,24 +191,21 @@ Aby som ušetril čas na rutinných opravách a mal garantovaný auditný zázna
 **Acceptance Criteria:**
 - [ ] V detaile nálezu sú **tri akcie**: „Opraviť pomocou AI" (primárna), „Upraviť ručne", „Ignorovať"
 - [ ] **AI fix:** Po kliknutí AI opraví text v editore, zelený fade (~2,5 s), nález → „Vyriešené" s labelom „Opravené AI", Readiness Score sa zvýši
-- [ ] **Upraviť ručne:** Po kliknutí sa editor presunie na dané miesto v texte, tlačidlo sa zmení na „Potvrdiť opravu" (zelené) → po potvrdení nález → „Vyriešené" s labelom „Upravené ručne", Readiness Score sa zvýši
-- [ ] **Ignorovať (nález):** Nález sa presunie do „Vyriešené" s labelom „Ignorované (vedomé rozhodnutie)", Readiness Score sa zvýši
-- [ ] Všetky tri akcie pre nálezy **pridajú body** do Readiness Score; Score reprezentuje „všetky nálezy boli vyriešené (úpravou alebo rozhodnutím)"
-- [ ] **SEO: Použiť návrh:** AI hodnota sa skopíruje do poľa, položka v SEO zozname zobrazí „Použité", Readiness Score sa zvýši
-- [ ] **SEO: Ignorovať:** Položka v SEO zozname zobrazí „Ignorované", Readiness Score sa zvýši; redaktor si zachová vlastný titulok
-- [ ] Do audit logu sa zapíše pre každú akciu: `actorId`, `source` (ai/human), `resolutionType` (ai_fix/manual/ignored), `claimId`, `timestamp`
+- [ ] **Upraviť ručne:** Editor sa presunie na dané miesto v texte, tlačidlo → „Potvrdiť opravu" → po potvrdení nález → „Vyriešené", Readiness Score sa zvýši
+- [ ] **Ignorovať:** Nález → „Vyriešené" s labelom „Ignorované (vedomé rozhodnutie)", Readiness Score sa zvýši
+- [ ] **SEO: Použiť návrh:** AI hodnota sa skopíruje do poľa, položka zobrazí „Použité", Readiness Score sa zvýši
+- [ ] **SEO: Ignorovať:** Položka zobrazí „Ignorované", Readiness Score sa zvýši; pole ostáva nezmenené
+- [ ] Do audit logu sa zapíše: `suggestion_id`, `actorId`, `source`, `resolutionType`, `claimId`, `timestamp`, `article_id`, `site_id`
 - [ ] Redaktor má možnosť vrátiť AI fix cez „Späť" (Undo stack, max. 5 krokov)
-- [ ] Tlačidlo „Späť" zobrazuje počet krokov: „Späť (3)"
 - [ ] Po Undo: fialový flash (~1 s) na obnovených poliach
 
 **Edge cases:**
 | Scenár | Správanie | UI copy |
 |--------|-----------|---------|
-| AI vráti prázdny reťazec | Oprava sa neaplikuje, nález ostáva otvorený | „Oprava sa nepodarila. Upravte text ručne alebo skúste znova." |
+| AI vráti prázdny reťazec | Oprava sa neaplikuje | „Oprava sa nepodarila. Upravte text ručne alebo skúste znova." |
 | Collab Lock zapnutý | Tlačidlo disabled | Tooltip: „Článok upravuje iný editor — AI úpravy sú pozastavené." |
-| API nedostupné | Oprava sa nespustí, zobrazí sa banner | „AI funkcie sú dočasne nedostupné. Môžete pokračovať v manuálnej editácii." |
-| Text nálezu bol medzičasom zmenený (nenájdený v dokumente) | Oprava sa nespustí | „Text nálezu sa v článku nenašiel. Nález skontrolujte ručne." |
-| Používateľ klikne viackrát rýchlo | Tlačidlo je disabled počas spracovania | Spinner + „Opravujem…" |
+| API nedostupné | Oprava sa nespustí | „AI funkcie sú dočasne nedostupné. Môžete pokračovať v manuálnej editácii." |
+| Text nálezu nenájdený v dokumente | Oprava sa nespustí | „Text nálezu sa v článku nenašiel. Nález skontrolujte ručne." |
 
 **Definícia Done:**
 - Unit testy pre `handleFixWithAI` (success, empty result, not found)
@@ -203,19 +223,19 @@ Aby som omylom neprepísal jeho prácu.
 ```
 
 **Acceptance Criteria:**
-- [ ] Ak je článok uzamknutý, zobrazí sa žltý banner pod Intelligence barom: „Aktuálne upravuje: {meno}. Vy ste v režime čítania."
+- [ ] Ak je článok uzamknutý, zobrazí sa žltý banner: „Aktuálne upravuje: {meno}. Vy ste v režime čítania."
 - [ ] Editor (textarea) je `readOnly`
-- [ ] Validácia, AI fix a SEO návrhy sú disabled s príslušnými tooltipmi
+- [ ] Validácia, AI fix, SEO návrhy a Tagy/Linky akcie sú disabled s príslušnými tooltipmi
 - [ ] Undo (Späť) je disabled počas zámku
 - [ ] Po uvoľnení zámku sa všetky prvky obnovia automaticky (bez reloadu stránky)
 
-**Technická poznámka (pre produkciu):**  
-Pilot: zamykanie pomocou `If-Match` / `ETag` hlavičky (optimistic locking).  
+**Technická poznámka:**
+Pilot: zamykanie pomocou `If-Match` / `ETag` (optimistic locking).
 Plná prevádzka: živá prítomnosť editorov cez WebSocket (napr. Ably / Supabase Realtime).
 
 ---
 
-### Story 5: Export audit logu (pre testovanie a compliance)
+### Story 5: Export audit logu
 ```
 MDIE-105
 Ako pilot owner alebo QA
@@ -226,16 +246,80 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 **Acceptance Criteria:**
 - [ ] Tlačidlo „Export logu" je v Intelligence bare
 - [ ] Stiahne sa súbor `eagle-test-log-{timestamp}.json`
-- [ ] Súbor obsahuje: `events[]`, `metrics.aiFixCount`, `metrics.timeToFixMsAvg`, `metrics.timeToFixUnder5SecondsRate`, `resolvedClaims[]`, `seoChangeLog[]`
+- [ ] Súbor obsahuje: `events[]`, `metrics` (aiFixCount, timeToFixMsAvg, linkSuggestions, tagSuggestions), `resolvedClaims[]`, `seoChangeLog[]`
 - [ ] `timeToFixMs` = čas od prvého otvorenia karty nálezu po vykonanie opravy
-- [ ] Ak nález nebol otvorený, `timeToFixMs` = čas od dokončenia validácie
+- [ ] Každý event má `suggestion_id`, `article_id`, `site_id`, `editor_id`, `timestamp`
+
+---
+
+### Story 6: Navrhované tagy (Phase 1)
+```
+MDIE-106
+Ako redaktor
+Chcem pri každom článku vidieť navrhované tagy s možnosťou prijať celý set alebo odstrániť nevhodné
+Aby som nemusel tagy hľadať manuálne a mal ich kontextuálne odporúčanie priamo v editore.
+```
+
+**Acceptance Criteria:**
+- [ ] Po validácii sa v SEO záložke zobrazí sekcia „Navrhované tagy"
+- [ ] Tagy sú zobrazené ako klikateľné chipy s náhľadom URL tagu (hover tooltip)
+- [ ] Každý chip má tlačidlo `×` pre individuálne odstránenie zo setu
+- [ ] Ak zostávajú **2 a viac** tagov: zobrazí sa tlačidlo „Pridať všetky (N)" — hromadné pridanie celého zostávajúceho setu jedným kliknutím; N sa dynamicky aktualizuje pri každom `×`
+- [ ] Ak zostáva **1 tag**: zobrazí sa tlačidlo „Pridať tag" (singulár) namiesto hromadnej akcie
+- [ ] Po hromadnom pridaní sa všetky chipy zafarbia zeleno, Readiness Score sa zvýši
+- [ ] Badge počítadlo „X tagov" sa aktualizuje s každým `×`
+- [ ] Ak redaktor odstráni všetky: „Všetky tagy boli odstránené."
+- [ ] Každá akcia (pridanie setu, odstránenie tagu) je zalogovaná ako event s `suggestion_id`
+- [ ] Ak API pre tagy zlyhá: 0 návrhov, článok ostáva nezmenený, event: `suggestions_skipped`
+- [ ] Collab Lock: sekcia disabled s tooltipom
+
+**Edge cases:**
+| Scenár | Správanie |
+|--------|-----------|
+| Žiadny tag neprejde filtrom | 0 návrhov, sekcia sa nezobrazí |
+| Tag už existuje v článku | Systém ho nenavrhne (deduplikácia) |
+| API nedostupné | `suggestions_skipped`, článok nezmenený |
+
+**Feature flags:** `article_validation.performance_layer.enabled`, `article_validation.event_logging.enabled`
+
+---
+
+### Story 7: Návrhy interných linkov (Phase 1)
+```
+MDIE-107
+Ako redaktor
+Chcem vidieť návrhy interných linkov s kontextom vety, kde link patrí
+Aby som nemusel manuálne hľadať vhodné miesta na prelinkovanie.
+```
+
+**Acceptance Criteria:**
+- [ ] Po validácii sa v SEO záložke zobrazí sekcia „Tagy & Interné linky"
+- [ ] Každý návrh obsahuje: anchor text (zvýraznený), šípku → cieľový tag, výrez kontextovej vety
+- [ ] Dve akcie: „Pridať link" (zelené) / „Odmietnuť" (sivé)
+- [ ] Po „Pridať link": karta zobrazí „Pridané", Readiness Score sa zvýši, event zalogovaný
+- [ ] Po „Odmietnuť": karta zobrazí „Odmietnuté", event zalogovaný
+- [ ] Anchor text sa vyberá výhradne z existujúcich výskytov v texte (nie generovanie nových fráz)
+- [ ] Systém rešpektuje link density: max. 1 link/veta, max. 1–2 linky/odstavec
+- [ ] Žiadny link do perexu
+- [ ] Ak sa anchor nenašiel v texte: návrh sa nevytvorí
+- [ ] Ak tag je už manuálne zalinkovaný: systém ho preskočí (deduplikácia)
+
+**Edge cases:**
+| Scenár | Správanie |
+|--------|-----------|
+| Anchor len v perexe | Návrh sa nevytvorí |
+| Všetky tagy sú blacklistované | 0 návrhov |
+| Článok kratší ako 3 odstavce | Systém nenavrhuje linky |
+| Redaktor nič neurobí do publishu | Neinteragované návrhy sa označia ako `ignored` |
+
+**Feature flags:** `seo_copilot.linkbuilding.enabled`, `seo_copilot.max_links_per_article` (default: 5)
 
 ---
 
 ## 6. WORKFLOW / LOGIKA PROCESU
 
 ```
-[Redaktor otvorí článok]
+[Redaktor otvorí DRAFT článku v Admin editore]
         │
         ▼
 [Klikne "Validovať článok"]
@@ -245,61 +329,53 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
         ├─── [API dostupné?] ──NO──► [Banner: "Nedostupné, editujte ručne"]
         │                                    │
         ▼                                    ▼
-[Loading ~1,5s "Analyzujem…"]         [Audit log: audit_failed_unavailable]
+[Loading "Analyzujem…"]               [Audit log: audit_failed_unavailable]
         │
         ▼
-[Zobrazia sa nálezy v paneli]
-[Readiness Score %, záložky: Dôvera / Štýl / SEO]
+[Zobrazia sa výsledky v paneli]
+[Záložky: Dôvera | Štýl | SEO + sekcie: Navrhované tagy | Interné linky]
+[Readiness Score animuje od 0 po vypočítanú hodnotu]
 [Zvýraznené úseky textu v editore sú klikateľné]
         │
         ├──► [Redaktor klikne na zvýraznený text v editore]
-        │    [Pravý panel otvorí zodpovedajúci detail nálezu]
+        │    [Panel otvorí zodpovedajúci detail nálezu]
         │    [Správna záložka sa aktivuje automaticky]
-        │    [Pri prekrytí viacerých nálezov: aktivuje sa nález s najvyšším rizikom]
-        │    [Audit: claimFirstSeenAt = now()]
+        │    [Pri prekrytí: aktivuje sa nález s najvyšším rizikom]
         │
         ▼
-[Redaktor klikne na kartu nálezu]
-[Highlight v editore, detail v paneli]
+[Redaktor klikne na kartu nálezu / tagu / linku]
 [Audit: claimFirstSeenAt = now()]
         │
         ├──► [Opraviť pomocou AI]
-        │           │
-        │           ├─── [API nedostupné] ──► [Banner, nález ostáva otvorený]
-        │           │
-        │           ├─── [Text nenájdený] ──► [Chybová hláška pod tlačidlom]
-        │           │
-        │           ▼
-        │    [AI opraví text v editore]
-        │    [Zelený fade na zmenenom texte]
-        │    [Nález → "Vyriešené" · label: "Opravené AI"]
-        │    [Readiness Score sa zvýši]
-        │    [Audit log: ai_fix_applied, resolutionType: ai_fix]
-        │    [Snapshot do Undo stack (max. 5)]
+        │    [AI opraví text → zelený fade → "Opravené AI" → Score↑ → Undo snapshot]
         │
         ├──► [Upraviť ručne]
-        │    [Editor sa presunie na dané miesto v texte]
-        │    [Tlačidlo → "Potvrdiť opravu" (zelené)]
-        │           │
-        │           ▼
-        │    [Redaktor potvrdí kliknutím]
-        │    [Nález → "Vyriešené" · label: "Upravené ručne"]
-        │    [Readiness Score sa zvýši]
-        │    [Audit log: resolutionType: manual]
+        │    [Editor sa presunie → "Potvrdiť opravu" → "Upravené ručne" → Score↑]
         │
-        ├──► [Ignorovať]
-        │    [Nález → "Vyriešené" · label: "Ignorované (vedomé rozhodnutie)"]
-        │    [Readiness Score sa zvýši]
-        │    [Audit log: resolutionType: ignored]
+        ├──► [Ignorovať (nález / SEO)]
+        │    ["Ignorované (vedomé rozhodnutie)" → Score↑ → event logged]
+        │
+        ├──► [Pridať set (tagy)]
+        │    [Zostatok tagov pridaný → chipy zelené → Score↑ → event: tags_committed]
+        │
+        ├──► [Odstrániť tag ×]
+        │    [Tag zo setu odstránený → event: tag_removed]
+        │
+        ├──► [Pridať link]
+        │    [Link prijatý → "Pridané" → Score↑ → event: link_suggestion_accepted]
+        │
+        ├──► [Odmietnuť link]
+        │    ["Odmietnuté" → event: link_suggestion_rejected]
         │
         └──► [Späť (Undo)]
-             [Obnoví posledný snapshot (len AI fix)]
-             [Fialový flash na zmenených poliach]
-             [Audit: undo_applied (produkcia; v prototype frontend-only)]
+             [Obnoví posledný snapshot → fialový flash]
                     │
                     ▼
-        [Všetky nálezy vyriešené → Publish Gate]
-        [Readiness Score ≥ threshold → povolené publikovanie]
+        [Publish Gate — SOFT (nikdy neblokuje publish flow)]
+        [Score ≥ 80 %: zelený badge "Pripravené"]
+        [Score 50–79 %: žltý badge "Odporúčame dokončiť"]
+        [Score < 50 %: červený badge "Nevyriešené nálezy"]
+        [Publish tlačidlo je aktívne vo všetkých prípadoch]
 ```
 
 ---
@@ -313,10 +389,13 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 | Validovať | „Validovať článok" | „Audit v procese…" | Sivé (disabled) |
 | Opraviť pomocou AI | „Opraviť pomocou AI" | „Opravujem…" + spinner | Sivé (lock / API) |
 | Upraviť ručne | „Upraviť ručne" | – | – |
-|| Potvrdiť opravu | „Potvrdiť opravu" | – | – |
-|| Ignorovať | „Ignorovať" | – | Sivé (Collab Lock) |
+| Potvrdiť opravu | „Potvrdiť opravu" | – | – |
+| Ignorovať (nález/SEO) | „Ignorovať" | – | Sivé (Collab Lock) |
 | Použiť návrh (SEO) | „Použiť návrh" | – | Sivé (lock / API) |
-| Ignorovať (SEO) | „Ignorovať" | – | Sivé (Collab Lock) |
+| Pridať všetky (tagy, N≥2) | „Pridať všetky (N)" | – | Sivé (Collab Lock) |
+| Pridať tag (tagy, N=1) | „Pridať tag" | – | Sivé (Collab Lock) |
+| Pridať link | „Pridať link" | – | Sivé (Collab Lock) |
+| Odmietnuť (link) | „Odmietnuť" | – | – |
 | Späť (Undo) | „Späť (N)" | – | Sivé (disabled) |
 | Export logu | „Export logu" | – | – |
 
@@ -327,37 +406,43 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 | Validovať (Collab Lock) | „Článok upravuje iný editor — validáciu spustíte po uvoľnení zámku." |
 | Opraviť pomocou AI (Collab Lock) | „Článok upravuje iný editor — AI úpravy sú pozastavené." |
 | Opraviť pomocou AI (API down) | „AI funkcie sú dočasne nedostupné." |
-|| Ignorovať (Collab Lock) | „Nemožno ignorovať počas zámku — článok upravuje iný editor." |
+| Ignorovať (Collab Lock) | „Nemožno ignorovať počas zámku — článok upravuje iný editor." |
 | Späť: prázdna história | „Nie je čo vrátiť. Zatiaľ ste nepoužili AI opravu nálezu ani SEO návrh." |
 | Späť: dostupný (N krokov) | „Späť (N): obnoví posledný stav pred AI úpravou (max. 5 krokov)." |
-| Späť: Collab Lock | „Vrátenie stavu nie je dostupné, kým článok upravuje iný editor." |
-| Export logu | „Stiahnuť JSON s udalosťami a Time-to-Fix metrikami pre testy a grafy." |
+| Export logu | „Stiahnuť JSON s udalosťami a metrikami pre testy a DataHub." |
 
 ### Bannery a systémové hlášky
 
 | Situácia | Text bannera |
 |----------|-------------|
 | API validácie nedostupné | „AI Validácia je dočasne nedostupná. Môžete pokračovať v manuálnej editácii." |
-| AI fix nedostupný | „AI funkcie sú dočasne nedostupné. Môžete pokračovať v manuálnej editácii článku v editore." |
+| AI fix nedostupný | „AI funkcie sú dočasne nedostupné. Môžete pokračovať v manuálnej editácii." |
 | SEO návrh nedostupný | „AI návrhy sú dočasne nedostupné. Polia môžete vyplniť ručne." |
-| Collab Lock | „Aktuálne upravuje: {meno}. Vy ste v režime čítania — AI validáciu a úpravy textu môžete spustiť až po uvoľnení zámku." |
+| Collab Lock | „Aktuálne upravuje: {meno}. Vy ste v režime čítania." |
 | Text nálezu nenájdený | „Text nálezu sa v článku nenašiel. Nález skontrolujte ručne." |
 | AI fix: prázdny výsledok | „Oprava sa nepodarila. Upravte text ručne alebo skúste znova." |
+| Tags API nedostupné | „Návrhy tagov sú dočasne nedostupné. Tagy pridajte ručne." |
 
-### Záložky a polia
+### Záložky, sekcie a stavové labely
 
 | Element | Text |
 |---------|------|
 | Záložka 1 | „Dôvera" |
 | Záložka 2 | „Štýl" |
 | Záložka 3 | „SEO" |
+| Sekcia tagov | „Navrhované tagy" |
+| Sekcia linkov | „Tagy & Interné linky" |
 | Readiness label | „Readiness Score" |
 | Sekcia vyriešených | „Vyriešené" |
-| Prázdny stav (bez auditu) | „Spustite audit pre analýzu" |
-| Education layer box (TL;DR) | *(modrý box, na vrchu detailu, príklad:)* „Systém nenašiel v texte konkrétny zdroj pre toto medicínske tvrdenie." |
-| Pätička vyriešenej karty | „Opravil(a) {meno} · pred {X} min." |
-| Pätička SEO zmeny v detaile | „Upravil(a) {meno} · pred {X} min." |
-| Späť tlačidlo: label | „(N)" vedľa ikony histórie |
+| Publish Gate: zelený | „Pripravené na publikáciu" |
+| Publish Gate: žltý | „Odporúčame dokončiť validáciu" |
+| Publish Gate: červený | „Článok obsahuje nevyriešené nálezy" |
+| Tag: pridaný | „Pridané" |
+| Link: prijatý | „Pridané" |
+| Link: odmietnutý | „Odmietnuté" |
+| Typ riešenia: AI fix | „Opravené AI" |
+| Typ riešenia: ručne | „Upravené ručne" |
+| Typ riešenia: ignorované | „Ignorované (vedomé rozhodnutie)" |
 
 ---
 
@@ -365,128 +450,166 @@ Aby som mohol vyhodnotiť adopciu a identifikovať UX problémy bez prístupu do
 
 | # | Scenár | Systémové správanie | UI reakcia |
 |---|--------|---------------------|------------|
-| E1 | API validácie timeout (>5 s) | Job označený ako `failed`, `reason: provider_unavailable` | Banner: „AI Validácia je dočasne nedostupná…" |
+| E1 | API validácie timeout | Job `failed`, `reason: provider_unavailable` | Banner: „AI Validácia je dočasne nedostupná…" |
 | E2 | API vráti prázdny zoznam nálezov | Validácia úspešná, 0 nálezov | „Skvelé! Žiadne nálezy nenájdené. Readiness Score: 100 %" |
-| E3 | Text nálezu nie je v dokumente | `indexOf` vráti -1, fix sa nespustí | „Text nálezu sa v článku nenašiel. Nález skontrolujte ručne." |
-| E4 | AI vráti prázdny string | Fix sa neaplikuje | „Oprava sa nepodarila. Upravte text ručne alebo skúste znova." |
-| E5 | AI vráti text dlhší ako pôvodný o >300 % | Upozornenie v konzole (prod: log), fix sa aplikuje | Štandardné zelené zvýraznenie; bez blokovania |
-| E6 | Collab Lock sa zapne počas aktívneho AI volania | Po `await` sa skontroluje stav zámku; ak je active → fix sa neaplikuje, snapshot sa nezapíše | Žiadna zmena, redaktor vidí žltý banner |
-| E7 | Undo stack plný (5/5), redaktor klikne ďalší AI fix | Najstarší snapshot sa vymaže, nový sa pridá | Počítadlo ostáva na „(5)" |
-| E8 | Nová validácia spustená → história sa vymaže | `articleHistory = []`, undo flash sa zruší | Tlačidlo „Späť" sa deaktivuje |
-| E9 | Redaktor klikne „Späť" viacnásobne rýchlo | `flushSync` + sekvenčné spracovanie; každý klik odpáli jeden krok | Počítadlo klesá 5→4→3… |
-| E10 | Duplicitné kliknutie na „Validovať" počas loading | Tlačidlo disabled, druhý request sa nespustí | Spinner + „Audit v procese…" |
-| E11 | SEO návrh aplikovaný, potom Undo | Snapshot obnoví pôvodné SEO pole; seoChangeLog ostáva (iba append) | Fialový flash na SEO poli |
-| E12 | Článok bez textu, klik na Validovať | Guard na prázdny string, validácia sa nespustí | Tooltip: „Pridajte text článku pred spustením validácie." |
-| E13 | Ignorovanie pri aktívnom Collab Lock | Tlačidlo „Ignorovať" je disabled | Tooltip: „Nemožno ignorovať počas zámku." |
-| E14 | Redaktor klikne „Upraviť ručne" ale nepotvrdí (prepne view) | Pending stav sa zruší, nález ostáva v zozname otvorený | – |
-| E15 | Redaktor ignoruje SEO titulok (má vlastný) | SEO položka označená „Ignorované", Readiness Score sa zvýši; pole ostáva nezmenené | – |
-| E16 | SEO návrh ignorovaný, detail sa zatvorí | „Ignorovať" tlačidlo sa skryje po akcii; bez novej validácie nie je možné zmeniť rozhodnutie | – |
+| E3 | Text nálezu nie je v dokumente | `indexOf` vráti -1, fix sa nespustí | „Text nálezu sa v článku nenašiel." |
+| E4 | AI vráti prázdny string | Fix sa neaplikuje | „Oprava sa nepodarila. Upravte text ručne." |
+| E5 | Collab Lock sa zapne počas AI volania | Po `await` sa skontroluje zámok; ak active → fix sa neaplikuje | Žltý banner |
+| E6 | Undo stack plný (5/5) | Najstarší snapshot sa vymaže, nový sa pridá | Počítadlo ostáva na „(5)" |
+| E7 | Nová validácia → história sa vymaže | `articleHistory = []` | Tlačidlo „Späť" sa deaktivuje |
+| E8 | Duplicitné kliknutie na „Validovať" | Tlačidlo disabled, druhý request sa nespustí | Spinner + „Audit v procese…" |
+| E9 | SEO návrh aplikovaný, potom Undo | Snapshot obnoví pôvodné SEO pole | Fialový flash na SEO poli |
+| E10 | Článok bez textu, klik na Validovať | Guard na prázdny string | Tooltip: „Pridajte text článku." |
+| E11 | Ignorovanie pri aktívnom Collab Lock | Tlačidlo „Ignorovať" disabled | Tooltip: „Nemožno ignorovať počas zámku." |
+| E12 | Žiadny tag neprejde filtrom | 0 návrhov, sekcia sa nezobrazí | – |
+| E13 | Anchor text len v perexe | Návrh sa nevytvorí | – |
+| E14 | Tag už je manuálne zalinkovaný | Systém tag preskočí | – |
+| E15 | Článok kratší ako 3 odstavce | Systém nenavrhuje linky | – |
+| E16 | Tags API nedostupné | `suggestions_skipped`, 0 návrhov | Banner: „Návrhy tagov sú dočasne nedostupné." |
+| E17 | Redaktor publikuje bez interakcie s návrhmi | Neinteragované návrhy označené ako `ignored` | Publish prebehne normálne |
+| E18 | Viac nálezov na rovnakom texte editora | Klik aktivuje nález s najvyšším rizikom | Panel prepne na zodpovedajúci nález |
 
 ---
 
 ## 9. ACCEPTANCE CRITERIA: SÚHRNNÁ CHECKLIST
 
-**Funkčnosť:**
-- [ ] Validácia sa spustí a zobrazí nálezy v < 3 s (UI loading)
-- [ ] Každý nález v zozname zobrazuje iba: krátky názov problému (`shortLabel`) + citácia, bez dlhých popisov
-- [ ] Detail nálezu obsahuje TL;DR box (modrý, 1 veta) na vrchu, pred citáciou
-- [ ] V detaile nálezu sú tri akcie: „Opraviť pomocou AI", „Upraviť ručne" (s potvrdením), „Ignorovať"
-- [ ] AI fix upraví text, zapíše audit záznam, presunie nález do „Vyriešené" s labelom „Opravené AI"
-- [ ] Ignorácia presunie nález do „Vyriešené" s labelom „Ignorované (vedomé rozhodnutie)"; Readiness Score sa zvýši
-- [ ] Potvrdená ručná úprava presunie nález do „Vyriešené" s labelom „Upravené ručne"; Readiness Score sa zvýši
-- [ ] Všetky tri akcie pridávajú body; Score = všetky nálezy vyriešené (úpravou alebo rozhodnutím)
-- [ ] Score nediferencuje kvalitu riešenia, ale mieru uzavretia nálezov; kvalita je zachytená v audit logu
-- [ ] SEO návrh: „Použiť návrh" skopíruje AI hodnotu do poľa, položka v SEO zozname zobrazí „Použité"
-- [ ] SEO návrh: „Ignorovať" označí položku v SEO zozname ako „Ignorované (vedomé rozhodnutie)", Readiness Score sa zvýši; pole ostáva nezmenené
-- [ ] Undo (max. 5 krokov) funguje pre AI fix aj SEO návrh
-- [ ] Collab Lock blokuje všetky zmeny vrátane Ignorovania; text ostáva len na čítanie
-- [ ] API degradation: editor ostáva plne editovateľný bez AI funkcií
-- [ ] Export JSON obsahuje `timeToFixMs` pre každý AI fix
+**Funkčnosť — Validácia (Dôvera / Štýl / SEO):**
+- [ ] Validácia sa spustí a zobrazí nálezy (UI loading)
+- [ ] Každý nález zobrazuje: `shortLabel` + citácia
+- [ ] Detail nálezu obsahuje TL;DR box (modrý, 1 veta) na vrchu
+- [ ] Tri akcie: „Opraviť pomocou AI", „Upraviť ručne", „Ignorovať"
+- [ ] Každá akcia presunie nález do „Vyriešené" s príslušným labelom
+- [ ] SEO návrhy: „Použiť návrh" a „Ignorovať" fungujú s Readiness Score
+
+**Funkčnosť — Tagy:**
+- [ ] Navrhované tagy sa zobrazia ako chip set
+- [ ] `×` odstráni individuálny tag
+- [ ] „Pridať set" pridá zostatok a zvýši Readiness Score
+- [ ] Všetky akcie sú zalogované s `suggestion_id`
+
+**Funkčnosť — Interné linky:**
+- [ ] Každý návrh obsahuje: anchor, cieľ, kontext vety
+- [ ] „Pridať link" a „Odmietnuť" fungujú s Readiness Score a event logom
+- [ ] Anchor sa nevkladá automaticky — vždy HITL
+
+**Readiness Score:**
+- [ ] Score animuje od 0 po vypočítanú hodnotu po validácii
+- [ ] Score rastie po každej vyriešenej položke (claim, SEO, tag set, link)
+- [ ] Publish Gate je výhradne soft (vizuálny indikátor, nikdy neblokuje publish)
 
 **Audit a bezpečnosť:**
-- [ ] Každá zmena má: `actorId`, `source` (ai/human), `resolutionType` (ai_fix/manual/ignored), `timestamp`, `documentVersion`, `claimId`
-- [ ] Audit log je len na pridávanie; záznamy nie je možné mazať ani upravovať
-- [ ] `whyFlagged` je vždy generovaný systémom, nie editovateľný redaktorom
+- [ ] Každá akcia má: `suggestion_id`, `actorId`, `resolutionType`, `timestamp`, `article_id`, `site_id`
+- [ ] Audit log je len na pridávanie
+- [ ] `whyFlagged` generuje systém, nie redaktor
 
 **UX:**
 - [ ] Zelený fade po AI fixe (2,5 s)
-- [ ] Fialový flash po Undo na zmenených poliach (1 s)
-- [ ] Všetky disabled stavy majú tooltips
-- [ ] Readiness Score sa animovane zvyšuje po každej oprave
-- [ ] Kliknutie na zvýraznený text v editore otvorí detail nálezu a prepne záložku (navigačný mostík editor → panel)
-- [ ] Pri prekrytí viacerých nálezov na jednom mieste sa aktivuje nález s najvyšším rizikom
+- [ ] Fialový flash po Undo (1 s)
+- [ ] Kliknutie na zvýraznený text → detail nálezu, správna záložka
+- [ ] Pri prekrytí nálezov → aktivuje sa nález s najvyšším rizikom
 
 **Non-functional:**
-- [ ] Prepínač `mdie.fix.ai_enabled` vypne AI fix bez nového nasadenia
-- [ ] Prepínač `mdie.validation.collab_lock` vypne zamykanie článkov pre konkrétnu redakciu
-- [ ] Všetky texty (copy) sú v centrálnom prekladovom súbore (nie pevne zapísané v kóde)
+- [ ] Feature flags (pozri Sekcia 12) sú vypínateľné per tenant bez deployu
+- [ ] Fail-safe: žiadna funkcia validation layera nesmie blokovať publish
+- [ ] Všetky texty v centrálnom prekladovom súbore
 
 ---
 
-## 10. PREČO SME TO NAVRHLI TAKTO (Zistenia z prototypu)
+## 10. READINESS SCORE — VÝPOČTOVÝ MODEL
 
-> *Táto sekcia vysvetľuje, prečo sú niektoré funkcie navrhnuté práve takto. Nie sú to náhodné detaily; každý vzišiel z konkrétneho problému, ktorý sme objavili počas testovania prototypu.*
+> Tento model je **návrh** — finálne váhy vyžadujú `[PM DECISION]` a potvrdenie šéfredaktora pilotnej značky.
 
-### 8.1 Education Layer (`whyFlagged`)
-**Problém:** Redaktori majú nízku dôveru k AI výstupom, ktoré upozorňujú na problém bez dostatočného vysvetlenia.
+### Základný vzorec
 
-**Riešenie:** Pole `whyFlagged`: jedna zrozumiteľná veta v odlíšenom vizuálnom bloku, ktorá vysvetľuje dôvod identifikácie nálezu a poskytuje kontext pre rozhodnutie.
+```
+ReadinessScore = Σ (PillarScore_i × PillarWeight_i)
+```
 
-**Príklad:** Namiesto „Príliš silné medicínske tvrdenie" → „Systém nenašiel v texte konkrétny zdroj, ktorý by podložil toto medicínske tvrdenie ako overiteľnú informáciu."
+### Váhy pilierov `[PM DECISION]`
 
-**Výsledok:** Redaktor nevníma výstup ako hodnotenie, ale ako vysvetlenie chýbajúceho kontextu, čo znižuje kognitívnu záťaž a zvyšuje ochotu pracovať s návrhmi systému.
+| Pilier | Navrhovaná váha | Zdôvodnenie |
+|--------|----------------|-------------|
+| Dôvera (Trust) | 35 % | Najvyššie právne a reputačné riziko |
+| SEO | 25 % | Priamy dopad na traffic |
+| Štýl (Style) | 20 % | Brand konzistencia, nižšie riziko |
+| Výkon (Tags + Links) | 20 % | Engagement a distribúcia |
 
-### 8.2 História zmien (Undo) ako „záchranná sieť"
-**Problém:** Redaktori váhajú použiť funkciu „Opraviť pomocou AI", pretože nemajú istotu, že zmenu môžu jednoducho vrátiť späť.  
-**Riešenie:** Pred každou AI opravou aj SEO návrhom sa uloží záloha stavu (max. 5 krokov). Počet krokov je viditeľný priamo na tlačidle.  
-**Výsledok:** Redaktor má pocit kontroly. Samotná existencia možnosti vrátiť zmenu zvyšuje ochotu používať AI, aj keď ju nakoniec nevyužije.  
-**Technická poznámka:** V prototype je história zmien uložená v prehliadači (React state + `flushSync`). V produkcii: záloha verzie dokumentu na serveri prepojená s Audit Trail.
+### Výpočet PillarScore
 
-### 8.3 Collab Lock / Zamknutý článok
-**Problém:** Dvaja redaktori môžu súčasne prepisovať ten istý odsek a navzájom si mazať prácu.  
-**Riešenie:** Žltý banner s menom editora + editor iba na čítanie + všetky AI akcie vypnuté.  
-**Prečo vidieť meno:** Redaktor nevolá IT, že „tlačidlo nefunguje"; hneď vie prečo a koho kontaktovať.  
-**Technická poznámka:** Pilot: zamykanie cez `ETag` / `If-Match`. Plná prevádzka: živá prítomnosť editorov cez WebSocket (napr. Ably alebo Supabase Realtime).
+```
+PillarScore = Σ(item_weight × resolution_factor) / Σ(item_weight) × 100
+```
 
-### 8.4 Záchranný režim pri výpadku AI
-**Problém:** „Čo ak vypadne AI?" Toto je najčastejšia námietka pri nasadzovaní AI.
+**Váha položky (Trust / Štýl):**
+- `high` risk = 3, `medium` = 2, `low` = 1
 
-**Riešenie:** Prepínač výpadku (v prototype ako checkbox, v produkcii: automatická poistka). Keď je AI nedostupná → zobrazí sa upozornenie a editor zostáva plne funkčný.
+**SEO a Výkon:** každá položka = 1 (flat weight)
 
-**Kľúčový princíp:** MDIE nikdy **neblokuje** prácu redakcie. Je to asistent, nie systém, ktorý riadi alebo blokuje prácu redakcie.
+**Resolution factor `[PM DECISION]`:**
 
-### 8.5 Attribution (Kto + Kedy)
-**Problém:** Právne oddelenia vydavateľstiev požadujú dohľadateľnosť každej zmeny v obsahu.  
-**Riešenie:** Pätičky kariet (`Opravil(a) {meno} · pred {X} min.`), plný audit log s `actorId`, `source`, `timestamp`, `documentVersion`.  
-**Výsledok:** Každá zmena má „podpis". Systém je audit-ready od prvého dňa pilotu.
+| Stav | Factor | Poznámka |
+|------|--------|----------|
+| AI fix / Potvrdiť ručne / Použiť návrh / Pridať link / Pridať set | 1.0 | Plná akcia |
+| Ignorovať (vedomé rozhodnutie) | 0.5 | Rozhodnutie prebehlo, bez opravy |
+| Neadresované | 0.0 | Otvorená položka |
 
-### 8.6 Time-to-Fix Metrika
-**Definícia:** Čas od prvého otvorenia karty nálezu po vykonanie opravy (AI alebo manuálne).
+### Publish Gate — soft indikátor
 
-**Prečo to meriame:** Krátky čas signalizuje, že systém je intuitívny a poskytuje dostatočný kontext pre rýchle rozhodnutie. Dlhší čas indikuje potrebu úpravy UX alebo vysvetľujúcej vrstvy (Education Layer).
+| Score | Indikátor | Správanie publish tlačidla |
+|-------|-----------|---------------------------|
+| ≥ 80 % | Zelený — „Pripravené" | Aktívne, zelená farba |
+| 50–79 % | Žltý — „Odporúčame dokončiť" | Aktívne, neutrálna farba |
+| < 50 % | Červený — „Nevyriešené nálezy" | Aktívne, s vizuálnym upozornením |
 
-**Dôležité:** Táto metrika je **indikátor použiteľnosti**, nie záväzný SLA. Konkrétne cieľové hodnoty sa stanovia na základe dát z pilotu.
+**Publish flow sa nikdy neblokuje.**
 
-Tlačidlo „Ignorovať" nie je len UX rozhodnutie, ale aj základ pre budúcu spätnoväzbovú slučku systému, ktorá umožní lepšie rozlíšiť medzi reálnym problémom a autorským zámerom redaktora.
-
-### 8.7 Navigačný mostík: klik na zvýraznený text → detail nálezu
-
-**Problém:** Redaktor vidí farebné zvýraznenie v texte, ale nemusí vedieť, že má hľadať zodpovedajúci nález v pravom paneli. Zvlášť pri viacerých nálezoch je orientácia náročná: nález 3 v paneli zodpovedá ktorému úseku v texte?
-
-**Riešenie:** Kliknutie na zvýraznený text v editore priamo otvorí detail zodpovedajúceho nálezu v pravom paneli a automaticky prepne na správnu záložku (Dôvera / Štýl / SEO). Žiadne extra ikony ani tooltipy. Farebnézvýraznenie samo o sebe naznačuje, že ide o aktívny prvok.
-
-**Prečo bez hover efektu v textarea:** Editor je štandardná textarea s prekrývajúcou sa highlight vrstvou. Dynamická zmena kurzora nad konkrétnym slovom by si vyžadovala sledovanie pozície myši voči dátovým rozsahom textu (experimentálne API). Pre v1 je dostatočný samotný klik. Hover efekt je zámer pre v2.
-
-**Výsledok:** Redaktor prirodzene prechádza medzi textom a panelom bez straty kontextu. Znižuje sa kognitívna záťaž pri hľadaní správneho nálezu v zozname.
+### `[DATA_GAP]` pre scoring
+- DG-1: Finálne váhy pilierov (PM + šéfredaktor)
+- Ignored factor 0.5 je návrh — overí sa na základe pilotných dát
+- Score sa počíta client-side v prototype; v produkcii: definovať, či server-side alebo client-side `[PM DECISION]`
 
 ---
 
-## 11. WIREFRAME / UI NÁČRT
+## 11. PREČO SME TO NAVRHLI TAKTO
 
-> *Odkaz na živý prototyp: [https://www.aifreelancer.sk/nmh](https://www.aifreelancer.sk/nmh)*  
-> *Heslo: `nmh2026`*
+### Education Layer (`whyFlagged`)
+**Problém:** Redaktori majú nízku dôveru k AI výstupom bez vysvetlenia.
+**Riešenie:** Pole `whyFlagged` — jedna veta v odlíšenom vizuálnom bloku, ktorá vysvetľuje prečo systém nález identifikoval.
+**Výsledok:** Redaktor nevníma výstup ako hodnotenie, ale ako kontext pre rozhodnutie.
 
-**Popis obrazovky (referencia k priloženým screenshotom z prototypu):**
+### História zmien (Undo) ako záchranná sieť
+**Problém:** Redaktori váhajú použiť AI opravu bez istoty, že ju môžu vrátiť.
+**Riešenie:** Undo stack (max. 5 krokov), počet viditeľný na tlačidle.
+**Výsledok:** Pocit kontroly zvyšuje ochotu používať AI.
+
+### Collab Lock
+**Problém:** Dvaja redaktori môžu prepisovať ten istý odstavec.
+**Riešenie:** Žltý banner s menom editora + editor iba na čítanie + všetky AI akcie vypnuté.
+**Technická poznámka:** Pilot: `ETag` / `If-Match`. Produkcia: WebSocket presence.
+
+### Záchranný režim pri výpadku AI
+**Princíp:** Performance Layer nikdy neblokuje prácu redakcie. Je to asistent, nie bloker.
+
+### Attribution (Kto + Kedy)
+**Riešenie:** Pätičky kariet, plný audit log s `actorId`, `source`, `timestamp`, `documentVersion`.
+
+### Navigačný mostík: klik na zvýraznený text → detail nálezu
+**Problém:** Redaktor vidí farebné zvýraznenia, ale nevie, ktoré zodpovedá ktorému nálezu v paneli.
+**Riešenie:** Kliknutie na zvýraznený text priamo otvorí detail nálezu a prepne záložku.
+**Technická poznámka:** Textarea + overlay architektúra — click handler na textarea cez `selectionStart` pozíciu. Hover kurzor (`cursor-pointer`) je zámer pre v2.
+
+### Soft Publish Gate
+**Problém:** Blokujúci gate by porušil CMS princíp a znížil dôveru redaktorov.
+**Riešenie:** Vizuálny indikátor (zelená/žltá/červená) bez blokovania. Rozhodnutie ostáva na redaktorovi.
+
+### Ignored ako feedback signal
+**Tlačidlo „Ignorovať" nie je len UX rozhodnutie** — je to dátový signal pre budúcu kalibráciu modelu. `Ignorovať` = systém navrhol niečo, čo redaktor vedome odmietol. Toto je najcennejší typ spätnej väzby.
+
+---
+
+## 12. WIREFRAME / UI NÁČRT
+
+> *Odkaz na živý prototyp: [https://www.aifreelancer.sk/nmh](https://www.aifreelancer.sk/nmh)*
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -495,135 +618,163 @@ Tlačidlo „Ignorovať" nie je len UX rozhodnutie, ale aj základ pre budúcu s
 │ INTELLIGENCE BAR                                                         │
 │ [🛡 Trust & Governance]  Readiness: ████░ 84%  [Validovať] [↩ Späť(3)] │
 │                                                [Export logu]            │
-│ [☐ Prototyp: druhý editor]  [☐ Simulácia: výpadok API]                  │
 ├────────────────────────────────┬────────────────────────────────────────┤
-│ EDITOR (ľavý stĺpec)           │ AI PANEL (pravý stĺpec, sticky)        │
+│ EDITOR — DRAFT                 │ PERFORMANCE PANEL (sticky)             │
 │                                │                                        │
 │ Titulok ░░░░░░░░░░░░░░░░░░░░░  │ [Dôvera 3] [Štýl 2] [SEO 3]          │
 │ SEO titulok ░░░░░░░░░░░░░░░░░  │ ─────────────────────────────────────  │
-│ URL ░░░░░░░░░░░░░░░░░░░░░░░░░  │ 🔴 Príliš silné medicínske tvrdenie   │
-│                                │ Systém nenašiel zdroj...               │
-│ Perex ░░░░░░░░░░░░░░░░░░░░░░░  │ „kreatín mohol predstavovať prelom…"  │
+│ URL ░░░░░░░░░░░░░░░░░░░░░░░░░  │ Navrhované tagy                       │
+│                                │ [Kreatín ×] [Alzheimer ×] [Zdravie ×] │
+│ Perex ░░░░░░░░░░░░░░░░░░░░░░░  │ [Pridať set]                          │
 │                                │ ─────────────────────────────────────  │
-│ ┌──────────────────────────┐   │ 🟡 Chýba konkrétna cena               │
-│ │ Text článku              │   │ Chýba konkrétna suma...               │
-│ │                          │   │ „stojí pár eur"                       │
-│ │ [highlight — klikateľné] │◄──┤ ─────────────────────────────────────  │
-│ │ kreatín monohydrát       │   │ [Vyriešené]                           │
-│ │ [highlight zelený]       │   │ ✓ Opravil Daniel · pred 2 min.        │
-│ │                          │   │                                        │
-│ └──────────────────────────┘   │                                        │
-│                                │ DETAIL (po kliknutí na nález):         │
-│                                │ ◄ Späť na zoznam                       │
-│                                │ „kreatín mohol predstavovať prelom…"   │
-│                                │ Dôvod: Príliš silné medicínske tvrdenie│
-│                                │ ╔══════════════════════════════╗       │
-│                                │ ║ Systém nenašiel v texte...  ║       │
-│                                │ ╚══════════════════════════════╝       │
-│                                │ Odporúčaná akcia: Zmierniť tón...      │
-│                                │ [🤖 Opraviť pomocou AI] [✏ Ručne]     │
+│ ┌──────────────────────────┐   │ Tagy & Interné linky                  │
+│ │ Text článku              │   │ kreatín monohydrát → Kreatín          │
+│ │ [highlight — klikateľné] │◄──┤ „...mohol predstavovať prelom..."     │
+│ │ kreatín monohydrát       │   │ [Pridať link] [Odmietnuť]             │
+│ │ [highlight fialový]      │   │ ─────────────────────────────────────  │
+│ └──────────────────────────┘   │ 🔴 Príliš silné medicínske tvrdenie   │
+│                                │ 🟡 Chýba konkrétna cena               │
+│                                │ ─────────────────────────────────────  │
+│                                │ Publish Gate: 🟢 Pripravené           │
 └────────────────────────────────┴────────────────────────────────────────┘
 ```
 
 **Farebný kód nálezov:**
-- 🔴 Červená ľavá linka = vysoké riziko
-- 🟡 Žltá ľavá linka = stredné riziko
-- 🟢 Zelená ľavá linka = nízke riziko / vyriešené
+- 🔴 Červená = vysoké riziko
+- 🟡 Žltá = stredné riziko
+- 🟢 Zelená = nízke riziko / vyriešené
+- 🔵 Modrá = tag / link návrh
 
 ---
 
-## 12. TECHNICKÉ POZNÁMKY PRE DEV TÍM
+## 13. TECHNICKÉ POZNÁMKY PRE DEV TÍM
 
-### Dátový model: Claim objekt
+### Dátový model: Unified Suggestion Object
+
+```typescript
+type Suggestion = {
+  suggestion_id: string;          // UUID, povinný pre event tracking
+  suggestion_type: "trust" | "style" | "seo" | "tag" | "internal_link";
+  anchor_text: string | null;     // pre internal_link
+  target_id: string | null;       // tag ID alebo field key
+  target_type: "tag" | "article" | "field" | null;
+  target_label: string | null;
+  context_snippet: string | null; // výrez vety pre kontext
+  suggestion_source: "ai" | "rule_based" | "hybrid";
+  article_id: string;             // [DATA_GAP DG-2]
+  site_id: string;                // [DATA_GAP DG-2]
+  article_type: string;
+  position_in_text: {
+    paragraph_index: number;
+    sentence_index: number;
+  } | null;
+};
+```
+
+### Dátový model: Claim objekt (pre Trust / Štýl)
+
 ```typescript
 type Claim = {
   id: string;
-  text: string;                  // citovaný text z článku
+  text: string;
   risk: "high" | "medium" | "low";
-  shortLabel: string;            // krátky názov problému, zobrazený v list view aj detaile
-  explanation: string;           // podrobný popis (detail view)
-  whyFlagged?: string;           // TL;DR: jedna veta prečo systém nález identifikoval (detail view)
-  recommendedAction: string;     // čo má redaktor urobiť
-  startIndex: number;            // pozícia v dokumente (pre highlight)
+  shortLabel: string;
+  explanation: string;
+  whyFlagged?: string;
+  recommendedAction: string;
+  startIndex: number;
   endIndex: number;
 };
 ```
 
-### Dátový model: Audit udalosť
+### Dátový model: Audit Event
+
 ```typescript
 type AuditEvent =
   | { type: "audit_completed"; at: number; readinessScore: number }
   | { type: "audit_failed_unavailable"; at: number; reason: string }
-  | {
-      type: "ai_fix_applied";
-      claimId: string;
-      tab: "trust" | "linguistic";
-      timeToFixMs: number;
-      timeToFixUnder5s: boolean;
-      appliedAt: number;
-      actorId: string;
-      actorType: "human";
-      source: "ai";
-      documentVersion: string;
-      beforeText: string;
-      afterText: string;
-    }
-  | {
-      type: "seo_suggestion_applied";
-      key: "title" | "seoTitle" | "url" | "perex";
-      appliedAt: number;
-      timeSinceAuditMs: number | null;
-      actorId: string;
-    };
+  | { type: "ai_fix_applied"; suggestion_id: string; claimId: string;
+      tab: "trust" | "style"; timeToFixMs: number; timeToFixUnder5s: boolean;
+      appliedAt: number; actorId: string; source: "ai";
+      article_id: string; site_id: string; beforeText: string; afterText: string }
+  | { type: "seo_suggestion_applied"; suggestion_id: string; key: string;
+      appliedAt: number; actorId: string; article_id: string; site_id: string }
+  | { type: "tags_committed"; at: number; suggestion_id: string;
+      tags: { id: string; label: string }[]; removedCount: number;
+      article_id: string; site_id: string }
+  | { type: "tag_removed"; at: number; suggestion_id: string;
+      tagId: string; label: string; article_id: string; site_id: string }
+  | { type: "link_suggestion_accepted"; at: number; suggestion_id: string;
+      anchor_text: string; target_id: string; context_snippet: string;
+      article_id: string; site_id: string }
+  | { type: "link_suggestion_rejected"; at: number; suggestion_id: string;
+      anchor_text: string; target_id: string;
+      article_id: string; site_id: string }
+  | { type: "suggestions_skipped"; at: number; reason: string;
+      article_id: string; site_id: string };
 ```
 
 ### Feature flags (per tenant)
+
 ```
-mdie.validation.enabled          // celý validation flow
-mdie.fix.ai_enabled              // AI fix tlačidlo
-mdie.fix.undo_stack_size         // int, default: 5
-mdie.collab_lock.enabled         // optimistic locking
-mdie.collab_lock.strategy        // "etag" | "websocket"
-mdie.export.audit_log_enabled    // JSON export tlačidlo
+mdie.validation.enabled                      // celý validation flow
+mdie.fix.ai_enabled                          // AI fix tlačidlo
+mdie.fix.undo_stack_size                     // int, default: 5
+mdie.collab_lock.enabled                     // optimistic locking
+mdie.collab_lock.strategy                    // "etag" | "websocket"
+mdie.export.audit_log_enabled                // JSON export tlačidlo
+seo_copilot.linkbuilding.enabled             // interné linky
+seo_copilot.max_links_per_article            // int, default: 5
+article_validation.performance_layer.enabled // tagy + linky sekcia
+article_validation.event_logging.enabled     // event logging
 ```
 
-### API kontrakt: POST validation
+### API kontrakt: POST validation `[DATA_GAP DG-2]`
+
 ```
 POST /api/mdie/v1/documents/{documentId}/validate
 Headers:
   Authorization: Bearer {token}
   X-Tenant-Id: {brandId}
-  If-Match: {currentVersion}     // pre optimistic locking
+  If-Match: {currentVersion}
 
 Body:
-  { "content": "...", "title": "...", "seoTitle": "...", "perex": "..." }
+  {
+    "content": "...",
+    "title": "...",
+    "seoTitle": "...",
+    "perex": "...",
+    "article_id": "...",     // [DATA_GAP DG-2]
+    "site_id": "...",        // [DATA_GAP DG-2]
+    "article_type": "..."    // [DATA_GAP DG-2]
+  }
 
 Response 200:
   { "jobId": "uuid", "status": "queued" }
 
 Response 409 Conflict:
   { "error": "version_conflict", "currentVersion": "abc123" }
-
-GET /api/mdie/v1/validation-jobs/{jobId}
-Response 200:
-  { "status": "succeeded", "result": { ...ArticleAudit } }
-  { "status": "failed", "errorCode": "provider_unavailable" }
 ```
 
-> **Poznámka k nákladovej optimalizácii:** Systém využíva Shared Intelligence Core s natívnou podporou Prompt Cachingu a Tiered Routingu pre optimalizáciu API volaní, viď Architektonickú prílohu (MDIE B).
+### DataHub integrácia `[DATA_GAP DG-3]`
+
+Events z audit logu musia byť kompatibilné s DataHub event schémou.
+Spôsob odosielania (on publish / periodicky / na vyžiadanie) sa definuje s DataHub tímom.
+V MVP fáze: eventy sa ukladajú lokálne (JSON export) a odosielanie do DataHubu je out of scope.
 
 ---
 
-## HISTORIA DOKUMENTU
+## HISTÓRIA DOKUMENTU
 
 | Verzia | Dátum | Autor | Zmena |
 |--------|-------|-------|-------|
 | 1.0 | 2026-04-12 | Daniel Budziňák | Prvá verzia pre 2. kolo výberového konania NMH |
-| 1.2 | 2026-04-12 | Daniel Budziňák | Token Management presunutý do Časti B (Príloha); C zameraná výhradne na feature spec |
-|| 2.0 | 2026-04-12 | Daniel Budzinák | Doplnené: DATA GAP, Feature Summary, MVP Scope, Out of Scope, Execution Framing |
-|| 2.1 | 2026-04-12 | Daniel Budziňák | Sync s prototypom: skrátené labels, TL;DR detail, Ignorovať akcia, resolutionType, score logika |
-|| 2.2 | 2026-04-12 | Daniel Budziňák | Navigačný mostík: klik na zvýraznený text → detail nálezu (Story 2 AC, Workflow, Design Rationale 8.7, AC Checklist) |
+| 1.2 | 2026-04-12 | Daniel Budziňák | Token Management presunutý do MDIE B |
+| 2.0 | 2026-04-12 | Daniel Budziňák | DATA GAP, Feature Summary, MVP Scope, Out of Scope |
+| 2.1 | 2026-04-12 | Daniel Budziňák | Sync s prototypom: skrátené labels, TL;DR, Ignorovať, score logika |
+| 2.2 | 2026-04-12 | Daniel Budziňák | Navigačný mostík: klik na zvýraznený text → detail nálezu |
+| 3.0 | 2026-04-27 | Daniel Budziňák | Repozícia na Article Performance Layer; CMS kontext; fázovanie Phase 1 (Tags+Links) → Phase 2 (Full Layer); Story 6+7; Soft Publish Gate; Readiness Score model; Unified Suggestion Object; nové feature flags; aktualizovaný DATA GAP |
 
 ---
 
-*Dokument pripravený v rámci výberového konania na pozíciu Senior Product Manager.*
+*Dokument pripravený v rámci výberového konania na pozíciu Senior Product Manager. Súvisí s MDIE A (`MDIE_A_Strategicka_Vizia.pdf`) a MDIE B (`MDIE_B_Projektovy_Ramec.pdf`).*

@@ -2484,15 +2484,27 @@ const EagleCMS_Split: React.FC = () => {
                                         {audit.tagSuggestions.filter(t => !removedTagIds.has(t.id)).length} tagov
                                       </span>
                                     </div>
-                                    {!tagsCommitted && audit.tagSuggestions.some(t => !removedTagIds.has(t.id)) && (
-                                      <button
-                                        type="button"
-                                        onClick={handleTagSetCommit}
-                                        className="rounded-lg border border-violet-300 bg-violet-50 px-2.5 py-1 text-[11px] font-bold text-violet-800 transition-all hover:bg-violet-100"
-                                      >
-                                        Pridať set
-                                      </button>
-                                    )}
+                                    {!tagsCommitted && (() => {
+                                      const remaining = audit.tagSuggestions.filter(t => !removedTagIds.has(t.id));
+                                      return remaining.length >= 2 ? (
+                                        <button
+                                          type="button"
+                                          onClick={handleTagSetCommit}
+                                          className="rounded-lg border border-violet-300 bg-violet-50 px-2.5 py-1 text-[11px] font-bold text-violet-800 transition-all hover:bg-violet-100"
+                                          title={`Pridá všetkých ${remaining.length} tagov naraz`}
+                                        >
+                                          Pridať všetky ({remaining.length})
+                                        </button>
+                                      ) : remaining.length === 1 ? (
+                                        <button
+                                          type="button"
+                                          onClick={handleTagSetCommit}
+                                          className="rounded-lg border border-violet-300 bg-violet-50 px-2.5 py-1 text-[11px] font-bold text-violet-800 transition-all hover:bg-violet-100"
+                                        >
+                                          Pridať tag
+                                        </button>
+                                      ) : null;
+                                    })()}
                                     {tagsCommitted && (
                                       <span className="flex items-center gap-1 text-[10px] font-black uppercase text-emerald-700">
                                         <CheckCircle2 size={11} /> Pridané
