@@ -195,6 +195,39 @@ type StudyExportEvent =
       key: SeoAuditKey;
       appliedAt: number;
       timeSinceAuditMs: number | null;
+    }
+  | {
+      type: "tags_committed";
+      at: number;
+      tags: { id: string; label: string; url: string }[];
+      removedCount: number;
+      suggestion_source: "ai";
+    }
+  | {
+      type: "tag_removed";
+      at: number;
+      tagId: string;
+      label: string;
+      suggestion_source: "ai";
+    }
+  | {
+      type: "link_suggestion_accepted";
+      at: number;
+      suggestion_id: string;
+      suggestion_type: "internal_link";
+      anchor_text: string;
+      target_id: string;
+      context_snippet: string;
+      suggestion_source: "ai";
+    }
+  | {
+      type: "link_suggestion_rejected";
+      at: number;
+      suggestion_id: string;
+      suggestion_type: "internal_link";
+      anchor_text: string;
+      target_id: string;
+      suggestion_source: "ai";
     };
 
 function downloadJsonFile(filename: string, data: unknown) {
@@ -401,13 +434,21 @@ const EagleCMS_Split: React.FC = () => {
             aiFixes.reduce((acc, f) => acc + f.timeToFixMs, 0) / aiFixes.length,
           )
         : null;
+    const linksAccepted = events.filter(e => e.type === "link_suggestion_accepted").length;
+    const linksRejected = events.filter(e => e.type === "link_suggestion_rejected").length;
+    const tagsCommittedEvent = events.find(e => e.type === "tags_committed") as
+      | Extract<StudyExportEvent, { type: "tags_committed" }>
+      | undefined;
+    const tagsRemovedCount = events.filter(e => e.type === "tag_removed").length;
     downloadJsonFile(`eagle-test-log-${Date.now()}.json`, {
-      exportVersion: 1,
+      exportVersion: 2,
       exportedAt: new Date().toISOString(),
       prototype: "EAGLE_ADMIN",
       session: {
         displayName: PROTOTYPE_SESSION_USER.displayName,
         email: PROTOTYPE_SESSION_USER.email,
+        article_type: "spravodajstvo",
+        site_id: "novycas",
       },
       metrics: {
         aiFixCount: aiFixes.length,
@@ -417,6 +458,19 @@ const EagleCMS_Split: React.FC = () => {
           aiFixes.length > 0 ? under5 / aiFixes.length : null,
         timeToFixDefinition:
           "Milliseconds from first claim card open (or audit completion if never opened) until click on AI fix.",
+        linkSuggestions: {
+          accepted: linksAccepted,
+          rejected: linksRejected,
+          total: linksAccepted + linksRejected,
+          acceptanceRate: (linksAccepted + linksRejected) > 0
+            ? Math.round(linksAccepted / (linksAccepted + linksRejected) * 100) / 100
+            : null,
+        },
+        tagSuggestions: {
+          committed: tagsCommittedEvent ? tagsCommittedEvent.tags.length : 0,
+          removed: tagsRemovedCount,
+          committedLabels: tagsCommittedEvent?.tags.map(t => t.label) ?? [],
+        },
       },
       events,
       resolvedClaims,
@@ -871,6 +925,60 @@ const EagleCMS_Split: React.FC = () => {
     },
     [audit, collaborationLockDemo, selectedClaimId],
   );
+
+  const handleTagSetCommit = useCallback(() => {
+    if (!audit) return;
+    const remaining = (audit.tagSuggestions ?? []).filter(t => !removedTagIds.has(t.id));
+    setTagsCommitted(true);
+    setAudit({ ...audit, readinessScore: nextReadinessBump(audit.readinessScore) });
+    studyLogRef.current.push({
+      type: "tags_committed",
+      at: Date.now(),
+      tags: remaining.map(t => ({ id: t.id, label: t.label, url: t.url })),
+      removedCount: (audit.tagSuggestions ?? []).length - remaining.length,
+      suggestion_source: "ai",
+    });
+  }, [audit, removedTagIds]);
+
+  const handleTagRemove = useCallback((tag: TagSuggestion) => {
+    setRemovedTagIds(prev => new Set(prev).add(tag.id));
+    studyLogRef.current.push({
+      type: "tag_removed",
+      at: Date.now(),
+      tagId: tag.id,
+      label: tag.label,
+      suggestion_source: "ai",
+    });
+  }, []);
+
+  const handleLinkAccept = useCallback((s: LinkSuggestion) => {
+    if (!audit) return;
+    setLinkActions(prev => new Map(prev).set(s.id, 'accepted'));
+    setAudit({ ...audit, readinessScore: nextReadinessBump(audit.readinessScore) });
+    studyLogRef.current.push({
+      type: "link_suggestion_accepted",
+      at: Date.now(),
+      suggestion_id: s.id,
+      suggestion_type: "internal_link",
+      anchor_text: s.anchor,
+      target_id: s.target,
+      context_snippet: s.context,
+      suggestion_source: "ai",
+    });
+  }, [audit]);
+
+  const handleLinkReject = useCallback((s: LinkSuggestion) => {
+    setLinkActions(prev => new Map(prev).set(s.id, 'rejected'));
+    studyLogRef.current.push({
+      type: "link_suggestion_rejected",
+      at: Date.now(),
+      suggestion_id: s.id,
+      suggestion_type: "internal_link",
+      anchor_text: s.anchor,
+      target_id: s.target,
+      suggestion_source: "ai",
+    });
+  }, []);
 
   const applySeoSuggestion = useCallback(
     (key: SeoAuditKey) => {
@@ -2379,7 +2487,7 @@ const EagleCMS_Split: React.FC = () => {
                                     {!tagsCommitted && audit.tagSuggestions.some(t => !removedTagIds.has(t.id)) && (
                                       <button
                                         type="button"
-                                        onClick={() => setTagsCommitted(true)}
+                                        onClick={handleTagSetCommit}
                                         className="rounded-lg border border-violet-300 bg-violet-50 px-2.5 py-1 text-[11px] font-bold text-violet-800 transition-all hover:bg-violet-100"
                                       >
                                         Pridať set
@@ -2417,7 +2525,7 @@ const EagleCMS_Split: React.FC = () => {
                                           {!tagsCommitted && (
                                             <button
                                               type="button"
-                                              onClick={() => setRemovedTagIds(prev => new Set(prev).add(tag.id))}
+                                              onClick={() => handleTagRemove(tag)}
                                               className="ml-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full text-violet-400 opacity-60 transition-opacity hover:bg-violet-200 hover:opacity-100"
                                               title="Odstrániť tag"
                                             >
@@ -2480,14 +2588,14 @@ const EagleCMS_Split: React.FC = () => {
                                           <div className="mt-2.5 flex gap-2">
                                             <button
                                               type="button"
-                                              onClick={() => setLinkActions(prev => new Map(prev).set(s.id, 'accepted'))}
+                                              onClick={() => handleLinkAccept(s)}
                                               className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 py-1.5 text-[11px] font-bold text-emerald-800 transition-all hover:bg-emerald-100"
                                             >
                                               <CheckCircle2 size={12} /> Pridať link
                                             </button>
                                             <button
                                               type="button"
-                                              onClick={() => setLinkActions(prev => new Map(prev).set(s.id, 'rejected'))}
+                                              onClick={() => handleLinkReject(s)}
                                               className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-gray-200 bg-gray-50 py-1.5 text-[11px] font-bold text-gray-600 transition-all hover:bg-gray-100"
                                             >
                                               Odmietnuť
