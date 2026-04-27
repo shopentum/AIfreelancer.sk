@@ -295,8 +295,10 @@ Aby som nemusel manuálne hľadať vhodné miesta na prelinkovanie.
 **Acceptance Criteria:**
 - [ ] Po validácii sa v SEO záložke zobrazí sekcia „Tagy & Interné linky"
 - [ ] Každý návrh obsahuje: anchor text (zvýraznený), šípku → cieľový tag, výrez kontextovej vety
-- [ ] Dve akcie: „Pridať link" (zelené) / „Odmietnuť" (sivé)
-- [ ] Po „Pridať link": karta zobrazí „Pridané", Readiness Score sa zvýši, event zalogovaný
+- [ ] Ak zostávajú **2 a viac** nespracovaných návrhov: zobrazí sa tlačidlo „Pridať všetky (N)" — hromadné prijatie jedným kliknutím; N sa aktualizuje s každou vyriešenou kartou
+- [ ] Ak zostáva **1 nespracovaný** návrh: zobrazí sa tlačidlo „Pridať link" (singulár)
+- [ ] Na každej karte dve akcie: „Pridať link" (zelené) / „Odmietnuť" (sivé)
+- [ ] Po „Pridať link" (jednotlivo aj hromadne): karta zobrazí „Pridané", Readiness Score sa zvýši, event zalogovaný pre každý link
 - [ ] Po „Odmietnuť": karta zobrazí „Odmietnuté", event zalogovaný
 - [ ] Anchor text sa vyberá výhradne z existujúcich výskytov v texte (nie generovanie nových fráz)
 - [ ] Systém rešpektuje link density: max. 1 link/veta, max. 1–2 linky/odstavec
@@ -394,7 +396,8 @@ Aby som nemusel manuálne hľadať vhodné miesta na prelinkovanie.
 | Použiť návrh (SEO) | „Použiť návrh" | – | Sivé (lock / API) |
 | Pridať všetky (tagy, N≥2) | „Pridať všetky (N)" | – | Sivé (Collab Lock) |
 | Pridať tag (tagy, N=1) | „Pridať tag" | – | Sivé (Collab Lock) |
-| Pridať link | „Pridať link" | – | Sivé (Collab Lock) |
+| Pridať všetky (linky, N≥2) | „Pridať všetky (N)" | – | Sivé (Collab Lock) |
+| Pridať link (linky, N=1 / jednotlivo) | „Pridať link" | – | Sivé (Collab Lock) |
 | Odmietnuť (link) | „Odmietnuť" | – | – |
 | Späť (Undo) | „Späť (N)" | – | Sivé (disabled) |
 | Export logu | „Export logu" | – | – |

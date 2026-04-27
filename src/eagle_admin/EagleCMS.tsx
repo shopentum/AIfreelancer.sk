@@ -980,6 +980,29 @@ const EagleCMS_Split: React.FC = () => {
     });
   }, []);
 
+  const handleLinkAcceptAll = useCallback(() => {
+    if (!audit) return;
+    const pending = (audit.linkSuggestions ?? []).filter(s => !linkActions.has(s.id));
+    if (pending.length === 0) return;
+    const newMap = new Map(linkActions);
+    pending.forEach(s => newMap.set(s.id, 'accepted'));
+    setLinkActions(newMap);
+    const bump = pending.reduce((acc) => nextReadinessBump(acc), audit.readinessScore);
+    setAudit({ ...audit, readinessScore: bump });
+    pending.forEach(s => {
+      studyLogRef.current.push({
+        type: "link_suggestion_accepted",
+        at: Date.now(),
+        suggestion_id: s.id,
+        suggestion_type: "internal_link",
+        anchor_text: s.anchor,
+        target_id: s.target,
+        context_snippet: s.context,
+        suggestion_source: "ai",
+      });
+    });
+  }, [audit, linkActions]);
+
   const applySeoSuggestion = useCallback(
     (key: SeoAuditKey) => {
       if (collaborationLockDemo) return;
@@ -2556,11 +2579,34 @@ const EagleCMS_Split: React.FC = () => {
                               {/* Tagy & Interné linky — SEO Copilot MVP1 */}
                               {activeAuditTab === 'seo' && audit?.linkSuggestions && audit.linkSuggestions.length > 0 && (
                                 <div className="mt-4 space-y-2">
-                                  <div className="flex items-center gap-2 pb-1">
-                                    <span className="text-[11px] font-black uppercase tracking-wide text-gray-500">Tagy & Interné linky</span>
-                                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">
-                                      {audit.linkSuggestions.filter(s => !linkActions.has(s.id)).length} nových
-                                    </span>
+                                  <div className="flex items-center justify-between pb-1">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-[11px] font-black uppercase tracking-wide text-gray-500">Tagy & Interné linky</span>
+                                      <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">
+                                        {audit.linkSuggestions.filter(s => !linkActions.has(s.id)).length} nových
+                                      </span>
+                                    </div>
+                                    {(() => {
+                                      const pending = audit.linkSuggestions.filter(s => !linkActions.has(s.id));
+                                      return pending.length >= 2 ? (
+                                        <button
+                                          type="button"
+                                          onClick={handleLinkAcceptAll}
+                                          className="rounded-lg border border-blue-300 bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-800 transition-all hover:bg-blue-100"
+                                          title={`Prijme všetkých ${pending.length} návrhov linkov naraz`}
+                                        >
+                                          Pridať všetky ({pending.length})
+                                        </button>
+                                      ) : pending.length === 1 ? (
+                                        <button
+                                          type="button"
+                                          onClick={() => handleLinkAccept(audit.linkSuggestions!.find(s => !linkActions.has(s.id))!)}
+                                          className="rounded-lg border border-blue-300 bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-800 transition-all hover:bg-blue-100"
+                                        >
+                                          Pridať link
+                                        </button>
+                                      ) : null;
+                                    })()}
                                   </div>
                                   {audit.linkSuggestions.map((s) => {
                                     const action = linkActions.get(s.id);
