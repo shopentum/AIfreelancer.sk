@@ -26,7 +26,7 @@ MVP1 vychádza z existujúceho architektonického návrhu linkbuildingu (Conflue
 | DG-L1 | Je SpaCy (`sk_core_news_lg`) alebo iná NLP knižnica v AI service stacku? (súvisí s CMSD1778) | Backend / AI service tím |
 | DG-L2 | Lifecycle stavu `ignored`: kedy presne — pri zatvorení / publishi / konci session? | PM + Backend |
 | DG-L3 | Incremental use case: nová validácia prepíše predchádzajúce návrhy alebo diff-uje? | Backend / AI service tím |
-| DG-L4 | Scope pilota: ktoré site / rubriky vstupujú do MVP1? | Matej / PM |
+| DG-L4 | ~~Scope pilota~~ — **VYRIEŠENÉ:** plus1deň, 4 týždne | ✅ |
 | DG-L5 | Baseline metriky (CTR interných linkov, priemerný počet linkov/článok) — kto a kedy zachytí? | Analytics / DataHub tím |
 | DG-L6 | Pravidlá indexácie tagov dostupné cez API? (potrebné pre hard filter) | Backend / SEO tím |
 
@@ -50,7 +50,7 @@ MVP1 vychádza z existujúceho architektonického návrhu linkbuildingu (Conflue
 ## 2. ROZSAH MVP1
 
 ### Zahrnuté
-- Spravodajský typ článkov
+- plus1deň (pilotná redakcia, testovacie obdobie 4 týždne)
 - Tagy ako cieľ prelinkovania
 - Anchor detekcia pomocou NLP knižnice (SpaCy sk) — nie LLM
 - Návrhový režim (HITL — human in the loop)
@@ -388,7 +388,7 @@ type LinkAction = {
 
 ---
 
-## 10. ACCEPTANCE CRITERIA — SÚHRNNÁ CHECKLIST
+## 10. ACCEPTANCE CRITERIA — SÚHRNNÝ CHECKLIST
 
 **Flow a podmienky:**
 - [ ] Krok B je disabled pred dokončením Kroku A (Tags)
@@ -445,8 +445,8 @@ Bez baseline nie je možné porovnanie „pred vs. po".
 
 ### Testovací setup
 
-- Pilotná redakcia alebo set redakcií — scope definuje Matej (`[DATA_GAP DG-L4]`)
-- Odporúčané testovacie obdobie: **minimálne 2–4 týždne**
+- Pilotná redakcia: **plus1deň**
+- Testovacie obdobie: **4 týždne**
 
 ### Primárne metriky
 
