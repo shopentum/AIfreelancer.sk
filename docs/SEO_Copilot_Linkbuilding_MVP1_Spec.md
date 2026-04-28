@@ -222,7 +222,12 @@ def _needs_morphodita_fallback(doc) -> bool:
 - Anchor matching je deterministický problém — LLM je overkill
 - API náklady a latencia pri NMH scale (tisíce článkov denne)
 - SpaCy sk model bol navrhnutý interne v kontexte CMSD1778 (lemmatizácia pre SEO Checker) — zdieľame model, nulové extra náklady na infraštruktúru
-- Morphodita (`ufal.morphodita`) ako fallback pre viacslovné tagy: zvážiť po reálnom testovaní SpaCy presnosti na NMH obsahu — `[DATA_GAP DG-L1]`
+
+**Infraštruktúra — poznámka pre dev tím (DataHub / FastAPI):**
+SpaCy `sk_core_news_lg` má ~500 MB. Model sa načíta do RAM **jednorazovo pri štarte DH služby (FastAPI singleton)**. Každý ďalší request na linkbuilding nás z hľadiska pamäte stojí nulu — model sedí v RAM a obsluhuje všetky requesty. Latencia = čistý výpočtový čas (CPU): pre jeden článok pod **150 ms**.
+
+**Kedy nastupuje Morphodita fallback:**
+SpaCy je primárna voľba pre syntax, vety a NER. Morphodita je lingvistický safety-net: ak SpaCy označí token ako OOV (Out of Vocabulary) — teda vráti `lemma_ == text` pri dlhom slove — alebo ak lemmatizácia zlyhá na viacslovnom pojme, Morphodita uprace výsledok pomocou presných slovenských morfologických slovníkov. Morphodita zvážiť po reálnom testovaní SpaCy na NMH obsahu — `[DATA_GAP DG-L1]`
 
 ### 6.3 Hard filter (povinné podmienky)
 
@@ -251,10 +256,20 @@ Táto vrstva **nepredstavuje komplexný scoring model** — je to jednoduchý de
 ### 6.5 Selection a deduplication
 
 - Pre každý anchor sa vyberá **jeden najlepší kandidát** (tag s najvyššou relevančnou skórou po filtroch)
-- Ak sa rovnaká entita vyskytuje v texte viackrát → systém navrhne link **iba raz**: výber podľa priority:
-  1. Nie perex
-  2. Najlepší kontext (nie headline, nie posledná veta)
-  3. Správna link density (max. 1 link/veta, max. 1–2/odstavec)
+- Ak sa rovnaká entita vyskytuje v texte viackrát → systém navrhne link **iba raz**
+
+**Pravidlo dvoch krokov — výber najlepšieho výskytu (Anchor Selection Priority):**
+
+| Priorita | Pravidlo | Dôvod |
+|----------|----------|-------|
+| 1. | **Prvá veta po perexe** (ak anchor existuje) | Najväčšia SEO váha — Google prikladá vyšší význam linkovaným slovám v úvode tela |
+| 2. | **Veta s najväčšou sémantickou podobnosťou** k celému článku (cosine similarity nad SpaCy vektormi) | Kontextovo najrelevantnejší výskyt |
+| 3. | Správna link density: max. 1 link/veta, max. 1–2/odstavec | Technická podmienka |
+
+**Vylúčené pozície (systém tieto výskyty preskočí):**
+- Perex
+- Nadpisy H1–H3 (rozbilo by frontend rendering)
+- Popisky obrázkov / alt texty (mimo toku textu)
 
 ### 6.6 Link density pravidlá
 
@@ -482,6 +497,22 @@ Bez baseline nie je možné porovnanie „pred vs. po".
 | Morphodita fallback po overení SpaCy presnosti na NMH obsahu | MVP2 |
 | Systematická práca s kvalitou tagov (TAGY 3.0) | Post-MVP |
 | Historická optimalizácia anchor textov | Post-MVP |
+
+---
+
+## 14. JIRA SUB-TASKY (ROZPAD EPICU)
+
+Tento dokument slúži ako **Master Epic**. Pre vývojový tím sa rozpadá na nasledujúce sub-tasky podľa NMH tímovej štruktúry:
+
+| Sub-task | Tím | Popis |
+|----------|-----|-------|
+| **ST-1: NLP Pipeline** | DataHub (DH) | Implementácia SpaCy `sk_core_news_lg` ako FastAPI singleton; lemmatizácia tagu + textu článku; anchor detekcia; sentence boundary extraction pre context snippet; Morphodita fallback interface (MVP2) |
+| **ST-2: Core API rozšírenie** | Core | Endpoint: `POST /linkbuilding/suggest` — prijme článok, vráti `LinkSuggestion[]`; integrácia s DH NLP pipeline; hard filter + soft filter nad existujúcim tag API; `[DATA_GAP DG-L6]` indexácia tagov |
+| **ST-3: Admin UI** | Admin (CMS) | Sekcia „Tagy & Interné linky" v editore; Krok A → Krok B podmienená logika; karty s anchor / cieľ / kontext vety / `Odst. N` badge; „Pridať link" / „Odmietnuť" / „Pridať všetky (N)"; event logging na každú interakciu |
+| **ST-4: Event Logging** | DataHub / Admin | JSON event schema (`LinkSuggestion`, `LinkAction`); append-only log; JSON export pre QA; napojenie na DataHub = ďalší krok (`[DATA_GAP DG-L5]`) |
+| **ST-5: Feature Flags** | Core / Infra | `seo_copilot.linkbuilding.enabled`, `seo_copilot.max_links_per_article`, `seo_copilot.linkbuilding.require_step_a` — vypínateľné per tenant bez deployu |
+
+> **Poradie implementácie:** ST-1 (DH NLP) → ST-2 (Core API) → ST-3 (Admin UI) → ST-4 (Logging) → ST-5 (Flags)
 
 ---
 
