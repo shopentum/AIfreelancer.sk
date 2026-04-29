@@ -1532,7 +1532,7 @@ const EagleCMS_Split: React.FC = () => {
                     )}
                     {modalPhase === 'krok_b_ready' && (
                       <span className="text-xs text-[#3182CE] font-medium">
-                        {modalLinks.filter(l => !modalRejectedLinkIds.has(l.id)).length} z {modalLinks.length} vybraných
+                        Vybraných {modalLinks.filter(l => !modalRejectedLinkIds.has(l.id)).length} návrhov
                       </span>
                     )}
                   </div>
@@ -2465,13 +2465,16 @@ const EagleCMS_Split: React.FC = () => {
                           <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Ďalšie nastavenia</h3>
                         </div>
                         <div className="p-5 space-y-4">
-                          {/* Generovať tagy tlačidlo */}
+                          {/* Generovať tagy + prelinkovania tlačidlo */}
                           <div className="flex flex-col gap-2">
+                            <p className="text-[11px] text-gray-400 leading-snug">
+                              Tagy a prelinkovania obsahu zlepšujú výkon článku vo vyhľadávačoch aj na webe — nechajte AI urobiť prvý návrh za vás.
+                            </p>
                             <button
                               onClick={openTagModal}
                               className="w-full flex items-center justify-center gap-2 bg-[#48BB78] hover:bg-[#38A169] text-white py-2.5 rounded-lg text-sm font-bold transition-colors"
                             >
-                              <Sparkles size={14} /> Generovať tagy
+                              <Sparkles size={14} /> Generovať tagy a prelinkovania
                             </button>
                             {tagsCommitted && (
                               <button
