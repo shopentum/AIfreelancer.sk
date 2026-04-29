@@ -448,7 +448,7 @@ seo_copilot.max_links_per_article         // 5 - max. návrhov na článok
 seo_copilot.linkbuilding.require_step_a   // true - Krok B podmienený Krokom A
 ```
 
-Vypínateľné bez nového deployu, per brand/tenant.
+Vypínateľné bez nového deployu, per brand.
 
 ---
 
@@ -510,7 +510,7 @@ Tento dokument slúži ako **Master Epic**. Pre vývojový tím sa rozpadá na n
 | **ST-2: Core API rozšírenie** | Core | Endpoint: `POST /linkbuilding/suggest` - prijme článok, vráti `LinkSuggestion[]`; integrácia s DH NLP pipeline; hard filter + soft filter nad existujúcim tag API |
 | **ST-3: Admin UI** | Admin (CMS) | Modálne okno s dvomi sekciami (Tagy + Interné prelinkovania); sekcia linkov disabled pred prijatím tagov; riadky s anchor/cieľ/kontext; akcie `×` (Zmazať) + „Nepoužiť" (hover); „Generovať znova"; commit „Použiť prelinkovania a zatvoriť"; pravý panel: tlačidlá „Zobraziť návrhy pre tagy" / „Zobraziť návrhy prelinkovania" |
 | **ST-4: Event Logging** | DataHub / Admin | JSON event schema (`LinkSuggestion`, `LinkAction`); append-only log; JSON export pre QA |
-| **ST-5: Feature Flags** | Core / Infra | `seo_copilot.linkbuilding.enabled`, `seo_copilot.max_links_per_article`, `seo_copilot.linkbuilding.require_step_a` - vypínateľné per tenant bez deployu |
+| **ST-5: Feature Flags** | Core / Infra | `seo_copilot.linkbuilding.enabled`, `seo_copilot.max_links_per_article`, `seo_copilot.linkbuilding.require_step_a` - vypínateľné per brand bez deployu |
 
 **Poradie implementácie:** ST-1 (DH NLP) - ST-2 (Core API) - ST-3 (Admin UI) - ST-4 (Logging) - ST-5 (Flags)
 
