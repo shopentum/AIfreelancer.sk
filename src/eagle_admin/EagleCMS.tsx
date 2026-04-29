@@ -1528,16 +1528,18 @@ const EagleCMS_Split: React.FC = () => {
                           rejected ? "border-gray-100 bg-gray-50 opacity-40" : "border-blue-100 bg-blue-50/40"
                         )}
                       >
+                        {/* Checkmark / restore vľavo */}
                         <button
                           onClick={() => handleModalToggleLink(link.id)}
                           className="shrink-0 mt-0.5"
-                          title={rejected ? "Obnoviť" : "Zamietnuť"}
+                          title={rejected ? "Obnoviť" : "Označiť ako prijatý"}
                         >
                           {rejected
                             ? <PlusCircle size={15} className="text-gray-300 hover:text-[#3182CE] transition-colors" />
-                            : <CheckCircle2 size={15} className="text-[#3182CE] hover:text-red-400 transition-colors" />
+                            : <CheckCircle2 size={15} className="text-[#3182CE]" />
                           }
                         </button>
+                        {/* Obsah */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap mb-0.5">
                             <code className="text-[11px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-mono">{link.anchor}</code>
@@ -1546,6 +1548,16 @@ const EagleCMS_Split: React.FC = () => {
                           </div>
                           <p className="text-[11px] text-gray-500 leading-relaxed italic">{link.context}</p>
                         </div>
+                        {/* X — odstrániť z návrhu */}
+                        {!rejected && (
+                          <button
+                            onClick={() => handleModalToggleLink(link.id)}
+                            className="shrink-0 mt-0.5 p-1 rounded hover:bg-red-50 text-gray-300 hover:text-red-500 transition-colors"
+                            title="Odstrániť z návrhu"
+                          >
+                            <X size={13} />
+                          </button>
+                        )}
                       </motion.div>
                     );
                   })}
