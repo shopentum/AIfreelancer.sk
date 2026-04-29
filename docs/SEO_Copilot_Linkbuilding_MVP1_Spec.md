@@ -58,7 +58,7 @@ MVP1 vychádza z existujúceho architektonického návrhu linkbuildingu (Conflue
 - Soft filter: 2 signály - relevancia (match) + existencia obsahu
 - Krok A - Krok B workflow: Tags musia byť prijaté pred aktiváciou Linkbuildingu
 - Deduplication: 1 entita = 1 návrh (prvý výskyt po perexe)
-- Bulk akcia: „Pridať všetky (N)" pre rýchle schválenie setu
+- Commit akcia: „Použiť prelinkovania a zatvoriť" akceptuje všetky zostávajúce návrhy naraz
 - Event logging: minimálny MVP1 schema (`suggestion_id`, `action`, `article_id`, `site_id`)
 
 ### Vylúčené z MVP1 - MVP2+
@@ -110,7 +110,7 @@ Article (DRAFT)
         ▼
       Suggestion Output — modálny zoznam
       anchor | cieľový tag | kontext vety
-      Per návrh: [×] Zmazať (trvalé) | [Nepoužiť] on hover (trvalé)
+      Per návrh: [×] Zmazať (MVP1 perzistentné) | [Nepoužiť] on hover (MVP1 perzistentné)
       [Generovať znova] — reset zoznamu
       [Použiť prelinkovania a zatvoriť] → akceptuje zostávajúce návrhy
         │
@@ -173,7 +173,6 @@ Aby som mal plnú kontrolu nad prelinkovaním článku.
 - Na každom riadku: vždy viditeľný `×` (Zmazať); „Nepoužiť" sa zobrazí pri hover na riadok
 - `×` (Zmazať): okamžite odstráni návrh zo zoznamu (MVP1 perzistentné); event `link_suggestion_removed`
 - „Nepoužiť": okamžite odstráni návrh zo zoznamu (MVP1 perzistentné); event `link_suggestion_rejected`
-- Obe akcie sú perzistentné — pri opätovnom otvorení modálu zostávajú odstránené
 - „Generovať znova" resetuje všetky link akcie a znovu animuje zoznam (escape hatch)
 - „Použiť prelinkovania a zatvoriť" akceptuje všetky zostávajúce viditeľné návrhy; každý = samostatný `link_suggestion_accepted` event
 - Anchor sa nevkladá automaticky — každá akcia je explicitná (HITL)
