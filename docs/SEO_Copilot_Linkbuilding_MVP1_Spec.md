@@ -171,8 +171,8 @@ Aby som mal plnú kontrolu nad prelinkovaním článku.
 
 **Acceptance Criteria:**
 - Na každom riadku: vždy viditeľný `×` (Zmazať); „Nepoužiť" sa zobrazí pri hover na riadok
-- `×` (Zmazať): okamžite a trvalo odstráni návrh zo zoznamu; event `link_suggestion_removed`
-- „Nepoužiť": okamžite a trvalo odstráni návrh zo zoznamu; event `link_suggestion_rejected`
+- `×` (Zmazať): okamžite odstráni návrh zo zoznamu (MVP1 perzistentné); event `link_suggestion_removed`
+- „Nepoužiť": okamžite odstráni návrh zo zoznamu (MVP1 perzistentné); event `link_suggestion_rejected`
 - Obe akcie sú perzistentné — pri opätovnom otvorení modálu zostávajú odstránené
 - „Generovať znova" resetuje všetky link akcie a znovu animuje zoznam (escape hatch)
 - „Použiť prelinkovania a zatvoriť" akceptuje všetky zostávajúce viditeľné návrhy; každý = samostatný `link_suggestion_accepted` event
@@ -256,11 +256,11 @@ Pri návrhoch interných linkov rozlišujeme štyri typy interakcie:
 
 | Stav | Trigger | Význam | Perzistencia (MVP1) |
 | `accepted` | „Použiť prelinkovania a zatvoriť" | Návrh bol použitý v článku | zostáva prijatý |
-| `rejected` | „Nepoužiť" | Vedomé odmietnutie — návrh je nevhodný | trvalé zmazanie zo zoznamu |
-| `removed` | „×" (Zmazať) | Upratanie zoznamu — nie hodnotenie kvality | trvalé zmazanie zo zoznamu |
+| `rejected` | „Nepoužiť" | Vedomé odmietnutie — návrh je nevhodný | odstránenie návrhu zo zoznamu (MVP1 perzistentné) |
+| `removed` | „×" (Zmazať) | Upratanie zoznamu — nie hodnotenie kvality | odstránenie návrhu zo zoznamu (MVP1 perzistentné) |
 | `ignored` | žiadna interakcia do publishu | Redaktor návrh videl, ale nereagoval | - |
 
-**Perzistencia v MVP1:** Obe akcie (`rejected` aj `removed`) trvalo odstránia návrh zo zoznamu — pri opätovnom otvorení modálu zostávajú preč. Rozdiel je iba v event logu (DataHub kalibrácia v MVP2). Obnovenie = „Generovať znova".
+**Perzistencia v MVP1:** Obe akcie (`rejected` aj `removed`) odstránia návrh zo zoznamu — pri opätovnom otvorení modálu zostávajú preč. Rozdiel je iba v event logu (DataHub kalibrácia v MVP2). Obnovenie = „Generovať znova".
 
 **UI hierarchia akcií:**
 - `×` (Zmazať) — vždy viditeľný, malý, červená ikona, sivý rám; tooltip: „Odstrániť zo zoznamu návrhov. Neovplyvní budúce návrhy."
