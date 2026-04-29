@@ -87,6 +87,29 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/** Fallback tag/link dáta pre modal — nezávislé od audit stavu. */
+const MODAL_TAG_SUGGESTIONS: TagSuggestion[] = [
+  { id: 'tag-p1', label: 'Dejan Stojković', url: '/tag/dejan-stojkovic', category: 'Osoba' },
+  { id: 'tag-p2', label: 'De-Chang Dai', url: '/tag/de-chang-dai', category: 'Osoba' },
+  { id: 'tag-l1', label: 'Buffalo', url: '/tag/buffalo', category: 'Lokalita' },
+  { id: 'tag-l2', label: 'Japonsko', url: '/tag/japonsko', category: 'Lokalita' },
+  { id: 'tag-o1', label: 'University at Buffalo', url: '/tag/university-at-buffalo', category: 'Organizácia' },
+  { id: 'tag-o2', label: 'MIT', url: '/tag/mit', category: 'Organizácia' },
+  { id: 'tag-e1', label: 'Vedecká konferencia 2026', url: '/tag/vedecna-konferencia-2026', category: 'Udalosť' },
+  { id: 'tag-t1', label: 'Alzheimerova choroba', url: '/tag/alzheimerova-choroba', category: 'Téma' },
+  { id: 'tag-t2', label: 'Kreatín', url: '/tag/kreatin', category: 'Téma' },
+  { id: 'tag-t3', label: 'Neuroveda', url: '/tag/neuroveda', category: 'Téma' },
+];
+
+const MODAL_LINK_SUGGESTIONS: LinkSuggestion[] = [
+  { id: 'link-1', anchor: 'kreatín monohydrát', target: 'Kreatín', targetUrl: '/tag/kreatin',
+    context: '…výskumníci zistili, že kreatín monohydrát mohol predstavovať prelom v liečbe…' },
+  { id: 'link-2', anchor: 'Alzheimerova choroba', target: 'Alzheimerova choroba', targetUrl: '/tag/alzheimerova-choroba',
+    context: '…nová štúdia sa zameriava na spojitosť medzi Alzheimerovou chorobou a mozgovým metabolizmom…' },
+  { id: 'link-3', anchor: 'neurodegeneratívnych ochorení', target: 'Neurodegeneratívne ochorenia', targetUrl: '/tag/neurodegenerativne-ochorenia',
+    context: '…jednou z najnáročnejších skupín neurodegeneratívnych ochorení zostáva demencia…' },
+];
+
 /**
  * Shared typography for mirror + textarea (pixel alignment).
  * Do not put min-h-full here — textarea must use min-h-0 in grid so it fills the cell;
@@ -1035,15 +1058,13 @@ const EagleCMS_Split: React.FC = () => {
 
   // --- Tag modal handlers ---
   const openTagModal = useCallback(() => {
-    if (!audit?.tagSuggestions?.length) return;
+    const tags = audit?.tagSuggestions?.length ? audit.tagSuggestions : MODAL_TAG_SUGGESTIONS;
     setModalPhase('loading_tags');
     setVisibleTagIds(new Set());
     setModalDeselected(new Set());
     setModalVisibleLinkIds(new Set());
     setModalRejectedLinkIds(new Set());
     setShowTagModal(true);
-    // Postupné zobrazovanie tagov (animácia nacitavania)
-    const tags = audit.tagSuggestions;
     tags.forEach((tag, i) => {
       setTimeout(() => {
         setVisibleTagIds((prev) => new Set([...prev, tag.id]));
@@ -1062,15 +1083,17 @@ const EagleCMS_Split: React.FC = () => {
 
   /** Krok A commit → odomkne Krok B */
   const handleModalCommitTags = useCallback(() => {
-    if (!audit?.tagSuggestions) return;
-    const accepted = audit.tagSuggestions.filter(t => !modalDeselected.has(t.id));
+    const tags = audit?.tagSuggestions?.length ? audit.tagSuggestions : MODAL_TAG_SUGGESTIONS;
+    const links = audit?.linkSuggestions?.length ? audit.linkSuggestions : MODAL_LINK_SUGGESTIONS;
+    const accepted = tags.filter(t => !modalDeselected.has(t.id));
     if (accepted.length === 0) return;
-    // Commit tagov (rovnaká logika ako handleTagSetCommit)
     setTagsCommitted(true);
-    const newRemoved = new Set(modalDeselected);
-    setRemovedTagIds(newRemoved);
-    const bump = nextReadinessBump(audit.readinessScore);
-    setAudit({ ...audit, readinessScore: bump });
+    setRemovedTagIds(new Set(modalDeselected));
+    const baseScore = audit?.readinessScore ?? 45;
+    const bump = nextReadinessBump(baseScore);
+    if (audit) {
+      setAudit({ ...audit, readinessScore: bump });
+    }
     studyLogRef.current.push({
       type: "tags_committed",
       at: Date.now(),
@@ -1080,7 +1103,6 @@ const EagleCMS_Split: React.FC = () => {
     });
     // Spustiť Krok B načítavanie
     setModalPhase('krok_b_loading');
-    const links = audit.linkSuggestions ?? [];
     links.forEach((link, i) => {
       setTimeout(() => {
         setModalVisibleLinkIds((prev) => new Set([...prev, link.id]));
@@ -1098,15 +1120,18 @@ const EagleCMS_Split: React.FC = () => {
   }, []);
 
   const handleModalCommitLinks = useCallback(() => {
-    if (!audit?.linkSuggestions) return;
-    const accepted = audit.linkSuggestions.filter(l => !modalRejectedLinkIds.has(l.id));
+    const links = audit?.linkSuggestions?.length ? audit.linkSuggestions : MODAL_LINK_SUGGESTIONS;
+    const accepted = links.filter(l => !modalRejectedLinkIds.has(l.id));
     const newMap = new Map(linkActions);
     accepted.forEach(l => newMap.set(l.id, 'accepted'));
-    audit.linkSuggestions.filter(l => modalRejectedLinkIds.has(l.id))
+    links.filter(l => modalRejectedLinkIds.has(l.id))
       .forEach(l => newMap.set(l.id, 'rejected'));
     setLinkActions(newMap);
-    const bump = accepted.reduce((acc) => nextReadinessBump(acc), audit.readinessScore);
-    setAudit({ ...audit, readinessScore: bump });
+    const baseScore = audit?.readinessScore ?? 45;
+    const bump = accepted.reduce((acc) => nextReadinessBump(acc), baseScore);
+    if (audit) {
+      setAudit({ ...audit, readinessScore: bump });
+    }
     accepted.forEach(l => {
       studyLogRef.current.push({
         type: "link_suggestion_accepted",
@@ -1293,9 +1318,10 @@ const EagleCMS_Split: React.FC = () => {
 
   // Tag+Link modal data helpers
   const TAG_CATEGORIES: TagCategory[] = ['Osoba', 'Lokalita', 'Organizácia', 'Udalosť', 'Téma'];
-  const tagsByCategory = (cat: TagCategory) =>
-    (audit?.tagSuggestions ?? []).filter(t => t.category === cat);
-  const acceptedTagsInModal = (audit?.tagSuggestions ?? []).filter(t => !modalDeselected.has(t.id));
+  const modalTags = audit?.tagSuggestions?.length ? audit.tagSuggestions : MODAL_TAG_SUGGESTIONS;
+  const modalLinks = audit?.linkSuggestions?.length ? audit.linkSuggestions : MODAL_LINK_SUGGESTIONS;
+  const tagsByCategory = (cat: TagCategory) => modalTags.filter(t => t.category === cat);
+  const acceptedTagsInModal = modalTags.filter(t => !modalDeselected.has(t.id));
   const kroKBPhase = modalPhase === 'krok_b_loading' || modalPhase === 'krok_b_ready';
   const tagsAlreadyCommittedInModal = kroKBPhase || modalPhase === 'tags_ready' && tagsCommitted;
 
@@ -1460,13 +1486,13 @@ const EagleCMS_Split: React.FC = () => {
                   )}
                   {modalPhase === 'krok_b_ready' && (
                     <span className="text-xs text-[#3182CE] font-medium">
-                      {(audit?.linkSuggestions ?? []).filter(l => !modalRejectedLinkIds.has(l.id)).length} návrhov pripravených
+                      {modalLinks.filter(l => !modalRejectedLinkIds.has(l.id)).length} návrhov pripravených
                     </span>
                   )}
                 </div>
 
                 <div className="space-y-3">
-                  {(audit?.linkSuggestions ?? []).map((link) => {
+                  {modalLinks.map((link) => {
                     const visible = modalVisibleLinkIds.has(link.id);
                     const rejected = modalRejectedLinkIds.has(link.id);
                     return (
@@ -2366,13 +2392,7 @@ const EagleCMS_Split: React.FC = () => {
                           {/* Generovať tagy tlačidlo */}
                           <div className="flex flex-col gap-2">
                             <button
-                              onClick={() => {
-                                if (!audit) {
-                                  handleValidate();
-                                } else {
-                                  openTagModal();
-                                }
-                              }}
+                              onClick={openTagModal}
                               className="w-full flex items-center justify-center gap-2 bg-[#48BB78] hover:bg-[#38A169] text-white py-2.5 rounded-lg text-sm font-bold transition-colors"
                             >
                               <Sparkles size={14} /> Generovať tagy
@@ -2393,7 +2413,7 @@ const EagleCMS_Split: React.FC = () => {
                           {/* Kategórie tagov */}
                           {TAG_CATEGORIES.map((cat) => {
                             const committed = tagsCommitted
-                              ? (audit?.tagSuggestions ?? []).filter(t => t.category === cat && !removedTagIds.has(t.id))
+                              ? modalTags.filter(t => t.category === cat && !removedTagIds.has(t.id))
                               : [];
                             return (
                               <div key={cat} className="space-y-1.5">
