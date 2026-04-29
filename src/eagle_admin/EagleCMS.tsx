@@ -1625,22 +1625,22 @@ const EagleCMS_Split: React.FC = () => {
                           <p className="text-[11px] text-gray-500 leading-relaxed italic">{link.context}</p>
                         </div>
 
-                        {/* Akcie — viditeľné len ak nie je inactive */}
+                        {/* Akcie — obe viditeľné pri hover */}
                         {!inactive && (
-                          <div className="shrink-0 flex items-center gap-1 mt-0.5">
-                            {/* × — removed (slabá akcia) */}
+                          <div className="shrink-0 flex items-center gap-1.5 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {/* × — removed, pri hover červený rám + väčší */}
                             <button
                               onClick={() => handleModalRemoveLink(link.id)}
                               title="Odstrániť zo zoznamu návrhov. Neovplyvní budúce návrhy."
-                              className="p-1 rounded text-gray-300 hover:text-gray-500 hover:bg-gray-100 transition-colors"
+                              className="p-1.5 rounded border border-transparent hover:border-red-400 hover:text-red-500 text-gray-400 transition-all"
                             >
-                              <X size={13} />
+                              <X size={15} />
                             </button>
-                            {/* Nepoužiť — rejected (silná akcia, na hover) */}
+                            {/* Nepoužiť — rejected, stredne sivé */}
                             <button
                               onClick={() => handleModalRejectLink(link.id)}
                               title="Nepoužiť, ak návrh nesedí pre tento článok"
-                              className="hidden group-hover:flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold text-red-500 hover:bg-red-50 border border-red-200 transition-all"
+                              className="flex items-center px-2 py-1 rounded text-[10px] font-medium text-gray-400 hover:text-gray-600 border border-gray-200 hover:border-gray-400 transition-all"
                             >
                               Nepoužiť
                             </button>
