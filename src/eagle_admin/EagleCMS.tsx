@@ -41,11 +41,22 @@ import {
   ExternalLink,
   Bold,
   Italic,
+  Underline,
+  Strikethrough,
   List,
+  ListOrdered,
   Quote,
   Code,
   Type,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Minus,
+  Table2,
+  Undo2,
+  Redo2,
   MoreHorizontal,
+  BookOpen,
   User,
   AlertTriangle,
   CheckCircle2,
@@ -1216,9 +1227,19 @@ const EagleCMS_Split: React.FC = () => {
             <h2 className="text-lg font-semibold text-gray-800">Editácia článku</h2>
           </div>
           <div className="flex items-center space-x-3">
-            <button className="flex items-center text-xs text-[#2C5282] font-medium hover:underline">
-              <ExternalLink size={14} className="mr-1" /> Nový článok
-            </button>
+            <div className="flex items-center space-x-2">
+              <button className="flex items-center text-xs text-[#2C5282] font-medium hover:underline">
+                <ExternalLink size={14} className="mr-1" /> Nový článok
+              </button>
+              <a
+                href="/nmh"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center bg-[#ED8936] text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-[#DD6B20] transition-colors"
+              >
+                <Eye size={13} className="mr-1.5" /> Náhľad
+              </a>
+            </div>
             <div className="flex items-center space-x-2 border-l border-gray-200 pl-4">
               <div className="text-right">
                 <p className="text-xs font-semibold">{PROTOTYPE_SESSION_USER.email}</p>
@@ -1522,8 +1543,8 @@ const EagleCMS_Split: React.FC = () => {
                       {/* Perex */}
                       <div className="space-y-1.5">
                         <div className="flex justify-between items-center">
-                          <label className="text-xs font-bold text-gray-600 flex items-center">
-                            <Globe size={12} className="mr-1 text-gray-400" /> Perex <span className="text-red-500">*</span>
+                            <label className="text-xs font-bold text-[#3182CE] flex items-center">
+                            <Globe size={12} className="mr-1 text-[#3182CE]" /> Perex <span className="text-red-500 ml-1">*</span>
                           </label>
                           <div className="flex items-center space-x-2">
                             <button className="bg-[#48BB78] text-white px-2 py-0.5 rounded text-[10px] font-bold flex items-center hover:bg-[#38A169]">
@@ -1544,7 +1565,7 @@ const EagleCMS_Split: React.FC = () => {
                             value={perex}
                             onChange={(e) => setPerex(e.target.value)}
                             rows={4}
-                            className="relative z-0 w-full rounded-md border border-gray-300 px-3 py-2 text-sm leading-relaxed outline-none focus:border-[#3182CE] focus:ring-1 focus:ring-[#3182CE]"
+                            className="relative z-0 w-full rounded-md border border-blue-200 bg-blue-50/40 px-3 py-2 text-sm leading-relaxed outline-none focus:border-[#3182CE] focus:ring-1 focus:ring-[#3182CE] placeholder:text-blue-300"
                           />
                         </div>
                       </div>
@@ -1622,25 +1643,42 @@ const EagleCMS_Split: React.FC = () => {
                 
                   <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden p-0">
                     {/* Toolbar */}
-                    <div className="px-4 py-2 border-b border-gray-100 flex items-center flex-wrap gap-1 bg-gray-50/30 shrink-0">
-                      {[
-                        { icon: Type, label: 'H' },
-                        { icon: Bold, label: 'B' },
-                        { icon: Italic, label: 'I' },
-                        { icon: List, label: 'UL' },
-                        { icon: List, label: 'OL' },
-                        { icon: Quote, label: 'Q' },
-                        { icon: Code, label: 'C' },
-                        { icon: LinkIcon, label: 'L' },
-                        { icon: ImageIcon, label: 'IMG' },
-                        { icon: Video, label: 'VID' },
-                        { icon: Info, label: 'INF' },
-                      ].map((tool, i) => (
-                        <button key={i} className="p-1.5 text-gray-500 hover:bg-white hover:text-[#3182CE] hover:shadow-sm rounded transition-all border border-transparent hover:border-gray-200">
-                          <tool.icon size={16} />
+                    <div className="px-4 py-2 border-b border-gray-100 flex items-center flex-wrap gap-0.5 bg-gray-50/30 shrink-0">
+                      {/* História */}
+                      {[{ icon: Undo2 }, { icon: Redo2 }].map((tool, i) => (
+                        <button key={`hist-${i}`} className="p-1.5 text-gray-400 hover:bg-white hover:text-[#3182CE] hover:shadow-sm rounded transition-all border border-transparent hover:border-gray-200">
+                          <tool.icon size={15} />
                         </button>
                       ))}
-                      <div className="h-6 w-[1px] bg-gray-200 mx-2"></div>
+                      <div className="h-5 w-[1px] bg-gray-200 mx-1.5" />
+                      {/* Formátovanie textu */}
+                      {[{ icon: Type }, { icon: Bold }, { icon: Italic }, { icon: Underline }, { icon: Strikethrough }].map((tool, i) => (
+                        <button key={`fmt-${i}`} className="p-1.5 text-gray-500 hover:bg-white hover:text-[#3182CE] hover:shadow-sm rounded transition-all border border-transparent hover:border-gray-200">
+                          <tool.icon size={15} />
+                        </button>
+                      ))}
+                      <div className="h-5 w-[1px] bg-gray-200 mx-1.5" />
+                      {/* Zarovnanie */}
+                      {[{ icon: AlignLeft }, { icon: AlignCenter }, { icon: AlignRight }].map((tool, i) => (
+                        <button key={`align-${i}`} className="p-1.5 text-gray-500 hover:bg-white hover:text-[#3182CE] hover:shadow-sm rounded transition-all border border-transparent hover:border-gray-200">
+                          <tool.icon size={15} />
+                        </button>
+                      ))}
+                      <div className="h-5 w-[1px] bg-gray-200 mx-1.5" />
+                      {/* Zoznamy a bloky */}
+                      {[{ icon: List }, { icon: ListOrdered }, { icon: Quote }, { icon: Code }, { icon: Minus }, { icon: Table2 }].map((tool, i) => (
+                        <button key={`block-${i}`} className="p-1.5 text-gray-500 hover:bg-white hover:text-[#3182CE] hover:shadow-sm rounded transition-all border border-transparent hover:border-gray-200">
+                          <tool.icon size={15} />
+                        </button>
+                      ))}
+                      <div className="h-5 w-[1px] bg-gray-200 mx-1.5" />
+                      {/* Vkladanie médií */}
+                      {[{ icon: LinkIcon }, { icon: ImageIcon }, { icon: Video }, { icon: Info }].map((tool, i) => (
+                        <button key={`media-${i}`} className="p-1.5 text-gray-500 hover:bg-white hover:text-[#3182CE] hover:shadow-sm rounded transition-all border border-transparent hover:border-gray-200">
+                          <tool.icon size={15} />
+                        </button>
+                      ))}
+                      <div className="h-5 w-[1px] bg-gray-200 mx-1.5" />
                       <div className="flex items-center space-x-2 px-2">
                         <p className="text-[10px] font-bold text-gray-400 uppercase">Brand:</p>
                         <select 
@@ -1907,6 +1945,82 @@ const EagleCMS_Split: React.FC = () => {
                               ))}
                             </div>
                           </div>
+
+                          {/* Séria / Záložka / Typ / SEO */}
+                          <div className="border-t border-gray-100 pt-5 space-y-4">
+                            <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Zaradenie</h4>
+                            {[
+                              { label: 'Séria', options: ['—', 'Séria 1', 'Séria 2', 'Séria 3'] },
+                              { label: 'Záložka', options: ['—', 'Záložka A', 'Záložka B', 'Záložka C'] },
+                              { label: 'Typ obsahu', options: ['Spravodajský', 'Analytický', 'Reportáž', 'Rozhovor', 'Komentár'] },
+                              { label: 'SEO priorita', options: ['Štandardná', 'Vysoká', 'Nízka'] },
+                            ].map((field) => (
+                              <div key={field.label} className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-600">{field.label}</label>
+                                <div className="relative">
+                                  <select className="w-full px-3 py-2 border border-gray-300 rounded appearance-none focus:ring-1 focus:ring-[#3182CE] outline-none text-sm bg-white">
+                                    {field.options.map((o) => <option key={o}>{o}</option>)}
+                                  </select>
+                                  <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Súvisiace články */}
+                      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center">
+                            <BookOpen size={13} className="mr-2" /> Súvisiace články
+                          </h3>
+                          <button className="text-[10px] font-bold text-[#3182CE] hover:underline flex items-center">
+                            <PlusCircle size={11} className="mr-1" /> Pridať
+                          </button>
+                        </div>
+                        <div className="p-4 space-y-2">
+                          {[
+                            'Alzheimer a výživa: čo hovorí veda?',
+                            'Kreartín vs. omega-3: porovnanie štúdií',
+                          ].map((title, i) => (
+                            <div key={i} className="flex items-start justify-between gap-2 p-2 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors group">
+                              <span className="text-[11px] text-gray-700 leading-snug flex-1">{title}</span>
+                              <button className="text-gray-300 hover:text-red-400 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <X size={12} />
+                              </button>
+                            </div>
+                          ))}
+                          <div className="text-[10px] text-gray-400 italic pt-1">Automaticky navrhnuté podľa tématu</div>
+                        </div>
+                      </div>
+
+                      {/* Čítanie nastavenia */}
+                      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50">
+                          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Čítanie nastavenia</h3>
+                        </div>
+                        <div className="p-4 space-y-3">
+                          {[
+                            { label: 'Zobraziť odporúčania pod článkom', checked: true },
+                            { label: 'Povoliť komentáre', checked: true },
+                            { label: 'Newsletterový výber', checked: false },
+                            { label: 'Paywall', checked: false },
+                            { label: 'Push notifikácia pri publikovaní', checked: false },
+                          ].map((item) => (
+                            <label key={item.label} className="flex items-center justify-between text-xs text-gray-600 cursor-pointer group">
+                              <span className="group-hover:text-gray-900 transition-colors">{item.label}</span>
+                              <div className={cn(
+                                "relative w-8 h-4 rounded-full transition-colors shrink-0",
+                                item.checked ? "bg-[#3182CE]" : "bg-gray-300"
+                              )}>
+                                <div className={cn(
+                                  "absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform",
+                                  item.checked ? "translate-x-4" : "translate-x-0.5"
+                                )} />
+                              </div>
+                            </label>
+                          ))}
                         </div>
                       </div>
                     </motion.div>
