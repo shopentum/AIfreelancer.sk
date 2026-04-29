@@ -1628,13 +1628,13 @@ const EagleCMS_Split: React.FC = () => {
                         {/* Akcie — obe viditeľné pri hover */}
                         {!inactive && (
                           <div className="shrink-0 flex items-center gap-1.5 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {/* × — removed, pri hover červený rám + väčší */}
+                            {/* × Zmazať — removed, pri hover červený rám */}
                             <button
                               onClick={() => handleModalRemoveLink(link.id)}
                               title="Odstrániť zo zoznamu návrhov. Neovplyvní budúce návrhy."
-                              className="p-1.5 rounded border border-transparent hover:border-red-400 hover:text-red-500 text-gray-400 transition-all"
+                              className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium text-gray-400 hover:text-red-500 border border-gray-200 hover:border-red-400 transition-all"
                             >
-                              <X size={15} />
+                              <X size={11} /> Zmazať
                             </button>
                             {/* Nepoužiť — rejected, stredne sivé */}
                             <button
