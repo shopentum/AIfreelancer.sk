@@ -338,6 +338,9 @@ const EagleCMS_Split: React.FC = () => {
   const [content, setContent] = useState(EAGLE_DEMO_ARTICLE);
   const [brand, setBrand] = useState('Nový Čas');
   const editorRef = useRef<HTMLTextAreaElement>(null);
+  const modalLinksSectionRef = useRef<HTMLDivElement>(null);
+  /** true = modal otvorený cez "Zobraziť návrhy" → auto-scroll na linky */
+  const modalScrollToLinksRef = useRef(false);
   const scrollRafRef = useRef<number | null>(null);
   const fadeClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const undoFlashClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -406,6 +409,16 @@ const EagleCMS_Split: React.FC = () => {
     }, stepMs);
     return () => clearInterval(timer);
   }, [audit?.readinessScore]);
+
+  /** Auto-scroll na sekciu linkov keď modal otvorí openLinksModal. */
+  useEffect(() => {
+    if (showTagModal && modalScrollToLinksRef.current) {
+      modalScrollToLinksRef.current = false;
+      setTimeout(() => {
+        modalLinksSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 80);
+    }
+  }, [showTagModal]);
 
   /** Akcie redaktora na návrhy interných linkov: accepted | rejected. */
   const [linkActions, setLinkActions] = useState<Map<string, 'accepted' | 'rejected'>>(new Map());
@@ -1174,6 +1187,23 @@ const EagleCMS_Split: React.FC = () => {
     setModalPhase('idle');
   }, []);
 
+  /** Znovu otvorí modal priamo na sekciu prelinkovaní s predchádzajúcimi voľbami. */
+  const openLinksModal = useCallback(() => {
+    const tags = audit?.tagSuggestions?.length ? audit.tagSuggestions : MODAL_TAG_SUGGESTIONS;
+    const links = audit?.linkSuggestions?.length ? audit.linkSuggestions : MODAL_LINK_SUGGESTIONS;
+    setModalDeselected(new Set(removedTagIds));
+    setVisibleTagIds(new Set(tags.map(t => t.id)));
+    const prevRejected = new Set(
+      links.filter(l => linkActions.get(l.id) === 'rejected').map(l => l.id)
+    );
+    setModalRejectedLinkIds(prevRejected);
+    setModalVisibleLinkIds(new Set(links.map(l => l.id)));
+    setModalTagLabels(new Map());
+    setModalPhase('krok_b_ready');
+    modalScrollToLinksRef.current = true;
+    setShowTagModal(true);
+  }, [audit, removedTagIds, linkActions]);
+
   const applySeoSuggestion = useCallback(
     (key: SeoAuditKey) => {
       if (collaborationLockDemo) return;
@@ -1371,7 +1401,7 @@ const EagleCMS_Split: React.FC = () => {
                 <p className="text-sm text-gray-500 mt-0.5">
                   {kroKBPhase
                     ? `${acceptedTagsInModal.length} tagov prijatých — teraz vyberte interné prelinkovania`
-                    : 'Text tagu môžete priamo upraviť'}
+                    : tagsCommitted ? 'Tagy sú uložené — upravte prelinkovania nižšie' : 'Text tagu môžete priamo upraviť'}
                 </p>
               </div>
               <button onClick={closeTagModal} className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
@@ -1478,10 +1508,13 @@ const EagleCMS_Split: React.FC = () => {
             </div>
 
             {/* ── Interné prelinkovania ── */}
-            <div className={cn(
-              "border-t border-gray-100 transition-all",
-              !kroKBPhase && "opacity-40 pointer-events-none select-none"
-            )}>
+            <div
+              ref={modalLinksSectionRef}
+              className={cn(
+                "border-t border-gray-100 transition-all",
+                !kroKBPhase && "opacity-40 pointer-events-none select-none"
+              )}
+            >
               <div className="px-7 py-5">
                 {/* Hlavička sekcie linkov */}
                 <div className="flex items-center justify-between mb-4">
@@ -2442,10 +2475,7 @@ const EagleCMS_Split: React.FC = () => {
                             </button>
                             {tagsCommitted && (
                               <button
-                                onClick={() => {
-                                  setRightPanelMode('ai');
-                                  setActiveAuditTab('seo');
-                                }}
+                                onClick={openLinksModal}
                                 className="w-full flex items-center justify-center gap-2 border border-[#3182CE] text-[#3182CE] hover:bg-blue-50 py-2 rounded-lg text-sm font-bold transition-colors"
                               >
                                 <Eye size={13} /> Zobraziť vygenerované návrhy
