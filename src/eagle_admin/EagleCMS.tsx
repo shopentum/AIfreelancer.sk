@@ -103,11 +103,29 @@ const MODAL_TAG_SUGGESTIONS: TagSuggestion[] = [
 
 const MODAL_LINK_SUGGESTIONS: LinkSuggestion[] = [
   { id: 'link-1', anchor: 'kreatín monohydrát', target: 'Kreatín', targetUrl: '/tag/kreatin',
-    context: '…výskumníci zistili, že kreatín monohydrát mohol predstavovať prelom v liečbe…' },
+    context: '…výskumníci zistili, že kreatín monohydrát mohol predstavovať prelom v doplnkovej liečbe…' },
   { id: 'link-2', anchor: 'Alzheimerova choroba', target: 'Alzheimerova choroba', targetUrl: '/tag/alzheimerova-choroba',
     context: '…nová štúdia sa zameriava na spojitosť medzi Alzheimerovou chorobou a mozgovým metabolizmom…' },
   { id: 'link-3', anchor: 'neurodegeneratívnych ochorení', target: 'Neurodegeneratívne ochorenia', targetUrl: '/tag/neurodegenerativne-ochorenia',
-    context: '…jednou z najnáročnejších skupín neurodegeneratívnych ochorení zostáva demencia…' },
+    context: '…jednou z najnáročnejších skupín neurodegeneratívnych ochorení zostáva demencia a Alzheimerova choroba…' },
+  { id: 'link-4', anchor: 'University at Buffalo', target: 'University at Buffalo', targetUrl: '/tag/university-at-buffalo',
+    context: '…profesor Dejan Stojković z University at Buffalo tvrdí, že tieto prvotné čierne diery sa mohli…' },
+  { id: 'link-5', anchor: 'adenozíntrifosfátu', target: 'ATP (energia)', targetUrl: '/tag/atp-energia',
+    context: '…kreatín pomáha pri tvorbe adenozíntrifosfátu, čo je hlavný zdroj energie pre mozgové bunky…' },
+  { id: 'link-6', anchor: 'kognitívne funkcie', target: 'Kognitívne funkcie', targetUrl: '/tag/kognitivne-funkcie',
+    context: '…vedci sledovali zlepšenie kognitívnych funkcií u pacientov po 12 týždňoch suplementácie…' },
+  { id: 'link-7', anchor: 'mozgový metabolizmus', target: 'Mozgový metabolizmus', targetUrl: '/tag/mozkovy-metabolizmus',
+    context: '…narušený mozgový metabolizmus patrí medzi prvé príznaky Alzheimerovej choroby…' },
+  { id: 'link-8', anchor: 'mitochondrie', target: 'Mitochondrie', targetUrl: '/tag/mitochondrie',
+    context: '…kreatín chráni mitochondrie pred oxidatívnym stresom, ktorý urýchľuje neurodegeneráciu…' },
+  { id: 'link-9', anchor: 'klinické štúdie', target: 'Klinické štúdie', targetUrl: '/tag/klinicke-studie',
+    context: '…výsledky klinické štúdie zverejnené v časopise Nature Aging ukázali sľubné výsledky…' },
+  { id: 'link-10', anchor: 'neuroprotekcia', target: 'Neuroprotekcia', targetUrl: '/tag/neuroprotekcia',
+    context: '…neuroprotekcia pomocou kreatínu je sľubnou oblasťou výskumu pre liečbu demencií…' },
+  { id: 'link-11', anchor: 'výživa a mozog', target: 'Výživa a mozog', targetUrl: '/tag/vyziva-mozog',
+    context: '…spojenie medzi výživa a mozog je predmetom stoviek výskumných projektov po celom svete…' },
+  { id: 'link-12', anchor: 'demencie', target: 'Demencia', targetUrl: '/tag/demencia',
+    context: '…počet ľudí trpiacich rôznymi formami demencie narastá každoročne o desaťtisíce prípadov…' },
 ];
 
 /**
@@ -409,6 +427,8 @@ const EagleCMS_Split: React.FC = () => {
   const [modalVisibleLinkIds, setModalVisibleLinkIds] = useState<Set<string>>(new Set());
   /** Linky zamietnuté priamo v modali */
   const [modalRejectedLinkIds, setModalRejectedLinkIds] = useState<Set<string>>(new Set());
+  /** Editované label texty tagov v modali */
+  const [modalTagLabels, setModalTagLabels] = useState<Map<string, string>>(new Map());
 
   const pushArticleSnapshot = useCallback(() => {
     setArticleHistory((h) => {
@@ -1064,6 +1084,7 @@ const EagleCMS_Split: React.FC = () => {
     setModalDeselected(new Set());
     setModalVisibleLinkIds(new Set());
     setModalRejectedLinkIds(new Set());
+    setModalTagLabels(new Map());
     setShowTagModal(true);
     tags.forEach((tag, i) => {
       setTimeout(() => {
@@ -1346,55 +1367,53 @@ const EagleCMS_Split: React.FC = () => {
             {/* Modal header */}
             <div className="flex items-center justify-between px-7 py-5 border-b border-gray-100">
               <div>
-                <h2 className="text-lg font-bold text-gray-900">Tagy</h2>
-                <p className="text-sm text-gray-500 mt-0.5">Vyberte vhodné tagy pre váš článok</p>
+                <h2 className="text-lg font-bold text-gray-900">Vyberte vhodné tagy</h2>
+                <p className="text-sm text-gray-500 mt-0.5">
+                  {kroKBPhase
+                    ? `${acceptedTagsInModal.length} tagov prijatých — teraz vyberte interné prelinkovania`
+                    : 'Text tagu môžete priamo upraviť'}
+                </p>
               </div>
-              <div className="flex items-center gap-3">
-                {modalPhase === 'tags_ready' && !kroKBPhase && (
-                  <button
-                    onClick={handleModalCommitTags}
-                    disabled={acceptedTagsInModal.length === 0}
-                    className={cn(
-                      "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all",
-                      acceptedTagsInModal.length > 0
-                        ? "bg-[#48BB78] text-white hover:bg-[#38A169]"
-                        : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                    )}
-                  >
-                    <CheckCircle2 size={15} /> Použiť v článku
-                  </button>
-                )}
-                {kroKBPhase && (
-                  <button
-                    onClick={handleModalCommitLinks}
-                    disabled={modalPhase === 'krok_b_loading'}
-                    className={cn(
-                      "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all",
-                      modalPhase === 'krok_b_ready'
-                        ? "bg-[#3182CE] text-white hover:bg-[#2B6CB0]"
-                        : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                    )}
-                  >
-                    <CheckCircle2 size={15} /> Použiť linky a zatvoriť
-                  </button>
-                )}
-                <button onClick={closeTagModal} className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-                  <X size={18} />
-                </button>
-              </div>
+              <button onClick={closeTagModal} className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+                <X size={18} />
+              </button>
             </div>
 
-            {/* ── KROK A: Tagy ── */}
+            {/* ── Tagy ── */}
             <div className="px-7 py-6">
-              <div className="flex items-center gap-3 mb-5">
-                <div className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold",
-                  kroKBPhase ? "bg-green-100 text-green-700" : "bg-[#3182CE] text-white"
-                )}>
-                  {kroKBPhase ? <CheckCircle2 size={12} /> : <Tag size={12} />}
-                  Krok A — Tagy
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-3">
+                  <Tag size={15} className={kroKBPhase ? "text-green-500" : "text-[#3182CE]"} />
+                  <span className={cn("text-sm font-bold", kroKBPhase ? "text-green-600" : "text-gray-800")}>Tagy</span>
+                  {kroKBPhase && <span className="text-xs text-green-600">✓ {acceptedTagsInModal.length} prijatých</span>}
                 </div>
-                {kroKBPhase && <span className="text-xs text-green-600 font-medium">{acceptedTagsInModal.length} tagov prijatých</span>}
+                {modalPhase === 'tags_ready' && !kroKBPhase && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={openTagModal}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-500 hover:bg-gray-50 transition-colors"
+                    >
+                      <RefreshCw size={12} /> Generovať znova
+                    </button>
+                    <button
+                      onClick={handleModalCommitTags}
+                      disabled={acceptedTagsInModal.length === 0}
+                      className={cn(
+                        "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all",
+                        acceptedTagsInModal.length > 0
+                          ? "bg-[#48BB78] text-white hover:bg-[#38A169]"
+                          : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      )}
+                    >
+                      <CheckCircle2 size={14} /> Použiť v článku
+                    </button>
+                  </div>
+                )}
+                {modalPhase === 'loading_tags' && (
+                  <span className="flex items-center gap-1.5 text-xs text-gray-400">
+                    <RefreshCw size={12} className="animate-spin" /> Analyzujem článok...
+                  </span>
+                )}
               </div>
 
               <div className="grid grid-cols-5 gap-4">
@@ -1404,38 +1423,51 @@ const EagleCMS_Split: React.FC = () => {
                     <div key={cat}>
                       <h4 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-3">{cat}</h4>
                       <div className="space-y-2">
-                        {catTags.length === 0 && (
-                          <div className="text-[11px] text-gray-300 italic">—</div>
-                        )}
+                        {catTags.length === 0 && <div className="text-[11px] text-gray-300 italic">—</div>}
                         {catTags.map((tag) => {
                           const visible = visibleTagIds.has(tag.id);
                           const selected = !modalDeselected.has(tag.id);
+                          const currentLabel = modalTagLabels.get(tag.id) ?? tag.label;
                           return (
-                            <motion.button
+                            <motion.div
                               key={tag.id}
                               initial={{ opacity: 0, y: 6 }}
                               animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }}
                               transition={{ duration: 0.25 }}
-                              onClick={() => !kroKBPhase && handleModalToggleTag(tag.id)}
                               className={cn(
-                                "w-full flex items-center gap-2 px-3 py-2 rounded-lg border text-sm text-left transition-all",
+                                "flex items-center gap-2 px-2 py-1.5 rounded-lg border transition-all",
                                 kroKBPhase
-                                  ? selected
-                                    ? "border-green-200 bg-green-50 text-green-800 cursor-default"
-                                    : "border-gray-100 bg-gray-50 text-gray-400 cursor-default line-through"
-                                  : selected
-                                    ? "border-[#3182CE] bg-[#EBF4FF] text-[#2C5282] hover:border-[#2C5282]"
-                                    : "border-gray-200 bg-white text-gray-400 hover:bg-gray-50"
+                                  ? selected ? "border-green-200 bg-green-50" : "border-gray-100 bg-gray-50 opacity-50"
+                                  : selected ? "border-[#3182CE]/40 bg-[#EBF4FF]" : "border-gray-200 bg-white"
                               )}
                             >
-                              {visible && (
+                              <button
+                                onClick={() => !kroKBPhase && handleModalToggleTag(tag.id)}
+                                className="shrink-0"
+                                title={selected ? "Odznačiť" : "Označiť"}
+                              >
                                 <CheckCircle2 size={13} className={cn(
-                                  "shrink-0",
-                                  kroKBPhase && selected ? "text-green-500" : selected ? "text-[#3182CE]" : "text-gray-300"
+                                  "transition-colors",
+                                  kroKBPhase && selected ? "text-green-500"
+                                    : selected ? "text-[#3182CE]"
+                                    : "text-gray-300"
                                 )} />
-                              )}
-                              <span className="text-[12px] font-medium leading-snug">{tag.label}</span>
-                            </motion.button>
+                              </button>
+                              <input
+                                type="text"
+                                value={currentLabel}
+                                onChange={(e) => {
+                                  const next = new Map(modalTagLabels);
+                                  next.set(tag.id, e.target.value);
+                                  setModalTagLabels(next);
+                                }}
+                                disabled={kroKBPhase || !selected}
+                                className={cn(
+                                  "flex-1 min-w-0 text-[12px] bg-transparent border-none outline-none",
+                                  !selected || kroKBPhase ? "text-gray-400 cursor-default" : "text-[#2C5282] font-medium"
+                                )}
+                              />
+                            </motion.div>
                           );
                         })}
                       </div>
@@ -1443,55 +1475,45 @@ const EagleCMS_Split: React.FC = () => {
                   );
                 })}
               </div>
-
-              {modalPhase === 'tags_ready' && !kroKBPhase && (
-                <div className="mt-5 flex justify-center">
-                  <button
-                    onClick={openTagModal}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-500 hover:bg-gray-50 transition-colors"
-                  >
-                    <RefreshCw size={13} /> Generovať znova
-                  </button>
-                </div>
-              )}
-
-              {modalPhase === 'loading_tags' && (
-                <div className="mt-4 flex items-center gap-2 text-sm text-gray-400">
-                  <RefreshCw size={14} className="animate-spin" /> Analyzujem článok...
-                </div>
-              )}
             </div>
 
-            {/* ── KROK B: Interné linky ── */}
+            {/* ── Interné prelinkovania ── */}
             <div className={cn(
               "border-t border-gray-100 transition-all",
-              !kroKBPhase && "opacity-40 pointer-events-none"
+              !kroKBPhase && "opacity-40 pointer-events-none select-none"
             )}>
               <div className="px-7 py-5">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={cn(
-                    "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold",
-                    modalPhase === 'krok_b_ready' ? "bg-[#3182CE] text-white" : "bg-gray-100 text-gray-400"
-                  )}>
-                    {!kroKBPhase ? <Lock size={12} /> : <LinkIcon size={12} />}
-                    Krok B — Interné linky
+                {/* Hlavička sekcie linkov */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    {!kroKBPhase
+                      ? <Lock size={14} className="text-gray-300" />
+                      : <LinkIcon size={14} className="text-[#3182CE]" />
+                    }
+                    <span className="text-sm font-bold text-gray-800">Interné prelinkovania</span>
+                    {!kroKBPhase && <span className="text-xs text-gray-400">Dostupné po prijatí tagov</span>}
+                    {modalPhase === 'krok_b_loading' && (
+                      <span className="text-xs text-gray-400 flex items-center gap-1.5">
+                        <RefreshCw size={11} className="animate-spin" /> Hľadám ankery v texte...
+                      </span>
+                    )}
+                    {modalPhase === 'krok_b_ready' && (
+                      <span className="text-xs text-[#3182CE] font-medium">
+                        {modalLinks.filter(l => !modalRejectedLinkIds.has(l.id)).length} z {modalLinks.length} vybraných
+                      </span>
+                    )}
                   </div>
-                  {!kroKBPhase && (
-                    <span className="text-xs text-gray-400">Dostupné po prijatí tagov</span>
-                  )}
-                  {modalPhase === 'krok_b_loading' && (
-                    <span className="text-xs text-gray-400 flex items-center gap-1.5">
-                      <RefreshCw size={11} className="animate-spin" /> Hľadám ankery v texte...
-                    </span>
-                  )}
                   {modalPhase === 'krok_b_ready' && (
-                    <span className="text-xs text-[#3182CE] font-medium">
-                      {modalLinks.filter(l => !modalRejectedLinkIds.has(l.id)).length} návrhov pripravených
-                    </span>
+                    <button
+                      onClick={handleModalCommitLinks}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#3182CE] text-white text-sm font-bold hover:bg-[#2B6CB0] transition-colors"
+                    >
+                      <CheckCircle2 size={14} /> Použiť prelinkovania a zatvoriť
+                    </button>
                   )}
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {modalLinks.map((link) => {
                     const visible = modalVisibleLinkIds.has(link.id);
                     const rejected = modalRejectedLinkIds.has(link.id);
@@ -1502,35 +1524,44 @@ const EagleCMS_Split: React.FC = () => {
                         animate={visible ? { opacity: 1, x: 0 } : { opacity: 0, x: -8 }}
                         transition={{ duration: 0.3 }}
                         className={cn(
-                          "flex items-start justify-between gap-3 p-3 rounded-xl border transition-all",
-                          rejected ? "border-gray-100 bg-gray-50 opacity-50" : "border-blue-100 bg-blue-50/50"
+                          "flex items-start gap-3 p-3 rounded-xl border transition-all",
+                          rejected ? "border-gray-100 bg-gray-50 opacity-40" : "border-blue-100 bg-blue-50/40"
                         )}
                       >
+                        <button
+                          onClick={() => handleModalToggleLink(link.id)}
+                          className="shrink-0 mt-0.5"
+                          title={rejected ? "Obnoviť" : "Zamietnuť"}
+                        >
+                          {rejected
+                            ? <PlusCircle size={15} className="text-gray-300 hover:text-[#3182CE] transition-colors" />
+                            : <CheckCircle2 size={15} className="text-[#3182CE] hover:text-red-400 transition-colors" />
+                          }
+                        </button>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[11px] font-black text-gray-400 uppercase tracking-wide">Ankera</span>
+                          <div className="flex items-center gap-2 flex-wrap mb-0.5">
                             <code className="text-[11px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-mono">{link.anchor}</code>
                             <span className="text-[11px] text-gray-400">→</span>
                             <span className="text-[11px] font-bold text-[#3182CE]">{link.target}</span>
                           </div>
                           <p className="text-[11px] text-gray-500 leading-relaxed italic">{link.context}</p>
                         </div>
-                        <button
-                          onClick={() => handleModalToggleLink(link.id)}
-                          className={cn(
-                            "shrink-0 p-1.5 rounded-lg transition-all",
-                            rejected
-                              ? "text-gray-300 hover:text-[#3182CE] hover:bg-blue-50"
-                              : "text-red-400 hover:text-red-600 hover:bg-red-50"
-                          )}
-                          title={rejected ? "Obnoviť" : "Zamietnuť"}
-                        >
-                          {rejected ? <PlusCircle size={14} /> : <X size={14} />}
-                        </button>
                       </motion.div>
                     );
                   })}
                 </div>
+
+                {/* Druhý button dole ak je 10+ linkov */}
+                {modalPhase === 'krok_b_ready' && modalLinks.length >= 10 && (
+                  <div className="mt-4 flex justify-end">
+                    <button
+                      onClick={handleModalCommitLinks}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#3182CE] text-white text-sm font-bold hover:bg-[#2B6CB0] transition-colors"
+                    >
+                      <CheckCircle2 size={14} /> Použiť prelinkovania a zatvoriť
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
