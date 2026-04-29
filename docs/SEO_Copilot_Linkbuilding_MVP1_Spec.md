@@ -343,10 +343,11 @@ type LinkAction = {
   action: "accepted" | "rejected" | "ignored";
   timestamp: number;       // Unix ms
   article_id: string;
+  site_id: string;
 };
 ```
 
-Rozšírené polia (`site_id`, `article_type`, `position_in_text`, `editor_id`, `suggestion_source`) → MVP2 / DataHub tím doplní podľa potreby.
+Rozšírené polia (`article_type`, `position_in_text`, `editor_id`, `suggestion_source`) → MVP2 / DataHub tím doplní podľa potreby.
 
 ### Event typy
 
@@ -376,7 +377,7 @@ Rozšírené polia (`site_id`, `article_type`, `position_in_text`, `editor_id`, 
 
 **Filtre:**
 - [ ] Hard filter: publikovaný tag, nie blacklist, nie duplikát existujúceho linku
-- [ ] Soft filter: relevancia, freshness, existencia obsahu, typ tagu
+- [ ] Soft filter: relevancia (match) + existencia obsahu
 - [ ] Žiadny link do perexu
 - [ ] Link density pravidlá rešpektované
 
