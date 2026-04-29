@@ -410,16 +410,6 @@ const EagleCMS_Split: React.FC = () => {
     return () => clearInterval(timer);
   }, [audit?.readinessScore]);
 
-  /** Auto-scroll na sekciu linkov keď modal otvorí openLinksModal. */
-  useEffect(() => {
-    if (showTagModal && modalScrollToLinksRef.current) {
-      modalScrollToLinksRef.current = false;
-      setTimeout(() => {
-        modalLinksSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 80);
-    }
-  }, [showTagModal]);
-
   /** Akcie redaktora na návrhy interných linkov: accepted | rejected. */
   const [linkActions, setLinkActions] = useState<Map<string, 'accepted' | 'rejected'>>(new Map());
 
@@ -429,6 +419,16 @@ const EagleCMS_Split: React.FC = () => {
 
   // --- Tag+Link generátor modal ---
   const [showTagModal, setShowTagModal] = useState(false);
+
+  /** Auto-scroll na sekciu linkov keď modal otvorí openLinksModal. */
+  useEffect(() => {
+    if (showTagModal && modalScrollToLinksRef.current) {
+      modalScrollToLinksRef.current = false;
+      setTimeout(() => {
+        modalLinksSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 80);
+    }
+  }, [showTagModal]);
   /** Fáza modálu: idle → loading_tags → tags_ready → krok_b_loading → krok_b_ready */
   type ModalPhase = 'idle' | 'loading_tags' | 'tags_ready' | 'krok_b_loading' | 'krok_b_ready';
   const [modalPhase, setModalPhase] = useState<ModalPhase>('idle');
