@@ -1744,8 +1744,8 @@ const EagleCMS_Split: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Column: sticky v scrollporte main; max-height len na LG kvôli vnútornému scrollu auditu. */}
-            <div className="col-span-12 flex min-h-0 flex-col gap-4 lg:sticky lg:top-3 lg:z-20 lg:col-span-4 lg:max-h-[min(calc(100dvh-7.5rem),920px)] lg:overflow-hidden lg:self-start">
+            {/* Right Column */}
+            <div className="col-span-12 flex flex-col gap-4 lg:col-span-4">
               
               {/* Toggle Header */}
               <div className="flex bg-white rounded-xl p-1 border border-gray-200 shadow-sm shrink-0">
@@ -1781,7 +1781,7 @@ const EagleCMS_Split: React.FC = () => {
                 </button>
               </div>
 
-              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+              <div className="flex flex-col">
                 <AnimatePresence mode="wait">
                   {rightPanelMode === 'settings' ? (
                     <motion.div 
@@ -1789,7 +1789,7 @@ const EagleCMS_Split: React.FC = () => {
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      className="h-full min-h-0 flex-1 overflow-y-auto space-y-6 pr-2 custom-scrollbar"
+                      className="space-y-6"
                     >
                       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                         <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50">
@@ -2030,7 +2030,7 @@ const EagleCMS_Split: React.FC = () => {
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      className="flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
+                      className="flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm"
                     >
                       {/* AI Tabs */}
                       <div className="flex border-b border-gray-100 shrink-0">
@@ -2090,7 +2090,7 @@ const EagleCMS_Split: React.FC = () => {
                       </div>
 
                       {/* AI Content Area */}
-                      <div className="min-h-0 flex-1 overflow-y-auto p-4 custom-scrollbar">
+                      <div className="p-4">
                         {sidebarAiBanner ? (
                           <div className="mb-3 flex gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs leading-snug text-amber-950">
                             <AlertTriangle
