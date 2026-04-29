@@ -244,7 +244,37 @@ Toto zabraňuje hromadeniu linkov na začiatku článku: každý ďalší tag au
 
 Pokročilý výber (cosine similarity, sémantická podobnosť) - MVP2.
 
-### 6.6 Link density pravidlá
+### 6.6 Akcie redaktora - granularita feedbacku
+
+Pri návrhoch interných linkov rozlišujeme štyri typy interakcie:
+
+| Stav | Trigger | Význam | Zachovanie pri ďalšom otvorení |
+| `accepted` | „Pridať link" | Návrh bol použitý v článku | zostáva prijatý |
+| `rejected` | „Nepoužiť" | Vedomé odmietnutie - návrh je nevhodný | zostáva zamietnutý (sivý) |
+| `removed` | „×" | Dočasné upratanie zoznamu - nie hodnotenie kvality | návrh sa môže zobraziť znova |
+| `ignored` | žiadna interakcia do publishu | Redaktor návrh videl, ale nereagoval | - |
+
+**UI hierarchia akcií:**
+- `Pridať link` - primárna akcia, vždy viditeľná
+- `×` - sekundárna akcia, vždy viditeľná, slabšia vizuálne; tooltip: „Odstrániť zo zoznamu návrhov. Neovplyvní budúce návrhy."
+- `Nepoužiť` - terciárna akcia, zobrazená pri hover; tooltip: „Nepoužiť, ak návrh nesedí pre tento článok"
+
+**Dôvod rozlíšenia:**
+`rejected` a `removed` nesmú byť zlučované. DataHub potrebuje odlíšiť vedome odmietnutý návrh od dočasne odloženého návrhu pre kalibráciu scoring modelu v MVP2.
+
+**Event schema:**
+```typescript
+type LinkActionStatus = 'accepted' | 'rejected' | 'removed' | 'ignored';
+
+// EventLog:
+{ type: "link_suggestion_accepted",  action: "accepted",  suggestion_id, article_id, site_id }
+{ type: "link_suggestion_rejected",  action: "rejected",  suggestion_id, article_id, site_id }
+{ type: "link_suggestion_removed",   action: "removed",   suggestion_id, article_id, site_id }
+```
+
+---
+
+### 6.7 Link density pravidlá
 
 | Pravidlo | Hodnota |
 | Perex | žiadny link |

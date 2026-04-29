@@ -281,6 +281,15 @@ type StudyExportEvent =
       anchor_text: string;
       target_id: string;
       suggestion_source: "ai";
+    }
+  | {
+      type: "link_suggestion_removed";
+      at: number;
+      suggestion_id: string;
+      suggestion_type: "internal_link";
+      anchor_text: string;
+      target_id: string;
+      suggestion_source: "ai";
     };
 
 function downloadJsonFile(filename: string, data: unknown) {
@@ -411,7 +420,7 @@ const EagleCMS_Split: React.FC = () => {
   }, [audit?.readinessScore]);
 
   /** Akcie redaktora na návrhy interných linkov: accepted | rejected. */
-  const [linkActions, setLinkActions] = useState<Map<string, 'accepted' | 'rejected'>>(new Map());
+  const [linkActions, setLinkActions] = useState<Map<string, 'accepted' | 'rejected' | 'removed'>>(new Map());
 
   /** Tagy odstraňuje redaktor ×; zostatok = schválený set. null = set zatiaľ nepridaný. */
   const [removedTagIds, setRemovedTagIds] = useState<Set<string>>(new Set());
@@ -438,8 +447,10 @@ const EagleCMS_Split: React.FC = () => {
   const [modalDeselected, setModalDeselected] = useState<Set<string>>(new Set());
   /** Linky viditeľné v Krok B sekcii modálu */
   const [modalVisibleLinkIds, setModalVisibleLinkIds] = useState<Set<string>>(new Set());
-  /** Linky zamietnuté priamo v modali */
+  /** Linky vedome zamietnuté (rejected) v modali */
   const [modalRejectedLinkIds, setModalRejectedLinkIds] = useState<Set<string>>(new Set());
+  /** Linky dočasne odstránené zo zoznamu (removed) v modali */
+  const [modalRemovedLinkIds, setModalRemovedLinkIds] = useState<Set<string>>(new Set());
   /** Editované label texty tagov v modali */
   const [modalTagLabels, setModalTagLabels] = useState<Map<string, string>>(new Map());
 
@@ -1097,6 +1108,7 @@ const EagleCMS_Split: React.FC = () => {
     setModalDeselected(new Set());
     setModalVisibleLinkIds(new Set());
     setModalRejectedLinkIds(new Set());
+    setModalRemovedLinkIds(new Set());
     setModalTagLabels(new Map());
     setShowTagModal(true);
     tags.forEach((tag, i) => {
@@ -1145,42 +1157,55 @@ const EagleCMS_Split: React.FC = () => {
     });
   }, [audit, modalDeselected]);
 
-  const handleModalToggleLink = useCallback((id: string) => {
-    setModalRejectedLinkIds((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+  /** × — dočasné odstránenie, nie hodnotenie kvality */
+  const handleModalRemoveLink = useCallback((id: string) => {
+    setModalRemovedLinkIds((prev) => new Set([...prev, id]));
+  }, []);
+
+  /** Nepoužiť — vedomé odmietnutie návrhu */
+  const handleModalRejectLink = useCallback((id: string) => {
+    setModalRejectedLinkIds((prev) => new Set([...prev, id]));
+  }, []);
+
+  /** Obnoviť link (zrušiť removed alebo rejected) */
+  const handleModalRestoreLink = useCallback((id: string) => {
+    setModalRemovedLinkIds((prev) => { const s = new Set(prev); s.delete(id); return s; });
+    setModalRejectedLinkIds((prev) => { const s = new Set(prev); s.delete(id); return s; });
   }, []);
 
   const handleModalCommitLinks = useCallback(() => {
     const links = audit?.linkSuggestions?.length ? audit.linkSuggestions : MODAL_LINK_SUGGESTIONS;
-    const accepted = links.filter(l => !modalRejectedLinkIds.has(l.id));
     const newMap = new Map(linkActions);
-    accepted.forEach(l => newMap.set(l.id, 'accepted'));
-    links.filter(l => modalRejectedLinkIds.has(l.id))
-      .forEach(l => newMap.set(l.id, 'rejected'));
+    const now = Date.now();
+
+    links.forEach(l => {
+      if (modalRejectedLinkIds.has(l.id)) {
+        newMap.set(l.id, 'rejected');
+        studyLogRef.current.push({ type: "link_suggestion_rejected", at: now,
+          suggestion_id: l.id, suggestion_type: "internal_link",
+          anchor_text: l.anchor, target_id: l.target, suggestion_source: "ai" });
+      } else if (modalRemovedLinkIds.has(l.id)) {
+        newMap.set(l.id, 'removed');
+        studyLogRef.current.push({ type: "link_suggestion_removed", at: now,
+          suggestion_id: l.id, suggestion_type: "internal_link",
+          anchor_text: l.anchor, target_id: l.target, suggestion_source: "ai" });
+      } else {
+        newMap.set(l.id, 'accepted');
+        studyLogRef.current.push({ type: "link_suggestion_accepted", at: now,
+          suggestion_id: l.id, suggestion_type: "internal_link",
+          anchor_text: l.anchor, target_id: l.target, context_snippet: l.context,
+          suggestion_source: "ai" });
+      }
+    });
+
     setLinkActions(newMap);
+    const accepted = links.filter(l => !modalRejectedLinkIds.has(l.id) && !modalRemovedLinkIds.has(l.id));
     const baseScore = audit?.readinessScore ?? 45;
     const bump = accepted.reduce((acc) => nextReadinessBump(acc), baseScore);
-    if (audit) {
-      setAudit({ ...audit, readinessScore: bump });
-    }
-    accepted.forEach(l => {
-      studyLogRef.current.push({
-        type: "link_suggestion_accepted",
-        at: Date.now(),
-        suggestion_id: l.id,
-        suggestion_type: "internal_link",
-        anchor_text: l.anchor,
-        target_id: l.target,
-        context_snippet: l.context,
-        suggestion_source: "ai",
-      });
-    });
+    if (audit) setAudit({ ...audit, readinessScore: bump });
     setShowTagModal(false);
     setModalPhase('idle');
-  }, [audit, modalRejectedLinkIds, linkActions]);
+  }, [audit, modalRejectedLinkIds, modalRemovedLinkIds, linkActions]);
 
   const closeTagModal = useCallback(() => {
     setShowTagModal(false);
@@ -1194,10 +1219,10 @@ const EagleCMS_Split: React.FC = () => {
     const links = audit?.linkSuggestions?.length ? audit.linkSuggestions : MODAL_LINK_SUGGESTIONS;
     setModalDeselected(new Set(removedTagIds));
     setVisibleTagIds(new Set(tags.map(t => t.id)));
-    const prevRejected = new Set(
-      links.filter(l => linkActions.get(l.id) === 'rejected').map(l => l.id)
-    );
+    const prevRejected = new Set(links.filter(l => linkActions.get(l.id) === 'rejected').map(l => l.id));
+    const prevRemoved = new Set(links.filter(l => linkActions.get(l.id) === 'removed').map(l => l.id));
     setModalRejectedLinkIds(prevRejected);
+    setModalRemovedLinkIds(prevRemoved);
     setModalVisibleLinkIds(new Set(links.map(l => l.id)));
     setModalTagLabels(new Map());
     setModalPhase('krok_b_ready');
@@ -1545,7 +1570,7 @@ const EagleCMS_Split: React.FC = () => {
                     )}
                     {modalPhase === 'krok_b_ready' && (
                       <span className="text-xs text-[#3182CE] font-medium">
-                        Vybraných {modalLinks.filter(l => !modalRejectedLinkIds.has(l.id)).length} návrhov
+                        Vybraných {modalLinks.filter(l => !modalRejectedLinkIds.has(l.id) && !modalRemovedLinkIds.has(l.id)).length} návrhov
                       </span>
                     )}
                   </div>
@@ -1563,6 +1588,8 @@ const EagleCMS_Split: React.FC = () => {
                   {modalLinks.map((link) => {
                     const visible = modalVisibleLinkIds.has(link.id);
                     const rejected = modalRejectedLinkIds.has(link.id);
+                    const removed = modalRemovedLinkIds.has(link.id);
+                    const inactive = rejected || removed;
                     return (
                       <motion.div
                         key={link.id}
@@ -1570,39 +1597,54 @@ const EagleCMS_Split: React.FC = () => {
                         animate={visible ? { opacity: 1, x: 0 } : { opacity: 0, x: -8 }}
                         transition={{ duration: 0.3 }}
                         className={cn(
-                          "flex items-start gap-3 p-3 rounded-xl border transition-all",
-                          rejected ? "border-gray-100 bg-gray-50 opacity-40" : "border-blue-100 bg-blue-50/40"
+                          "group flex items-start gap-3 p-3 rounded-xl border transition-all",
+                          rejected ? "border-red-100 bg-red-50/30 opacity-50"
+                            : removed ? "border-gray-100 bg-gray-50 opacity-40"
+                            : "border-blue-100 bg-blue-50/40"
                         )}
                       >
-                        {/* Checkmark / restore vľavo */}
-                        <button
-                          onClick={() => handleModalToggleLink(link.id)}
-                          className="shrink-0 mt-0.5"
-                          title={rejected ? "Obnoviť" : "Označiť ako prijatý"}
-                        >
-                          {rejected
-                            ? <PlusCircle size={15} className="text-gray-300 hover:text-[#3182CE] transition-colors" />
+                        {/* Restore / check vľavo */}
+                        <div className="shrink-0 mt-0.5">
+                          {inactive
+                            ? <button onClick={() => handleModalRestoreLink(link.id)} title="Obnoviť">
+                                <PlusCircle size={15} className="text-gray-300 hover:text-[#3182CE] transition-colors" />
+                              </button>
                             : <CheckCircle2 size={15} className="text-[#3182CE]" />
                           }
-                        </button>
+                        </div>
+
                         {/* Obsah */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap mb-0.5">
                             <code className="text-[11px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-mono">{link.anchor}</code>
                             <span className="text-[11px] text-gray-400">→</span>
                             <span className="text-[11px] font-bold text-[#3182CE]">{link.target}</span>
+                            {rejected && <span className="text-[10px] text-red-400 font-bold uppercase tracking-wide">Nepoužiť</span>}
+                            {removed && <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Odstránené</span>}
                           </div>
                           <p className="text-[11px] text-gray-500 leading-relaxed italic">{link.context}</p>
                         </div>
-                        {/* X — odstrániť z návrhu */}
-                        {!rejected && (
-                          <button
-                            onClick={() => handleModalToggleLink(link.id)}
-                            className="shrink-0 mt-0.5 p-1 rounded hover:bg-red-50 text-gray-300 hover:text-red-500 transition-colors"
-                            title="Odstrániť z návrhu"
-                          >
-                            <X size={13} />
-                          </button>
+
+                        {/* Akcie — viditeľné len ak nie je inactive */}
+                        {!inactive && (
+                          <div className="shrink-0 flex items-center gap-1 mt-0.5">
+                            {/* × — removed (slabá akcia) */}
+                            <button
+                              onClick={() => handleModalRemoveLink(link.id)}
+                              title="Odstrániť zo zoznamu návrhov. Neovplyvní budúce návrhy."
+                              className="p-1 rounded text-gray-300 hover:text-gray-500 hover:bg-gray-100 transition-colors"
+                            >
+                              <X size={13} />
+                            </button>
+                            {/* Nepoužiť — rejected (silná akcia, na hover) */}
+                            <button
+                              onClick={() => handleModalRejectLink(link.id)}
+                              title="Nepoužiť, ak návrh nesedí pre tento článok"
+                              className="hidden group-hover:flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold text-red-500 hover:bg-red-50 border border-red-200 transition-all"
+                            >
+                              Nepoužiť
+                            </button>
+                          </div>
                         )}
                       </motion.div>
                     );
@@ -2483,23 +2525,25 @@ const EagleCMS_Split: React.FC = () => {
                             <p className="text-[11px] text-gray-400 leading-snug">
                               Tagy a prelinkovania obsahu zlepšujú výkon článku vo vyhľadávačoch aj na webe — nechajte AI urobiť prvý návrh za vás.
                             </p>
-                            <button
-                              onClick={openTagModal}
-                              className="w-full flex items-center justify-center gap-2 bg-[#48BB78] hover:bg-[#38A169] text-white py-2.5 rounded-lg text-sm font-bold transition-colors"
-                            >
-                              <Sparkles size={14} /> Generovať tagy a prelinkovania
-                            </button>
+                            {!tagsCommitted && (
+                              <button
+                                onClick={openTagModal}
+                                className="w-full flex items-center justify-center gap-2 bg-[#48BB78] hover:bg-[#38A169] text-white py-2.5 rounded-lg text-sm font-bold transition-colors"
+                              >
+                                <Sparkles size={14} /> Generovať tagy a prelinkovania
+                              </button>
+                            )}
                             {tagsCommitted && (
                               <>
                                 <button
                                   onClick={openTagsEditModal}
-                                  className="w-full flex items-center justify-center gap-2 border border-gray-300 text-gray-600 hover:bg-gray-50 py-2 rounded-lg text-sm font-medium transition-colors"
+                                  className="w-full flex items-center justify-center gap-2 bg-[#3182CE] hover:bg-[#2B6CB0] text-white py-2 rounded-lg text-sm font-bold transition-colors"
                                 >
                                   <Tag size={13} /> Zobraziť návrhy pre tagy
                                 </button>
                                 <button
                                   onClick={openLinksModal}
-                                  className="w-full flex items-center justify-center gap-2 border border-[#3182CE] text-[#3182CE] hover:bg-blue-50 py-2 rounded-lg text-sm font-bold transition-colors"
+                                  className="w-full flex items-center justify-center gap-2 bg-[#3182CE] hover:bg-[#2B6CB0] text-white py-2 rounded-lg text-sm font-bold transition-colors"
                                 >
                                   <LinkIcon size={13} /> Zobraziť návrhy prelinkovania
                                 </button>
