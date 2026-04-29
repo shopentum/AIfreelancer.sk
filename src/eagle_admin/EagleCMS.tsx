@@ -1157,39 +1157,60 @@ const EagleCMS_Split: React.FC = () => {
     });
   }, [audit, modalDeselected]);
 
-  /** × — dočasné odstránenie, nie hodnotenie kvality */
+  /** × — trvalé odstránenie zo zoznamu (removed event, nie rejection feedback) */
   const handleModalRemoveLink = useCallback((id: string) => {
+    const links = audit?.linkSuggestions?.length ? audit.linkSuggestions : MODAL_LINK_SUGGESTIONS;
+    const link = links.find(l => l.id === id);
     setModalRemovedLinkIds((prev) => new Set([...prev, id]));
-  }, []);
+    setLinkActions((prev) => new Map([...prev, [id, 'removed']]));
+    if (link) studyLogRef.current.push({
+      type: "link_suggestion_removed", at: Date.now(),
+      suggestion_id: link.id, suggestion_type: "internal_link",
+      anchor_text: link.anchor, target_id: link.target, suggestion_source: "ai",
+    });
+  }, [audit]);
 
-  /** Nepoužiť — vedomé odmietnutie návrhu */
+  /** Nepoužiť — trvalé odmietnutie návrhu (rejected feedback signal) */
   const handleModalRejectLink = useCallback((id: string) => {
+    const links = audit?.linkSuggestions?.length ? audit.linkSuggestions : MODAL_LINK_SUGGESTIONS;
+    const link = links.find(l => l.id === id);
     setModalRejectedLinkIds((prev) => new Set([...prev, id]));
-  }, []);
+    setLinkActions((prev) => new Map([...prev, [id, 'rejected']]));
+    if (link) studyLogRef.current.push({
+      type: "link_suggestion_rejected", at: Date.now(),
+      suggestion_id: link.id, suggestion_type: "internal_link",
+      anchor_text: link.anchor, target_id: link.target, suggestion_source: "ai",
+    });
+  }, [audit]);
 
-  /** Obnoviť link (zrušiť removed alebo rejected) */
-  const handleModalRestoreLink = useCallback((id: string) => {
-    setModalRemovedLinkIds((prev) => { const s = new Set(prev); s.delete(id); return s; });
-    setModalRejectedLinkIds((prev) => { const s = new Set(prev); s.delete(id); return s; });
-  }, []);
+  /** Generovať znova — vymaže všetky link akcie a znovu animuje zoznam */
+  const handleRegenerateLinks = useCallback(() => {
+    const links = audit?.linkSuggestions?.length ? audit.linkSuggestions : MODAL_LINK_SUGGESTIONS;
+    setLinkActions((prev) => {
+      const m = new Map(prev);
+      links.forEach(l => m.delete(l.id));
+      return m;
+    });
+    setModalRejectedLinkIds(new Set());
+    setModalRemovedLinkIds(new Set());
+    setModalVisibleLinkIds(new Set());
+    setModalPhase('krok_b_loading');
+    links.forEach((link, i) => {
+      setTimeout(() => {
+        setModalVisibleLinkIds(prev => new Set([...prev, link.id]));
+        if (i === links.length - 1) setModalPhase('krok_b_ready');
+      }, 250 + i * 220);
+    });
+  }, [audit]);
 
   const handleModalCommitLinks = useCallback(() => {
     const links = audit?.linkSuggestions?.length ? audit.linkSuggestions : MODAL_LINK_SUGGESTIONS;
     const newMap = new Map(linkActions);
     const now = Date.now();
 
+    // Removed/rejected boli zalogované okamžite pri akcii — tu len acceptujeme zostatok
     links.forEach(l => {
-      if (modalRejectedLinkIds.has(l.id)) {
-        newMap.set(l.id, 'rejected');
-        studyLogRef.current.push({ type: "link_suggestion_rejected", at: now,
-          suggestion_id: l.id, suggestion_type: "internal_link",
-          anchor_text: l.anchor, target_id: l.target, suggestion_source: "ai" });
-      } else if (modalRemovedLinkIds.has(l.id)) {
-        newMap.set(l.id, 'removed');
-        studyLogRef.current.push({ type: "link_suggestion_removed", at: now,
-          suggestion_id: l.id, suggestion_type: "internal_link",
-          anchor_text: l.anchor, target_id: l.target, suggestion_source: "ai" });
-      } else {
+      if (!newMap.has(l.id)) {
         newMap.set(l.id, 'accepted');
         studyLogRef.current.push({ type: "link_suggestion_accepted", at: now,
           suggestion_id: l.id, suggestion_type: "internal_link",
@@ -1199,13 +1220,13 @@ const EagleCMS_Split: React.FC = () => {
     });
 
     setLinkActions(newMap);
-    const accepted = links.filter(l => !modalRejectedLinkIds.has(l.id) && !modalRemovedLinkIds.has(l.id));
+    const accepted = links.filter(l => newMap.get(l.id) === 'accepted');
     const baseScore = audit?.readinessScore ?? 45;
     const bump = accepted.reduce((acc) => nextReadinessBump(acc), baseScore);
     if (audit) setAudit({ ...audit, readinessScore: bump });
     setShowTagModal(false);
     setModalPhase('idle');
-  }, [audit, modalRejectedLinkIds, modalRemovedLinkIds, linkActions]);
+  }, [audit, linkActions]);
 
   const closeTagModal = useCallback(() => {
     setShowTagModal(false);
@@ -1575,42 +1596,39 @@ const EagleCMS_Split: React.FC = () => {
                     )}
                   </div>
                   {modalPhase === 'krok_b_ready' && (
-                    <button
-                      onClick={handleModalCommitLinks}
-                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#3182CE] text-white text-sm font-bold hover:bg-[#2B6CB0] transition-colors"
-                    >
-                      <CheckCircle2 size={14} /> Použiť prelinkovania a zatvoriť
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleRegenerateLinks}
+                        title="Obnoví všetky návrhy vrátane zmazaných"
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 text-gray-500 text-xs font-medium hover:border-gray-300 hover:text-gray-700 transition-colors"
+                      >
+                        <RefreshCw size={12} /> Generovať znova
+                      </button>
+                      <button
+                        onClick={handleModalCommitLinks}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#3182CE] text-white text-sm font-bold hover:bg-[#2B6CB0] transition-colors"
+                      >
+                        <CheckCircle2 size={14} /> Použiť prelinkovania a zatvoriť
+                      </button>
+                    </div>
                   )}
                 </div>
 
                 <div className="space-y-2.5">
-                  {modalLinks.map((link) => {
+                  {modalLinks.filter(l => !modalRejectedLinkIds.has(l.id) && !modalRemovedLinkIds.has(l.id)).map((link) => {
                     const visible = modalVisibleLinkIds.has(link.id);
-                    const rejected = modalRejectedLinkIds.has(link.id);
-                    const removed = modalRemovedLinkIds.has(link.id);
-                    const inactive = rejected || removed;
                     return (
                       <motion.div
                         key={link.id}
                         initial={{ opacity: 0, x: -8 }}
                         animate={visible ? { opacity: 1, x: 0 } : { opacity: 0, x: -8 }}
+                        exit={{ opacity: 0, x: 8, transition: { duration: 0.2 } }}
                         transition={{ duration: 0.3 }}
-                        className={cn(
-                          "group flex items-start gap-3 p-3 rounded-xl border transition-all",
-                          rejected ? "border-red-100 bg-red-50/30 opacity-50"
-                            : removed ? "border-gray-100 bg-gray-50 opacity-40"
-                            : "border-blue-100 bg-blue-50/40"
-                        )}
+                        className="group flex items-start gap-3 p-3 rounded-xl border border-blue-100 bg-blue-50/40 transition-all"
                       >
-                        {/* Restore / check vľavo */}
+                        {/* Check vľavo */}
                         <div className="shrink-0 mt-0.5">
-                          {inactive
-                            ? <button onClick={() => handleModalRestoreLink(link.id)} title="Obnoviť">
-                                <PlusCircle size={15} className="text-gray-300 hover:text-[#3182CE] transition-colors" />
-                              </button>
-                            : <CheckCircle2 size={15} className="text-[#3182CE]" />
-                          }
+                          <CheckCircle2 size={15} className="text-[#3182CE]" />
                         </div>
 
                         {/* Obsah */}
@@ -1619,41 +1637,50 @@ const EagleCMS_Split: React.FC = () => {
                             <code className="text-[11px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-mono">{link.anchor}</code>
                             <span className="text-[11px] text-gray-400">→</span>
                             <span className="text-[11px] font-bold text-[#3182CE]">{link.target}</span>
-                            {rejected && <span className="text-[10px] text-red-400 font-bold uppercase tracking-wide">Nepoužiť</span>}
-                            {removed && <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Odstránené</span>}
                           </div>
                           <p className="text-[11px] text-gray-500 leading-relaxed italic">{link.context}</p>
                         </div>
 
-                        {/* Akcie */}
-                        {!inactive && (
-                          <div className="shrink-0 flex items-center gap-1.5 mt-0.5">
-                            {/* × — vždy viditeľné; malé, červená ikona, sivý rám; hover všetko červené */}
-                            <button
-                              onClick={() => handleModalRemoveLink(link.id)}
-                              title="Odstrániť zo zoznamu návrhov. Neovplyvní budúce návrhy."
-                              className="p-1 rounded border border-gray-200 hover:border-red-400 hover:text-red-500 transition-all"
-                            >
-                              <X size={12} className="text-red-400" />
-                            </button>
-                            {/* Nepoužiť — objaví sa len pri hover na riadok */}
-                            <button
-                              onClick={() => handleModalRejectLink(link.id)}
-                              title="Nepoužiť, ak návrh nesedí pre tento článok"
-                              className="hidden group-hover:flex items-center px-2 py-1 rounded text-[10px] font-medium text-gray-400 hover:text-gray-600 border border-gray-200 hover:border-gray-400 transition-all"
-                            >
-                              Nepoužiť
-                            </button>
-                          </div>
-                        )}
+                        {/* Akcie — vždy viditeľný × (malý), Nepoužiť len na hover */}
+                        <div className="shrink-0 flex items-center gap-1.5 mt-0.5">
+                          <button
+                            onClick={() => handleModalRemoveLink(link.id)}
+                            title="Odstrániť zo zoznamu návrhov. Neovplyvní budúce návrhy."
+                            className="p-1 rounded border border-gray-200 hover:border-red-400 hover:bg-red-50 transition-all"
+                          >
+                            <X size={12} className="text-red-400" />
+                          </button>
+                          <button
+                            onClick={() => handleModalRejectLink(link.id)}
+                            title="Nepoužiť, ak návrh nesedí pre tento článok"
+                            className="hidden group-hover:flex items-center px-2 py-1 rounded text-[10px] font-medium text-gray-400 hover:text-gray-600 border border-gray-200 hover:border-gray-400 transition-all"
+                          >
+                            Nepoužiť
+                          </button>
+                        </div>
                       </motion.div>
                     );
                   })}
+                  {/* Empty state — ak boli všetky zmazané */}
+                  {modalPhase === 'krok_b_ready' &&
+                   modalLinks.filter(l => !modalRejectedLinkIds.has(l.id) && !modalRemovedLinkIds.has(l.id)).length === 0 && (
+                    <div className="py-8 text-center text-sm text-gray-400">
+                      Všetky návrhy boli odstránené. Kliknite na „Generovať znova" pre nové návrhy.
+                    </div>
+                  )}
                 </div>
 
-                {/* Druhý button dole ak je 10+ linkov */}
-                {modalPhase === 'krok_b_ready' && modalLinks.length >= 10 && (
-                  <div className="mt-4 flex justify-end">
+                {/* Druhý button dole ak je 10+ linkov (zobrazujeme len ak zostatok >= 10) */}
+                {modalPhase === 'krok_b_ready' &&
+                 modalLinks.filter(l => !modalRejectedLinkIds.has(l.id) && !modalRemovedLinkIds.has(l.id)).length >= 10 && (
+                  <div className="mt-4 flex justify-end gap-2">
+                    <button
+                      onClick={handleRegenerateLinks}
+                      title="Obnoví všetky návrhy vrátane zmazaných"
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 text-gray-500 text-xs font-medium hover:border-gray-300 hover:text-gray-700 transition-colors"
+                    >
+                      <RefreshCw size={12} /> Generovať znova
+                    </button>
                     <button
                       onClick={handleModalCommitLinks}
                       className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#3182CE] text-white text-sm font-bold hover:bg-[#2B6CB0] transition-colors"
