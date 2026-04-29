@@ -100,7 +100,7 @@ Article (DRAFT)
                     Selection
                     1 najlepší kandidát per anchor
                     Deduplication: 1 entita = 1 návrh (prvý výskyt po perexe)
-                    Hard cap: max. 5 linkov / žiadny do perexu / nie H1-H3
+                    Hard cap: max. 1 link/odstavec / max. 5/článok / žiadny do perexu / nie H1-H3
                       │
                       ▼
                     Suggestion Output
@@ -228,9 +228,16 @@ Freshness, typ tagu a ďalšie signály - MVP2 (nemáme kalibračné dáta, risk
 ### 6.5 Selection a deduplication
 
 - Pre každý anchor sa vyberá **jeden najlepší kandidát** (tag s najvyššou relevančnou skórou po filtroch)
-- Ak sa rovnaká entita vyskytuje v texte viackrát - systém navrhne link **iba raz**: **prvý výskyt po perexe**
+- Ak sa rovnaká entita vyskytuje v texte viackrát - systém navrhne link **iba raz**
 
-**Vylúčené pozície (systém tieto výskyty preskočí):**
+**Výber výskytu — distribuovaný greedy:**
+1. Nájdi všetky výskyty anchoru po perexe (nie H1-H3, nie popisky obrázkov)
+2. Vyber prvý výskyt v odstavci, ktorý ešte **nemá priradený žiadny iný link**
+3. Ak taký odstavec neexistuje - návrh sa nevytvorí (hard cap na odstavec zabraňuje nahromadeniu)
+
+Toto zabraňuje hromadeniu linkov na začiatku článku: každý ďalší tag automaticky putuje do ďalšieho voľného odstavca.
+
+**Vylúčené pozície:**
 - Perex
 - Nadpisy H1-H3 (rozbilo by frontend rendering)
 - Popisky obrázkov / alt texty (mimo toku textu)
@@ -241,9 +248,10 @@ Pokročilý výber (cosine similarity, sémantická podobnosť) - MVP2.
 
 | Pravidlo | Hodnota |
 | Perex | žiadny link |
+| Max. linky na odstavec | 1 (guard proti nahromadeniu) |
 | Max. linky na článok | 5 (konfigurovateľné: `seo_copilot.max_links_per_article`) |
 
-Granulárne pravidlá na úrovni vety/odstavca - MVP2. V MVP1 ich nahrádza HITL - redaktor rozhoduje.
+Pravidlo 1 link/odstavec je jednoduchý distribuovaný guard - nie scoring. Granulárne pravidlá na úrovni vety - MVP2.
 
 ---
 
@@ -367,7 +375,7 @@ Rozšírené polia (`article_type`, `position_in_text`, `editor_id`, `suggestion
 - Hard filter: publikovaný tag, nie blacklist, nie duplikát existujúceho linku
 - Soft filter: relevancia (match) + existencia obsahu
 - Žiadny link do perexu
-- Hard cap: max. 5 linkov na článok
+- Hard cap: max. 1 link/odstavec, max. 5 linkov/článok
 
 **Deduplication:**
 - Rovnaká entita navrhnutá max. 1× (prvý výskyt po perexe)
