@@ -1188,7 +1188,8 @@ const EagleCMS_Split: React.FC = () => {
   }, []);
 
   /** Znovu otvorí modal priamo na sekciu prelinkovaní s predchádzajúcimi voľbami. */
-  const openLinksModal = useCallback(() => {
+  /** Spoločná inicializácia stavu pre oba "edit" modaly. */
+  const prepareEditModal = useCallback(() => {
     const tags = audit?.tagSuggestions?.length ? audit.tagSuggestions : MODAL_TAG_SUGGESTIONS;
     const links = audit?.linkSuggestions?.length ? audit.linkSuggestions : MODAL_LINK_SUGGESTIONS;
     setModalDeselected(new Set(removedTagIds));
@@ -1200,9 +1201,21 @@ const EagleCMS_Split: React.FC = () => {
     setModalVisibleLinkIds(new Set(links.map(l => l.id)));
     setModalTagLabels(new Map());
     setModalPhase('krok_b_ready');
+  }, [audit, removedTagIds, linkActions]);
+
+  /** Otvorí modal na sekcii tagov (bez scroll na linky). */
+  const openTagsEditModal = useCallback(() => {
+    prepareEditModal();
+    modalScrollToLinksRef.current = false;
+    setShowTagModal(true);
+  }, [prepareEditModal]);
+
+  /** Otvorí modal priamo na sekcii prelinkovaní. */
+  const openLinksModal = useCallback(() => {
+    prepareEditModal();
     modalScrollToLinksRef.current = true;
     setShowTagModal(true);
-  }, [audit, removedTagIds, linkActions]);
+  }, [prepareEditModal]);
 
   const applySeoSuggestion = useCallback(
     (key: SeoAuditKey) => {
@@ -2477,12 +2490,20 @@ const EagleCMS_Split: React.FC = () => {
                               <Sparkles size={14} /> Generovať tagy a prelinkovania
                             </button>
                             {tagsCommitted && (
-                              <button
-                                onClick={openLinksModal}
-                                className="w-full flex items-center justify-center gap-2 border border-[#3182CE] text-[#3182CE] hover:bg-blue-50 py-2 rounded-lg text-sm font-bold transition-colors"
-                              >
-                                <Eye size={13} /> Zobraziť vygenerované návrhy
-                              </button>
+                              <>
+                                <button
+                                  onClick={openTagsEditModal}
+                                  className="w-full flex items-center justify-center gap-2 border border-gray-300 text-gray-600 hover:bg-gray-50 py-2 rounded-lg text-sm font-medium transition-colors"
+                                >
+                                  <Tag size={13} /> Zobraziť návrhy pre tagy
+                                </button>
+                                <button
+                                  onClick={openLinksModal}
+                                  className="w-full flex items-center justify-center gap-2 border border-[#3182CE] text-[#3182CE] hover:bg-blue-50 py-2 rounded-lg text-sm font-bold transition-colors"
+                                >
+                                  <LinkIcon size={13} /> Zobraziť návrhy prelinkovania
+                                </button>
+                              </>
                             )}
                           </div>
 
