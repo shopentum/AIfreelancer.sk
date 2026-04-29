@@ -80,6 +80,7 @@ import {
   type SeoAuditKey,
   type LinkSuggestion,
   type TagSuggestion,
+  type TagCategory,
 } from "@/eagle_admin/geminiService";
 
 function cn(...inputs: ClassValue[]) {
@@ -372,6 +373,20 @@ const EagleCMS_Split: React.FC = () => {
   const [removedTagIds, setRemovedTagIds] = useState<Set<string>>(new Set());
   const [tagsCommitted, setTagsCommitted] = useState(false);
 
+  // --- Tag+Link generátor modal ---
+  const [showTagModal, setShowTagModal] = useState(false);
+  /** Fáza modálu: idle → loading_tags → tags_ready → krok_b_loading → krok_b_ready */
+  type ModalPhase = 'idle' | 'loading_tags' | 'tags_ready' | 'krok_b_loading' | 'krok_b_ready';
+  const [modalPhase, setModalPhase] = useState<ModalPhase>('idle');
+  /** Tagy zobrazované postupne v modali (animácia) */
+  const [visibleTagIds, setVisibleTagIds] = useState<Set<string>>(new Set());
+  /** Tagy deselektované v modali pred commitom */
+  const [modalDeselected, setModalDeselected] = useState<Set<string>>(new Set());
+  /** Linky viditeľné v Krok B sekcii modálu */
+  const [modalVisibleLinkIds, setModalVisibleLinkIds] = useState<Set<string>>(new Set());
+  /** Linky zamietnuté priamo v modali */
+  const [modalRejectedLinkIds, setModalRejectedLinkIds] = useState<Set<string>>(new Set());
+
   const pushArticleSnapshot = useCallback(() => {
     setArticleHistory((h) => {
       const snap: ArticleSnapshot = {
@@ -573,12 +588,16 @@ const EagleCMS_Split: React.FC = () => {
         },
       ],
       tagSuggestions: [
-        { id: 'tag-1', label: 'Kreatín', url: '/tag/kreatin' },
-        { id: 'tag-2', label: 'Alzheimerova choroba', url: '/tag/alzheimerova-choroba' },
-        { id: 'tag-3', label: 'Neurodegeneratívne ochorenia', url: '/tag/neurodegenerativne-ochorenia' },
-        { id: 'tag-4', label: 'Výskum', url: '/tag/vyskum' },
-        { id: 'tag-5', label: 'Zdravie', url: '/tag/zdravie' },
-        { id: 'tag-6', label: 'Mozog', url: '/tag/mozog' },
+        { id: 'tag-p1', label: 'Dejan Stojković', url: '/tag/dejan-stojkovic', category: 'Osoba' as const },
+        { id: 'tag-p2', label: 'De-Chang Dai', url: '/tag/de-chang-dai', category: 'Osoba' as const },
+        { id: 'tag-l1', label: 'Buffalo', url: '/tag/buffalo', category: 'Lokalita' as const },
+        { id: 'tag-l2', label: 'Japonsko', url: '/tag/japonsko', category: 'Lokalita' as const },
+        { id: 'tag-o1', label: 'University at Buffalo', url: '/tag/university-at-buffalo', category: 'Organizácia' as const },
+        { id: 'tag-o2', label: 'MIT', url: '/tag/mit', category: 'Organizácia' as const },
+        { id: 'tag-e1', label: 'Vedecká konferencia 2026', url: '/tag/vedecna-konferencia-2026', category: 'Udalosť' as const },
+        { id: 'tag-t1', label: 'Alzheimerova choroba', url: '/tag/alzheimerova-choroba', category: 'Téma' as const },
+        { id: 'tag-t2', label: 'Kreatín', url: '/tag/kreatin', category: 'Téma' as const },
+        { id: 'tag-t3', label: 'Neuroveda', url: '/tag/neuroveda', category: 'Téma' as const },
       ],
       claims: [
         {
@@ -1014,6 +1033,100 @@ const EagleCMS_Split: React.FC = () => {
     });
   }, [audit, linkActions]);
 
+  // --- Tag modal handlers ---
+  const openTagModal = useCallback(() => {
+    if (!audit?.tagSuggestions?.length) return;
+    setModalPhase('loading_tags');
+    setVisibleTagIds(new Set());
+    setModalDeselected(new Set());
+    setModalVisibleLinkIds(new Set());
+    setModalRejectedLinkIds(new Set());
+    setShowTagModal(true);
+    // Postupné zobrazovanie tagov (animácia nacitavania)
+    const tags = audit.tagSuggestions;
+    tags.forEach((tag, i) => {
+      setTimeout(() => {
+        setVisibleTagIds((prev) => new Set([...prev, tag.id]));
+        if (i === tags.length - 1) setModalPhase('tags_ready');
+      }, 200 + i * 180);
+    });
+  }, [audit]);
+
+  const handleModalToggleTag = useCallback((id: string) => {
+    setModalDeselected((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }, []);
+
+  /** Krok A commit → odomkne Krok B */
+  const handleModalCommitTags = useCallback(() => {
+    if (!audit?.tagSuggestions) return;
+    const accepted = audit.tagSuggestions.filter(t => !modalDeselected.has(t.id));
+    if (accepted.length === 0) return;
+    // Commit tagov (rovnaká logika ako handleTagSetCommit)
+    setTagsCommitted(true);
+    const newRemoved = new Set(modalDeselected);
+    setRemovedTagIds(newRemoved);
+    const bump = nextReadinessBump(audit.readinessScore);
+    setAudit({ ...audit, readinessScore: bump });
+    studyLogRef.current.push({
+      type: "tags_committed",
+      at: Date.now(),
+      tags: accepted,
+      removedCount: modalDeselected.size,
+    });
+    // Spustiť Krok B načítavanie
+    setModalPhase('krok_b_loading');
+    const links = audit.linkSuggestions ?? [];
+    links.forEach((link, i) => {
+      setTimeout(() => {
+        setModalVisibleLinkIds((prev) => new Set([...prev, link.id]));
+        if (i === links.length - 1) setModalPhase('krok_b_ready');
+      }, 250 + i * 220);
+    });
+  }, [audit, modalDeselected]);
+
+  const handleModalToggleLink = useCallback((id: string) => {
+    setModalRejectedLinkIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }, []);
+
+  const handleModalCommitLinks = useCallback(() => {
+    if (!audit?.linkSuggestions) return;
+    const accepted = audit.linkSuggestions.filter(l => !modalRejectedLinkIds.has(l.id));
+    const newMap = new Map(linkActions);
+    accepted.forEach(l => newMap.set(l.id, 'accepted'));
+    audit.linkSuggestions.filter(l => modalRejectedLinkIds.has(l.id))
+      .forEach(l => newMap.set(l.id, 'rejected'));
+    setLinkActions(newMap);
+    const bump = accepted.reduce((acc) => nextReadinessBump(acc), audit.readinessScore);
+    setAudit({ ...audit, readinessScore: bump });
+    accepted.forEach(l => {
+      studyLogRef.current.push({
+        type: "link_suggestion_accepted",
+        at: Date.now(),
+        suggestion_id: l.id,
+        suggestion_type: "internal_link",
+        anchor_text: l.anchor,
+        target_id: l.target,
+        context_snippet: l.context,
+        suggestion_source: "ai",
+      });
+    });
+    setShowTagModal(false);
+    setModalPhase('idle');
+  }, [audit, modalRejectedLinkIds, linkActions]);
+
+  const closeTagModal = useCallback(() => {
+    setShowTagModal(false);
+    setModalPhase('idle');
+  }, []);
+
   const applySeoSuggestion = useCallback(
     (key: SeoAuditKey) => {
       if (collaborationLockDemo) return;
@@ -1177,7 +1290,227 @@ const EagleCMS_Split: React.FC = () => {
     { icon: Settings, label: 'Systém', subItems: true },
   ];
 
+  // Tag+Link modal data helpers
+  const TAG_CATEGORIES: TagCategory[] = ['Osoba', 'Lokalita', 'Organizácia', 'Udalosť', 'Téma'];
+  const tagsByCategory = (cat: TagCategory) =>
+    (audit?.tagSuggestions ?? []).filter(t => t.category === cat);
+  const acceptedTagsInModal = (audit?.tagSuggestions ?? []).filter(t => !modalDeselected.has(t.id));
+  const kroKBPhase = modalPhase === 'krok_b_loading' || modalPhase === 'krok_b_ready';
+  const tagsAlreadyCommittedInModal = kroKBPhase || modalPhase === 'tags_ready' && tagsCommitted;
+
   return (
+    <>
+    {/* ===== TAG + LINK GENERÁTOR MODAL ===== */}
+    <AnimatePresence>
+      {showTagModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[200] flex items-start justify-center bg-black/40 backdrop-blur-sm p-6 overflow-y-auto"
+          onClick={(e) => { if (e.target === e.currentTarget) closeTagModal(); }}
+        >
+          <motion.div
+            initial={{ scale: 0.96, y: 12 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.96, y: 12 }}
+            className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden my-8"
+          >
+            {/* Modal header */}
+            <div className="flex items-center justify-between px-7 py-5 border-b border-gray-100">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Tagy</h2>
+                <p className="text-sm text-gray-500 mt-0.5">Vyberte vhodné tagy pre váš článok</p>
+              </div>
+              <div className="flex items-center gap-3">
+                {modalPhase === 'tags_ready' && !kroKBPhase && (
+                  <button
+                    onClick={handleModalCommitTags}
+                    disabled={acceptedTagsInModal.length === 0}
+                    className={cn(
+                      "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all",
+                      acceptedTagsInModal.length > 0
+                        ? "bg-[#48BB78] text-white hover:bg-[#38A169]"
+                        : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    )}
+                  >
+                    <CheckCircle2 size={15} /> Použiť v článku
+                  </button>
+                )}
+                {kroKBPhase && (
+                  <button
+                    onClick={handleModalCommitLinks}
+                    disabled={modalPhase === 'krok_b_loading'}
+                    className={cn(
+                      "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all",
+                      modalPhase === 'krok_b_ready'
+                        ? "bg-[#3182CE] text-white hover:bg-[#2B6CB0]"
+                        : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    )}
+                  >
+                    <CheckCircle2 size={15} /> Použiť linky a zatvoriť
+                  </button>
+                )}
+                <button onClick={closeTagModal} className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* ── KROK A: Tagy ── */}
+            <div className="px-7 py-6">
+              <div className="flex items-center gap-3 mb-5">
+                <div className={cn(
+                  "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold",
+                  kroKBPhase ? "bg-green-100 text-green-700" : "bg-[#3182CE] text-white"
+                )}>
+                  {kroKBPhase ? <CheckCircle2 size={12} /> : <Tag size={12} />}
+                  Krok A — Tagy
+                </div>
+                {kroKBPhase && <span className="text-xs text-green-600 font-medium">{acceptedTagsInModal.length} tagov prijatých</span>}
+              </div>
+
+              <div className="grid grid-cols-5 gap-4">
+                {TAG_CATEGORIES.map((cat) => {
+                  const catTags = tagsByCategory(cat);
+                  return (
+                    <div key={cat}>
+                      <h4 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-3">{cat}</h4>
+                      <div className="space-y-2">
+                        {catTags.length === 0 && (
+                          <div className="text-[11px] text-gray-300 italic">—</div>
+                        )}
+                        {catTags.map((tag) => {
+                          const visible = visibleTagIds.has(tag.id);
+                          const selected = !modalDeselected.has(tag.id);
+                          return (
+                            <motion.button
+                              key={tag.id}
+                              initial={{ opacity: 0, y: 6 }}
+                              animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }}
+                              transition={{ duration: 0.25 }}
+                              onClick={() => !kroKBPhase && handleModalToggleTag(tag.id)}
+                              className={cn(
+                                "w-full flex items-center gap-2 px-3 py-2 rounded-lg border text-sm text-left transition-all",
+                                kroKBPhase
+                                  ? selected
+                                    ? "border-green-200 bg-green-50 text-green-800 cursor-default"
+                                    : "border-gray-100 bg-gray-50 text-gray-400 cursor-default line-through"
+                                  : selected
+                                    ? "border-[#3182CE] bg-[#EBF4FF] text-[#2C5282] hover:border-[#2C5282]"
+                                    : "border-gray-200 bg-white text-gray-400 hover:bg-gray-50"
+                              )}
+                            >
+                              {visible && (
+                                <CheckCircle2 size={13} className={cn(
+                                  "shrink-0",
+                                  kroKBPhase && selected ? "text-green-500" : selected ? "text-[#3182CE]" : "text-gray-300"
+                                )} />
+                              )}
+                              <span className="text-[12px] font-medium leading-snug">{tag.label}</span>
+                            </motion.button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {modalPhase === 'tags_ready' && !kroKBPhase && (
+                <div className="mt-5 flex justify-center">
+                  <button
+                    onClick={openTagModal}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-500 hover:bg-gray-50 transition-colors"
+                  >
+                    <RefreshCw size={13} /> Generovať znova
+                  </button>
+                </div>
+              )}
+
+              {modalPhase === 'loading_tags' && (
+                <div className="mt-4 flex items-center gap-2 text-sm text-gray-400">
+                  <RefreshCw size={14} className="animate-spin" /> Analyzujem článok...
+                </div>
+              )}
+            </div>
+
+            {/* ── KROK B: Interné linky ── */}
+            <div className={cn(
+              "border-t border-gray-100 transition-all",
+              !kroKBPhase && "opacity-40 pointer-events-none"
+            )}>
+              <div className="px-7 py-5">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={cn(
+                    "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold",
+                    modalPhase === 'krok_b_ready' ? "bg-[#3182CE] text-white" : "bg-gray-100 text-gray-400"
+                  )}>
+                    {!kroKBPhase ? <Lock size={12} /> : <LinkIcon size={12} />}
+                    Krok B — Interné linky
+                  </div>
+                  {!kroKBPhase && (
+                    <span className="text-xs text-gray-400">Dostupné po prijatí tagov</span>
+                  )}
+                  {modalPhase === 'krok_b_loading' && (
+                    <span className="text-xs text-gray-400 flex items-center gap-1.5">
+                      <RefreshCw size={11} className="animate-spin" /> Hľadám ankery v texte...
+                    </span>
+                  )}
+                  {modalPhase === 'krok_b_ready' && (
+                    <span className="text-xs text-[#3182CE] font-medium">
+                      {(audit?.linkSuggestions ?? []).filter(l => !modalRejectedLinkIds.has(l.id)).length} návrhov pripravených
+                    </span>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  {(audit?.linkSuggestions ?? []).map((link) => {
+                    const visible = modalVisibleLinkIds.has(link.id);
+                    const rejected = modalRejectedLinkIds.has(link.id);
+                    return (
+                      <motion.div
+                        key={link.id}
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={visible ? { opacity: 1, x: 0 } : { opacity: 0, x: -8 }}
+                        transition={{ duration: 0.3 }}
+                        className={cn(
+                          "flex items-start justify-between gap-3 p-3 rounded-xl border transition-all",
+                          rejected ? "border-gray-100 bg-gray-50 opacity-50" : "border-blue-100 bg-blue-50/50"
+                        )}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[11px] font-black text-gray-400 uppercase tracking-wide">Ankera</span>
+                            <code className="text-[11px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-mono">{link.anchor}</code>
+                            <span className="text-[11px] text-gray-400">→</span>
+                            <span className="text-[11px] font-bold text-[#3182CE]">{link.target}</span>
+                          </div>
+                          <p className="text-[11px] text-gray-500 leading-relaxed italic">{link.context}</p>
+                        </div>
+                        <button
+                          onClick={() => handleModalToggleLink(link.id)}
+                          className={cn(
+                            "shrink-0 p-1.5 rounded-lg transition-all",
+                            rejected
+                              ? "text-gray-300 hover:text-[#3182CE] hover:bg-blue-50"
+                              : "text-red-400 hover:text-red-600 hover:bg-red-50"
+                          )}
+                          title={rejected ? "Obnoviť" : "Zamietnuť"}
+                        >
+                          {rejected ? <PlusCircle size={14} /> : <X size={14} />}
+                        </button>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+
     <div className="flex h-screen bg-[#F0F2F5] text-[#333] font-sans overflow-hidden">
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col shrink-0">
@@ -2023,6 +2356,96 @@ const EagleCMS_Split: React.FC = () => {
                           ))}
                         </div>
                       </div>
+                      {/* Ďalšie nastavenia — Tagy (EAGLE CMS štýl) */}
+                      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Ďalšie nastavenia</h3>
+                        </div>
+                        <div className="p-5 space-y-4">
+                          {/* Generovať tagy tlačidlo */}
+                          <div className="flex flex-col gap-2">
+                            <button
+                              onClick={() => {
+                                if (!audit) {
+                                  handleValidate();
+                                } else {
+                                  openTagModal();
+                                }
+                              }}
+                              className="w-full flex items-center justify-center gap-2 bg-[#48BB78] hover:bg-[#38A169] text-white py-2.5 rounded-lg text-sm font-bold transition-colors"
+                            >
+                              <Sparkles size={14} /> Generovať tagy
+                            </button>
+                            {tagsCommitted && (
+                              <button
+                                onClick={() => {
+                                  setRightPanelMode('ai');
+                                  setActiveAuditTab('seo');
+                                }}
+                                className="w-full flex items-center justify-center gap-2 border border-[#3182CE] text-[#3182CE] hover:bg-blue-50 py-2 rounded-lg text-sm font-bold transition-colors"
+                              >
+                                <Eye size={13} /> Zobraziť vygenerované návrhy
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Kategórie tagov */}
+                          {TAG_CATEGORIES.map((cat) => {
+                            const committed = tagsCommitted
+                              ? (audit?.tagSuggestions ?? []).filter(t => t.category === cat && !removedTagIds.has(t.id))
+                              : [];
+                            return (
+                              <div key={cat} className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-600">{cat}</label>
+                                {committed.length > 0 ? (
+                                  <div className="flex flex-wrap gap-1.5 p-2 border border-gray-200 rounded-lg min-h-[38px] bg-white">
+                                    {committed.map((tag) => (
+                                      <div key={tag.id} className="bg-[#3182CE] text-white px-2 py-1 rounded text-[10px] font-bold flex items-center gap-1">
+                                        {tag.label}
+                                        <button
+                                          onClick={() => {
+                                            const next = new Set(removedTagIds);
+                                            next.add(tag.id);
+                                            setRemovedTagIds(next);
+                                          }}
+                                          className="hover:text-red-200 transition-colors"
+                                        >
+                                          <X size={9} />
+                                        </button>
+                                      </div>
+                                    ))}
+                                    <ChevronDown size={13} className="ml-auto text-gray-400 self-center" />
+                                  </div>
+                                ) : (
+                                  <div className="relative">
+                                    <select className="w-full px-3 py-2 border border-gray-200 rounded-lg appearance-none text-sm text-gray-400 bg-white outline-none focus:ring-1 focus:ring-[#3182CE]">
+                                      <option>Vybrať</option>
+                                    </select>
+                                    <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+
+                          {/* SEO obsah toggle */}
+                          <div className="pt-2 space-y-2">
+                            <label className="text-xs font-bold text-gray-600 flex items-center gap-1.5">
+                              SEO obsah <Info size={12} className="text-gray-400" />
+                            </label>
+                            <div className="flex gap-2">
+                              {['SEO full', 'SEO friendly'].map((opt, i) => (
+                                <button key={opt} className={cn(
+                                  "flex-1 py-2 rounded-lg text-xs font-bold border transition-all",
+                                  i === 0 ? "bg-[#2D3748] text-white border-[#2D3748]" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
+                                )}>
+                                  {opt}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </motion.div>
                   ) : (
                     <motion.div 
@@ -2812,6 +3235,7 @@ const EagleCMS_Split: React.FC = () => {
         </main>
       </div>
     </div>
+    </>
   );
 };
 

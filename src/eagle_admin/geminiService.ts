@@ -54,11 +54,14 @@ export type LinkSuggestion = {
   context: string;      // výrez vety pre kontext redaktora
 };
 
+export type TagCategory = 'Osoba' | 'Lokalita' | 'Organizácia' | 'Udalosť' | 'Téma';
+
 /** Navrhovaný tag článku od SEO Copilota. */
 export type TagSuggestion = {
   id: string;
   label: string;
   url: string;
+  category: TagCategory;
 };
 
 /** Reserved for future holistic analysis — prototype uses inline mock in UI. */
