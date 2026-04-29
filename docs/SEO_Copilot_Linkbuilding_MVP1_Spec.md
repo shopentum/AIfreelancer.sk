@@ -3,7 +3,7 @@
 > **Dokument:** Jira Epic + Story + Design Zámer
 > **Projekt:** SEO Copilot — Linkbuilding (súčasť Article Performance Layer)
 > **Autor:** Daniel Budziňák, Senior Product Manager
-> **Verzia:** 1.0 | Dátum: 2026-04-28
+> **Verzia:** 1.1 | Dátum: 2026-04-29
 > **Status:** Ready for refinement
 > **Súvisí s:** `MDIE_C_Jira_Spec.pdf` (Article Performance Layer), `SEO_Copilot_Tags_MVP1`
 
@@ -54,20 +54,24 @@ MVP1 vychádza z existujúceho architektonického návrhu linkbuildingu (Conflue
 - Tagy ako cieľ prelinkovania
 - Anchor detekcia pomocou NLP knižnice (SpaCy sk) — nie LLM
 - Návrhový režim (HITL — human in the loop)
-- Základné pravidlá link density
-- Hard filter + soft filter (validation vrstva nad existujúcimi dátami)
+- Hard cap: max. 5 linkov/článok + žiadny link do perexu
+- Hard filter (publikovaný, nie blacklist, nie duplikát)
+- Soft filter: 2 signály — relevancia (match) + existencia obsahu
 - Krok A → Krok B workflow: Tags musia byť prijaté pred aktiváciou Linkbuildingu
-- Deduplication: 1 entita = 1 návrh (najlepší výskyt)
+- Deduplication: 1 entita = 1 návrh (prvý výskyt po perexe)
 - Bulk akcia: „Pridať všetky (N)" pre rýchle schválenie setu
-- Event logging: JSON eventy kompatibilné s DataHub
+- Event logging: minimálny MVP1 schema (`suggestion_id`, `action`, `article_id`)
 
-### Vylúčené z MVP1 (MVP2+)
+### Vylúčené z MVP1 → MVP2+
+- Cosine similarity / pokročilá anchor selection logika (ranking layer)
+- Morphodita fallback (edge-case optimalizácia — riešiť po overení adopcie)
+- Detailné link density pravidlá na úrovni vety/odstavca (HITL ich nahrádza)
+- Soft filter: freshness + typ tagu (nemáme kalibračné dáta)
+- Incremental / diff logic (vždy fresh run)
+- Rozšírený event schema (DataHub doplní polia neskôr)
 - Články ako cieľ prelinkovania
-- Komplexný scoring model (anchor aj candidate)
-- LLM generovanie anchorov
-- Historická optimalizácia anchor textov
 - Performance-based ranking (GSC a pod.)
-- Morphodita fallback — zvážiť po reálnom testovaní SpaCy na NMH obsahu
+- LLM generovanie anchorov
 
 ---
 
@@ -91,13 +95,13 @@ Article (DRAFT)
                       │
                       ▼
                     Soft filter / Validation vrstva
-                    (relevancia, freshness, existencia obsahu, typ tagu)
+                    (relevancia: match + existencia obsahu)
                       │
                       ▼
                     Selection
                     1 najlepší kandidát per anchor
-                    Deduplication: 1 entita = 1 návrh
-                    Link density rules
+                    Deduplication: 1 entita = 1 návrh (prvý výskyt po perexe)
+                    Hard cap: max. 5 linkov / žiadny do perexu / nie H1-H3
                       │
                       ▼
                     Suggestion Output
@@ -185,7 +189,7 @@ Aby sme mohli vyhodnotiť adopciu a dopad na traffic.
 ```
 
 **Acceptance Criteria:**
-- [ ] Každý event obsahuje: `suggestion_id`, `action`, `timestamp`, `editor_id`, `article_id`, `site_id`, `article_type`
+- [ ] Každý event obsahuje: `suggestion_id`, `action`, `timestamp`, `article_id`
 - [ ] Každý návrh má unikátne `suggestion_id` (UUID)
 - [ ] Eventy sú ukladané ako append-only log
 - [ ] JSON export logu je dostupný pre QA a DataHub (viď Sekcia 9)
@@ -202,32 +206,9 @@ Zoznam prijatých tagov pre článok (výstup Kroku A — Tags).
 
 **Knižnica:** SpaCy `sk_core_news_lg`
 
-```python
-def get_anchor_lemmas(text: str) -> list[str]:
-    doc = nlp_spacy(text)
-    if _needs_morphodita_fallback(doc):
-        return morphodita.get_lemmas(text)   # MVP2: po overení SpaCy presnosti
-    return [t.lemma_ for t in doc]
+Lemmatizácia tagu aj textu článku → nájdenie výskytu v skloňovanom tvare. Ak SpaCy anchor nenájde → návrh sa nevytvorí, žiadna chyba.
 
-def _needs_morphodita_fallback(doc) -> bool:
-    if len(doc) > 1:  # viacslovný tag
-        return True
-    for token in doc:
-        if token.lemma_ == token.text and token.is_alpha and len(token.text) > 4:
-            return True  # SpaCy nevedelo lemmatizovať
-    return False
-```
-
-**Dôvod voľby knižnice (nie LLM):**
-- Anchor matching je deterministický problém — LLM je overkill
-- API náklady a latencia pri NMH scale (tisíce článkov denne)
-- SpaCy sk model bol navrhnutý interne v kontexte CMSD1778 (lemmatizácia pre SEO Checker) — zdieľame model, nulové extra náklady na infraštruktúru
-
-**Infraštruktúra — poznámka pre dev tím (DataHub / FastAPI):**
-SpaCy `sk_core_news_lg` má ~500 MB. Model sa načíta do RAM **jednorazovo pri štarte DH služby (FastAPI singleton)**. Každý ďalší request na linkbuilding nás z hľadiska pamäte stojí nulu — model sedí v RAM a obsluhuje všetky requesty. Latencia = čistý výpočtový čas (CPU): pre jeden článok pod **150 ms**.
-
-**Kedy nastupuje Morphodita fallback:**
-SpaCy je primárna voľba pre syntax, vety a NER. Morphodita je lingvistický safety-net: ak SpaCy označí token ako OOV (Out of Vocabulary) — teda vráti `lemma_ == text` pri dlhom slove — alebo ak lemmatizácia zlyhá na viacslovnom pojme, Morphodita uprace výsledok pomocou presných slovenských morfologických slovníkov. Morphodita zvážiť po reálnom testovaní SpaCy na NMH obsahu — `[DATA_GAP DG-L1]`
+**Dôvod voľby (nie LLM):** Anchor matching je deterministický problém. SpaCy sk je navrhovaný interne v kontexte CMSD1778 — zdieľame model. `[DATA_GAP DG-L1]` — potvrdiť, či je v AI service stacku.
 
 ### 6.3 Hard filter (povinné podmienky)
 
@@ -242,43 +223,35 @@ Ak niektorá podmienka nie je splnená → tag sa preskočí. Žiadna chyba, ži
 
 ### 6.4 Soft filter / Validation vrstva
 
-Cieľ: eliminovať zjavne nevhodné targety bez komplexného scoring modelu.
+Cieľ: eliminovať zjavne nevhodné targety. MVP1 používa iba **2 signály**:
 
 | Signál | Typ | Dôvod |
 |--------|-----|-------|
-| Relevancia voči článku | must-have | Základná zmysluplnosť návrhu |
-| Freshness (recent activity) | doplnkový | Preferencia aktívnych tagov |
+| Relevancia voči článku (match) | must-have | Základná zmysluplnosť návrhu |
 | Existencia obsahu | proxy kvalita | Tag nie je prázdny |
-| Typ tagu | preferencia | Entity typy relevantné pre spravodajstvo |
 
-Táto vrstva **nepredstavuje komplexný scoring model** — je to jednoduchý decision filter nad existujúcimi dátami z BE.
+Freshness, typ tagu a ďalšie signály → MVP2 (nemáme kalibračné dáta, riskujeme overfiltering).
 
 ### 6.5 Selection a deduplication
 
 - Pre každý anchor sa vyberá **jeden najlepší kandidát** (tag s najvyššou relevančnou skórou po filtroch)
-- Ak sa rovnaká entita vyskytuje v texte viackrát → systém navrhne link **iba raz**
-
-**Pravidlo dvoch krokov — výber najlepšieho výskytu (Anchor Selection Priority):**
-
-| Priorita | Pravidlo | Dôvod |
-|----------|----------|-------|
-| 1. | **Prvá veta po perexe** (ak anchor existuje) | Najväčšia SEO váha — Google prikladá vyšší význam linkovaným slovám v úvode tela |
-| 2. | **Veta s najväčšou sémantickou podobnosťou** k celému článku (cosine similarity nad SpaCy vektormi) | Kontextovo najrelevantnejší výskyt |
-| 3. | Správna link density: max. 1 link/veta, max. 1–2/odstavec | Technická podmienka |
+- Ak sa rovnaká entita vyskytuje v texte viackrát → systém navrhne link **iba raz**: **prvý výskyt po perexe**
 
 **Vylúčené pozície (systém tieto výskyty preskočí):**
 - Perex
 - Nadpisy H1–H3 (rozbilo by frontend rendering)
 - Popisky obrázkov / alt texty (mimo toku textu)
 
+Pokročilý výber (cosine similarity, sémantická podobnosť) → MVP2.
+
 ### 6.6 Link density pravidlá
 
 | Pravidlo | Hodnota |
 |----------|---------|
-| Max. linky na vetu | 1 |
-| Max. linky na odstavec | 1–2 (podľa dĺžky) |
 | Perex | žiadny link |
 | Max. linky na článok | 5 (konfigurovateľné: `seo_copilot.max_links_per_article`) |
+
+Granulárne pravidlá na úrovni vety/odstavca → MVP2. V MVP1 ich nahrádza HITL — redaktor rozhoduje.
 
 ---
 
@@ -342,7 +315,7 @@ Tagy & Interné linky   [3 nových]          [Pridať všetky (3)]
 | EL8 | Krok B aktivovaný pred Krokom A | Tlačidlá disabled | Tooltip: „Najprv prijmite navrhované tagy (Krok A)" |
 | EL9 | Redaktor publikuje bez interakcie | Neinteragované návrhy → `ignored` pri publishi | Publish prebehne normálne; `[DATA_GAP DG-L2]` |
 | EL10 | Incremental: editor má existujúce linky z predchádzajúcej session | MVP1: nová validácia prepíše predchádzajúce návrhy; `[DATA_GAP DG-L3]` pre diff-approach | – |
-| EL11 | SpaCy nevedelo lemmatizovať anchor | Fallback: Morphodita (ak dostupná); ak nie → návrh sa nevytvorí | – |
+| EL11 | SpaCy nevedelo lemmatizovať anchor | Návrh sa nevytvorí; žiadna chyba; Morphodita fallback → MVP2 | – |
 
 ---
 
@@ -352,21 +325,13 @@ Tagy & Interné linky   [3 nových]          [Pridať všetky (3)]
 
 ```typescript
 type LinkSuggestion = {
-  suggestion_id: string;           // UUID, povinný
-  suggestion_type: "internal_link";
+  suggestion_id: string;   // UUID, povinný
   anchor_text: string;
-  target_id: string;               // tag ID
-  target_label: string;            // zobrazovaný názov tagu
-  target_url: string;              // URL tag stránky
-  context_snippet: string;         // výrez vety s anchorom
-  suggestion_source: "rule_based" | "hybrid"; // nie "ai" — bez LLM
-  article_id: string;              // [DATA_GAP DG-L2]
-  site_id: string;
-  article_type: string;
-  position_in_text: {
-    paragraph_index: number;
-    sentence_index: number;
-  };
+  target_id: string;       // tag ID
+  target_label: string;
+  target_url: string;
+  context_snippet: string; // výrez vety s anchorom
+  article_id: string;
 };
 ```
 
@@ -376,13 +341,12 @@ type LinkSuggestion = {
 type LinkAction = {
   suggestion_id: string;
   action: "accepted" | "rejected" | "ignored";
-  timestamp: number;               // Unix ms
-  editor_id: string | null;
+  timestamp: number;       // Unix ms
   article_id: string;
-  site_id: string;
-  article_type: string;
 };
 ```
+
+Rozšírené polia (`site_id`, `article_type`, `position_in_text`, `editor_id`, `suggestion_source`) → MVP2 / DataHub tím doplní podľa potreby.
 
 ### Event typy
 
@@ -521,7 +485,8 @@ Tento dokument slúži ako **Master Epic**. Pre vývojový tím sa rozpadá na n
 | Verzia | Dátum | Autor | Zmena |
 |--------|-------|-------|-------|
 | 0.1 | 2026-04-12 | Daniel Budziňák | Pôvodný návrh `SEO_Copilot_Linkbuilding_MVP1.pdf` |
-| 1.0 | 2026-04-28 | Daniel Budziňák | Formalizácia do Jira spec; aktualizácia o NLP knižnicu (SpaCy, bez LLM); Krok A → Krok B workflow; deduplication (1 entita = 1 návrh); best candidate výber; bulk UI (Pridať všetky N); nové DATA GAP DG-L1 až DG-L6; edge cases EL1–EL11; rozšírené JSON schema |
+| 1.0 | 2026-04-28 | Daniel Budziňák | Formalizácia do Jira spec; SpaCy bez LLM; Krok A → Krok B; deduplication; bulk UI; DATA GAP DG-L1–DG-L6; edge cases EL1–EL11; JSON schema |
+| 1.1 | 2026-04-29 | Daniel Budziňák | MVP scope rez: cosine similarity → MVP2; Morphodita fallback → MVP2; link density zjednodušené na hard cap; soft filter redukovaný na 2 signály; NLP infra detail presunutý do DH tímu; incremental potvrdený ako MVP2; event schema orezaný na minimálne polia |
 
 ---
 
