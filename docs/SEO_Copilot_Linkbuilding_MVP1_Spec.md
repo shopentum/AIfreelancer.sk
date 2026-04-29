@@ -349,7 +349,7 @@ Pravidlo 1 link/odstavec je jednoduchý distribuovaný guard - nie scoring. Gran
 | EL5 | Tag manuálne zalinkovaný | Systém tag preskočí | - |
 | EL6 | Článok kratší ako 3 odstavce | 0 návrhov; guard na krátky obsah | - |
 | EL7 | BE API nedostupné | `suggestions_skipped`; článok nezmenený | Banner: „Návrhy linkov sú dočasne nedostupné." |
-| EL8 | Krok B aktivovaný pred Krokom A | Tlačidlá disabled | Tooltip: „Najprv prijmite navrhované tagy (Krok A)" |
+| EL8 | Linky aktivované pred prijatím tagov | Sekcia disabled | Tooltip: „Dostupné po prijatí tagov" |
 | EL9 | Redaktor publikuje bez interakcie | Neinteragované návrhy - `ignored` pri publishi | Publish prebehne normálne; `[DATA_GAP DG-L2]` |
 | EL10 | Incremental: editor má existujúce linky z predchádzajúcej session | MVP1: nová validácia prepíše predchádzajúce návrhy; `[DATA_GAP DG-L3]` pre diff-approach | - |
 | EL11 | SpaCy nevedelo lemmatizovať anchor | Návrh sa nevytvorí; žiadna chyba; Morphodita fallback - MVP2 | - |
