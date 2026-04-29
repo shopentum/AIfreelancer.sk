@@ -1076,6 +1076,7 @@ const EagleCMS_Split: React.FC = () => {
       at: Date.now(),
       tags: accepted,
       removedCount: modalDeselected.size,
+      suggestion_source: "ai",
     });
     // Spustiť Krok B načítavanie
     setModalPhase('krok_b_loading');
