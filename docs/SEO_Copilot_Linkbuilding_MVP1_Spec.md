@@ -3,7 +3,7 @@
 > **Dokument:** Jira Epic + Story + Design Zámer
 > **Projekt:** SEO Copilot - Linkbuilding (súčasť Article Performance Layer)
 > **Autor:** Daniel Budziňák, Senior Product Manager
-> **Verzia:** 1.2 | Dátum: 2026-04-29
+> **Verzia:** 1.3 | Dátum: 2026-04-29
 > **Status:** Ready for refinement
 > **Súvisí s:** `MDIE_C_Jira_Spec.pdf` (Article Performance Layer), `SEO_Copilot_Tags_MVP1`
 
@@ -78,43 +78,47 @@ MVP1 vychádza z existujúceho architektonického návrhu linkbuildingu (Conflue
 
 ```
 Article (DRAFT)
-  └─► [Krok A: Tags dokončený?]
+  └─► Redaktor klikne „Generovať tagy a prelinkovania" (pravý panel)
         │
-        ├── NIE ──► Krok B disabled (tooltip: „Najprv prijmite navrhované tagy")
+        ▼
+      Modálne okno — sekcia Tagy
+      Tagy sa načítavajú progressívne; redaktor upraví/odznačí
+      [Použiť v článku] → tagy sú prijaté
         │
-        └── ÁNO ──► Input: zoznam prijatých tagov pre článok
-                      │
-                      ▼
-                    Anchor detekcia (SpaCy sk)
-                    Lemmatizácia tagu aj textu - nájdenie výskytu v skloňovanom tvare
-                      │
-                      ▼
-                    Hard filter
-                    (publikovaný, nie blacklist, indexovateľný, nie duplikát)
-                      │
-                      ▼
-                    Soft filter / Validation vrstva
-                    (relevancia: match + existencia obsahu)
-                      │
-                      ▼
-                    Selection
-                    1 najlepší kandidát per anchor
-                    Deduplication: 1 entita = 1 návrh (prvý výskyt po perexe)
-                    Hard cap: max. 1 link/odstavec / max. 5/článok / žiadny do perexu / nie H1-H3
-                      │
-                      ▼
-                    Suggestion Output
-                    anchor | cieľový tag | kontext vety | paragraph index
-                      │
-                      ▼
-                    Editor confirm (HITL)
-                    [Pridať link] / [Odmietnuť] / [Pridať všetky (N)]
-                      │
-                      ▼
-                    Event logging - JSON - DataHub
-                      │
-                      ▼
-                    Publish (nikdy neblokovaný)
+        ▼
+      Modálne okno — sekcia Interné prelinkovania
+      (sprístupní sa po prijatí tagov; pred tým disabled)
+        │
+        Input: zoznam prijatých tagov pre článok
+        │
+        ▼
+      Anchor detekcia (SpaCy sk)
+      Lemmatizácia tagu aj textu - nájdenie výskytu v skloňovanom tvare
+        │
+        ▼
+      Hard filter (publikovaný, nie blacklist, indexovateľný, nie duplikát)
+        │
+        ▼
+      Soft filter / Validation vrstva (relevancia: match + existencia obsahu)
+        │
+        ▼
+      Selection
+      1 najlepší kandidát per anchor
+      Deduplication: 1 entita = 1 návrh (prvý výskyt po perexe)
+      Hard cap: max. 1 link/odstavec / max. 5/článok / žiadny do perexu / nie H1-H3
+        │
+        ▼
+      Suggestion Output — modálny zoznam
+      anchor | cieľový tag | kontext vety
+      Per návrh: [×] Zmazať (trvalé) | [Nepoužiť] on hover (trvalé)
+      [Generovať znova] — reset zoznamu
+      [Použiť prelinkovania a zatvoriť] → akceptuje zostávajúce návrhy
+        │
+        ▼
+      Event logging - JSON - DataHub
+        │
+        ▼
+      Publish (nikdy neblokovaný)
 ```
 
 ---
@@ -134,43 +138,45 @@ Article (DRAFT)
 
 SEO-201
 Ako redaktor
-Chcem po prijatí tagov (Krok A) vidieť návrhy interných linkov s kontextom vety
+Chcem po prijatí tagov vidieť návrhy interných linkov s kontextom vety
 Aby som vedel rýchlo posúdiť, kde link v texte sedí, a rozhodnúť o jeho použití.
 
 **Acceptance Criteria:**
-- Sekcia „Tagy & Interné linky" je viditeľná v SEO záložke panelu
-- Pred dokončením Kroku A (Tags): tlačidlá „Pridať link" a „Pridať všetky (N)" sú **disabled** s tooltipom „Najprv prijmite navrhované tagy (Krok A)"
-- Po dokončení Kroku A: sekcia sa automaticky aktivuje (bez reloadu)
-- Každý návrh zobrazuje: anchor text (zvýraznený), šípku - cieľový tag, výrez kontextovej vety, badge odstavca (`Odst. N`)
-- Ak zostávajú **2 a viac** nespracovaných návrhov: zobrazí sa tlačidlo „Pridať všetky (N)" - hromadné prijatie; N sa dynamicky aktualizuje
-- Ak zostáva **1 nespracovaný** návrh: zobrazí sa tlačidlo „Pridať link" (singulár)
+- V pravom paneli sú po prijatí tagov dostupné dve tlačidlá: „Zobraziť návrhy pre tagy" a „Zobraziť návrhy prelinkovania"
+- Kliknutie otvára **modálne okno** s dvomi sekciami: Tagy (hore) a Interné prelinkovania (dole)
+- Sekcia Interné prelinkovania je pred prijatím tagov disabled s tooltipom „Dostupné po prijatí tagov"
+- Po prijatí tagov sa sekcia linkov automaticky aktivuje a načíta progressívne (bez reloadu)
+- Každý návrh zobrazuje: anchor (monospace badge), šípku, cieľový tag, kontext vety
+- Počet viditeľných návrhov je zobrazený v hlavičke sekcie: „Vybraných X návrhov"
 - Rovnaká entita navrhnutá max. **1×** (prvý výskyt po perexe)
-- Po spracovaní všetkých návrhov: sekcia zobrazí „Všetky návrhy spracované"
+- Ak sú všetky návrhy odstránené: zobrazí sa empty state „Všetky návrhy boli odstránené. Kliknite na Generovať znova."
 
 **Edge cases:**
 | Scenár | Správanie |
-| Žiadny tag neprejde filtrom | 0 návrhov, sekcia sa nezobrazí |
+| Žiadny tag neprejde filtrom | 0 návrhov, sekcia linkov prázdna |
 | Všetky tagy blacklistované | 0 návrhov, fail-safe |
 | Anchor len v perexe | Návrh sa nevytvorí |
 | Článok kratší ako 3 odstavce | Systém nenavrhuje linky |
 | BE API nedostupné | `suggestions_skipped`, 0 návrhov, článok nezmenený |
-| Krok B aktivovaný pred Krokom A | Disabled s tooltipom |
+| Linky aktivované pred tagmi | Sekcia disabled s tooltipom |
 
 ---
 
-### Story 2: Prijatie / odmietnutie návrhu
+### Story 2: Správa návrhov linkov — akceptácia, mazanie, odmietnutie
 
 SEO-202
 Ako redaktor
-Chcem každý návrh linku individuálne prijať alebo odmietnuť
+Chcem každý návrh linku individuálne spracovať alebo celý set potvrdiť jedným klikom
 Aby som mal plnú kontrolu nad prelinkovaním článku.
 
 **Acceptance Criteria:**
-- Na každej karte dve akcie: „Pridať link" (zelené) / „Odmietnuť" (sivé)
-- Po „Pridať link": karta zobrazí „Pridané", event zalogovaný ako `suggestion_accepted`
-- Po „Odmietnuť": karta zobrazí „Odmietnuté", event zalogovaný ako `suggestion_rejected`
-- Po „Pridať všetky (N)": každý link zalogovaný ako samostatný `suggestion_accepted` event
-- Anchor sa nevkladá automaticky - každá akcia je explicitná (HITL)
+- Na každom riadku: vždy viditeľný `×` (Zmazať); „Nepoužiť" sa zobrazí pri hover na riadok
+- `×` (Zmazať): okamžite a trvalo odstráni návrh zo zoznamu; event `link_suggestion_removed`
+- „Nepoužiť": okamžite a trvalo odstráni návrh zo zoznamu; event `link_suggestion_rejected`
+- Obe akcie sú perzistentné — pri opätovnom otvorení modálu zostávajú odstránené
+- „Generovať znova" resetuje všetky link akcie a znovu animuje zoznam (escape hatch)
+- „Použiť prelinkovania a zatvoriť" akceptuje všetky zostávajúce viditeľné návrhy; každý = samostatný `link_suggestion_accepted` event
+- Anchor sa nevkladá automaticky — každá akcia je explicitná (HITL)
 - Publish prebehne normálne bez ohľadu na stav návrhov
 - Neinteragované návrhy pri publishi dostanú stav `ignored` (`[DATA_GAP DG-L2]`)
 
@@ -248,28 +254,29 @@ Pokročilý výber (cosine similarity, sémantická podobnosť) - MVP2.
 
 Pri návrhoch interných linkov rozlišujeme štyri typy interakcie:
 
-| Stav | Trigger | Význam | Zachovanie pri ďalšom otvorení |
-| `accepted` | „Pridať link" | Návrh bol použitý v článku | zostáva prijatý |
-| `rejected` | „Nepoužiť" | Vedomé odmietnutie - návrh je nevhodný | zostáva zamietnutý (sivý) |
-| `removed` | „×" | Dočasné upratanie zoznamu - nie hodnotenie kvality | návrh sa môže zobraziť znova |
+| Stav | Trigger | Význam | Perzistencia (MVP1) |
+| `accepted` | „Použiť prelinkovania a zatvoriť" | Návrh bol použitý v článku | zostáva prijatý |
+| `rejected` | „Nepoužiť" | Vedomé odmietnutie — návrh je nevhodný | trvalé zmazanie zo zoznamu |
+| `removed` | „×" (Zmazať) | Upratanie zoznamu — nie hodnotenie kvality | trvalé zmazanie zo zoznamu |
 | `ignored` | žiadna interakcia do publishu | Redaktor návrh videl, ale nereagoval | - |
 
-**UI hierarchia akcií:**
-- `Pridať link` - primárna akcia, vždy viditeľná
-- `×` - sekundárna akcia, vždy viditeľná, slabšia vizuálne; tooltip: „Odstrániť zo zoznamu návrhov. Neovplyvní budúce návrhy."
-- `Nepoužiť` - terciárna akcia, zobrazená pri hover; tooltip: „Nepoužiť, ak návrh nesedí pre tento článok"
+**Perzistencia v MVP1:** Obe akcie (`rejected` aj `removed`) trvalo odstránia návrh zo zoznamu — pri opätovnom otvorení modálu zostávajú preč. Rozdiel je iba v event logu (DataHub kalibrácia v MVP2). Obnovenie = „Generovať znova".
 
-**Dôvod rozlíšenia:**
-`rejected` a `removed` nesmú byť zlučované. DataHub potrebuje odlíšiť vedome odmietnutý návrh od dočasne odloženého návrhu pre kalibráciu scoring modelu v MVP2.
+**UI hierarchia akcií:**
+- `×` (Zmazať) — vždy viditeľný, malý, červená ikona, sivý rám; tooltip: „Odstrániť zo zoznamu návrhov. Neovplyvní budúce návrhy."
+- `Nepoužiť` — zobrazí sa pri hover na riadok, sivý, diskrétny; tooltip: „Nepoužiť, ak návrh nesedí pre tento článok"
+- `Generovať znova` — v hlavičke sekcie; resetuje všetky link akcie a znovu animuje zoznam
+
+**Dôvod rozlíšenia `rejected` vs `removed`:**
+DataHub potrebuje odlíšiť vedome odmietnutý návrh od upratania zoznamu pre kalibráciu scoring modelu v MVP2. Nesmú byť zlučované.
 
 **Event schema:**
 ```typescript
 type LinkActionStatus = 'accepted' | 'rejected' | 'removed' | 'ignored';
 
-// EventLog:
-{ type: "link_suggestion_accepted",  action: "accepted",  suggestion_id, article_id, site_id }
-{ type: "link_suggestion_rejected",  action: "rejected",  suggestion_id, article_id, site_id }
-{ type: "link_suggestion_removed",   action: "removed",   suggestion_id, article_id, site_id }
+{ type: "link_suggestion_accepted",  suggestion_id, article_id, site_id }
+{ type: "link_suggestion_rejected",  suggestion_id, article_id, site_id }
+{ type: "link_suggestion_removed",   suggestion_id, article_id, site_id }
 ```
 
 ---
@@ -287,45 +294,49 @@ Pravidlo 1 link/odstavec je jednoduchý distribuovaný guard - nie scoring. Gran
 
 ## 7. UI / UX
 
-### Návrh karty
+### Vstupný bod (pravý panel editora)
 
 ```
-┌─────────────────────────────────────────────────────┐
-│ Interný link                          Odst. 3  ●    │
-│ kreatín monohydrát  →  Kreatín                      │
-│ „...štúdie naznačujú, že kreatín monohydrát mohol   │
-│  predstavovať prelom v suplementácii..."             │
-│                                                     │
-│  [✓ Pridať link]          [Odmietnuť]               │
-└─────────────────────────────────────────────────────┘
+[Generovať tagy a prelinkovania]   ← pred prijatím tagov
+  ↓ po prijatí tagov:
+[Zobraziť návrhy pre tagy]   [Zobraziť návrhy prelinkovania]
 ```
 
-### Header sekcie
+### Modálne okno — sekcia Interné prelinkovania
 
+**Hlavička sekcie:**
 ```
-Tagy & Interné linky   [3 nových]          [Pridať všetky (3)]
+🔗 Interné prelinkovania    Vybraných 10 návrhov
+[↺ Generovať znova]   [✓ Použiť prelinkovania a zatvoriť]
+```
+
+**Riadok návrhu:**
+```
+✓  kreatín monohydrát  →  Kreatín
+   „...štúdie naznačujú, že kreatín monohydrát..."
+                                          [×]  [Nepoužiť ←hover]
 ```
 
 ### Stavové labely
 
-| Stav | Label | Farba |
-| Nespracovaný | modrá bodka | modrá |
-| Prijatý | „Pridané" + ✓ | zelená |
-| Odmietnutý | „Odmietnuté" | sivá |
-| Krok B disabled | tlačidlá sivé + tooltip | sivá |
+| Stav | Správanie |
+| Aktívny návrh | modrý rámik + CheckCircle2 vľavo |
+| Zmazaný (`×`) | okamžite zmizne zo zoznamu; event `removed` |
+| Odmietnutý („Nepoužiť") | okamžite zmizne zo zoznamu; event `rejected` |
+| Linky disabled | šedý Lock ikona + „Dostupné po prijatí tagov" |
 
 ### UI Copy
 
 | Element | Text |
-| Sekcia | „Tagy & Interné linky" |
-| Krok B disabled tooltip | „Najprv prijmite navrhované tagy (Krok A)" |
-| Bulk button (N≥2) | „Pridať všetky (N)" |
-| Bulk button (N=1) | „Pridať link" |
-| Prijatý stav | „Pridané" |
-| Odmietnutý stav | „Odmietnuté" |
-| Všetky spracované | „Všetky návrhy linkov spracované" |
+| Sekcia v modáli | „Interné prelinkovania" |
+| Linky disabled tooltip | „Dostupné po prijatí tagov" |
+| Počítadlo | „Vybraných X návrhov" |
+| Commit button | „Použiť prelinkovania a zatvoriť" |
+| Reset button | „Generovať znova" |
+| Empty state | „Všetky návrhy boli odstránené. Kliknite na Generovať znova." |
 | API nedostupné | „Návrhy linkov sú dočasne nedostupné." |
-| Krok A chýba | „Najprv prijmite navrhované tagy (Krok A)" |
+| Zmazať tooltip | „Odstrániť zo zoznamu návrhov. Neovplyvní budúce návrhy." |
+| Nepoužiť tooltip | „Nepoužiť, ak návrh nesedí pre tento článok" |
 
 ---
 
@@ -367,7 +378,7 @@ type LinkSuggestion = {
 ```typescript
 type LinkAction = {
   suggestion_id: string;
-  action: "accepted" | "rejected" | "ignored";
+  action: "accepted" | "rejected" | "removed" | "ignored";
   timestamp: number;       // Unix ms
   article_id: string;
   site_id: string;
@@ -380,8 +391,9 @@ Rozšírené polia (`article_type`, `position_in_text`, `editor_id`, `suggestion
 
 | Event | Kedy |
 | `suggestions_generated` | Po každej validácii (aj 0 návrhov) |
-| `suggestion_accepted` | Redaktor klikol „Pridať link" (aj pri bulk) |
-| `suggestion_rejected` | Redaktor klikol „Odmietnuť" |
+| `link_suggestion_accepted` | „Použiť prelinkovania a zatvoriť" — pre každý zostávajúci návrh |
+| `link_suggestion_rejected` | Redaktor klikol „Nepoužiť" — okamžitý event |
+| `link_suggestion_removed` | Redaktor klikol `×` (Zmazať) — okamžitý event |
 | `suggestion_ignored` | Neinteragované pri publishi / konci session |
 | `suggestions_skipped` | API nedostupné; 0 návrhov z technického dôvodu |
 
@@ -412,9 +424,11 @@ Rozšírené polia (`article_type`, `position_in_text`, `editor_id`, `suggestion
 - Pre každý anchor = 1 najlepší kandidát
 
 **UI:**
-- Každý návrh zobrazuje: anchor, cieľ, kontext vety, badge odstavca
-- „Pridať všetky (N)" aktívne pri N≥2; „Pridať link" pri N=1
-- Každá karta: „Pridať link" + „Odmietnuť"
+- Vstup cez modálne okno; pravý panel obsahuje „Zobraziť návrhy prelinkovania"
+- Každý návrh zobrazuje: anchor (monospace), cieľ, kontext vety
+- Akcie: `×` (Zmazať, vždy viditeľný) + „Nepoužiť" (hover)
+- Commit: „Použiť prelinkovania a zatvoriť" akceptuje zostatok
+- „Generovať znova" resetuje zoznam
 
 **Logging:**
 - Každý event obsahuje: `suggestion_id`, `action`, `timestamp`, `article_id`, `site_id`
@@ -495,7 +509,7 @@ Tento dokument slúži ako **Master Epic**. Pre vývojový tím sa rozpadá na n
 | Sub-task | Tím | Popis |
 | **ST-1: NLP Pipeline** | DataHub (DH) | Implementácia SpaCy `sk_core_news_lg`; lemmatizácia tagu + textu článku; anchor detekcia; sentence boundary extraction pre context snippet |
 | **ST-2: Core API rozšírenie** | Core | Endpoint: `POST /linkbuilding/suggest` - prijme článok, vráti `LinkSuggestion[]`; integrácia s DH NLP pipeline; hard filter + soft filter nad existujúcim tag API |
-| **ST-3: Admin UI** | Admin (CMS) | Sekcia „Tagy & Interné linky" v editore; Krok A - Krok B podmienená logika; karty s anchor / cieľ / kontext vety / `Odst. N` badge; „Pridať link" / „Odmietnuť" / „Pridať všetky (N)" |
+| **ST-3: Admin UI** | Admin (CMS) | Modálne okno s dvomi sekciami (Tagy + Interné prelinkovania); sekcia linkov disabled pred prijatím tagov; riadky s anchor/cieľ/kontext; akcie `×` (Zmazať) + „Nepoužiť" (hover); „Generovať znova"; commit „Použiť prelinkovania a zatvoriť"; pravý panel: tlačidlá „Zobraziť návrhy pre tagy" / „Zobraziť návrhy prelinkovania" |
 | **ST-4: Event Logging** | DataHub / Admin | JSON event schema (`LinkSuggestion`, `LinkAction`); append-only log; JSON export pre QA |
 | **ST-5: Feature Flags** | Core / Infra | `seo_copilot.linkbuilding.enabled`, `seo_copilot.max_links_per_article`, `seo_copilot.linkbuilding.require_step_a` - vypínateľné per tenant bez deployu |
 
@@ -510,6 +524,7 @@ Tento dokument slúži ako **Master Epic**. Pre vývojový tím sa rozpadá na n
 | 1.0 | 2026-04-28 | Daniel Budziňák | Formalizácia do Jira spec; SpaCy bez LLM; Krok A - Krok B; deduplication; bulk UI; DATA GAP DG-L1-DG-L6; edge cases EL1-EL11; JSON schema |
 | 1.1 | 2026-04-29 | Daniel Budziňák | MVP scope rez: cosine similarity - MVP2; Morphodita fallback - MVP2; link density zjednodušené na hard cap; soft filter redukovaný na 2 signály; event schema orezaný na minimálne polia |
 | 1.2 | 2026-04-29 | Daniel Budziňák | Formátovanie: dlhé pomlčky - krátke; odstránené checkboxy; odstránené ``` z user stories; odstránené oddeľovacie riadky tabuliek |
+| 1.3 | 2026-04-29 | Daniel Budziňák | UI refaktor: modálny workflow (namiesto inline panelu); akcie zmenené na `×` Zmazať + „Nepoužiť"; obe sú trvalé v MVP1; pridaný „Generovať znova"; bulk button pattern nahradený commit „Použiť prelinkovania a zatvoriť"; sekcie 3, 5, 6.6, 7, 9, 10, 14 aktualizované |
 
 ---
 
