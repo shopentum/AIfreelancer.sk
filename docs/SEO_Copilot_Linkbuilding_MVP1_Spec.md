@@ -3,7 +3,7 @@
 > **Dokument:** Jira Epic + Story + Design Zámer
 > **Projekt:** SEO Copilot - Linkbuilding (súčasť Article Performance Layer)
 > **Autor:** Daniel Budziňák, Senior Product Manager
-> **Verzia:** 1.3 | Dátum: 2026-04-29
+> **Verzia:** 1.4 | Dátum: 2026-04-30
 > **Status:** Ready for refinement
 > **Súvisí s:** `MDIE_C_Jira_Spec.pdf` (Article Performance Layer), `SEO_Copilot_Tags_MVP1`
 
@@ -194,6 +194,7 @@ Aby sme mohli vyhodnotiť adopciu a dopad na traffic.
 - Eventy sú ukladané ako append-only log
 - JSON export logu je dostupný pre QA a DataHub (viď Sekcia 9)
 - `suggestions_generated` event sa zapíše pri každej validácii (aj keď je 0 návrhov)
+- Pri každom `link_suggestion_accepted` sa zapíše aj `accepted_internal_link_snapshot` (polia podľa Sekcie 9)
 
 ---
 
@@ -392,15 +393,39 @@ Rozšírené polia (`article_type`, `position_in_text`, `editor_id`, `suggestion
 | Event | Kedy |
 | `suggestions_generated` | Po každej validácii (aj 0 návrhov) |
 | `link_suggestion_accepted` | „Použiť prelinkovania a zatvoriť" — pre každý zostávajúci návrh |
+| `accepted_internal_link_snapshot` | Ihneď s každým `link_suggestion_accepted` — normalizovaný stav (anchor, ciele, article, URL) |
 | `link_suggestion_rejected` | Redaktor klikol „Nepoužiť" — okamžitý event |
 | `link_suggestion_removed` | Redaktor klikol `×` (Zmazať) — okamžitý event |
 | `suggestion_ignored` | Neinteragované pri publishi / konci session |
 | `suggestions_skipped` | API nedostupné; 0 návrhov z technického dôvodu |
 
+### Prijatý link - normalizovaný záznam (MVP1 minimum)
+
+Pre SEO kontrolu a DataHub nestačí len event `accepted` / `rejected` / `removed` / `ignored`. Pri každom **priatom** návrhu (rovnaký moment ako `link_suggestion_accepted`) zapíš aj **druhý** riadok do append-only logu: normalizovaný záznam o tom, **čo redaktor akceptoval** (kotva, cieľ, článok). Nenahrádza event, ide o doplnkový snapshot na join cez `suggestion_id`.
+
+```typescript
+type AcceptedInternalLinkSnapshot = {
+  type: "accepted_internal_link_snapshot";
+  suggestion_id: string;      // väzba na `link_suggestion_accepted`
+  article_id: string;
+  source_article_url: string; // kanonická URL zdrojového článku v čase akceptácie
+  anchor_text: string;        // text kotvy pri akceptácii (MVP1 = návrh; po manuálnej úprave v editore doplní CMS ak vie)
+  tag_id: string;             // cieľový tag
+  target_url: string;         // finálna URL cieľa (tag stránka)
+  timestamp: number;          // Unix ms
+  site_id: string;
+};
+```
+
+**MVP1 poznámka:** Presná pozícia v publikovanom HTML (offset, strom DOM) nie je povinná; ak CMS pri akceptácii pozíciu nepozná, stačí uvedené minimum. Rozšírenie polí (napr. `paragraph_index`, `context_hash`) pre kontrolu proti live HTML - MVP2.
+
+**MVP2:** Nad append-only logom **kontrolná vrstva** (validácia voči crawl / publikovanému obsahu, automatické varovania pri rozpore so snapshotom).
+
 ### Technické pravidlá
 
 - Každý návrh má unikátne `suggestion_id` (UUID)
 - Každá interakcia je samostatný event (append-only log)
+- Pri `link_suggestion_accepted` vždy aj záznam `accepted_internal_link_snapshot` (MVP1 minimum)
 - Eventy obsahujú dostatočný kontext na spätnú analýzu
 - MVP1: JSON export pre QA; DataHub napojenie = ďalší krok (`[DATA_GAP DG-L5]`)
 
@@ -432,6 +457,7 @@ Rozšírené polia (`article_type`, `position_in_text`, `editor_id`, `suggestion
 
 **Logging:**
 - Každý event obsahuje: `suggestion_id`, `action`, `timestamp`, `article_id`, `site_id`
+- Pri každom `link_suggestion_accepted` aj `accepted_internal_link_snapshot` (anchor, tag_id, target_url, source_article_url)
 - `suggestions_generated` zalogovaný pri každej validácii
 - `suggestion_ignored` pri neinteragovaných návrhoch
 
@@ -510,7 +536,7 @@ Tento dokument slúži ako **Master Epic**. Pre vývojový tím sa rozpadá na n
 | **ST-1: NLP Pipeline** | DataHub (DH) | Implementácia SpaCy `sk_core_news_lg`; lemmatizácia tagu + textu článku; anchor detekcia; sentence boundary extraction pre context snippet |
 | **ST-2: Core API rozšírenie** | Core | Endpoint: `POST /linkbuilding/suggest` - prijme článok, vráti `LinkSuggestion[]`; integrácia s DH NLP pipeline; hard filter + soft filter nad existujúcim tag API |
 | **ST-3: Admin UI** | Admin (CMS) | Modálne okno s dvomi sekciami (Tagy + Interné prelinkovania); sekcia linkov disabled pred prijatím tagov; riadky s anchor/cieľ/kontext; akcie `×` (Zmazať) + „Nepoužiť" (hover); „Generovať znova"; commit „Použiť prelinkovania a zatvoriť"; pravý panel: tlačidlá „Zobraziť návrhy pre tagy" / „Zobraziť návrhy prelinkovania" |
-| **ST-4: Event Logging** | DataHub / Admin | JSON event schema (`LinkSuggestion`, `LinkAction`); append-only log; JSON export pre QA |
+| **ST-4: Event Logging** | DataHub / Admin | JSON event schema (`LinkSuggestion`, `LinkAction`); append-only log; pri `link_suggestion_accepted` aj `accepted_internal_link_snapshot`; JSON export pre QA |
 | **ST-5: Feature Flags** | Core / Infra | `seo_copilot.linkbuilding.enabled`, `seo_copilot.max_links_per_article`, `seo_copilot.linkbuilding.require_step_a` - vypínateľné per brand bez deployu |
 
 **Poradie implementácie:** ST-1 (DH NLP) - ST-2 (Core API) - ST-3 (Admin UI) - ST-4 (Logging) - ST-5 (Flags)
@@ -525,6 +551,7 @@ Tento dokument slúži ako **Master Epic**. Pre vývojový tím sa rozpadá na n
 | 1.1 | 2026-04-29 | Daniel Budziňák | MVP scope rez: cosine similarity - MVP2; Morphodita fallback - MVP2; link density zjednodušené na hard cap; soft filter redukovaný na 2 signály; event schema orezaný na minimálne polia |
 | 1.2 | 2026-04-29 | Daniel Budziňák | Formátovanie: dlhé pomlčky - krátke; odstránené checkboxy; odstránené ``` z user stories; odstránené oddeľovacie riadky tabuliek |
 | 1.3 | 2026-04-29 | Daniel Budziňák | UI refaktor: modálny workflow (namiesto inline panelu); akcie zmenené na `×` Zmazať + „Nepoužiť"; obe sú trvalé v MVP1; pridaný „Generovať znova"; bulk button pattern nahradený commit „Použiť prelinkovania a zatvoriť"; sekcie 3, 5, 6.6, 7, 9, 10, 14 aktualizované |
+| 1.4 | 2026-04-30 | Daniel Budziňák | Sekcia 9: `accepted_internal_link_snapshot` pre SEO / DataHub; MVP2 kontrolná vrstva; checklist + ST-4 |
 
 ---
 
