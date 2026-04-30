@@ -23,7 +23,7 @@ MVP1 vychádza z existujúceho architektonického návrhu linkbuildingu (Conflue
 
 | # | Gap | Zodpovednosť |
 | DG-L1 | Je SpaCy (`sk_core_news_lg`) alebo iná NLP knižnica v AI service stacku? (súvisí s CMSD1778) | Backend / AI service tím |
-| DG-L2 | Lifecycle stavu `ignored`: kedy presne - pri zatvorení / publishi / konci session? | PM + Backend |
+| DG-L2 | Lifecycle stavu `ignored`: odporúčanie = pri publishi alebo prechode do REVIEW (whichever first); pre články ktoré zostanú v DRAFT — session end fallback (riešenie na dev tíme) | PM + Backend |
 | DG-L3 | Incremental use case: nová validácia prepíše predchádzajúce návrhy alebo diff-uje? | Backend / AI service tím |
 | DG-L4 | ~~Scope pilota~~ - **VYRIEŠENÉ:** plus1deň, 4 týždne | ✅ |
 | DG-L5 | Baseline metriky (CTR interných linkov, priemerný počet linkov/článok) - kto a kedy zachytí? | Analytics / DataHub tím |
