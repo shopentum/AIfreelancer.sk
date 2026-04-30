@@ -1643,20 +1643,32 @@ const EagleCMS_Split: React.FC = () => {
 
                         {/* Akcie — vždy viditeľný × (malý), Nepoužiť len na hover */}
                         <div className="shrink-0 flex items-center gap-1.5 mt-0.5">
-                          <button
-                            onClick={() => handleModalRemoveLink(link.id)}
-                            title="Odstrániť zo zoznamu návrhov. Neovplyvní budúce návrhy."
-                            className="p-1 rounded border border-gray-200 hover:border-red-400 hover:bg-red-50 transition-all"
-                          >
-                            <X size={12} className="text-red-400" />
-                          </button>
-                          <button
-                            onClick={() => handleModalRejectLink(link.id)}
-                            title="Nepoužiť, ak návrh nesedí pre tento článok"
-                            className="opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto flex items-center px-2 py-1 rounded text-[10px] font-medium text-gray-400 hover:text-gray-600 border border-gray-200 hover:border-gray-400 transition-opacity"
-                          >
-                            Nepoužiť
-                          </button>
+                          {/* × Zmazať s okamžitým custom tooltipom */}
+                          <div className="relative group/remove">
+                            <button
+                              onClick={() => handleModalRemoveLink(link.id)}
+                              className="p-1 rounded border border-gray-200 hover:border-red-400 hover:bg-red-50 transition-all"
+                            >
+                              <X size={12} className="text-red-400" />
+                            </button>
+                            <div className="absolute bottom-full right-0 mb-1.5 px-2 py-1 bg-gray-800 text-white text-[10px] rounded whitespace-nowrap opacity-0 group-hover/remove:opacity-100 transition-opacity duration-75 pointer-events-none z-10">
+                              Odstrániť zo zoznamu návrhov
+                              <div className="absolute top-full right-2 border-4 border-transparent border-t-gray-800" />
+                            </div>
+                          </div>
+                          {/* Nepoužiť s okamžitým custom tooltipom */}
+                          <div className="relative group/reject opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-75">
+                            <button
+                              onClick={() => handleModalRejectLink(link.id)}
+                              className="flex items-center px-2 py-1 rounded text-[10px] font-medium text-gray-400 hover:text-gray-600 border border-gray-200 hover:border-gray-400 transition-all"
+                            >
+                              Nepoužiť
+                            </button>
+                            <div className="absolute bottom-full right-0 mb-1.5 px-2 py-1 bg-gray-800 text-white text-[10px] rounded whitespace-nowrap opacity-0 group-hover/reject:opacity-100 transition-opacity duration-75 pointer-events-none z-10">
+                              Nepoužiť, ak návrh nesedí pre tento článok
+                              <div className="absolute top-full right-2 border-4 border-transparent border-t-gray-800" />
+                            </div>
+                          </div>
                         </div>
                       </motion.div>
                     );
