@@ -276,6 +276,7 @@ type LinkActionStatus = 'accepted' | 'rejected' | 'removed' | 'ignored';
 { type: "link_suggestion_accepted",  suggestion_id, article_id, site_id }
 { type: "link_suggestion_rejected",  suggestion_id, article_id, site_id }
 { type: "link_suggestion_removed",   suggestion_id, article_id, site_id }
+{ type: "link_suggestion_ignored",   suggestion_id, article_id, site_id }  // pri publishi
 ```
 
 ---
