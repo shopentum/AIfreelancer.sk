@@ -866,6 +866,14 @@ const EagleCMS_Split: React.FC = () => {
     };
   }, []);
 
+  // Auto-resize textarea podľa obsahu — editor rastie s textom
+  useEffect(() => {
+    const ta = editorRef.current;
+    if (!ta) return;
+    ta.style.height = "auto";
+    ta.style.height = `${ta.scrollHeight}px`;
+  }, [content]);
+
   const handleFixWithAI = async (claim: Claim) => {
     if (collaborationLockDemo) return;
     if (simulateIntelligenceApiFailure) {
@@ -2230,7 +2238,7 @@ const EagleCMS_Split: React.FC = () => {
                     </div>
 
                     {/* Grid: obe vrstvy majú presne rovnakú bunku (žiadne absolute + zlá výška textarea). */}
-                    <div className="relative isolate grid min-h-[22rem] h-[clamp(22rem,55vh,42rem)] shrink-0 grid-cols-1 grid-rows-1 overflow-hidden">
+                    <div className="relative isolate grid min-h-[22rem] shrink-0 grid-cols-1 grid-rows-1">
                       <div className="pointer-events-none col-span-full row-span-full z-0 min-h-0 min-w-0 overflow-hidden">
                         <div
                           className={cn(
@@ -2255,7 +2263,7 @@ const EagleCMS_Split: React.FC = () => {
                         onClick={handleEditorClick}
                         className={cn(
                           EAGLE_EDITOR_TYPO_CLASS,
-                          "col-span-full row-span-full z-10 block size-full min-h-0 resize-none overflow-y-auto border-0 text-[#1f2937] outline-none [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-gray-400 [&::-webkit-scrollbar]:hidden",
+                          "col-span-full row-span-full z-10 block w-full min-h-[22rem] resize-none overflow-hidden border-0 text-[#1f2937] outline-none placeholder:text-gray-400",
                           collaborationLockDemo
                             ? "cursor-not-allowed bg-gray-100/40 text-gray-600"
                             : "bg-transparent",
