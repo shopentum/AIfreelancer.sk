@@ -453,6 +453,8 @@ const EagleCMS_Split: React.FC = () => {
   const [modalRemovedLinkIds, setModalRemovedLinkIds] = useState<Set<string>>(new Set());
   /** Editované label texty tagov v modali */
   const [modalTagLabels, setModalTagLabels] = useState<Map<string, string>>(new Map());
+  /** Tagy trvalo zmazané zo zoznamu v modali (X button) */
+  const [modalDeletedTagIds, setModalDeletedTagIds] = useState<Set<string>>(new Set());
 
   const pushArticleSnapshot = useCallback(() => {
     setArticleHistory((h) => {
@@ -1114,6 +1116,7 @@ const EagleCMS_Split: React.FC = () => {
     setModalPhase('loading_tags');
     setVisibleTagIds(new Set());
     setModalDeselected(new Set());
+    setModalDeletedTagIds(new Set());
     setModalVisibleLinkIds(new Set());
     setModalRejectedLinkIds(new Set());
     setModalRemovedLinkIds(new Set());
@@ -1133,6 +1136,12 @@ const EagleCMS_Split: React.FC = () => {
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
+  }, []);
+
+  /** X — trvalé zmazanie tagu zo zoznamu v modali */
+  const handleModalDeleteTag = useCallback((id: string) => {
+    setModalDeletedTagIds((prev) => new Set([...prev, id]));
+    setModalDeselected((prev) => new Set([...prev, id]));
   }, []);
 
   /** Krok A commit → odomkne Krok B */
@@ -1459,7 +1468,7 @@ const EagleCMS_Split: React.FC = () => {
             initial={{ scale: 0.96, y: 12 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.96, y: 12 }}
-            className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden my-8"
+            className="relative w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden my-8"
           >
             {/* Modal header */}
             <div className="flex items-center justify-between px-7 py-5 border-b border-gray-100">
@@ -1520,8 +1529,10 @@ const EagleCMS_Split: React.FC = () => {
                     <div key={cat}>
                       <h4 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-3">{cat}</h4>
                       <div className="space-y-2">
-                        {catTags.length === 0 && <div className="text-[11px] text-gray-300 italic">—</div>}
-                        {catTags.map((tag) => {
+                        {catTags.filter(t => !modalDeletedTagIds.has(t.id)).length === 0 && (
+                          <div className="text-[11px] text-gray-300 italic">-</div>
+                        )}
+                        {catTags.filter(t => !modalDeletedTagIds.has(t.id)).map((tag) => {
                           const visible = visibleTagIds.has(tag.id);
                           const selected = !modalDeselected.has(tag.id);
                           const currentLabel = modalTagLabels.get(tag.id) ?? tag.label;
@@ -1530,9 +1541,10 @@ const EagleCMS_Split: React.FC = () => {
                               key={tag.id}
                               initial={{ opacity: 0, y: 6 }}
                               animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }}
+                              exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
                               transition={{ duration: 0.25 }}
                               className={cn(
-                                "flex items-center gap-2 px-2 py-1.5 rounded-lg border transition-all",
+                                "group flex items-center gap-2 px-2 py-1.5 rounded-lg border transition-all",
                                 kroKBPhase
                                   ? selected ? "border-green-200 bg-green-50" : "border-gray-100 bg-gray-50 opacity-50"
                                   : selected ? "border-[#3182CE]/40 bg-[#EBF4FF]" : "border-gray-200 bg-white"
@@ -1564,6 +1576,15 @@ const EagleCMS_Split: React.FC = () => {
                                   !selected || kroKBPhase ? "text-gray-400 cursor-default" : "text-[#2C5282] font-medium"
                                 )}
                               />
+                              {!kroKBPhase && (
+                                <button
+                                  onClick={() => handleModalDeleteTag(tag.id)}
+                                  title="Odstrániť tag"
+                                  className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-red-50"
+                                >
+                                  <X size={10} className="text-gray-300 hover:text-red-400 transition-colors" />
+                                </button>
+                              )}
                             </motion.div>
                           );
                         })}
@@ -2569,8 +2590,9 @@ const EagleCMS_Split: React.FC = () => {
                         <div className="p-5 space-y-4">
                           {/* Generovať tagy + prelinkovania tlačidlo */}
                           <div className="flex flex-col gap-2">
-                            <p className="text-[11px] text-gray-400 leading-snug">
-                              Tagy a prelinkovania obsahu zlepšujú výkon článku vo vyhľadávačoch aj na webe — nechajte AI urobiť prvý návrh za vás.
+                            <p className="flex items-start gap-1.5 text-[11px] text-gray-400 leading-snug">
+                              <Info size={12} className="shrink-0 mt-0.5 text-gray-300" />
+                              Pomôžte článku dosiahnuť lepšie čísla. Systém vygeneroval sadu kvalitných tagov a linkov pre váš text. Prejdite si ich a zvýšte úspech svojej témy za menej ako minútu.
                             </p>
                             {!tagsCommitted && (
                               <button
