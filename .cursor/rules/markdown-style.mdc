@@ -1,0 +1,31 @@
+---
+description: Pravidlá písania Markdown dokumentácie v tomto projekte
+globs: **/*.md
+alwaysApply: false
+---
+
+# Markdown štýl
+
+## Pomlčky
+
+Používaj vždy krátku pomlčku `-`, nikdy dlhú pomlčku `—` (em dash) ani strednú `–` (en dash).
+
+❌ `Redaktor rozhoduje — systém loguje`
+✅ `Redaktor rozhoduje - systém loguje`
+
+## Tabuľky
+
+Bez oddeľovacích riadkov (`|---|---|`). Riadky tabuľky začínajú priamo hodnotami.
+
+❌
+```
+| Stav | Trigger |
+|------|---------|
+| accepted | klik |
+```
+
+✅
+```
+| Stav | Trigger |
+| accepted | klik |
+```
