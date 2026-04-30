@@ -1653,7 +1653,7 @@ const EagleCMS_Split: React.FC = () => {
                           <button
                             onClick={() => handleModalRejectLink(link.id)}
                             title="Nepoužiť, ak návrh nesedí pre tento článok"
-                            className="hidden group-hover:flex items-center px-2 py-1 rounded text-[10px] font-medium text-gray-400 hover:text-gray-600 border border-gray-200 hover:border-gray-400 transition-all"
+                            className="opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto flex items-center px-2 py-1 rounded text-[10px] font-medium text-gray-400 hover:text-gray-600 border border-gray-200 hover:border-gray-400 transition-opacity"
                           >
                             Nepoužiť
                           </button>
