@@ -1,21 +1,18 @@
-# CMS Copilot – Q&A Layer
+# CMS Copilot - Q&A Layer
 
-**Analýza, vyhodnotenie a smerovanie (Post-MVP)**
-
-**Status:** Návrh na zdieľanie s tímom (review)  
-**Súvisí s:** EAGLE CMS 2026-2027 – Inteligentný Copilot redakcie, Article Performance Layer
+**Analýza a smerovanie (nie roadmapa)**  
+**Status:** materiál na diskusiu s tímom  
+**Súvisí s:** EAGLE CMS 2026-2027 - Inteligentný Copilot redakcie, Article Performance Layer
 
 ---
 
-## Kontext
+## Účel dokumentu
 
-Q&A modul v aktuálnom stave predstavuje AI funkciu na generovanie obsahu v editore článku.
+Tento text je **rozbor a rámec rozhodnutí**, nie záväzný plán dodávky. Slúži na:
 
-**Ciele tohto dokumentu:**
-
-- posunúť vnímanie Q&A z „AI nástroja“ na **Decision Copilot** modul
-- definovať minimálne **dátové základy** (JSON layer)
-- ukázať **strategické smerovanie** v súlade s EAGLE CMS 2026-2027 – Inteligentný Copilot redakcie
+- zosúladiť vnímanie Q&A (z „AI generátora“ na **Copilot s rozhodnutiami a dátami**)
+- oddeliť **čo má zmysel urobiť hneď** a **čo je ďalší obmedzený krok (MVP2)** od **dlhodobého smeru bez termínov**
+- ukázať minimálne **dátové základy** a riziká, aby sa modul neuzavrel ako „feature bez dopadu“
 
 ---
 
@@ -25,22 +22,19 @@ Q&A modul v aktuálnom stave predstavuje AI funkciu na generovanie obsahu v edit
 
 - AI generuje Q&A
 - redaktor upravuje / akceptuje / zahodí
-- systém nemá spätnú väzbu (logging / metriky)
+- chýba **systematická spätná väzba** (logging, metriky)
 
-### Cieľový stav
+### Kam smerujeme (kontextovo)
 
-- Q&A modul ako súčasť **Article Performance Layer**
-- AI návrh → redaktor interakcia → **logging** → vyhodnotenie → odporúčanie
+- Q&A ako súčasť **Article Performance Layer**: návrh → interakcia redaktora → **záznam správania** → neskôr vyhodnotenie a odporúčania
 
-**Posun:** z generovania obsahu na **rozhodovanie nad obsahom**.
+**Idea posunu:** nie len generovať text, ale **rozhodovať nad obsahom** a vedieť to **merať**.
 
 ---
 
-## 2. JSON Layer (kľúčový základ)
+## 2. Dátový základ - JSON #1 (Editorial Behavior)
 
-### 2.1 JSON #1 – Editorial Behavior Layer (MVP+)
-
-**Účel:** Zachytiť správanie redaktora a kvalitu AI výstupu.
+**Účel:** Zachytiť správanie redaktora a kvalitu AI výstupu. Bez toho sú závery o adopcii a kvalite pocitové.
 
 ```json
 {
@@ -59,13 +53,13 @@ Q&A modul v aktuálnom stave predstavuje AI funkciu na generovanie obsahu v edit
 }
 ```
 
-**Hodnota:** prvý reálny insight do adopcie AI, kvality výstupu a správania redakcie. Táto vrstva predstavuje **Data Acquisition Layer**.
+**Význam:** prvý **Data Acquisition** krok pre Q&A (a rovnaký prístup sa hodí aj ostatným Copilot modulom v editore).
 
 ---
 
-### 2.2 JSON #2 – Performance & Decision Layer (Post-MVP)
+## 3. Koncept JSON #2 (Decision / Performance - referenčný)
 
-**Účel:** Vyhodnotiť dopad Q&A na výkon článku a umožniť rozhodovanie.
+**Účel:** Neskôr prepojiť editorial udalosti s výkonom článku a s odporúčaniami. Tu ide o **architektonickú predstavu**, nie o záväzok implementácie v jednej vlne.
 
 ```json
 {
@@ -82,115 +76,106 @@ Q&A modul v aktuálnom stave predstavuje AI funkciu na generovanie obsahu v edit
 }
 ```
 
-**Hodnota:** prepája editorial behavior, user behavior a business impact. Táto vrstva predstavuje **Decision Intelligence Layer**.
+**Poznámka:** Zoznam vrstiev ilustruje **smer** (Decision Intelligence), nie povinný rozsah jedného projektu. Rozdeľovanie na menšie releasy je na refinemente.
 
 ---
 
-## 3. Analýza hodnoty
+## 4. Analýza hodnoty (časová logika)
 
-### 3.1 Krátkodobá hodnota (MVP+)
+### Krátkodobo (bez JSON #1)
 
-- získanie dát: acceptance rate, edit distance, usage
-- **Bez tohto:** optimalizácia je len pocitová
+- nedá sa rozumne optimalizovať trigger ani kvalita modelu
+- acceptance rate sám o sebe môže klamať (viď riziká)
 
-### 3.2 Strednodobá hodnota
+### Strednodobo (s dátami + jedným jasným produktovým rezaním)
 
-- optimalizácia triggerov, kvality výstupu a adopcie
+- úprava triggerov a textov na základe správania redakcie
+- **jeden** dobre ohraničený cross-modulový flow v editore namiesto desiatich paralelných iniciatív
 
-### 3.3 Dlhodobá hodnota
+### Dlhodobo (autonomný smer)
 
-- Copilot **odporúča akciu**, nečaká len na input redaktora
-
----
-
-## 4. Kľúčový posun
-
-| FROM | TO |
-| AI generuje obsah | AI odporúča rozhodnutia |
+- Copilot aktívnejšie **navrhuje** ďalší krok (nie len čaká na klik)
+- vyžaduje DataHub, performance signály a produktové pravidlá - mimo rámca „malého“ Q&A modulu samého o sebe
 
 ---
 
-## 5. Architektonický kontext
+## 5. Kľúčový posun (myšlienka)
 
-Q&A modul kopíruje rovnaký **pattern vrstiev** ako ostatné Copilot moduly:
+| Dnes typicky | Cieľová logika |
+| AI generuje obsah | AI + editor generujú **rozhodnutia, ktoré vieme zmerať** |
+
+---
+
+## 6. Architektonický pattern (zdieľaný s inými modulmi)
 
 | Vrstva | Význam |
 | Generation | AI výstup |
 | Interaction | redaktor |
 | Feedback | logging |
-| Evaluation | analýza |
-| Decision | odporúčanie |
+| Evaluation | analýza (najprv nad JSON #1) |
+| Decision | odporúčanie (neskôr; závisí od dát) |
 
-**Kompatibilita:** DataHub (eventy), SEO Copilot logika, časť Article Performance Layer.
+Zhoda s DataHub eventmi, SEO Copilot / tag logikou: **jeden typ „navrhni → vyber → zaloguj“** namiesto izolovaných widgetov.
 
 ---
 
-## 6. Riziká
+## 7. Riziká
 
 | ID | Rizikum | Poznámka |
-| R1 | Feature bez dopadu | bez napojenia na performance |
-| R2 | Noise generator | príliš jednoduchý trigger (napr. 1500 znakov) |
-| R3 | Nesprávne metriky | acceptance rate sám o sebe ≠ kvalita; doplniť **edit distance** |
-| R4 | Bez učenia | bez feedback loopu AI stagnuje |
+| R1 | Feature bez dopadu | bez neskoršieho performance kontextu ťažko ukázať biznis efekt; prvý krok sú aspoň editorial metriky |
+| R2 | Noise generator | príliš jednoduchý trigger (napr. len dĺžka textu) môže generovať zbytočné návrhy |
+| R3 | Zlé čítanie kvality | samotný acceptance rate ≠ kvalita; **edit distance** a podobné signály pomáhajú |
+| R4 | Žiadny uzavretý okruh | bez metrík a občasnej revízie triggerov / promptov sa zlepšovanie zastaví |
 
 ---
 
-## 7. DATA GAP
+## 8. DATA GAP
 
 | ID | Gap |
-| DG1 – Baseline | chýba porovnanie „bez Q&A“ |
-| DG2 – Performance napojenie | chýba: ATS, CTR, scroll (alebo ekvivalent podľa zdroja dát) |
-| DG3 – Typológia článkov | chýba klasifikácia obsahu pre segmentáciu výkonu |
+| DG1 - Baseline | porovnanie scenára bez Q&A |
+| DG2 - Performance | ATS, CTR, scroll (alebo ekvivalent podľa zdroja dát) |
+| DG3 - Typológia článkov | klasifikácia pre segmentáciu výkonu |
+
+Tieto body **neblokujú** začatie JSON #1; obmedzujú až **interpretáciu „čo to urobilo s článkom navonok“**.
 
 ---
 
-## 8. Cross-module prepojenie
+## 9. Cross-module prepojenia (kontext)
 
-- **SEO Copilot:** Q&A → kontext / entity → interné linky
-- **Tags:** Q&A → entity → tagy
-- **Performance Layer:** Q&A → engagement → rozhodovanie
+- **Tags:** entity a článok ako vstup do označovania a ďalšej práce v editore
+- **SEO Copilot / linkbuilding:** kontext článku a tagov pre interné linky
+- **Performance layer:** neskôr - väzba na správanie čitateľa
 
-**Výsledok:** jednotná AI vrstva nad obsahom (nie izolovaný widget).
-
----
-
-## 9. Priority (Suggestion Hub)
-
-1. **MUST:** implementovať JSON #1 (logging)
-2. **HIGH IMPACT:** zaviesť **edit distance** ako core metriku
-3. **STRATEGICKÉ:** posun smerom k proactive copy typu **„Odporúčame pridať Q&A“** (nie len tlačidlo „Vygenerovať“)
+**Konštatovanie:** zmysluplnejší **jeden vertikál** (tagy → linky) pre QA a redakciu než paralelné rozširovanie Q&A o celú „decision“ architektúru v jednom kroku.
 
 ---
 
-## 10. Strategické smerovanie
+## 10. Jasné kroky (čo z tohto dokumentu brať ako návrh akcií)
 
-V súlade s:
+### Krok A - Teraz: JSON #1
 
-- proactive copiloting
-- data-driven rozhodovanie
-- AI-native CMS
+- zaviesť **append-only** logovanie udalostí Q&A (`qa_*`) a minimálne metriky (**acceptance**, **edit distance** kde technicky možné, **usage**)
+- bez tohto kroku nie je analýza v dokumente konzistentná s realitou produktu
 
-(viď dokumentáciu **EAGLE CMS 2026-2027 – Inteligentný Copilot redakcie**)
+### Krok B - MVP2 (navrhovaný obrys, na refine)
 
-**Cieľový stav:** CMS neponúka len nástroje - CMS **navrhuje rozhodnutia**.
+- **produktovo zamerať MVP2** na **prepojenie Tags + Linkbuilding** v editore (jeden priebeh, zdieľané vzory UI a logovania s existujúcimi špecifikáciami)
+- Q&A v tej vlne **nepretŕhať** na plnú „Decision Layer“ - nech zostane s JSON #1 a prípadnými drobnými úpravami copy / triggeru podľa vzniknutých dát
 
----
+### Autonomný smer (bez záväzku backlogu)
 
-## 11. Finálny insight
-
-Q&A nie je izolovaný **feature** - je to **prvý krok k Decision Intelligence CMS** v rámci redakčného workflow.
+- JSON #2 a prvky typu **recommendation engine**, **trigger_engine_v2**, plné **performance** prepojenie: držať ako **smer uchovania architektúry**, rozhodovať po MVP2 a po dátach z JSON #1 (a z tag/link flow)
 
 ---
 
-## Záver
+## 11. Zhrnutie pre rozhodnutie
 
-- **JSON #1** = základ (bez neho sa neposunieme v optimalizácii ani v dôvere dát)
-- **JSON #2** = smer (bez neho hrozí rozptyl bez jasného „prečo“ v produktových rozhodnutiach)
-
-**Spolu** vytvárajú základ Copilot architektúry a prepájajú editor → dáta → výkon → rozhodovanie.
+- **JSON #1** je predpoklad, aby Q&A (a podobné moduly) neboli „hluché“ k redaktorovi a kvalite výstupu
+- **MVP2** má väčší zmysel ako **Tags + Linkbuilding** než nafúknutie Q&A o celú decision architektúru
+- **Zvyšok** textu (JSON #2, proactive Copilot, plná performance vrstva) je **autonomný smer** - na ďalšie epicy a refine, nie ako jeden monoblok pre QA
 
 ---
 
-## Ďalší krok (voliteľné)
+## Voliteľne
 
-- prepis do **Jira Epic + Stories** (ready na refinement)
+- po zosúladení s tímom: samostatný **Jira Epic** len pre JSON #1; MVP2 už podľa link/tags špecifikácie, nie podľa tohto dokumentu ako „mega roadmapy“
