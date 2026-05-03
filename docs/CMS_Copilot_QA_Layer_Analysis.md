@@ -48,10 +48,13 @@ Tento text je **rozbor a rámec rozhodnutí**, nie záväzný plán dodávky. Sl
   "core_metrics": [
     "acceptance_rate",
     "edit_distance",
-    "generation_rate"
+    "generation_rate",
+    "time_to_accept"
   ]
 }
 ```
+
+**Implementovateľnosť:** JSON #1 je zámerne navrhnutý tak, aby ho bolo možné **dodať len z editora a logu udalostí** - **bez závislosti na DataHub** a bez performance dát (CTR, scroll a pod.). Všetko v `core_metrics` musí ísť odvodiť z časových razítok eventov a z diffu textu v rámci CMS.
 
 **Význam:** prvý **Data Acquisition** krok pre Q&A (a rovnaký prístup sa hodí aj ostatným Copilot modulom v editore).
 
@@ -154,7 +157,7 @@ Tieto body **neblokujú** začatie JSON #1; obmedzujú až **interpretáciu „�
 
 ### Krok A - Teraz: JSON #1
 
-- zaviesť **append-only** logovanie udalostí Q&A (`qa_*`) a minimálne metriky (**acceptance**, **edit distance** kde technicky možné, **usage**)
+- zaviesť **append-only** logovanie udalostí Q&A (`qa_*`) a minimálne metriky (**acceptance**, **edit distance** kde technicky možné, **time_to_accept**, **usage**), všetko odvoditeľné v CMS bez DataHub / performance
 - bez tohto kroku nie je analýza v dokumente konzistentná s realitou produktu
 
 ### Krok B - MVP2 (navrhovaný obrys, na refine)
