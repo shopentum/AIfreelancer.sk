@@ -18,6 +18,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const IMG = {
+  zaklady: "/img/proficrafts_fundamente.webp",
+  elektrika: "/img/proficrafts_elektrik.webp",
+  omietka: "/img/proficrafts_putz.webp",
+  sadrokarton: "/img/proficrafts_trockenbau.webp",
+} as const;
+
 const Logo = ({
   uppercase = false,
   className = "",
@@ -67,38 +74,52 @@ const ServiceCard = ({
   title,
   description,
   specialties,
+  imageSrc,
 }: {
   icon: LucideIcon;
   title: string;
   description: string;
   specialties?: string[];
+  imageSrc: string;
 }) => (
   <motion.div
     whileHover={{ y: -8 }}
-    className="group rounded-3xl border border-white/5 bg-white p-8 shadow-2xl transition-all hover:shadow-red-500/10"
+    className="group overflow-hidden rounded-3xl border border-white/5 bg-white shadow-2xl transition-all hover:shadow-red-500/10"
   >
-    <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 transition-colors group-hover:bg-red-500">
-      <Icon
-        className="text-red-500 transition-colors group-hover:text-white"
-        size={28}
+    <div className="relative aspect-[4/3] w-full">
+      <Image
+        src={imageSrc}
+        alt={`${title} — ilustračná fotografia služby`}
+        fill
+        className="object-cover transition-transform duration-500 group-hover:scale-105"
+        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
       />
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/55 via-transparent to-transparent" />
     </div>
-    <h3 className="mb-3 text-xl font-black tracking-tight text-slate-900 uppercase">
-      {title}
-    </h3>
-    <p className="mb-6 text-sm leading-relaxed text-slate-500">{description}</p>
-    {specialties ? (
-      <div className="flex flex-wrap gap-2">
-        {specialties.map((item, id) => (
-          <span
-            key={id}
-            className="rounded-full bg-slate-50 px-3 py-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase"
-          >
-            {item}
-          </span>
-        ))}
+    <div className="p-8 pt-7">
+      <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 transition-colors group-hover:bg-red-500">
+        <Icon
+          className="text-red-500 transition-colors group-hover:text-white"
+          size={28}
+        />
       </div>
-    ) : null}
+      <h3 className="mb-3 text-xl font-black tracking-tight text-slate-900 uppercase">
+        {title}
+      </h3>
+      <p className="mb-6 text-sm leading-relaxed text-slate-500">{description}</p>
+      {specialties ? (
+        <div className="flex flex-wrap gap-2">
+          {specialties.map((item, id) => (
+            <span
+              key={id}
+              className="rounded-full bg-slate-50 px-3 py-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase"
+            >
+              {item}
+            </span>
+          ))}
+        </div>
+      ) : null}
+    </div>
   </motion.div>
 );
 
@@ -280,24 +301,28 @@ export default function ProfiCraftsWeb() {
             <ServiceCard
               icon={Zap}
               title="Elektrikári"
+              imageSrc={IMG.elektrika}
               description="Priemyselné inštalácie, rozvodové skrine a revízne správy podľa VDE noriem."
               specialties={["Priemysel", "VDE Normy", "Revízie"]}
             />
             <ServiceCard
               icon={Layers}
               title="SDK Práce"
+              imageSrc={IMG.sadrokarton}
               description="Sadrokartónové systémy pre moderné kancelárie a rezidenčné haly v najvyššom štandarde."
               specialties={["Priečky", "Podhľady", "Akustika"]}
             />
             <ServiceCard
               icon={Construction}
               title="Hrubé stavby"
+              imageSrc={IMG.zaklady}
               description="Koordinácia a realizácia základových dosiek, murovacích prác a hrubých konštrukcií."
               specialties={["Betonáž", "Murivo", "Základy"]}
             />
             <ServiceCard
               icon={Hammer}
               title="Dokončovacie práce"
+              imageSrc={IMG.omietka}
               description="Precízne omietky, obklady a dlažby, ktoré dodávajú stavbe finálny vizuálny charakter."
               specialties={["Obklady", "Omietky", "Sanita"]}
             />
