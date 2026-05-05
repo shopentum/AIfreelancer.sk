@@ -123,13 +123,14 @@ const Hero = () => (
         transition={{ duration: 1.5, delay: 0.2 }}
         className="relative flex justify-center md:justify-end"
       >
-        <div className="relative w-[320px] h-[320px] md:w-[450px] md:h-[450px]">
-          <div className="absolute inset-0 rounded-full border border-beige/20 animate-pulse"></div>
-          <div className="absolute inset-4 rounded-full overflow-hidden border-[1px] border-white/10 shadow-2xl">
-            <img 
-              src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800" 
-              alt="Simona Hryzáková" 
-              className="w-full h-full object-cover grayscale-[30%] hover:grayscale-0 transition-all duration-1000"
+        <div className="relative w-[320px] h-[430px] md:w-[420px] md:h-[560px]">
+          <div className="absolute -inset-4 rounded-[2.5rem] bg-beige/10 blur-3xl"></div>
+          <div className="absolute inset-0 rounded-[2.2rem] border border-beige/25"></div>
+          <div className="absolute inset-[14px] rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl">
+            <img
+              src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=900"
+              alt="Simona Hryzáková"
+              className="w-full h-full object-cover grayscale-[20%] hover:grayscale-0 hover:scale-[1.02] transition-all duration-1000"
               referrerPolicy="no-referrer"
             />
           </div>
