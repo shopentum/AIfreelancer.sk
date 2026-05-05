@@ -1,13 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import ProfiCraftsWeb from "@/components/proficrafts/ProfiCraftsWeb";
-
-export const metadata: Metadata = {
-  title: "ProfiCrafts.eu — remeselná síla pre váš projekt",
-  description:
-    "Kvalifikovaní odborníci pre priemyselné a rezidenčné stavby: elektrina, SDK, hrubá stavba, dokončovacie práce.",
-};
 
 const inter = Inter({
   subsets: ["latin"],
@@ -19,6 +13,20 @@ const spaceGrotesk = Space_Grotesk({
   variable: "--font-proficrafts-space",
 });
 
+export async function generateMetadata({
+  params,
+}: Readonly<{
+  params: Promise<{ locale: string }>;
+}>): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "ProfiCrafts" });
+
+  return {
+    title: t("meta.title"),
+    description: t("meta.description"),
+  };
+}
+
 export default async function ProfiCraftsPage({
   params,
 }: Readonly<{
@@ -29,7 +37,7 @@ export default async function ProfiCraftsPage({
 
   return (
     <div className={`${inter.variable} ${spaceGrotesk.variable}`}>
-      <ProfiCraftsWeb locale={locale} />
+      <ProfiCraftsWeb />
     </div>
   );
 }

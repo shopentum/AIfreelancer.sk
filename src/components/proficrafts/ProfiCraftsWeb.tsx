@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
 
 const PROFICRAFTS_PATH = "/proficrafts";
 
@@ -42,7 +43,11 @@ function LocaleFlagPhoto({ iso }: { iso: string }) {
   );
 }
 
-function ProfiCraftsLocaleSwitch({ locale }: { locale: string }) {
+function ProfiCraftsLocaleSwitch() {
+  const locale = useLocale();
+  const tNav = useTranslations("ProfiCrafts.nav");
+  const tLang = useTranslations("ProfiCrafts.lang");
+
   const chip = (active: boolean, extra?: string) =>
     cn(
       "inline-flex shrink-0 items-center gap-1 rounded border px-2 py-[3px] text-[10px] font-black tracking-wide text-slate-700 uppercase",
@@ -55,18 +60,14 @@ function ProfiCraftsLocaleSwitch({ locale }: { locale: string }) {
     );
 
   return (
-    <div
-      className="flex items-center gap-1.5"
-      role="group"
-      aria-label="Volba jazyka stránky ProfiCrafts"
-    >
+    <div className="flex items-center gap-1.5" role="group" aria-label={tNav("langAria")}>
       <Link
         href={PROFICRAFTS_PATH}
         locale="de"
         prefetch={false}
         className={cn(chip(locale === "de"), "no-underline")}
-        aria-label="Deutsch"
-        title="Deutsch"
+        aria-label={tLang("de")}
+        title={tLang("de")}
       >
         <LocaleFlagPhoto iso="de" />
         <span className="md:hidden">DE</span>
@@ -76,8 +77,8 @@ function ProfiCraftsLocaleSwitch({ locale }: { locale: string }) {
         locale="en"
         prefetch={false}
         className={cn(chip(locale === "en"), "no-underline")}
-        aria-label="English (UK)"
-        title="English"
+        aria-label={tLang("enAria")}
+        title={tLang("en")}
       >
         <LocaleFlagPhoto iso="gb" />
         <span className="md:hidden">EN</span>
@@ -87,8 +88,8 @@ function ProfiCraftsLocaleSwitch({ locale }: { locale: string }) {
         locale="sk"
         prefetch={false}
         className={cn(chip(locale === "sk"), "no-underline")}
-        aria-label="Slovenčina"
-        title="Slovenčina"
+        aria-label={tLang("sk")}
+        title={tLang("sk")}
       >
         <LocaleFlagPhoto iso="sk" />
         <span className="md:hidden">SK</span>
@@ -109,12 +110,27 @@ const IMG_ABOUT = {
   putz: "/img/proficrafts_putz_detail.webp",
 } as const;
 
+type ServiceKey = "electricians" | "drywall" | "shell" | "finishing";
+
+const SERVICE_ROWS: readonly {
+  key: ServiceKey;
+  icon: LucideIcon;
+  imageSrc: string;
+}[] = [
+  { key: "electricians", icon: Zap, imageSrc: IMG.elektrika },
+  { key: "drywall", icon: Layers, imageSrc: IMG.sadrokarton },
+  { key: "shell", icon: Construction, imageSrc: IMG.zaklady },
+  { key: "finishing", icon: Hammer, imageSrc: IMG.omietka },
+];
+
 const Logo = ({
   uppercase = false,
   className = "",
+  tagline,
 }: {
   uppercase?: boolean;
   className?: string;
+  tagline: string;
 }) => {
   const grayColor = "#64748b";
 
@@ -146,7 +162,7 @@ const Logo = ({
           className="text-center text-[0.22em] font-bold tracking-[0.4em] whitespace-nowrap uppercase"
           style={{ color: grayColor, marginRight: "-0.4em" }}
         >
-          Partner for your project
+          {tagline}
         </p>
       </div>
     </div>
@@ -159,12 +175,14 @@ const ServiceCard = ({
   description,
   specialties,
   imageSrc,
+  imageAlt,
 }: {
   icon: LucideIcon;
   title: string;
   description: string;
   specialties?: string[];
   imageSrc: string;
+  imageAlt: string;
 }) => (
   <motion.div
     whileHover={{ y: -8 }}
@@ -173,7 +191,7 @@ const ServiceCard = ({
     <div className="relative aspect-[4/3] w-full">
       <Image
         src={imageSrc}
-        alt={`${title} — ilustračná fotografia služby`}
+        alt={imageAlt}
         fill
         className="object-cover transition-transform duration-500 group-hover:scale-105"
         sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
@@ -214,6 +232,7 @@ const workerPanelTransition = {
 
 function WorkerForm() {
   const [isOpen, setIsOpen] = React.useState(false);
+  const t = useTranslations("ProfiCrafts.workerForm");
 
   return (
     <div className="w-full">
@@ -222,7 +241,7 @@ function WorkerForm() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex w-full items-center justify-center space-x-3 rounded-2xl bg-red-600 py-5 text-[12px] font-black tracking-[0.2em] text-white uppercase shadow-xl transition-all hover:bg-red-700"
       >
-        <span>Chcem sa zaregistrovať</span>
+        <span>{t("toggle")}</span>
         <ChevronRight
           className={cn(
             "transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
@@ -245,19 +264,19 @@ function WorkerForm() {
             <div className="mt-6 space-y-4 rounded-2xl bg-slate-800/50 p-6">
               <input
                 type="text"
-                placeholder="Vaša profesia (napr. Elektrikár)"
+                placeholder={t("professionPh")}
                 className="w-full rounded-xl border-none bg-slate-900/50 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-1 focus:ring-red-500 outline-none"
               />
               <input
                 type="tel"
-                placeholder="Telefónne číslo"
+                placeholder={t("phonePh")}
                 className="w-full rounded-xl border-none bg-slate-900/50 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-1 focus:ring-red-500 outline-none"
               />
               <button
                 type="button"
                 className="w-full rounded-xl bg-white/10 py-3 text-[10px] font-black tracking-widest text-white uppercase transition-all hover:bg-white/20"
               >
-                Odoslať kontakt
+                {t("submit")}
               </button>
             </div>
           </motion.div>
@@ -267,34 +286,45 @@ function WorkerForm() {
   );
 }
 
-export default function ProfiCraftsWeb({ locale }: Readonly<{ locale: string }>) {
+export default function ProfiCraftsWeb() {
+  const t = useTranslations("ProfiCrafts");
+  const tc = useTranslations("ProfiCrafts.contact");
+  const tf = useTranslations("ProfiCrafts.footer");
+  const serviceOptions = (t.raw("contact.serviceOptions") as string[]) ?? [];
+
+  const NAV = [
+    { hash: "sluzby", label: t("nav.services") },
+    { hash: "o-nas", label: t("nav.about") },
+    { hash: "kontakt", label: t("nav.contact") },
+  ];
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-white font-sans text-slate-900 [font-family:var(--font-proficrafts-inter),sans-serif]">
       <nav className="fixed top-0 z-[100] flex h-20 w-full items-center border-b border-slate-100 bg-white/90 px-6 backdrop-blur-xl md:px-12">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3">
           <div className="min-w-0 text-[20px] md:text-[24px]">
-            <Logo />
+            <Logo tagline={t("logoTagline")} />
           </div>
           <div className="flex shrink-0 items-center gap-4 md:gap-10">
-            <ProfiCraftsLocaleSwitch locale={locale} />
+            <ProfiCraftsLocaleSwitch />
             <div className="hidden items-center space-x-10 md:flex">
-              {["Služby", "O nás", "Kontakt"].map((item) => (
+              {NAV.map(({ hash, label }) => (
                 <a
-                  key={item}
-                  href={`#${item.toLowerCase()}`}
+                  key={hash}
+                  href={`#${hash}`}
                   className="text-[12px] font-bold tracking-[0.15em] text-slate-900/60 uppercase transition-colors hover:text-red-600"
                   style={{
                     fontFamily: "var(--font-proficrafts-space), sans-serif",
                   }}
                 >
-                  {item}
+                  {label}
                 </a>
               ))}
               <a
                 href="#kontakt"
                 className="rounded-xl bg-[#111827] px-6 py-3 text-[11px] font-black tracking-[0.2em] text-white uppercase shadow-lg shadow-black/10 transition-all hover:bg-red-600"
               >
-                Nezáväzný dopyt
+                {t("nav.ctaInquiry")}
               </a>
             </div>
           </div>
@@ -313,36 +343,34 @@ export default function ProfiCraftsWeb({ locale }: Readonly<{ locale: string }>)
             <div className="mx-auto inline-flex items-center space-x-3 rounded-full bg-red-50 px-5 py-2 text-red-600">
               <ShieldCheck size={14} />
               <span className="text-[10px] font-black tracking-[0.3em] uppercase">
-                Overení špecialisti pre EU trh
+                {t("hero.badge")}
               </span>
             </div>
             <h1 className="text-5xl font-black tracking-tighter text-slate-900 uppercase leading-[0.9] md:text-8xl">
-              Projekty v rukách <br />
+              {t("hero.titleLine1")} <br />
               <span className="block text-[2.25rem] leading-[0.92] text-red-600 sm:text-5xl md:text-8xl">
-                profesionálov.
+                {t("hero.titleLine2")}
               </span>
             </h1>
             <p className="mx-auto max-w-2xl text-lg leading-relaxed font-medium text-slate-500 md:text-2xl">
-              ProfiCrafts.eu zabezpečuje kvalifikovaných odborníkov pre
-              priemyselné a rezidenčné stavby. Od elektriny až po finálne
-              detaily v interiéri.
+              {t("hero.lead")}
             </p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <a
                 href="#kontakt"
                 className="group flex w-full items-center justify-center space-x-3 rounded-2xl bg-[#111827] px-10 py-6 text-[12px] font-black tracking-[0.2em] text-white uppercase shadow-2xl transition-all hover:bg-red-600 sm:w-auto"
               >
-                <span>Naplánovať konzultáciu</span>
+                <span>{t("hero.ctaConsult")}</span>
                 <ChevronRight
                   size={16}
                   className="transition-transform group-hover:translate-x-1"
                 />
               </a>
               <a
-                href="#služby"
+                href="#sluzby"
                 className="flex w-full items-center justify-center rounded-2xl border border-slate-200 px-10 py-6 text-[12px] font-black tracking-[0.2em] text-slate-600 uppercase transition-all hover:bg-slate-50 sm:w-auto"
               >
-                <span>Preskúmať naše služby</span>
+                <span>{t("hero.ctaServices")}</span>
               </a>
             </div>
           </motion.div>
@@ -358,88 +386,69 @@ export default function ProfiCraftsWeb({ locale }: Readonly<{ locale: string }>)
                 100%
               </p>
               <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-                Garancia odvedenej kvality
+                {t("hero.stat100Label")}
               </p>
             </div>
             <div className="space-y-2">
               <p className="text-3xl font-black tracking-tighter text-slate-900">
-                DE / SK / EU
+                {t("hero.statRegions")}
               </p>
               <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-                Medzinárodná pôsobnosť
+                {t("hero.statRegionsLabel")}
               </p>
             </div>
             <div className="space-y-2">
-              <p className="text-3xl font-black tracking-tighter text-slate-900">
-                CERTIFIKÁCIA
+              <p className="text-3xl font-black tracking-tighter text-slate-900 uppercase">
+                {t("hero.statCert")}
               </p>
               <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-                Odborne overené tímy
+                {t("hero.statCertLabel")}
               </p>
             </div>
           </motion.div>
         </div>
       </section>
 
-      <section
-        id="služby"
-        className="bg-[#F1F5F9] px-6 py-32 md:px-12"
-      >
+      <section id="sluzby" className="bg-[#F1F5F9] px-6 py-32 md:px-12">
         <div className="mx-auto max-w-7xl space-y-20">
           <div className="mx-auto max-w-2xl space-y-4 text-center">
             <span className="text-[10px] font-black tracking-[0.5em] text-red-600 uppercase">
-              Fokus a expertíza
+              {t("servicesSection.eyebrow")}
             </span>
             <h2 className="text-4xl font-black tracking-tighter text-slate-900 uppercase leading-none md:text-5xl">
-              Zabezpečujeme tie najnáročnejšie remeslá.
+              {t("servicesSection.title")}
             </h2>
-            <p className="text-slate-600">
-              Pripravujeme tímy odborníkov s dôrazom na technickú správnosť a
-              dodržiavanie medzinárodných štandardov.
-            </p>
+            <p className="text-slate-600">{t("servicesSection.lead")}</p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-            <ServiceCard
-              icon={Zap}
-              title="Elektrikári"
-              imageSrc={IMG.elektrika}
-              description="Priemyselné inštalácie, rozvodové skrine a revízne správy podľa VDE noriem."
-              specialties={["Priemysel", "VDE Normy", "Revízie"]}
-            />
-            <ServiceCard
-              icon={Layers}
-              title="SDK Práce"
-              imageSrc={IMG.sadrokarton}
-              description="Sadrokartónové systémy pre moderné kancelárie a rezidenčné haly v najvyššom štandarde."
-              specialties={["Priečky", "Podhľady", "Akustika"]}
-            />
-            <ServiceCard
-              icon={Construction}
-              title="Hrubé stavby"
-              imageSrc={IMG.zaklady}
-              description="Koordinácia a realizácia základových dosiek, murovacích prác a hrubých konštrukcií."
-              specialties={["Betonáž", "Murivo", "Základy"]}
-            />
-            <ServiceCard
-              icon={Hammer}
-              title="Dokončovacie práce"
-              imageSrc={IMG.omietka}
-              description="Precízne omietky, obklady a dlažby, ktoré dodávajú stavbe finálny vizuálny charakter."
-              specialties={["Obklady", "Omietky", "Sanita"]}
-            />
+            {SERVICE_ROWS.map(({ key, icon: Icon, imageSrc }) => {
+              const title = t(`services.${key}.title`);
+              const tags = (t.raw(`services.${key}.tags`) as string[]) ?? [];
+              return (
+                <ServiceCard
+                  key={key}
+                  icon={Icon}
+                  title={title}
+                  description={t(`services.${key}.desc`)}
+                  specialties={tags}
+                  imageSrc={imageSrc}
+                  imageAlt={`${title} ${t("services.imageAltSuffix")}`}
+                />
+              );
+            })}
           </div>
         </div>
       </section>
 
-      <section id="o nás" className="px-6 py-32 md:px-12">
+      <section id="o-nas" className="px-6 py-32 md:px-12">
         <div className="mx-auto grid max-w-7xl items-center gap-24 lg:grid-cols-2">
           <div className="relative grid grid-cols-2 gap-6">
             <div className="space-y-6 pt-12">
               <div className="relative aspect-square overflow-hidden rounded-3xl bg-slate-100 shadow-sm">
                 <Image
                   src={IMG_ABOUT.putz}
-                  alt="Tím pri omietkových a dokončovacích prácach"
+                  alt={t("about.imagePutzAlt")}
                   fill
                   className="object-cover"
                   sizes="(max-width: 1024px) 50vw, 25vw"
@@ -450,10 +459,10 @@ export default function ProfiCraftsWeb({ locale }: Readonly<{ locale: string }>)
                 <div className="relative z-10 text-center">
                   <Clock size={40} className="mx-auto mb-4 text-red-500" />
                   <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                    Garancia
+                    {t("about.deadlineEyebrow")}
                   </p>
                   <p className="text-xl font-bold tracking-tight uppercase">
-                    Termínov
+                    {t("about.deadlineTitle")}
                   </p>
                 </div>
               </div>
@@ -462,15 +471,15 @@ export default function ProfiCraftsWeb({ locale }: Readonly<{ locale: string }>)
               <div className="flex aspect-square items-center justify-center rounded-3xl bg-red-600 p-8 text-white">
                 <div className="text-center">
                   <p className="mb-2 text-6xl font-black leading-none">15+</p>
-                  <p className="text-[10px] font-black tracking-[0.3em] text-white/60 uppercase">
-                    Aktívnych <br /> tímov
+                  <p className="whitespace-pre-line text-[10px] font-black tracking-[0.3em] text-white/60 uppercase">
+                    {t("about.activeTeams")}
                   </p>
                 </div>
               </div>
               <div className="relative aspect-square overflow-hidden rounded-3xl border border-slate-100 bg-slate-100 shadow-sm">
                 <Image
                   src={IMG_ABOUT.elektro}
-                  alt="Elektrotechnické práce na projekte ProfiCrafts"
+                  alt={t("about.imageElektroAlt")}
                   fill
                   className="object-cover"
                   sizes="(max-width: 1024px) 50vw, 25vw"
@@ -482,41 +491,31 @@ export default function ProfiCraftsWeb({ locale }: Readonly<{ locale: string }>)
           <div className="space-y-10">
             <div>
               <span className="text-[10px] font-black tracking-[0.5em] text-red-500 uppercase">
-                Kto sme
+                {t("about.eyebrow")}
               </span>
               <h2 className="mt-4 text-4xl font-black tracking-tighter text-slate-900 uppercase leading-none md:text-5xl">
-                Partner, na ktorého sa môžete spoľahnúť.
+                {t("about.title")}
               </h2>
             </div>
-            <p className="text-lg leading-relaxed text-slate-500">
-              Pôsobíme ako most medzi špičkovými remeselníkmi a tými, ktorí
-              hľadajú spoľahlivú pracovnú silu pre svoje projekty. Naším cieľom
-              je odstrániť bariéry neefektivity a dodať kapacity vtedy, keď ich
-              najviac potrebujete.
-            </p>
+            <p className="text-lg leading-relaxed text-slate-500">{t("about.body")}</p>
             <div className="grid gap-8 border-t border-slate-100 pt-8 md:grid-cols-2">
               <div className="space-y-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100">
                   <ShieldCheck className="text-slate-900" size={20} />
                 </div>
                 <h4 className="text-xs font-black tracking-tight text-slate-900 uppercase">
-                  Vysoký štandard výberu
+                  {t("about.standardTitle")}
                 </h4>
-                <p className="text-xs text-slate-500">
-                  Pracujeme len s preverenými ľuďmi s jasnou históriou
-                  referencií.
-                </p>
+                <p className="text-xs text-slate-500">{t("about.standardDesc")}</p>
               </div>
               <div className="space-y-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100">
                   <TrendingUp className="text-slate-900" size={20} />
                 </div>
                 <h4 className="text-xs font-black tracking-tight text-slate-900 uppercase">
-                  Flexibilné kapacity
+                  {t("about.capacityTitle")}
                 </h4>
-                <p className="text-xs text-slate-500">
-                  Dokážeme pokryť malé opravy aj veľké priemyselné celky.
-                </p>
+                <p className="text-xs text-slate-500">{t("about.capacityDesc")}</p>
               </div>
             </div>
 
@@ -524,12 +523,9 @@ export default function ProfiCraftsWeb({ locale }: Readonly<{ locale: string }>)
               <div className="absolute top-0 right-0 h-32 w-32 bg-red-600/10 opacity-0 blur-3xl transition-opacity group-hover:opacity-100" />
               <div className="relative z-10 space-y-6">
                 <h4 className="text-xl font-black tracking-tight uppercase">
-                  Hľadáte prácu?
+                  {t("about.jobsTitle")}
                 </h4>
-                <p className="text-sm text-slate-400">
-                  Ste kvalifikovaný elektrikár alebo stavbár? Neustále
-                  rozširujeme naše tímy pre projekty v zahraničí.
-                </p>
+                <p className="text-sm text-slate-400">{t("about.jobsLead")}</p>
                 <WorkerForm />
               </div>
             </div>
@@ -541,12 +537,11 @@ export default function ProfiCraftsWeb({ locale }: Readonly<{ locale: string }>)
         <div className="mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-2">
           <div className="space-y-8 text-slate-100">
             <h2 className="text-5xl font-black tracking-tighter text-white uppercase leading-none md:text-8xl">
-              Pošlite nám <br />
-              <span className="text-red-500">dopyt.</span>
+              {t("contact.titleLine1")} <br />
+              <span className="text-red-500">{t("contact.titleAccent")}</span>
             </h2>
             <p className="max-w-sm text-lg font-medium text-slate-300 md:text-xl">
-              Hľadáte odborníkov pre váš projekt? Zanechajte nám základné údaje
-              a my sa vám ozveme s návrhom spolupráce.
+              {t("contact.lead")}
             </p>
             <div className="flex flex-col space-y-4 pt-4">
               <div className="flex items-center space-x-4 text-slate-100">
@@ -574,55 +569,53 @@ export default function ProfiCraftsWeb({ locale }: Readonly<{ locale: string }>)
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
                   <label className="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                    Vaše Meno
+                    {tc("labels.name")}
                   </label>
                   <input
                     type="text"
-                    placeholder="Jan Novák"
+                    placeholder={tc("placeholders.name")}
                     className="w-full rounded-2xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold transition-all outline-none focus:ring-2 focus:ring-red-500"
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                    E-mail
+                    {tc("labels.email")}
                   </label>
                   <input
                     type="email"
-                    placeholder="jan@firma.sk"
+                    placeholder={tc("placeholders.email")}
                     className="w-full rounded-2xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold transition-all outline-none focus:ring-2 focus:ring-red-500"
                   />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Telefón
+                  {tc("labels.phone")}
                 </label>
                 <input
                   type="tel"
                   name="phone"
                   autoComplete="tel"
-                  placeholder="+421 912 345 678"
+                  placeholder={tc("placeholders.phone")}
                   className="w-full rounded-2xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold transition-all outline-none focus:ring-2 focus:ring-red-500"
                 />
               </div>
               <div className="space-y-2">
                 <label className="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  O ktorú službu máte záujem?
+                  {tc("labels.service")}
                 </label>
                 <select className="w-full cursor-pointer appearance-none rounded-2xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold outline-none focus:ring-2 focus:ring-red-500">
-                  <option>Elektroinštalácie</option>
-                  <option>Sadrokartónové práce</option>
-                  <option>Hrubá stavba</option>
-                  <option>Finálne práce v interiéri</option>
-                  <option>Iné</option>
+                  {serviceOptions.map((option) => (
+                    <option key={option}>{option}</option>
+                  ))}
                 </select>
               </div>
               <div className="space-y-2">
                 <label className="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Stručný dopyt
+                  {tc("labels.message")}
                 </label>
                 <textarea
-                  placeholder="Popíšte nám váš projekt..."
+                  placeholder={tc("placeholders.message")}
                   rows={4}
                   className="w-full resize-none rounded-2xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold outline-none focus:ring-2 focus:ring-red-500"
                 />
@@ -631,7 +624,7 @@ export default function ProfiCraftsWeb({ locale }: Readonly<{ locale: string }>)
                 type="submit"
                 className="w-full rounded-2xl bg-red-600 py-5 text-[12px] font-black tracking-[0.2em] text-white uppercase shadow-xl shadow-red-600/20 transition-all hover:bg-red-700 active:scale-[0.98]"
               >
-                Odoslať nezáväzný dopyt
+                {tc("submit")}
               </button>
             </form>
           </div>
@@ -640,22 +633,23 @@ export default function ProfiCraftsWeb({ locale }: Readonly<{ locale: string }>)
 
       <footer className="border-t border-slate-100 bg-white px-6 py-20 md:px-12">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-12 md:flex-row">
-          <Logo className="text-[28px]" />
+          <Logo className="text-[28px]" tagline={t("logoTagline")} />
           <div className="flex space-x-10">
-            {["Služby", "O nás", "Kontakt"].map((item) => (
+            {NAV.map(({ hash, label }) => (
               <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
+                key={hash}
+                href={`#${hash}`}
                 className="text-[10px] font-black tracking-[0.2em] text-slate-900/40 uppercase transition-colors hover:text-red-500"
               >
-                {item}
+                {label}
               </a>
             ))}
           </div>
           <div className="text-center md:text-right">
             <p className="text-[10px] leading-relaxed font-bold tracking-widest text-slate-400 uppercase">
-              © 2026 PROFICRAFTS.EU | Všetky práva vyhradené. <br />
-              DIČ: SK2120000000
+              {tf("copyrightPrefix")} {tf("rights")}
+              <br />
+              {tf("taxLine")}
             </p>
           </div>
         </div>

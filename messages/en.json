@@ -212,22 +212,52 @@
     "systemLayerEyebrow": "Tech stack / system layer",
     "systemLayerTitle": "How my systems are built",
     "systemList": {
-      "i1": { "title": "Pipeline-based architecture", "desc": "No ad-hoc scripts. Robust chained processes." },
-      "i2": { "title": "Data gap detection", "desc": "The system actively identifies blind spots in data." },
-      "i3": { "title": "Deterministic outputs", "desc": "Strict output control with hallucination mitigation." },
-      "i4": { "title": "Auditable decisions", "desc": "Full traceability from input to logic to outcome." },
-      "i5": { "title": "Runtime vs snapshot logic", "desc": "Clear split between live processing and historical state." },
-      "i6": { "title": "Production-first design", "desc": "Systems built for load, not demo conditions." }
+      "i1": {
+        "title": "Pipeline-based architecture",
+        "desc": "No ad-hoc scripts. Robust chained processes."
+      },
+      "i2": {
+        "title": "Data gap detection",
+        "desc": "The system actively identifies blind spots in data."
+      },
+      "i3": {
+        "title": "Deterministic outputs",
+        "desc": "Strict output control with hallucination mitigation."
+      },
+      "i4": {
+        "title": "Auditable decisions",
+        "desc": "Full traceability from input to logic to outcome."
+      },
+      "i5": {
+        "title": "Runtime vs snapshot logic",
+        "desc": "Clear split between live processing and historical state."
+      },
+      "i6": {
+        "title": "Production-first design",
+        "desc": "Systems built for load, not demo conditions."
+      }
     },
     "approachEyebrow": "How I work with AI",
     "approachTitle": "My approach to AI systems",
     "approachQuote": "\"I don't use AI as a black box.\"",
     "approachLead": "Every system is designed as a managed process:",
     "approachList": {
-      "i1": { "label": "Clear input", "val": "data contract" },
-      "i2": { "label": "Controlled output", "val": "no guessing" },
-      "i3": { "label": "Decision validation", "val": "confidence, trace" },
-      "i4": { "label": "Interpretation split", "val": "facts vs estimates" }
+      "i1": {
+        "label": "Clear input",
+        "val": "data contract"
+      },
+      "i2": {
+        "label": "Controlled output",
+        "val": "no guessing"
+      },
+      "i3": {
+        "label": "Decision validation",
+        "val": "confidence, trace"
+      },
+      "i4": {
+        "label": "Interpretation split",
+        "val": "facts vs estimates"
+      }
     },
     "approachResultLabel": "Result:",
     "approachResultText": "AI you can govern, not just use.",
@@ -242,11 +272,21 @@
     "diagramTitle": "Shopentum connects data and turns it into clear decisions.",
     "diagramLead": "By connecting marketing and technical signals, we identify the most critical growth barriers in e-commerce operations.",
     "inputsTitle": "Data Inputs",
-    "inputs": { "i1": "GA4 Data", "i2": "Google Ads", "i3": "Meta Ads", "i4": "Search Console" },
+    "inputs": {
+      "i1": "GA4 Data",
+      "i2": "Google Ads",
+      "i3": "Meta Ads",
+      "i4": "Search Console"
+    },
     "engineLabel": "Decision Intelligence Engine",
     "engineLead": "Stores context, evaluates audit data, GA4, and Google/Meta Ads signals in real time, then drives execution based on market reality and business goals.",
     "modulesTitle": "Execution Modules",
-    "modules": { "i1": "AI Marketing", "i2": "Task Manager", "i3": "Growth Engine", "i4": "Ads Engine" },
+    "modules": {
+      "i1": "AI Marketing",
+      "i2": "Task Manager",
+      "i3": "Growth Engine",
+      "i4": "Ads Engine"
+    },
     "problemEyebrow": "Problem / Reality",
     "problemTitle": "The store operated, but decision logic was weak.",
     "problems": {
@@ -259,10 +299,22 @@
     "architectureTitle": "Next-generation architecture: Decision Intelligence System",
     "architectureLead": "I designed a custom decision layer architecture built on AI WORKS principles.",
     "architectureCards": {
-      "c1": { "title": "Runtime vs Snapshot", "desc": "Strict separation between real-time processing and immutable historical states for fully auditable decisions." },
-      "c2": { "title": "Pipeline-based Processing", "desc": "No ad-hoc scripts. Chained data pipeline from raw collection to strategic insight." },
-      "c3": { "title": "Delta Engine", "desc": "Continuously compares current state against benchmarks and explains cause and business impact over time." },
-      "c4": { "title": "Findings Engine", "desc": "Multi-layer analytics that detects critical barriers and growth opportunities in data noise." }
+      "c1": {
+        "title": "Runtime vs Snapshot",
+        "desc": "Strict separation between real-time processing and immutable historical states for fully auditable decisions."
+      },
+      "c2": {
+        "title": "Pipeline-based Processing",
+        "desc": "No ad-hoc scripts. Chained data pipeline from raw collection to strategic insight."
+      },
+      "c3": {
+        "title": "Delta Engine",
+        "desc": "Continuously compares current state against benchmarks and explains cause and business impact over time."
+      },
+      "c4": {
+        "title": "Findings Engine",
+        "desc": "Multi-layer analytics that detects critical barriers and growth opportunities in data noise."
+      }
     },
     "log": {
       "file": "shopentum_os_core.log",
@@ -289,10 +341,26 @@
       "auditTitle": "Audit"
     },
     "metrics": {
-      "m1": { "label": "Speed", "val": "Faster decisions", "desc": "Data is interpreted immediately." },
-      "m2": { "label": "Efficiency", "val": "Less manual work", "desc": "Automation of routine analysis." },
-      "m3": { "label": "Control", "val": "Clearer performance visibility", "desc": "No blind spots in marketing." },
-      "m4": { "label": "Scaling", "val": "Growth readiness", "desc": "No need to constantly increase team size." }
+      "m1": {
+        "label": "Speed",
+        "val": "Faster decisions",
+        "desc": "Data is interpreted immediately."
+      },
+      "m2": {
+        "label": "Efficiency",
+        "val": "Less manual work",
+        "desc": "Automation of routine analysis."
+      },
+      "m3": {
+        "label": "Control",
+        "val": "Clearer performance visibility",
+        "desc": "No blind spots in marketing."
+      },
+      "m4": {
+        "label": "Scaling",
+        "val": "Growth readiness",
+        "desc": "No need to constantly increase team size."
+      }
     },
     "ctaTitle": "Need a technical architect for your AI initiative?",
     "ctaLead": "Define the challenge. I will design the logic layer and deploy a system that turns data into decisions.",
@@ -395,6 +463,135 @@
     "gdpr": "GDPR",
     "geoSignal": "AI-native development and decision intelligence layers for companies across Slovakia.",
     "legal": "AI-native development and decision intelligence systems. EU-based, globally scalable."
+  },
+  "ProfiCrafts": {
+    "meta": {
+      "title": "ProfiCrafts.eu — skilled trades for your project",
+      "description": "Qualified specialists for industrial and residential construction: electrical, drywall, shell work, and finishing."
+    },
+    "logoTagline": "Partner for your project",
+    "nav": {
+      "langAria": "ProfiCrafts language selection",
+      "services": "Services",
+      "about": "About us",
+      "contact": "Contact",
+      "ctaInquiry": "Non-binding enquiry"
+    },
+    "lang": {
+      "de": "Deutsch",
+      "en": "English",
+      "enAria": "English (UK)",
+      "sk": "Slovak"
+    },
+    "hero": {
+      "badge": "Vetted specialists for the EU market",
+      "titleLine1": "Projects in the hands",
+      "titleLine2": "of professionals.",
+      "lead": "ProfiCrafts.eu supplies qualified trades for industrial and residential builds — from electrical systems to the final interior touches.",
+      "ctaConsult": "Book a consultation",
+      "ctaServices": "Explore our services",
+      "statRegions": "DE / SK / EU",
+      "stat100Label": "Commitment to quality",
+      "statRegionsLabel": "Cross-border coverage",
+      "statCert": "CERTIFIED",
+      "statCertLabel": "Professionally vetted crews"
+    },
+    "servicesSection": {
+      "eyebrow": "Focus & expertise",
+      "title": "We staff the most demanding trades.",
+      "lead": "We assemble specialist teams with rigorous technical standards and adherence to international norms."
+    },
+    "services": {
+      "electricians": {
+        "title": "Electricians",
+        "desc": "Industrial installations, distribution boards, and inspection reports aligned with VDE guidelines.",
+        "tags": [
+          "Industrial",
+          "VDE standards",
+          "Inspections"
+        ]
+      },
+      "drywall": {
+        "title": "Drywall",
+        "desc": "Gypsum systems for modern offices and residential halls to a high standard.",
+        "tags": [
+          "Partitions",
+          "Ceilings",
+          "Acoustics"
+        ]
+      },
+      "shell": {
+        "title": "Shell & structural",
+        "desc": "Coordination and delivery of foundations, masonry, and structural shell work.",
+        "tags": [
+          "Concrete",
+          "Masonry",
+          "Foundations"
+        ]
+      },
+      "finishing": {
+        "title": "Finishing",
+        "desc": "Precision plaster, tiling, and flooring that defines the final character of a build.",
+        "tags": [
+          "Tiles",
+          "Plaster",
+          "Sanitary"
+        ]
+      },
+      "imageAltSuffix": "— service photo"
+    },
+    "about": {
+      "imagePutzAlt": "Crew during plastering and finishing work",
+      "imageElektroAlt": "Electrical work on a ProfiCrafts project",
+      "deadlineEyebrow": "Our promise",
+      "deadlineTitle": "On schedule",
+      "activeTeams": "Active\nteams",
+      "eyebrow": "Who we are",
+      "title": "A partner you can rely on.",
+      "body": "We bridge top craftspeople with clients who need dependable capacity. Our goal is to cut inefficiency barriers and deliver manpower when you need it most.",
+      "standardTitle": "Rigorous selection",
+      "standardDesc": "We work only with vetted people who have a clear track record.",
+      "capacityTitle": "Flexible capacity",
+      "capacityDesc": "From minor repairs to major industrial packages.",
+      "jobsTitle": "Looking for work?",
+      "jobsLead": "Qualified electrician or builder? We continually grow our teams for international projects."
+    },
+    "workerForm": {
+      "toggle": "Register your interest",
+      "professionPh": "Your trade (e.g. electrician)",
+      "phonePh": "Phone number",
+      "submit": "Send contact"
+    },
+    "contact": {
+      "titleLine1": "Send us",
+      "titleAccent": "an enquiry.",
+      "lead": "Looking for experts for your project? Leave your details and we will get back with next steps.",
+      "labels": {
+        "name": "Your name",
+        "email": "Email",
+        "phone": "Phone",
+        "service": "Which service are you interested in?",
+        "message": "Brief description"
+      },
+      "placeholders": {
+        "name": "Jan Novák",
+        "email": "you@company.com",
+        "phone": "+421 912 345 678",
+        "message": "Tell us about your project..."
+      },
+      "serviceOptions": [
+        "Electrical installations",
+        "Drywall work",
+        "Shell construction",
+        "Interior finishing",
+        "Other"
+      ],
+      "submit": "Send non-binding enquiry"
+    },
+    "footer": {
+      "copyrightPrefix": "© 2026 ProfiCrafts.eu |",
+      "rights": "All rights reserved.",
+      "taxLine": "VAT ID: SK2120000000"
+    }
   }
 }
-

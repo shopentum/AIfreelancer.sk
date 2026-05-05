@@ -212,22 +212,52 @@
     "systemLayerEyebrow": "TECH STACK / SYSTEM LAYER",
     "systemLayerTitle": "Ako sú moje systémy postavené",
     "systemList": {
-      "i1": { "title": "Pipeline-based architektúra", "desc": "Žiadne ad-hoc skripty, ale robustné, zreťazené procesy." },
-      "i2": { "title": "Data Gap detection", "desc": "Systém aktívne identifikuje slepé miesta v dátach." },
-      "i3": { "title": "Deterministic výstupy", "desc": "Prísna kontrola nad výstupmi, eliminácia halucinácií." },
-      "i4": { "title": "Auditovateľné rozhodnutia", "desc": "Kompletný trace od vstupu cez logiku až po výsledok." },
-      "i5": { "title": "Runtime vs Snapshot logika", "desc": "Jasné oddelenie okamžitého spracovania od historických dát." },
-      "i6": { "title": "Production-first návrh", "desc": "Staviam systémy pripravené na záťaž, nie len demá." }
+      "i1": {
+        "title": "Pipeline-based architektúra",
+        "desc": "Žiadne ad-hoc skripty, ale robustné, zreťazené procesy."
+      },
+      "i2": {
+        "title": "Data Gap detection",
+        "desc": "Systém aktívne identifikuje slepé miesta v dátach."
+      },
+      "i3": {
+        "title": "Deterministic výstupy",
+        "desc": "Prísna kontrola nad výstupmi, eliminácia halucinácií."
+      },
+      "i4": {
+        "title": "Auditovateľné rozhodnutia",
+        "desc": "Kompletný trace od vstupu cez logiku až po výsledok."
+      },
+      "i5": {
+        "title": "Runtime vs Snapshot logika",
+        "desc": "Jasné oddelenie okamžitého spracovania od historických dát."
+      },
+      "i6": {
+        "title": "Production-first návrh",
+        "desc": "Staviam systémy pripravené na záťaž, nie len demá."
+      }
     },
     "approachEyebrow": "AKO PRACUJEM S AI",
     "approachTitle": "Ako pristupujem k AI systémom",
     "approachQuote": "\"AI nepoužívam ako black box.\"",
     "approachLead": "Každý systém navrhujem ako riadený proces:",
     "approachList": {
-      "i1": { "label": "Jasný vstup", "val": "data contract" },
-      "i2": { "label": "Kontrolovaný výstup", "val": "no guessing" },
-      "i3": { "label": "Validácia rozhodnutí", "val": "confidence, trace" },
-      "i4": { "label": "Oddelenie interpretácie", "val": "fakty vs. odhady" }
+      "i1": {
+        "label": "Jasný vstup",
+        "val": "data contract"
+      },
+      "i2": {
+        "label": "Kontrolovaný výstup",
+        "val": "no guessing"
+      },
+      "i3": {
+        "label": "Validácia rozhodnutí",
+        "val": "confidence, trace"
+      },
+      "i4": {
+        "label": "Oddelenie interpretácie",
+        "val": "fakty vs. odhady"
+      }
     },
     "approachResultLabel": "Výsledok:",
     "approachResultText": "AI, ktorá sa dá riadiť, nie len “používať”.",
@@ -242,11 +272,21 @@
     "diagramTitle": "Shopentum prepája dáta a premieňa ich na jasné rozhodnutia.",
     "diagramLead": "Na základe prepojenia marketingových a technických signálov identifikujeme najdôležitejšie bariéry rastu e-shopu.",
     "inputsTitle": "DÁTOVÉ VSTUPY",
-    "inputs": { "i1": "GA4 DATA", "i2": "GOOGLE ADS", "i3": "META ADS", "i4": "SEARCH CONSOLE" },
+    "inputs": {
+      "i1": "GA4 DATA",
+      "i2": "GOOGLE ADS",
+      "i3": "META ADS",
+      "i4": "SEARCH CONSOLE"
+    },
     "engineLabel": "Decision Intelligence Engine",
     "engineLead": "Ukladá kontext, vyhodnocuje auditné dáta, GA4 a signály z Google a Meta Ads v reálnom čase a riadi exekúciu na základe reality trhu a vašich biznis cieľov.",
     "modulesTitle": "EXEKUTÍVNE MODULY",
-    "modules": { "i1": "AI MARKETING", "i2": "TASK MANAGER", "i3": "GROWTH ENGINE", "i4": "ADS ENGINE" },
+    "modules": {
+      "i1": "AI MARKETING",
+      "i2": "TASK MANAGER",
+      "i3": "GROWTH ENGINE",
+      "i4": "ADS ENGINE"
+    },
     "problemEyebrow": "PROBLÉM / REALITA",
     "problemTitle": "E-shop fungoval, ale...",
     "problems": {
@@ -259,10 +299,22 @@
     "architectureTitle": "Architektúra novej generácie: Decision Intelligence System",
     "architectureLead": "Navrhol som vlastnú decision layer architektúru postavenú na princípoch AIWorks.",
     "architectureCards": {
-      "c1": { "title": "Runtime vs Snapshot", "desc": "Systém striktne oddeľuje real-time spracovanie dát od nemenných historických stavov. To zaručuje, že každé rozhodnutie je spätne auditovateľné a postavené na dôkazoch (Master Truth)." },
-      "c2": { "title": "Pipeline-based Processing", "desc": "Dáta neanalyzujeme ad-hoc skriptami. Prechádzajú zreťazenou pipeline, kde každý krok zvyšuje informačnú hodnotu – od surového zberu cez validáciu až po finálny strategický vhľad." },
-      "c3": { "title": "Delta Engine", "desc": "Jadro našej inteligencie, ktoré neustále porovnáva aktuálny stav s predchádzajúcimi benchmarkmi. Identifikuje nielen to, čo sa zmenilo, ale analyzuje aj príčinu a biznisový dopad týchto zmien v čase." },
-      "c4": { "title": "Findings Engine", "desc": "Viacvrstvová analytická vrstva, ktorá v dátovom šume automaticky vyhľadáva kritické bariéry a rastové príležitosti. Každý nález je prioritizovaný podľa reálneho vplyvu na zisk e-shopu." }
+      "c1": {
+        "title": "Runtime vs Snapshot",
+        "desc": "Systém striktne oddeľuje real-time spracovanie dát od nemenných historických stavov. To zaručuje, že každé rozhodnutie je spätne auditovateľné a postavené na dôkazoch (Master Truth)."
+      },
+      "c2": {
+        "title": "Pipeline-based Processing",
+        "desc": "Dáta neanalyzujeme ad-hoc skriptami. Prechádzajú zreťazenou pipeline, kde každý krok zvyšuje informačnú hodnotu – od surového zberu cez validáciu až po finálny strategický vhľad."
+      },
+      "c3": {
+        "title": "Delta Engine",
+        "desc": "Jadro našej inteligencie, ktoré neustále porovnáva aktuálny stav s predchádzajúcimi benchmarkmi. Identifikuje nielen to, čo sa zmenilo, ale analyzuje aj príčinu a biznisový dopad týchto zmien v čase."
+      },
+      "c4": {
+        "title": "Findings Engine",
+        "desc": "Viacvrstvová analytická vrstva, ktorá v dátovom šume automaticky vyhľadáva kritické bariéry a rastové príležitosti. Každý nález je prioritizovaný podľa reálneho vplyvu na zisk e-shopu."
+      }
     },
     "log": {
       "file": "shopentum_os_core.log",
@@ -289,10 +341,26 @@
       "auditTitle": "Audit"
     },
     "metrics": {
-      "m1": { "label": "Rýchlosť", "val": "Zrýchlenie rozhodovania", "desc": "Dáta sú interpretované okamžite." },
-      "m2": { "label": "Efektivita", "val": "Menej manuálnej práce", "desc": "Automatizácia rutinných analýz." },
-      "m3": { "label": "Kontrola", "val": "Lepší prehľad o výkone", "desc": "Žiadne slepé miesta v marketingu." },
-      "m4": { "label": "Škálovanie", "val": "Pripravenosť na rast", "desc": "Bez nutnosti navyšovania tímu." }
+      "m1": {
+        "label": "Rýchlosť",
+        "val": "Zrýchlenie rozhodovania",
+        "desc": "Dáta sú interpretované okamžite."
+      },
+      "m2": {
+        "label": "Efektivita",
+        "val": "Menej manuálnej práce",
+        "desc": "Automatizácia rutinných analýz."
+      },
+      "m3": {
+        "label": "Kontrola",
+        "val": "Lepší prehľad o výkone",
+        "desc": "Žiadne slepé miesta v marketingu."
+      },
+      "m4": {
+        "label": "Škálovanie",
+        "val": "Pripravenosť na rast",
+        "desc": "Bez nutnosti navyšovania tímu."
+      }
     },
     "ctaTitle": "Hľadáte technického partnera pre AI projekt?",
     "ctaLead": "Poďme to prebrať. Ukážem vám, ako môžeme transformovať vaše dáta na rozhodnutia.",
@@ -395,6 +463,135 @@
     "gdpr": "GDPR",
     "geoSignal": "AI-native vývoj a decision intelligence riešenia pre firmy v celej SR.",
     "legal": "AI-native development and decision intelligence systems. EU-based, globally scalable."
+  },
+  "ProfiCrafts": {
+    "meta": {
+      "title": "ProfiCrafts.eu — remeselná síla pre váš projekt",
+      "description": "Kvalifikovaní odborníci pre priemyselné a rezidenčné stavby: elektrina, SDK, hrubá stavba, dokončovacie práce."
+    },
+    "logoTagline": "Partner pre váš projekt",
+    "nav": {
+      "langAria": "Jazyková ponuka ProfiCrafts",
+      "services": "Služby",
+      "about": "O nás",
+      "contact": "Kontakt",
+      "ctaInquiry": "Nezáväzný dopyt"
+    },
+    "lang": {
+      "de": "Deutsch",
+      "en": "English",
+      "enAria": "English (UK)",
+      "sk": "Slovenčina"
+    },
+    "hero": {
+      "badge": "Overení špecialisti pre EU trh",
+      "titleLine1": "Projekty v rukách",
+      "titleLine2": "profesionálov.",
+      "lead": "ProfiCrafts.eu zabezpečuje kvalifikovaných odborníkov pre priemyselné a rezidenčné stavby. Od elektriny až po finálne detaily v interiéri.",
+      "ctaConsult": "Naplánovať konzultáciu",
+      "ctaServices": "Preskúmať naše služby",
+      "statRegions": "DE / SK / EU",
+      "stat100Label": "Garancia odvedenej kvality",
+      "statRegionsLabel": "Medzinárodná pôsobnosť",
+      "statCert": "CERTIFIKÁCIA",
+      "statCertLabel": "Odborne overené tímy"
+    },
+    "servicesSection": {
+      "eyebrow": "Fokus a expertíza",
+      "title": "Zabezpečujeme tie najnáročnejšie remeslá.",
+      "lead": "Pripravujeme tímy odborníkov s dôrazom na technickú správnosť a dodržiavanie medzinárodných štandardov."
+    },
+    "services": {
+      "electricians": {
+        "title": "Elektrikári",
+        "desc": "Priemyselné inštalácie, rozvodové skrine a revízne správy podľa VDE noriem.",
+        "tags": [
+          "Priemysel",
+          "VDE normy",
+          "Revízie"
+        ]
+      },
+      "drywall": {
+        "title": "SDK práce",
+        "desc": "Sadrokartónové systémy pre moderné kancelárie a rezidenčné haly v najvyššom štandarde.",
+        "tags": [
+          "Priečky",
+          "Podhľady",
+          "Akustika"
+        ]
+      },
+      "shell": {
+        "title": "Hrubé stavby",
+        "desc": "Koordinácia a realizácia základových dosiek, murovacích prác a hrubých konštrukcií.",
+        "tags": [
+          "Betonáž",
+          "Murivo",
+          "Základy"
+        ]
+      },
+      "finishing": {
+        "title": "Dokončovacie práce",
+        "desc": "Precízne omietky, obklady a dlažby, ktoré dodávajú stavbe finálny vizuálny charakter.",
+        "tags": [
+          "Obklady",
+          "Omietky",
+          "Sanita"
+        ]
+      },
+      "imageAltSuffix": "— ilustrácia služby"
+    },
+    "about": {
+      "imagePutzAlt": "Tím pri omietkových a dokončovacích prácach",
+      "imageElektroAlt": "Elektrotechnické práce na projekte ProfiCrafts",
+      "deadlineEyebrow": "Garancia",
+      "deadlineTitle": "Termínov",
+      "activeTeams": "Aktívnych\ntímov",
+      "eyebrow": "Kto sme",
+      "title": "Partner, na ktorého sa môžete spoľahnúť.",
+      "body": "Pôsobíme ako most medzi špičkovými remeselníkmi a tými, ktorí hľadajú spoľahlivú pracovnú silu pre svoje projekty. Naším cieľom je odstrániť bariéry neefektivity a dodať kapacity vtedy, keď ich najviac potrebujete.",
+      "standardTitle": "Vysoký štandard výberu",
+      "standardDesc": "Pracujeme len s preverenými ľuďmi s jasnou históriou referencií.",
+      "capacityTitle": "Flexibilné kapacity",
+      "capacityDesc": "Dokážeme pokryť malé opravy aj veľké priemyselné celky.",
+      "jobsTitle": "Hľadáte prácu?",
+      "jobsLead": "Ste kvalifikovaný elektrikár alebo stavbár? Neustále rozširujeme naše tímy pre projekty v zahraničí."
+    },
+    "workerForm": {
+      "toggle": "Chcem sa zaregistrovať",
+      "professionPh": "Vaša profesia (napr. elektrikár)",
+      "phonePh": "Telefónne číslo",
+      "submit": "Odoslať kontakt"
+    },
+    "contact": {
+      "titleLine1": "Pošlite nám",
+      "titleAccent": "dopyt.",
+      "lead": "Hľadáte odborníkov pre váš projekt? Zanechajte nám základné údaje a my sa vám ozveme s návrhom spolupráce.",
+      "labels": {
+        "name": "Vaše meno",
+        "email": "E-mail",
+        "phone": "Telefón",
+        "service": "O ktorú službu máte záujem?",
+        "message": "Stručný dopyt"
+      },
+      "placeholders": {
+        "name": "Ján Novák",
+        "email": "jan@firma.sk",
+        "phone": "+421 912 345 678",
+        "message": "Popíšte nám váš projekt..."
+      },
+      "serviceOptions": [
+        "Elektroinštalácie",
+        "Sadrokartónové práce",
+        "Hrubá stavba",
+        "Finálne práce v interiéri",
+        "Iné"
+      ],
+      "submit": "Odoslať nezáväzný dopyt"
+    },
+    "footer": {
+      "copyrightPrefix": "© 2026 ProfiCrafts.eu |",
+      "rights": "Všetky práva vyhradené.",
+      "taxLine": "IČ DPH / DIČ: SK2120000000"
+    }
   }
 }
-
