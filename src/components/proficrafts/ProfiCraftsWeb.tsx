@@ -84,7 +84,7 @@ const ServiceCard = ({
 }) => (
   <motion.div
     whileHover={{ y: -8 }}
-    className="group overflow-hidden rounded-3xl border border-white/5 bg-white shadow-2xl transition-all hover:shadow-red-500/10"
+    className="group overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xl transition-all hover:border-slate-300/90 hover:shadow-red-500/10"
   >
     <div className="relative aspect-[4/3] w-full">
       <Image
@@ -281,17 +281,17 @@ export default function ProfiCraftsWeb() {
 
       <section
         id="služby"
-        className="bg-[#0f172a] px-6 py-32 md:px-12"
+        className="bg-[#F1F5F9] px-6 py-32 md:px-12"
       >
         <div className="mx-auto max-w-7xl space-y-20">
           <div className="mx-auto max-w-2xl space-y-4 text-center">
-            <span className="text-[10px] font-black tracking-[0.5em] text-red-500 uppercase">
+            <span className="text-[10px] font-black tracking-[0.5em] text-red-600 uppercase">
               Fokus a expertíza
             </span>
-            <h2 className="text-4xl font-black tracking-tighter text-white uppercase leading-none md:text-5xl">
+            <h2 className="text-4xl font-black tracking-tighter text-slate-900 uppercase leading-none md:text-5xl">
               Zabezpečujeme tie najnáročnejšie remeslá.
             </h2>
-            <p className="text-slate-400">
+            <p className="text-slate-600">
               Pripravujeme tímy odborníkov s dôrazom na technickú správnosť a
               dodržiavanie medzinárodných štandardov.
             </p>
@@ -435,34 +435,34 @@ export default function ProfiCraftsWeb() {
         </div>
       </section>
 
-      <section id="kontakt" className="bg-[#9A9FA7] px-6 py-32 md:px-12">
+      <section id="kontakt" className="bg-[#0f172a] px-6 py-32 md:px-12">
         <div className="mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-2">
-          <div className="space-y-8 text-slate-900">
-            <h2 className="text-5xl font-black tracking-tighter uppercase leading-none md:text-8xl">
+          <div className="space-y-8 text-slate-100">
+            <h2 className="text-5xl font-black tracking-tighter text-white uppercase leading-none md:text-8xl">
               Pošlite nám <br />
-              <span className="text-red-700">dopyt.</span>
+              <span className="text-red-500">dopyt.</span>
             </h2>
-            <p className="max-w-sm text-lg font-medium text-slate-700 md:text-xl">
+            <p className="max-w-sm text-lg font-medium text-slate-300 md:text-xl">
               Hľadáte odborníkov pre váš projekt? Zanechajte nám základné údaje
               a my sa vám ozveme s návrhom spolupráce.
             </p>
             <div className="flex flex-col space-y-4 pt-4">
-              <div className="flex items-center space-x-4 text-slate-800">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-lg">
-                  <Phone size={18} className="text-red-600" />
+              <div className="flex items-center space-x-4 text-slate-100">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-slate-800/60 shadow-lg">
+                  <Phone size={18} className="text-red-500" />
                 </div>
                 <span className="font-black">+421 911 111 222</span>
               </div>
-              <div className="flex items-center space-x-4 text-slate-800">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-lg">
-                  <Mail size={18} className="text-red-600" />
+              <div className="flex items-center space-x-4 text-slate-100">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-slate-800/60 shadow-lg">
+                  <Mail size={18} className="text-red-500" />
                 </div>
                 <span className="font-black">jan@proficrafts.eu</span>
               </div>
             </div>
           </div>
 
-          <div className="rounded-[2.5rem] bg-white p-8 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] md:p-12">
+          <div className="rounded-[2.5rem] bg-white p-8 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.25)] md:p-12">
             <form
               className="space-y-6"
               onSubmit={(e) => {
@@ -490,6 +490,18 @@ export default function ProfiCraftsWeb() {
                     className="w-full rounded-2xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold transition-all outline-none focus:ring-2 focus:ring-red-500"
                   />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <label className="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                  Telefón
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  autoComplete="tel"
+                  placeholder="+421 912 345 678"
+                  className="w-full rounded-2xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold transition-all outline-none focus:ring-2 focus:ring-red-500"
+                />
               </div>
               <div className="space-y-2">
                 <label className="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase">
