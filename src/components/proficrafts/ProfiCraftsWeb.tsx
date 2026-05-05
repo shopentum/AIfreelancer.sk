@@ -25,6 +25,11 @@ const IMG = {
   sadrokarton: "/img/proficrafts_trockenbau.webp",
 } as const;
 
+const IMG_ABOUT = {
+  elektro: "/img/proficrafts_elektro_detail.webp",
+  putz: "/img/proficrafts_putz_detail.webp",
+} as const;
+
 const Logo = ({
   uppercase = false,
   className = "",
@@ -336,10 +341,10 @@ export default function ProfiCraftsWeb() {
             <div className="space-y-6 pt-12">
               <div className="relative aspect-square overflow-hidden rounded-3xl bg-slate-100 shadow-sm">
                 <Image
-                  src="https://images.unsplash.com/photo-1541888946425-d81bb19480c5?auto=format&fit=crop&q=80&w=1000"
-                  alt="Construction work"
+                  src={IMG_ABOUT.putz}
+                  alt="Tím pri omietkových a dokončovacích prácach"
                   fill
-                  className="object-cover brightness-90 grayscale contrast-110"
+                  className="object-cover"
                   sizes="(max-width: 1024px) 50vw, 25vw"
                 />
               </div>
@@ -367,10 +372,10 @@ export default function ProfiCraftsWeb() {
               </div>
               <div className="relative aspect-square overflow-hidden rounded-3xl border border-slate-100 bg-slate-100 shadow-sm">
                 <Image
-                  src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80&w=1000"
-                  alt="Professional electrician"
+                  src={IMG_ABOUT.elektro}
+                  alt="Elektrotechnické práce na projekte ProfiCrafts"
                   fill
-                  className="object-cover brightness-90 grayscale"
+                  className="object-cover"
                   sizes="(max-width: 1024px) 50vw, 25vw"
                 />
               </div>
