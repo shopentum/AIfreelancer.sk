@@ -3,7 +3,7 @@
 > **Dokument:** Jira Epic + Story + Design Zámer
 > **Projekt:** SEO Copilot - Linkbuilding (súčasť Article Performance Layer)
 > **Autor:** Daniel Budziňák, Senior Product Manager
-> **Verzia:** 1.6 | Dátum: 2026-04-30  
+> **Verzia:** 1.7 | Dátum: 2026-04-30  
 > **Doplnenie:** Sekcia 15; DATA_GAP DG-L7 - DG-L9 (schválený text sekcií 1-14 bez zásadných zmien oproti v1.4)
 > **Status:** Ready for refinement
 > **Súvisí s:** `MDIE_C_Jira_Spec.pdf` (Article Performance Layer), `SEO_Copilot_Tags_MVP1`
@@ -29,7 +29,7 @@ MVP1 vychádza z existujúceho architektonického návrhu linkbuildingu (Conflue
 | DG-L4 | ~~Scope pilota~~ - **VYRIEŠENÉ:** plus1deň, 4 týždne | ✅ |
 | DG-L5 | Baseline metriky (CTR interných linkov, priemerný počet linkov/článok) - kto a kedy zachytí? | Analytics / DataHub tím |
 | DG-L6 | Pravidlá indexácie tagov dostupné cez API? (potrebné pre hard filter) | Backend / SEO tím |
-| DG-L7 | Kanonický `article_id` pre join: `DocumentId`, `EntityUuid`, alebo `EntityId` v article message a v JSON eventoch? Rovnaký kľúč ako `AiFeaturesUsageLog.ArticleDocumentId` | Core / Backend |
+| DG-L7 | Kanonický join kľúč pre JSON eventy vs. article message. **Preferovaný kandidát:** `ArticleDocumentId` (explicitne v `AiFeaturesUsageLog`); finálne potvrdenie vrátane alternatív podľa rozhodnutia Core | Core / Backend |
 | DG-L8 | Kedy presne zapísať `AiFeaturesUsageLog` pre linkbuilding (prvé generovanie, commit tagov, commit linkov, iný trigger)? | Core / PM |
 | DG-L9 | Presná hodnota `AiFeatureType` v enum / konvencii Core pre tento modul (napr. `linkbuilding` vs. iný slug) | Core |
 
@@ -573,7 +573,7 @@ Ak obe vrstvy použijú **rôznu identitu článku** alebo sa usage **nezapíše
 ### Odporúčaný postup (bez povinnej zmeny vyššie uvedených AC v tejto iterácii)
 
 | Téma | Odporúčanie | Otvorené |
-| Identita článku v logoch | Všetky nové zápisy by mali používať **rovnaký kanonický kľúč** ako article message (často `ArticleDocumentId`); presná voľba `[DATA_GAP DG-L7]` | Core |
+| Identita článku v logoch | Všetky nové zápisy by mali **preferovať `ArticleDocumentId`** ako kandidáta na kanonický join key, keďže je explicitne prítomný v `AiFeaturesUsageLog`. Finálne potvrdenie ostáva `[DATA_GAP DG-L7]`. | Core |
 | Pomenovanie modulu | `AiFeatureType` pre linkbuilding zosúladiť s enum / konvenciou Core (napr. slug `linkbuilding`) | `[DATA_GAP DG-L9]` |
 | Kedy logovať usage | Jedna udalosť alebo viac - napr. pri prvom úspešnom generovaní návrhov vs. pri commite | `[DATA_GAP DG-L8]` |
 | Dvojstopý model | Zachovať Sekciu 9 (detail) + **doplniť** zápis do `AiFeaturesUsageLog` po dohode triggeru - **nie** nablokovať refaktorom celý DataHub naraz | PM + Core |
@@ -614,6 +614,7 @@ Analogicky môže napr. SEO Content Checker používať vlastný `AiFeatureType`
 | 1.2 | 2026-04-29 | Daniel Budziňák | Formátovanie: dlhé pomlčky - krátke; odstránené checkboxy; odstránené ``` z user stories; odstránené oddeľovacie riadky tabuliek |
 | 1.3 | 2026-04-29 | Daniel Budziňák | UI refaktor: modálny workflow (namiesto inline panelu); akcie zmenené na `×` Zmazať + „Nepoužiť"; obe sú trvalé v MVP1; pridaný „Generovať znova"; bulk button pattern nahradený commit „Použiť prelinkovania a zatvoriť"; sekcie 3, 5, 6.6, 7, 9, 10, 14 aktualizované |
 | 1.6 | 2026-04-30 | Daniel Budziňák | DATA_GAP: DG-L7, DG-L8, DG-L9; nová **Sekcia 15** (Article message, AiFeaturesUsageLog, additive). Schválené sekcie 1-14 zarovnané na obsah v1.4 (bez v1.5 úprav princípu, rozsahu, flow, kap. 9-10, ST-4). |
+| 1.7 | 2026-04-30 | Daniel Budziňák | DG-L7 + Sekcia 15: preferencia `ArticleDocumentId` ako kanonický join; finálna voľba DG-L7 |
 
 ---
 
