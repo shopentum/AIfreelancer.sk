@@ -3,7 +3,8 @@
 > **Dokument:** Jira Epic + Story + Design Zámer
 > **Projekt:** SEO Copilot - Linkbuilding (súčasť Article Performance Layer)
 > **Autor:** Daniel Budziňák, Senior Product Manager
-> **Verzia:** 1.4 | Dátum: 2026-04-30
+> **Verzia:** 1.6 | Dátum: 2026-04-30  
+> **Doplnenie:** Sekcia 15; DATA_GAP DG-L7 - DG-L9 (schválený text sekcií 1-14 bez zásadných zmien oproti v1.4)
 > **Status:** Ready for refinement
 > **Súvisí s:** `MDIE_C_Jira_Spec.pdf` (Article Performance Layer), `SEO_Copilot_Tags_MVP1`
 
@@ -23,11 +24,14 @@ MVP1 vychádza z existujúceho architektonického návrhu linkbuildingu (Conflue
 
 | # | Gap | Zodpovednosť |
 | DG-L1 | Je SpaCy (`sk_core_news_lg`) alebo iná NLP knižnica v AI service stacku? (súvisí s CMSD1778) | Backend / AI service tím |
-| DG-L2 | Lifecycle stavu `ignored`: odporúčanie = pri publishi alebo prechode do REVIEW (whichever first); pre články ktoré zostanú v DRAFT — session end fallback (riešenie na dev tíme) | PM + Backend |
+| DG-L2 | Lifecycle stavu `ignored`: odporúčanie = pri publishi alebo prechode do REVIEW (whichever first); pre články ktoré zostanú v DRAFT - session end fallback (riešenie na dev tíme) | PM + Backend |
 | DG-L3 | Incremental use case: nová validácia prepíše predchádzajúce návrhy alebo diff-uje? | Backend / AI service tím |
 | DG-L4 | ~~Scope pilota~~ - **VYRIEŠENÉ:** plus1deň, 4 týždne | ✅ |
 | DG-L5 | Baseline metriky (CTR interných linkov, priemerný počet linkov/článok) - kto a kedy zachytí? | Analytics / DataHub tím |
 | DG-L6 | Pravidlá indexácie tagov dostupné cez API? (potrebné pre hard filter) | Backend / SEO tím |
+| DG-L7 | Kanonický `article_id` pre join: `DocumentId`, `EntityUuid`, alebo `EntityId` v article message a v JSON eventoch? Rovnaký kľúč ako `AiFeaturesUsageLog.ArticleDocumentId` | Core / Backend |
+| DG-L8 | Kedy presne zapísať `AiFeaturesUsageLog` pre linkbuilding (prvé generovanie, commit tagov, commit linkov, iný trigger)? | Core / PM |
+| DG-L9 | Presná hodnota `AiFeatureType` v enum / konvencii Core pre tento modul (napr. `linkbuilding` vs. iný slug) | Core |
 
 ---
 
@@ -81,12 +85,12 @@ Article (DRAFT)
   └─► Redaktor klikne „Generovať tagy a prelinkovania" (pravý panel)
         │
         ▼
-      Modálne okno — sekcia Tagy
+      Modálne okno - sekcia Tagy
       Tagy sa načítavajú progressívne; redaktor upraví/odznačí
       [Použiť v článku] → tagy sú prijaté
         │
         ▼
-      Modálne okno — sekcia Interné prelinkovania
+      Modálne okno - sekcia Interné prelinkovania
       (sprístupní sa po prijatí tagov; pred tým disabled)
         │
         Input: zoznam prijatých tagov pre článok
@@ -108,10 +112,10 @@ Article (DRAFT)
       Hard cap: max. 1 link/odstavec / max. 5/článok / žiadny do perexu / nie H1-H3
         │
         ▼
-      Suggestion Output — modálny zoznam
+      Suggestion Output - modálny zoznam
       anchor | cieľový tag | kontext vety
       Per návrh: [×] Zmazať (MVP1 perzistentné) | [Nepoužiť] on hover (MVP1 perzistentné)
-      [Generovať znova] — reset zoznamu
+      [Generovať znova] - reset zoznamu
       [Použiť prelinkovania a zatvoriť] → akceptuje zostávajúce návrhy
         │
         ▼
@@ -162,7 +166,7 @@ Aby som vedel rýchlo posúdiť, kde link v texte sedí, a rozhodnúť o jeho po
 
 ---
 
-### Story 2: Správa návrhov linkov — akceptácia, mazanie, odmietnutie
+### Story 2: Správa návrhov linkov - akceptácia, mazanie, odmietnutie
 
 SEO-202
 Ako redaktor
@@ -175,7 +179,7 @@ Aby som mal plnú kontrolu nad prelinkovaním článku.
 - „Nepoužiť": okamžite odstráni návrh zo zoznamu (MVP1 perzistentné); event `link_suggestion_rejected`
 - „Generovať znova" resetuje všetky link akcie a znovu animuje zoznam (escape hatch)
 - „Použiť prelinkovania a zatvoriť" akceptuje všetky zostávajúce viditeľné návrhy; každý = samostatný `link_suggestion_accepted` event
-- Anchor sa nevkladá automaticky — každá akcia je explicitná (HITL)
+- Anchor sa nevkladá automaticky - každá akcia je explicitná (HITL)
 - Publish prebehne normálne bez ohľadu na stav návrhov
 - Neinteragované návrhy pri publishi dostanú stav `ignored` (`[DATA_GAP DG-L2]`)
 
@@ -236,7 +240,7 @@ Freshness, typ tagu a ďalšie signály - MVP2 (nemáme kalibračné dáta, risk
 - Pre každý anchor sa vyberá **jeden najlepší kandidát** (tag s najvyššou relevančnou skórou po filtroch)
 - Ak sa rovnaká entita vyskytuje v texte viackrát - systém navrhne link **iba raz**
 
-**Výber výskytu — distribuovaný greedy:**
+**Výber výskytu - distribuovaný greedy:**
 1. Nájdi všetky výskyty anchoru po perexe (nie H1-H3, nie popisky obrázkov)
 2. Vyber prvý výskyt v odstavci, ktorý ešte **nemá priradený žiadny iný link**
 3. Ak taký odstavec neexistuje - návrh sa nevytvorí (hard cap na odstavec zabraňuje nahromadeniu)
@@ -256,16 +260,16 @@ Pri návrhoch interných linkov rozlišujeme štyri typy interakcie:
 
 | Stav | Trigger | Význam | Perzistencia (MVP1) |
 | `accepted` | „Použiť prelinkovania a zatvoriť" | Návrh bol použitý v článku | zostáva prijatý |
-| `rejected` | „Nepoužiť" | Vedomé odmietnutie — návrh je nevhodný | odstránenie návrhu zo zoznamu (MVP1 perzistentné) |
-| `removed` | „×" (Zmazať) | Upratanie zoznamu — nie hodnotenie kvality | odstránenie návrhu zo zoznamu (MVP1 perzistentné) |
+| `rejected` | „Nepoužiť" | Vedomé odmietnutie - návrh je nevhodný | odstránenie návrhu zo zoznamu (MVP1 perzistentné) |
+| `removed` | „×" (Zmazať) | Upratanie zoznamu - nie hodnotenie kvality | odstránenie návrhu zo zoznamu (MVP1 perzistentné) |
 | `ignored` | žiadna interakcia do publishu | Redaktor návrh videl, ale nereagoval | - |
 
-**Perzistencia v MVP1:** Obe akcie (`rejected` aj `removed`) odstránia návrh zo zoznamu — pri opätovnom otvorení modálu zostávajú preč. Rozdiel je iba v event logu (DataHub kalibrácia v MVP2). Obnovenie = „Generovať znova".
+**Perzistencia v MVP1:** Obe akcie (`rejected` aj `removed`) odstránia návrh zo zoznamu - pri opätovnom otvorení modálu zostávajú preč. Rozdiel je iba v event logu (DataHub kalibrácia v MVP2). Obnovenie = „Generovať znova".
 
 **UI hierarchia akcií:**
-- `×` (Zmazať) — vždy viditeľný, malý, červená ikona, sivý rám; tooltip: „Odstrániť zo zoznamu návrhov. Neovplyvní budúce návrhy."
-- `Nepoužiť` — zobrazí sa pri hover na riadok, sivý, diskrétny; tooltip: „Nepoužiť, ak návrh nesedí pre tento článok"
-- `Generovať znova` — v hlavičke sekcie; resetuje všetky link akcie a znovu animuje zoznam
+- `×` (Zmazať) - vždy viditeľný, malý, červená ikona, sivý rám; tooltip: „Odstrániť zo zoznamu návrhov. Neovplyvní budúce návrhy."
+- `Nepoužiť` - zobrazí sa pri hover na riadok, sivý, diskrétny; tooltip: „Nepoužiť, ak návrh nesedí pre tento článok"
+- `Generovať znova` - v hlavičke sekcie; resetuje všetky link akcie a znovu animuje zoznam
 
 **Dôvod rozlíšenia `rejected` vs `removed`:**
 DataHub potrebuje odlíšiť vedome odmietnutý návrh od upratania zoznamu pre kalibráciu scoring modelu v MVP2. Nesmú byť zlučované.
@@ -303,7 +307,7 @@ Pravidlo 1 link/odstavec je jednoduchý distribuovaný guard - nie scoring. Gran
 [Zobraziť návrhy pre tagy]   [Zobraziť návrhy prelinkovania]
 ```
 
-### Modálne okno — sekcia Interné prelinkovania
+### Modálne okno - sekcia Interné prelinkovania
 
 **Hlavička sekcie:**
 ```
@@ -392,10 +396,10 @@ Rozšírené polia (`article_type`, `position_in_text`, `editor_id`, `suggestion
 
 | Event | Kedy |
 | `suggestions_generated` | Po každej validácii (aj 0 návrhov) |
-| `link_suggestion_accepted` | „Použiť prelinkovania a zatvoriť" — pre každý zostávajúci návrh |
-| `accepted_internal_link_snapshot` | Ihneď s každým `link_suggestion_accepted` — normalizovaný stav (anchor, ciele, article, URL) |
-| `link_suggestion_rejected` | Redaktor klikol „Nepoužiť" — okamžitý event |
-| `link_suggestion_removed` | Redaktor klikol `×` (Zmazať) — okamžitý event |
+| `link_suggestion_accepted` | „Použiť prelinkovania a zatvoriť" - pre každý zostávajúci návrh |
+| `accepted_internal_link_snapshot` | Ihneď s každým `link_suggestion_accepted` - normalizovaný stav (anchor, ciele, article, URL) |
+| `link_suggestion_rejected` | Redaktor klikol „Nepoužiť" - okamžitý event |
+| `link_suggestion_removed` | Redaktor klikol `×` (Zmazať) - okamžitý event |
 | `suggestion_ignored` | Neinteragované pri publishi / konci session |
 | `suggestions_skipped` | API nedostupné; 0 návrhov z technického dôvodu |
 
@@ -543,6 +547,64 @@ Tento dokument slúži ako **Master Epic**. Pre vývojový tím sa rozpadá na n
 
 ---
 
+## 15. Doplnenie (po revízií dev): Article message a AI usage
+
+*Táto sekcia je **additive** - nenahrádza schválený text vyššie. Slúži na zarovnanie s reálnou NMH štruktúrou článku a odporúčania z dev analýzy (Article message, nie isolovaný study log).*
+
+### Kontext z Core
+
+Kanonický objekt článku v message / API zahŕňa okrem iného:
+
+| Pole / kolekcia | Typ / význam (skrátene) |
+| `DocumentId` | Guid |
+| `EntityId` | long |
+| `EntityUuid` | Guid |
+| `AiTools` | kolekcia (napr. `DonAiToolEmbed`: ToolId, Description) |
+| `AiFeaturesUsageLog` | kolekcia (napr. `DonAiFeatureUsageLogEmbed`: UserId, SiteId, ArticleId, ArticleDocumentId, AiFeatureType, CreatedAt) |
+
+Referencia: štruktúra podľa interného podkladu **DonRecommendArticle** / embedov (nie je súčasťou tejto špecifikácie ako kód).
+
+### Prečo to súvisí s linkbuildingom
+
+Samostatné **JSON eventy** z tejto špecifikácie (`link_suggestion_*`, `accepted_internal_link_snapshot`, …) slúžia na detail správania redaktora a QA. **Article message** už dnes nesie **AI usage** v `AiFeaturesUsageLog`.
+
+Ak obe vrstvy použijú **rôznu identitu článku** alebo sa usage **nezapíše** do `AiFeaturesUsageLog`, vznikajú **dve neprepojiteľné pravdy** o tom, či bol na článku použitý AI nástroj linkbuilding - zhoršuje sa join na dashboard a na budúcu performance vrstvu.
+
+### Odporúčaný postup (bez povinnej zmeny vyššie uvedených AC v tejto iterácii)
+
+| Téma | Odporúčanie | Otvorené |
+| Identita článku v logoch | Všetky nové zápisy by mali používať **rovnaký kanonický kľúč** ako article message (často `ArticleDocumentId`); presná voľba `[DATA_GAP DG-L7]` | Core |
+| Pomenovanie modulu | `AiFeatureType` pre linkbuilding zosúladiť s enum / konvenciou Core (napr. slug `linkbuilding`) | `[DATA_GAP DG-L9]` |
+| Kedy logovať usage | Jedna udalosť alebo viac - napr. pri prvom úspešnom generovaní návrhov vs. pri commite | `[DATA_GAP DG-L8]` |
+| Dvojstopý model | Zachovať Sekciu 9 (detail) + **doplniť** zápis do `AiFeaturesUsageLog` po dohode triggeru - **nie** nablokovať refaktorom celý DataHub naraz | PM + Core |
+
+### Bridge (koncept)
+
+Spojenie usage článku s neskorším výkonom vyžaduje aspoň:
+
+```json
+{
+  "article_document_id": "<Guid>",
+  "ai_feature": "<AiFeatureType z Core>",
+  "used": true,
+  "timestamp": "<ISO alebo Unix>"
+}
+```
+
+Idea: rovnaký `article_document_id` ako v článku umožní spájať **„použil linkbuilding“** s metrikami článku **bez** spochybnenia detailných eventov v Sekcii 9.
+
+### Iné moduly (iba poznámka)
+
+Analogicky môže napr. SEO Content Checker používať vlastný `AiFeatureType` (napr. konvencia `seo_checker`) - mimo scope tejto špecifikácie, rovnaký princíp identity článku.
+
+### Čo sa z tejto sekcie **neberie** ako okamžitá zmena DoD
+
+- prepis existujúcej tabuľky eventov v Sekcii 9
+- zrušenie JSON exportu pre QA
+- zmena checklistu v Sekcii 10 bez samostatného schválenia
+
+---
+
 ## HISTÓRIA DOKUMENTU
 
 | Verzia | Dátum | Autor | Zmena |
@@ -551,7 +613,7 @@ Tento dokument slúži ako **Master Epic**. Pre vývojový tím sa rozpadá na n
 | 1.1 | 2026-04-29 | Daniel Budziňák | MVP scope rez: cosine similarity - MVP2; Morphodita fallback - MVP2; link density zjednodušené na hard cap; soft filter redukovaný na 2 signály; event schema orezaný na minimálne polia |
 | 1.2 | 2026-04-29 | Daniel Budziňák | Formátovanie: dlhé pomlčky - krátke; odstránené checkboxy; odstránené ``` z user stories; odstránené oddeľovacie riadky tabuliek |
 | 1.3 | 2026-04-29 | Daniel Budziňák | UI refaktor: modálny workflow (namiesto inline panelu); akcie zmenené na `×` Zmazať + „Nepoužiť"; obe sú trvalé v MVP1; pridaný „Generovať znova"; bulk button pattern nahradený commit „Použiť prelinkovania a zatvoriť"; sekcie 3, 5, 6.6, 7, 9, 10, 14 aktualizované |
-| 1.4 | 2026-04-30 | Daniel Budziňák | Sekcia 9: `accepted_internal_link_snapshot` pre SEO / DataHub; MVP2 kontrolná vrstva; checklist + ST-4 |
+| 1.6 | 2026-04-30 | Daniel Budziňák | DATA_GAP: DG-L7, DG-L8, DG-L9; nová **Sekcia 15** (Article message, AiFeaturesUsageLog, additive). Schválené sekcie 1-14 zarovnané na obsah v1.4 (bez v1.5 úprav princípu, rozsahu, flow, kap. 9-10, ST-4). |
 
 ---
 
