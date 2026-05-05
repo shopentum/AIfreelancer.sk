@@ -17,6 +17,104 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Link } from "@/i18n/navigation";
+
+const PROFICRAFTS_PATH = "/proficrafts";
+
+function FlagDe({ className }: { className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "relative inline-block h-3.5 w-[1.35rem] shrink-0 overflow-hidden rounded-[1px] border border-black/40 shadow-[1px_1px_0_rgba(0,0,0,0.12)]",
+        className,
+      )}
+    >
+      <span className="absolute inset-0 flex flex-col">
+        <span className="h-1/3 bg-black" />
+        <span className="h-1/3 bg-[#DE0000]" />
+        <span className="h-1/3 bg-[#FFCE00]" />
+      </span>
+    </span>
+  );
+}
+
+function FlagEn({ className }: { className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "relative inline-block h-3.5 w-[1.35rem] shrink-0 overflow-hidden rounded-[1px] border border-black/40 bg-white shadow-[1px_1px_0_rgba(0,0,0,0.12)]",
+        className,
+      )}
+    >
+      <span className="absolute top-0 left-[calc(50%-1px)] z-[1] h-full w-0.5 bg-[#CE1124]" />
+      <span className="absolute top-[calc(50%-1px)] left-0 z-[1] h-0.5 w-full bg-[#CE1124]" />
+    </span>
+  );
+}
+
+function FlagSk({ className }: { className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "relative inline-block h-3.5 w-[1.35rem] shrink-0 overflow-hidden rounded-[1px] border border-black/40 shadow-[1px_1px_0_rgba(0,0,0,0.12)]",
+        className,
+      )}
+    >
+      <span className="absolute inset-0 flex flex-col">
+        <span className="h-1/3 bg-white" />
+        <span className="h-1/3 bg-[#0B4EA2]" />
+        <span className="h-1/3 bg-[#EE1C25]" />
+      </span>
+    </span>
+  );
+}
+
+function ProfiCraftsLocaleSwitch({ locale }: { locale: string }) {
+  const chip = (active: boolean, extra?: string) =>
+    cn(
+      "inline-flex shrink-0 items-center gap-1 rounded border px-2 py-[3px] text-[10px] font-black tracking-wide text-slate-700 uppercase",
+      "border-slate-300/95 bg-gradient-to-b from-white to-slate-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),1px_1px_0_rgba(0,0,0,0.08)] transition-colors",
+      active
+        ? "border-red-500/70 bg-red-50 text-red-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]"
+        : "hover:border-slate-400",
+      extra,
+    );
+
+  return (
+    <div
+      className="flex items-center gap-1.5"
+      role="group"
+      aria-label="Jazyková ponuka (predbežne len rozhranie)"
+    >
+      <span
+        className={chip(false, "cursor-not-allowed opacity-60")}
+        title="German — čoskoro"
+        aria-disabled
+      >
+        <FlagDe /> DE
+      </span>
+      <Link
+        href={PROFICRAFTS_PATH}
+        locale="en"
+        prefetch={false}
+        className={cn(chip(locale === "en"), "no-underline")}
+      >
+        <FlagEn /> EN
+      </Link>
+      <Link
+        href={PROFICRAFTS_PATH}
+        locale="sk"
+        prefetch={false}
+        className={cn(chip(locale === "sk"), "no-underline")}
+      >
+        <FlagSk /> SK
+      </Link>
+    </div>
+  );
+}
 
 const IMG = {
   zaklady: "/img/proficrafts_fundamente.webp",
@@ -188,38 +286,41 @@ function WorkerForm() {
   );
 }
 
-export default function ProfiCraftsWeb() {
+export default function ProfiCraftsWeb({ locale }: Readonly<{ locale: string }>) {
   return (
     <div className="min-h-screen overflow-x-hidden bg-white font-sans text-slate-900 [font-family:var(--font-proficrafts-inter),sans-serif]">
       <nav className="fixed top-0 z-[100] flex h-20 w-full items-center border-b border-slate-100 bg-white/90 px-6 backdrop-blur-xl md:px-12">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
-          <div className="text-[20px] md:text-[24px]">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3">
+          <div className="min-w-0 text-[20px] md:text-[24px]">
             <Logo />
           </div>
-          <div className="hidden items-center space-x-10 md:flex">
-            {["Služby", "O nás", "Kontakt"].map((item) => (
+          <div className="flex shrink-0 items-center gap-4 md:gap-10">
+            <ProfiCraftsLocaleSwitch locale={locale} />
+            <div className="hidden items-center space-x-10 md:flex">
+              {["Služby", "O nás", "Kontakt"].map((item) => (
+                <a
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  className="text-[12px] font-bold tracking-[0.15em] text-slate-900/60 uppercase transition-colors hover:text-red-600"
+                  style={{
+                    fontFamily: "var(--font-proficrafts-space), sans-serif",
+                  }}
+                >
+                  {item}
+                </a>
+              ))}
               <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
-                className="text-[12px] font-bold tracking-[0.15em] text-slate-900/60 uppercase transition-colors hover:text-red-600"
-                style={{
-                  fontFamily: "var(--font-proficrafts-space), sans-serif",
-                }}
+                href="#kontakt"
+                className="rounded-xl bg-[#111827] px-6 py-3 text-[11px] font-black tracking-[0.2em] text-white uppercase shadow-lg shadow-black/10 transition-all hover:bg-red-600"
               >
-                {item}
+                Dopytovať odborníka
               </a>
-            ))}
-            <a
-              href="#kontakt"
-              className="rounded-xl bg-[#111827] px-6 py-3 text-[11px] font-black tracking-[0.2em] text-white uppercase shadow-lg shadow-black/10 transition-all hover:bg-red-600"
-            >
-              Dopytovať odborníka
-            </a>
+            </div>
           </div>
         </div>
       </nav>
 
-      <section className="relative overflow-hidden px-6 pt-20 pb-20 md:px-12 md:pb-32 md:pt-[7.5rem]">
+      <section className="relative overflow-hidden px-6 pt-[6.25rem] pb-20 md:px-12 md:pb-32 md:pt-[7.5rem]">
         <div className="absolute top-0 left-1/2 -z-10 h-full max-w-4xl w-full -translate-x-1/2 rounded-full bg-red-500/5 blur-[120px]" />
 
         <div className="mx-auto max-w-5xl space-y-12 text-center">
@@ -236,7 +337,9 @@ export default function ProfiCraftsWeb() {
             </div>
             <h1 className="text-5xl font-black tracking-tighter text-slate-900 uppercase leading-[0.9] md:text-8xl">
               Projekty v rukách <br />
-              <span className="text-red-600">profesionálov.</span>
+              <span className="block text-3xl text-red-600 sm:text-5xl md:text-8xl">
+                profesionálov.
+              </span>
             </h1>
             <p className="mx-auto max-w-2xl text-lg leading-relaxed font-medium text-slate-500 md:text-2xl">
               ProfiCrafts.eu zabezpečuje kvalifikovaných odborníkov pre

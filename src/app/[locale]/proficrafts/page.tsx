@@ -29,7 +29,7 @@ export default async function ProfiCraftsPage({
 
   return (
     <div className={`${inter.variable} ${spaceGrotesk.variable}`}>
-      <ProfiCraftsWeb />
+      <ProfiCraftsWeb locale={locale} />
     </div>
   );
 }
