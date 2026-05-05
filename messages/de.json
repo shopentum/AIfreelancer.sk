@@ -1,0 +1,400 @@
+{
+  "Hero": {
+    "titlePrefix": "Staviam systémy,",
+    "titleAccent": "ktoré premieňajú",
+    "titleSuffix": "dáta na rozhodnutia.",
+    "title": "Staviam systémy, ktoré premieňajú dáta na rozhodnutia.",
+    "subtitle": "Firmy dnes majú viac dát než kedykoľvek predtým, no rozhodnutia sú stále pomalé a nejasné. Staviam systémy, ktoré tieto dáta prepájajú, vyhodnocujú a premieňajú na jasné výstupy. Tvorím architektúru, ktorá dáva dátam kontext a mení ich na konkrétne kroky.",
+    "cta": "Konzultovať váš projekt"
+  },
+  "Philosophy": {
+    "title": "The AI WORKS Constitution",
+    "principle": "AI navrhuje. Inteligencia rozhoduje.",
+    "description": "Posun za hranicu stochastických chatbotov. Architektujem agentné systémy, kde je každý výstup trasovateľný, auditovateľný a stavovo konzistentný."
+  },
+  "Services": {
+    "title": "AI-DRIVEN DEVELOPMENT PARTNER",
+    "service1": "AI-Native Execution",
+    "service2": "Decision Intelligence",
+    "service3": "Enterprise-Ready Agility"
+  },
+  "CaseStudy": {
+    "title": "Shopentum Decision Intelligence System",
+    "description": "Implementácia vlastného AI jadra, ktoré neriadi len chat, ale celú logiku objednávkového toku a personalizáciu v reálnom čase.",
+    "metric": "Veľa dát, málo jasných rozhodnutí.",
+    "cta": "Pozrieť Case Study"
+  },
+  "Studio": {
+    "eyebrow": "AI-DRIVEN DEVELOPMENT PARTNER",
+    "services": {
+      "s1Desc": "Využívam plný potenciál LLM orchestrácie na generovanie produkčného kódu v reálnom čase. Skracujem cestu od konceptu k deployu o 90 % bez kompromisov v kvalite.",
+      "s2Desc": "Navrhujem systémy, ktoré nečakajú na povel. Staviam architektúry, ktoré autonómne analyzujú dáta a transformujú ich na okamžité biznis rozhodnutia.",
+      "s3Desc": "Moderný stack a modulárna architektúra umožňujú extrémnu flexibilitu. Škálovateľnosť, stabilita a bezpečnosť sú v DNA každého riadku kódu."
+    },
+    "caseEyebrow": "Veľa dát, málo jasných rozhodnutí.",
+    "highlights": {
+      "h1Title": "Vývoj: 10x rýchlejšia iterácia",
+      "h1Desc": "Vďaka AI-Native workflow a unifikovanému frameworku AI WORKS sme skrátili vývojový cyklus o 90%.",
+      "h2Title": "Stav: Globálna škálovateľnosť",
+      "h2Desc": "Plne škálovateľná architektúra postavená na serverless princípoch, pripravená na okamžitú globálnu expanziu.",
+      "h3Title": "Výsledok: Data-Driven Decisions",
+      "h3Desc": "Systém, ktorý sa rozhoduje na základe reálnych dát a prediktívnych modelov, nie na základe odhadov."
+    },
+    "caseImageAlt": "Shopentum — ukážka Decision Intelligence System",
+    "badgeSub": "Decision Engine",
+    "uptimeLabel": "Uptime",
+    "latencyLabel": "Latencia"
+  },
+  "About": {
+    "title": "MGR. DANIEL BUDZIŇÁK",
+    "bio": "Produktový manažér prepájajúci biznis, dáta a inteligentné workflowy — technológia má ľuďom vracať čas, nie ho brať."
+  },
+  "AboutPage": {
+    "heroTitlePrefix": "Staviam mosty medzi",
+    "heroTitleAccent": "biznisovou logikou a inteligentnými systémami.",
+    "location": "SÍDLO: SLOVENSKO",
+    "intro": {
+      "lead": "Moja cesta nezačala pri AI. Za posledných 20 rokov som prešiel každou kľúčovou vrstvou digitálneho produktu:",
+      "b1": "Grafika a vizuálna komunikácia: Viem, čo robí dizajn „drahým“ a funkčným.",
+      "b2": "Marketing a UX/UI: Rozumiem psychológii používateľa a tomu, ako dáta menia konverzie.",
+      "b3": "Manažment projektov a produktov: Viem, ako riadiť priority, rozpočty a tímovú energiu.",
+      "closing": "Dnes tieto izolované svety spájam do jedného celku. Som produktový manažér, ktorý verí, že technológia má ľuďom čas vracať, nie ho brať. Pomáham firmám robiť lepšie rozhodnutia cez dáta a inteligentné workflowy."
+    },
+    "philosophyTitle": "Moja filozofia: Efektivita nad komplexnosťou",
+    "philosophyText": "Nehľadám najkomplikovanejšie riešenie, hľadám to, ktoré v danom momente prinesie najväčší dopad. Moja práca spočíva v prepájaní biznisových potrieb s technologickou realitou dneška.",
+    "valueTitle": "V čom je moja pridaná hodnota?",
+    "valueText": "Vďaka tomu, že som si prešiel celým procesom od prvého pixelu až po strategické riadenie, dokážem dnes cez AI nástroje (ako Cursor a Claude) validovať nápady a stavať systémy v tempe, ktoré bolo pred rokmi nemožné. Špecializujem sa na systémové myslenie, ktoré firmám umožňuje rýchlo rásť bez zbytočného technologického dlhu.",
+    "stackEyebrow": "TECH STACK",
+    "stackTitle": "Technologický stack",
+    "skills": {
+      "s1": "AI Workflow Design",
+      "s2": "Product Architecture",
+      "s3": "Cursor",
+      "s4": "Supabase",
+      "s5": "Vercel",
+      "s6": "Make / N8N",
+      "s7": "API",
+      "s8": "Notion / Jira"
+    },
+    "stackDesc": {
+      "s1": "Workflow & automatizácia",
+      "s2": "Štruktúra produktu",
+      "s3": "AI-native IDE",
+      "s4": "Backend & dáta",
+      "s5": "Deployment & edge",
+      "s6": "No-code integrácie",
+      "s7": "Connected logic",
+      "s8": "Delivery & dokumentácia"
+    },
+    "timelineTitle": "Moja cesta",
+    "timeline": {
+      "t1": {
+        "period": "2025 – SÚČASNOSŤ",
+        "company": "SHOPENTUM",
+        "role": "AI Product Owner / Systems Architect",
+        "desc": "Vývoj AI-driven decision intelligence systému pre transformáciu marketingových a UX dát do štruktúrovaných workflowov."
+      },
+      "t2": {
+        "period": "2020 – 2025",
+        "company": "AIfreelancer.sk",
+        "role": "AI Workflow & Automation Consultant",
+        "desc": "Implementácia AI-asistovaných workflowov a automatizačných systémov pre digitálne projekty."
+      },
+      "t3": {
+        "period": "2013 – 2019",
+        "company": "WebRoyal",
+        "role": "Digital Project Manager",
+        "desc": "Riadenie vývoja komplexných webových aplikácií a e-commerce riešení."
+      },
+      "t4": {
+        "period": "2005 – 2013",
+        "company": "MediaHelp",
+        "role": "Owner štúdia",
+        "desc": "Vývoj jedného z prvých krabicových e-shopových systémov na slovenskom trhu."
+      }
+    },
+    "personalTitle": "Mimo obrazovky",
+    "personal": {
+      "p1": {
+        "title": "Cestovanie",
+        "desc": "Milujem spoznávanie nových kultúr a chutí, najradšej sa vraciam do Talianska a Španielska."
+      },
+      "p2": {
+        "title": "Hudba",
+        "desc": "Sprevádza ma pri práci aj oddychu a vždy mi dodáva potrebnú motiváciu."
+      },
+      "p3": {
+        "title": "Rodina",
+        "desc": "Voľný čas trávim prácou v záhrade a chvíľami s manželkou a našimi štyrmi deťmi."
+      }
+    }
+  },
+  "Contact": {
+    "eyebrow": "Kontakt",
+    "title": "Poďme sa porozprávať.",
+    "titlePrefix": "Poďme sa",
+    "titleAccent": "porozprávať.",
+    "lead": "Máte projekt, nápad alebo hľadáte technologického partnera? Napíšte mi a spolu nájdeme vhodné riešenie.",
+    "identity_name": "Mgr. Daniel Budziňák",
+    "location": "Sídlo: Slovensko / Remote",
+    "subject_prefix": "Dopyt aifreelancer.sk",
+    "success_title": "Správa odoslaná!",
+    "send_another": "Poslať ďalšiu správu",
+    "error_missing_key": "Chýba NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY v .env.local (reštartuj dev server).",
+    "error_submit_failed": "Odoslanie zlyhalo. Skús to prosím znova.",
+    "error_unexpected": "Nastala neočakávaná chyba.",
+    "labels": {
+      "name": "Meno",
+      "email": "Email",
+      "phone": "Telefón"
+    },
+    "form": {
+      "name_label": "Vaše meno",
+      "email_label": "Email",
+      "email_placeholder": "vas@email.com",
+      "phone_label": "Telefón (nepovinné)",
+      "phone_placeholder": "+421 ...",
+      "message_label": "Vaša správa"
+    },
+    "placeholder_name": "Vaše meno",
+    "placeholder_message": "Vaša správa",
+    "status_sending": "Odosielam správu…",
+    "status_success": "Ďakujem, správa je u mňa. Ozvem sa čo najskôr.",
+    "cta": "Odoslať správu"
+  },
+  "Agency": {
+    "eyebrow": "Externý AI Engine pre Agentúry",
+    "heroTitlePrefix": "Staviam moderné produkty s AI-native architektúrou",
+    "heroTitleAccent": "v rekordnom čase.",
+    "heroTitle": "Staviam moderné produkty s AI-native architektúrou v rekordnom čase.",
+    "heroLead1": "Pomáham agentúram a tímom doručovať projekty, ktoré by inak boli technicky a časovo náročné.",
+    "heroLead2": "Staviam riešenia, ktoré sú pripravené na produkciu - nie len demo alebo prototyp. Od Figma dizajnu cez frontend a backend až po AI workflow.",
+    "heroResult": "Výsledok: funkčný web alebo aplikácia, nie prototyp",
+    "heroPrimaryCta": "Prebrať váš projekt (15 min)",
+    "servicesEyebrow": "Najčastejšie spolupráce",
+    "servicesTitle": "3 EXKLUZÍVNE SLUŽBY",
+    "services": {
+      "s1": {
+        "title": "Produkčný frontend",
+        "desc": "Vysoko výkonné a škálovateľné rozhrania postavené na modernom stacku. Zameriavam sa na rýchlosť, stabilitu a bezchybný používateľský zážitok.",
+        "f1": "pixel-accurate implementácia",
+        "f2": "komponentová štruktúra",
+        "f3": "pripravené na backend/integrácie",
+        "f4": "rýchle nasadenie"
+      },
+      "s2": {
+        "title": "AI workflow & automatizácia",
+        "desc": "Zefektívňovanie procesov pomocou inteligentných nástrojov a automatizovaných tokov dát. Šetrím váš čas a eliminujem manuálne chyby.",
+        "f1": "AI asistované workflow",
+        "f2": "prepojenie nástrojov (API, data flow)",
+        "f3": "interné nástroje pre tímy",
+        "f4": "decision support systémy"
+      },
+      "s3": {
+        "title": "Od nápadu k funkčnému produktu",
+        "desc": "Kompletné zastrešenie vývoja od prvotného konceptu až po finálne nasadenie. Rýchlo a efektívne mením nápady na realitu.",
+        "f1": "MVP development",
+        "f2": "rýchle prototypovanie → produkcia",
+        "f3": "validácia nápadu",
+        "f4": "škálovateľný základ"
+      }
+    },
+    "stackEyebrow": "MODERN AI STACK",
+    "stackTitle": "Nástroje, ktoré menia pravidlá hry",
+    "stack": {
+      "cursor": "AI-native IDE",
+      "builder": "Visual CMS & AI",
+      "api": "Connected Logic",
+      "github": "Version Control",
+      "supabase": "Backend & Auth",
+      "vercel": "Deployment & Edge"
+    },
+    "systemLayerEyebrow": "TECH STACK / SYSTEM LAYER",
+    "systemLayerTitle": "Ako sú moje systémy postavené",
+    "systemList": {
+      "i1": { "title": "Pipeline-based architektúra", "desc": "Žiadne ad-hoc skripty, ale robustné, zreťazené procesy." },
+      "i2": { "title": "Data Gap detection", "desc": "Systém aktívne identifikuje slepé miesta v dátach." },
+      "i3": { "title": "Deterministic výstupy", "desc": "Prísna kontrola nad výstupmi, eliminácia halucinácií." },
+      "i4": { "title": "Auditovateľné rozhodnutia", "desc": "Kompletný trace od vstupu cez logiku až po výsledok." },
+      "i5": { "title": "Runtime vs Snapshot logika", "desc": "Jasné oddelenie okamžitého spracovania od historických dát." },
+      "i6": { "title": "Production-first návrh", "desc": "Staviam systémy pripravené na záťaž, nie len demá." }
+    },
+    "approachEyebrow": "AKO PRACUJEM S AI",
+    "approachTitle": "Ako pristupujem k AI systémom",
+    "approachQuote": "\"AI nepoužívam ako black box.\"",
+    "approachLead": "Každý systém navrhujem ako riadený proces:",
+    "approachList": {
+      "i1": { "label": "Jasný vstup", "val": "data contract" },
+      "i2": { "label": "Kontrolovaný výstup", "val": "no guessing" },
+      "i3": { "label": "Validácia rozhodnutí", "val": "confidence, trace" },
+      "i4": { "label": "Oddelenie interpretácie", "val": "fakty vs. odhady" }
+    },
+    "approachResultLabel": "Výsledok:",
+    "approachResultText": "AI, ktorá sa dá riadiť, nie len “používať”.",
+    "ctaTitle": "Posuňte hranice toho, čo je možné.",
+    "ctaLead": "Či už budujete komplexnú infraštruktúru alebo hľadáte technologický motor pre vaše štúdio, som tu, aby som vaše vízie zhmotnil. Premeňme vašu kreativitu na funkčný, high-end softvér bez zbytočných prieťahov."
+  },
+  "Shopentum": {
+    "eyebrow": "USE CASE: SHOPENTUM",
+    "heroTitle": "Veľa dát, málo jasných rozhodnutí",
+    "heroSubTitle": "Decision Intelligence System",
+    "heroLead": "E-shopy dnes pracujú s množstvom dát z rôznych platforiem, ktoré často existujú oddelene a neposkytujú jasnú odpoveď na kľúčovú otázku: Kde presne e-shop stráca rast? Práve tu nastupuje Shopentum.",
+    "diagramTitle": "Shopentum prepája dáta a premieňa ich na jasné rozhodnutia.",
+    "diagramLead": "Na základe prepojenia marketingových a technických signálov identifikujeme najdôležitejšie bariéry rastu e-shopu.",
+    "inputsTitle": "DÁTOVÉ VSTUPY",
+    "inputs": { "i1": "GA4 DATA", "i2": "GOOGLE ADS", "i3": "META ADS", "i4": "SEARCH CONSOLE" },
+    "engineLabel": "Decision Intelligence Engine",
+    "engineLead": "Ukladá kontext, vyhodnocuje auditné dáta, GA4 a signály z Google a Meta Ads v reálnom čase a riadi exekúciu na základe reality trhu a vašich biznis cieľov.",
+    "modulesTitle": "EXEKUTÍVNE MODULY",
+    "modules": { "i1": "AI MARKETING", "i2": "TASK MANAGER", "i3": "GROWTH ENGINE", "i4": "ADS ENGINE" },
+    "problemEyebrow": "PROBLÉM / REALITA",
+    "problemTitle": "E-shop fungoval, ale...",
+    "problems": {
+      "i1": "Rozhodnutia boli manuálne a založené na pocitoch",
+      "i2": "Marketing a dáta neboli prepojené (data silos)",
+      "i3": "Optimalizácia bola pomalá, reaktívna a drahá",
+      "i4": "Systém neškáloval bez neustáleho nárastu tímu"
+    },
+    "architectureEyebrow": "ARCHITEKTÚRA / PRÍSTUP",
+    "architectureTitle": "Architektúra novej generácie: Decision Intelligence System",
+    "architectureLead": "Navrhol som vlastnú decision layer architektúru postavenú na princípoch AIWorks.",
+    "architectureCards": {
+      "c1": { "title": "Runtime vs Snapshot", "desc": "Systém striktne oddeľuje real-time spracovanie dát od nemenných historických stavov. To zaručuje, že každé rozhodnutie je spätne auditovateľné a postavené na dôkazoch (Master Truth)." },
+      "c2": { "title": "Pipeline-based Processing", "desc": "Dáta neanalyzujeme ad-hoc skriptami. Prechádzajú zreťazenou pipeline, kde každý krok zvyšuje informačnú hodnotu – od surového zberu cez validáciu až po finálny strategický vhľad." },
+      "c3": { "title": "Delta Engine", "desc": "Jadro našej inteligencie, ktoré neustále porovnáva aktuálny stav s predchádzajúcimi benchmarkmi. Identifikuje nielen to, čo sa zmenilo, ale analyzuje aj príčinu a biznisový dopad týchto zmien v čase." },
+      "c4": { "title": "Findings Engine", "desc": "Viacvrstvová analytická vrstva, ktorá v dátovom šume automaticky vyhľadáva kritické bariéry a rastové príležitosti. Každý nález je prioritizovaný podľa reálneho vplyvu na zisk e-shopu." }
+    },
+    "log": {
+      "file": "shopentum_os_core.log",
+      "l1": "[SYSTEM] Initializing Decision Layer...",
+      "l2": "[DATA] Fetching snapshots from GA4 & Meta API",
+      "l3": "[ENGINE] Delta analysis complete: +14% deviation in ROAS",
+      "l4": "[FINDINGS] Critical issue identified: Checkout drop-off",
+      "l5": "[ACTION] Generating recommendations..."
+    },
+    "solutionEyebrow": "RIEŠENIE / LOGIKA",
+    "solutionTitle": "Vznikol Shopentum",
+    "solutionList": {
+      "i1": "Systém, ktorý sleduje stav marketingu v čase",
+      "i2": "Automaticky identifikuje problémy a zmeny",
+      "i3": "Generuje odporúčania na základe reálnych dát",
+      "i4": "Pripravuje podklady pre strategické rozhodnutia"
+    },
+    "visuals": {
+      "dashboardLabel": "Unified Dashboard",
+      "dashboardTitle": "Dashboard",
+      "findingsLabel": "AI Findings Engine",
+      "findingsTitle": "Findings",
+      "auditLabel": "Automated Audit",
+      "auditTitle": "Audit"
+    },
+    "metrics": {
+      "m1": { "label": "Rýchlosť", "val": "Zrýchlenie rozhodovania", "desc": "Dáta sú interpretované okamžite." },
+      "m2": { "label": "Efektivita", "val": "Menej manuálnej práce", "desc": "Automatizácia rutinných analýz." },
+      "m3": { "label": "Kontrola", "val": "Lepší prehľad o výkone", "desc": "Žiadne slepé miesta v marketingu." },
+      "m4": { "label": "Škálovanie", "val": "Pripravenosť na rast", "desc": "Bez nutnosti navyšovania tímu." }
+    },
+    "ctaTitle": "Hľadáte technického partnera pre AI projekt?",
+    "ctaLead": "Poďme to prebrať. Ukážem vám, ako môžeme transformovať vaše dáta na rozhodnutia.",
+    "ctaPrimary": "Dohodnúť konzultáciu",
+    "ctaSecondary": "Späť na úvod"
+  },
+  "AIArchitecture": {
+    "heroBadge": "Enterprise AI architektúra",
+    "heroTitleLine1": "Enterprise AI architektúra:",
+    "heroTitleAccent": "Od chaosu k riadenému výkonu",
+    "heroLead": "Navrhujem a implementujem systémy rozhodovacej inteligencie (Decision Intelligence), ktoré sú bezpečné, auditovateľné a plne integrované do vašich biznis procesov.",
+    "quote": "Za 20 rokov v digitále som pochopil, že najväčšie riziko nie je technológia, ale chaos. Moja AI architektúra prináša do generatívnych procesov poriadok a biznisovú logiku. Nepredávam prompty, predávam infraštruktúru pre vaše rozhodovanie.",
+    "quoteRole": "AI architekt & stratég",
+    "diagramTitle": "Use case: Intelligence Engine",
+    "diagramLead": "Príklad architektúry systému riadeného stavom, kde sú agenti aktivovaní dynamicky podľa aktuálneho stavu objektu.",
+    "governance": {
+      "title": "Governance, Security & Control Layer",
+      "sub": "Policy • Risk • Human Authority • Publish Gate"
+    },
+    "discovery": {
+      "title": "Discovery & Analysis",
+      "i1": "Signály publika a analytika",
+      "i2": "Trhové trendy a signály",
+      "i3": "Autoritatívne zdroje",
+      "i4": "Konkurenčné medzery",
+      "i5": "Prioritizácia tém"
+    },
+    "validation": {
+      "title": "Validation & Verification",
+      "i1": "Extrakcia tvrdení",
+      "i2": "Overenie zdrojov a porovnanie",
+      "i3": "Editorial a policy kontrola",
+      "i4": "Risk scoring a dôvera",
+      "i5": "Risk heatmap (cieľový review)"
+    },
+    "creation": {
+      "title": "Creation & Optimization",
+      "i1": "Brand kontext a pamäť",
+      "i2": "Režimy obsahu: fakt • hodnota • názor",
+      "i3": "Štruktúra a zámer",
+      "i4": "Drafting na základe zdrojov",
+      "i5": "Varianty a optimalizácia"
+    },
+    "distribution": {
+      "title": "Distribution & Performance",
+      "i1": "Výber kanálov",
+      "i2": "Optimalizácia načasovania",
+      "i3": "A/B testovanie",
+      "i4": "Cielenie publika",
+      "i5": "Spätná väzba výkonu"
+    },
+    "publishGate": {
+      "line1": "Publish Gate",
+      "line2": "Explicit Commit"
+    },
+    "identity": {
+      "title": "Brand Identity Layer",
+      "desc": "Každá značka má vlastný tón, pravidlá a risk profil. (Multi-brand / multi-tenant architektúra)."
+    },
+    "core": {
+      "title": "Common Intelligence Core",
+      "sub": "Shared Memory • Audit Trail • Decision Context • Content • Claims • Policy • Events"
+    },
+    "benefits": {
+      "b1": {
+        "title": "Bezpečnosť a súlad",
+        "desc": "Plná kontrola nad dátami a výstupmi (governance). Vaše know-how nikdy neopustí bezpečný perimeter."
+      },
+      "b2": {
+        "title": "Škálovateľnosť",
+        "desc": "Multi-tenant architektúra umožňuje jeden systém pre viacero značiek, trhov alebo oddelení pri zachovaní identity."
+      },
+      "b3": {
+        "title": "Auditovateľnosť",
+        "desc": "Každé rozhodnutie AI je v audit trail a spätne overiteľné. Koniec „čiernej skrinky“."
+      },
+      "b4": {
+        "title": "Efektivita",
+        "desc": "Automatizácia rutinných analytických a kreatívnych úloh uvoľní seniorov na strategickú prácu."
+      }
+    },
+    "cta": {
+      "title": "AI architektúra pod kontrolou",
+      "lead": "Navrhnem vám uzavretý Intelligence Engine, ktorý rešpektuje vašu identitu a bezpečnostné pravidlá. Architektúra, ktorá váš biznis udrží pod kontrolou.",
+      "button": "Konzultovať AI stratégiu"
+    }
+  },
+  "Navbar": {
+    "links": {
+      "about": "About",
+      "agency": "Agency",
+      "aiArch": "AI Architecture",
+      "caseStudy": "Case Study"
+    },
+    "contact": "Contact",
+    "language": "Language"
+  },
+  "Footer": {
+    "cookies": "Cookies",
+    "gdpr": "GDPR",
+    "geoSignal": "AI-native vývoj a decision intelligence riešenia pre firmy v celej SR.",
+    "legal": "AI-native development and decision intelligence systems. EU-based, globally scalable."
+  }
+}
+

@@ -21,53 +21,23 @@ import { Link } from "@/i18n/navigation";
 
 const PROFICRAFTS_PATH = "/proficrafts";
 
-function FlagDe({ className }: { className?: string }) {
+/** Skutočná vlajka (SK má erb); EN = gb. Zdroj: flagcdn.com (w40 PNG). */
+function LocaleFlagPhoto({ iso }: { iso: string }) {
   return (
     <span
       aria-hidden
       className={cn(
-        "relative inline-block h-3.5 w-[1.35rem] shrink-0 overflow-hidden rounded-[1px] border border-black/40 shadow-[1px_1px_0_rgba(0,0,0,0.12)]",
-        className,
+        "relative block h-3.5 w-[22px] shrink-0 overflow-hidden rounded-[1px]",
+        "border border-black/30 shadow-[1px_1px_0_rgba(0,0,0,0.12)]",
       )}
     >
-      <span className="absolute inset-0 flex flex-col">
-        <span className="h-1/3 bg-black" />
-        <span className="h-1/3 bg-[#DE0000]" />
-        <span className="h-1/3 bg-[#FFCE00]" />
-      </span>
-    </span>
-  );
-}
-
-function FlagEn({ className }: { className?: string }) {
-  return (
-    <span
-      aria-hidden
-      className={cn(
-        "relative inline-block h-3.5 w-[1.35rem] shrink-0 overflow-hidden rounded-[1px] border border-black/40 bg-white shadow-[1px_1px_0_rgba(0,0,0,0.12)]",
-        className,
-      )}
-    >
-      <span className="absolute top-0 left-[calc(50%-1px)] z-[1] h-full w-0.5 bg-[#CE1124]" />
-      <span className="absolute top-[calc(50%-1px)] left-0 z-[1] h-0.5 w-full bg-[#CE1124]" />
-    </span>
-  );
-}
-
-function FlagSk({ className }: { className?: string }) {
-  return (
-    <span
-      aria-hidden
-      className={cn(
-        "relative inline-block h-3.5 w-[1.35rem] shrink-0 overflow-hidden rounded-[1px] border border-black/40 shadow-[1px_1px_0_rgba(0,0,0,0.12)]",
-        className,
-      )}
-    >
-      <span className="absolute inset-0 flex flex-col">
-        <span className="h-1/3 bg-white" />
-        <span className="h-1/3 bg-[#0B4EA2]" />
-        <span className="h-1/3 bg-[#EE1C25]" />
-      </span>
+      <Image
+        src={`https://flagcdn.com/w40/${iso}.png`}
+        alt=""
+        fill
+        className="object-cover object-center"
+        sizes="22px"
+      />
     </span>
   );
 }
@@ -76,6 +46,7 @@ function ProfiCraftsLocaleSwitch({ locale }: { locale: string }) {
   const chip = (active: boolean, extra?: string) =>
     cn(
       "inline-flex shrink-0 items-center gap-1 rounded border px-2 py-[3px] text-[10px] font-black tracking-wide text-slate-700 uppercase",
+      "md:gap-0 md:px-1.5 md:py-[5px]",
       "border-slate-300/95 bg-gradient-to-b from-white to-slate-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),1px_1px_0_rgba(0,0,0,0.08)] transition-colors",
       active
         ? "border-red-500/70 bg-red-50 text-red-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]"
@@ -87,30 +58,40 @@ function ProfiCraftsLocaleSwitch({ locale }: { locale: string }) {
     <div
       className="flex items-center gap-1.5"
       role="group"
-      aria-label="Jazyková ponuka (predbežne len rozhranie)"
+      aria-label="Volba jazyka stránky ProfiCrafts"
     >
-      <span
-        className={chip(false, "cursor-not-allowed opacity-60")}
-        title="German — čoskoro"
-        aria-disabled
+      <Link
+        href={PROFICRAFTS_PATH}
+        locale="de"
+        prefetch={false}
+        className={cn(chip(locale === "de"), "no-underline")}
+        aria-label="Deutsch"
+        title="Deutsch"
       >
-        <FlagDe /> DE
-      </span>
+        <LocaleFlagPhoto iso="de" />
+        <span className="md:hidden">DE</span>
+      </Link>
       <Link
         href={PROFICRAFTS_PATH}
         locale="en"
         prefetch={false}
         className={cn(chip(locale === "en"), "no-underline")}
+        aria-label="English (UK)"
+        title="English"
       >
-        <FlagEn /> EN
+        <LocaleFlagPhoto iso="gb" />
+        <span className="md:hidden">EN</span>
       </Link>
       <Link
         href={PROFICRAFTS_PATH}
         locale="sk"
         prefetch={false}
         className={cn(chip(locale === "sk"), "no-underline")}
+        aria-label="Slovenčina"
+        title="Slovenčina"
       >
-        <FlagSk /> SK
+        <LocaleFlagPhoto iso="sk" />
+        <span className="md:hidden">SK</span>
       </Link>
     </div>
   );
@@ -313,7 +294,7 @@ export default function ProfiCraftsWeb({ locale }: Readonly<{ locale: string }>)
                 href="#kontakt"
                 className="rounded-xl bg-[#111827] px-6 py-3 text-[11px] font-black tracking-[0.2em] text-white uppercase shadow-lg shadow-black/10 transition-all hover:bg-red-600"
               >
-                Dopytovať odborníka
+                Nezáväzný dopyt
               </a>
             </div>
           </div>
@@ -337,7 +318,7 @@ export default function ProfiCraftsWeb({ locale }: Readonly<{ locale: string }>)
             </div>
             <h1 className="text-5xl font-black tracking-tighter text-slate-900 uppercase leading-[0.9] md:text-8xl">
               Projekty v rukách <br />
-              <span className="block text-3xl text-red-600 sm:text-5xl md:text-8xl">
+              <span className="block text-[2.25rem] leading-[0.92] text-red-600 sm:text-5xl md:text-8xl">
                 profesionálov.
               </span>
             </h1>
