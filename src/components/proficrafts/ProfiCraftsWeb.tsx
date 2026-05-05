@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import {
   Zap,
@@ -128,6 +128,11 @@ const ServiceCard = ({
   </motion.div>
 );
 
+const workerPanelTransition = {
+  duration: 0.32,
+  ease: [0.4, 0, 0.2, 1] as const,
+};
+
 function WorkerForm() {
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -140,37 +145,45 @@ function WorkerForm() {
       >
         <span>Chcem sa zaregistrovať</span>
         <ChevronRight
-          className={cn("transition-transform", isOpen ? "rotate-90" : "")}
+          className={cn(
+            "transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+            isOpen ? "rotate-90" : "",
+          )}
           size={16}
         />
       </button>
 
-      {isOpen ? (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          className="overflow-hidden pt-6"
-        >
-          <div className="space-y-4 rounded-2xl bg-slate-800/50 p-6">
-            <input
-              type="text"
-              placeholder="Vaša profesia (napr. Elektrikár)"
-              className="w-full rounded-xl border-none bg-slate-900/50 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-1 focus:ring-red-500 outline-none"
-            />
-            <input
-              type="tel"
-              placeholder="Telefónne číslo"
-              className="w-full rounded-xl border-none bg-slate-900/50 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-1 focus:ring-red-500 outline-none"
-            />
-            <button
-              type="button"
-              className="w-full rounded-xl bg-white/10 py-3 text-[10px] font-black tracking-widest text-white uppercase transition-all hover:bg-white/20"
-            >
-              Odoslať kontakt
-            </button>
-          </div>
-        </motion.div>
-      ) : null}
+      <AnimatePresence initial={false}>
+        {isOpen ? (
+          <motion.div
+            key="worker-register-panel"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={workerPanelTransition}
+            className="overflow-hidden"
+          >
+            <div className="mt-6 space-y-4 rounded-2xl bg-slate-800/50 p-6">
+              <input
+                type="text"
+                placeholder="Vaša profesia (napr. Elektrikár)"
+                className="w-full rounded-xl border-none bg-slate-900/50 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-1 focus:ring-red-500 outline-none"
+              />
+              <input
+                type="tel"
+                placeholder="Telefónne číslo"
+                className="w-full rounded-xl border-none bg-slate-900/50 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-1 focus:ring-red-500 outline-none"
+              />
+              <button
+                type="button"
+                className="w-full rounded-xl bg-white/10 py-3 text-[10px] font-black tracking-widest text-white uppercase transition-all hover:bg-white/20"
+              >
+                Odoslať kontakt
+              </button>
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }
@@ -206,7 +219,7 @@ export default function ProfiCraftsWeb() {
         </div>
       </nav>
 
-      <section className="relative overflow-hidden pt-40 pb-20 px-6 md:px-12 md:pt-60 md:pb-32">
+      <section className="relative overflow-hidden px-6 pt-20 pb-20 md:px-12 md:pb-32 md:pt-[7.5rem]">
         <div className="absolute top-0 left-1/2 -z-10 h-full max-w-4xl w-full -translate-x-1/2 rounded-full bg-red-500/5 blur-[120px]" />
 
         <div className="mx-auto max-w-5xl space-y-12 text-center">
@@ -462,7 +475,7 @@ export default function ProfiCraftsWeb() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-slate-800/60 shadow-lg">
                   <Mail size={18} className="text-red-500" />
                 </div>
-                <span className="font-black">jan@proficrafts.eu</span>
+                <span className="font-black">info@proficrafts.eu</span>
               </div>
             </div>
           </div>
