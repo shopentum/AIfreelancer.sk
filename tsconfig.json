@@ -30,5 +30,12 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "src/components/App.tsx", "mediace", "docs"]
+  "exclude": [
+    "node_modules",
+    "src/components/App.tsx",
+    "mediace",
+    "docs",
+    "modern-eshop",
+    "omega-cashflow"
+  ]
 }
