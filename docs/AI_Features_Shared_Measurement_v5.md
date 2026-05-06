@@ -206,10 +206,4 @@ AI feature bez measurement ostáva len nástroj. Cieľom v5 nie je merať všetk
 - nechať **feature špecifický detail** (napr. linkbuilding) koexistovať so shared minimom,
 - spísať **adoption** tak, aby menovateľ nebol dvojzmyselný.
 
----
-
-## HISTÓRIA
-
-| Verzia | Dátum | Zmena |
-| v4 | (pôvodný súbor) | Draft v4 v `AI-Features_Shared-Measurement.txt` |
-| v5 | 2026-05-06 | Konsolidácia: Article message realita, Core princíp, DG-L7, tabuľka embed vs MVP, adoption menovateľ, dvojstopý model vs linkbuilding, poznámky k placeholderom a impact |
+**Cieľom je vytvoriť konzistentný základ pre budúce AI-assisted decision workflows v CMS.**
