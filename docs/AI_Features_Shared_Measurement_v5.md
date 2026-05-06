@@ -1,4 +1,4 @@
-# AI Features - Shared Measurement (Draft v5)
+# AI Features - Shared Measurement (v5, finál)
 
 > **Nadväzuje na:** predchádzajúci interný draft smeru shared measurement (Product).  
 > **Zohľadňuje:** štruktúru Article message v Core (usage embed, identita článku), feedback Core, audit zhody a medzier; zarovnanie s Confluence: **Interné prelinkovanie v editore** (Article message / `AiFeaturesUsageLog`, DATA_GAP DG-L7 až DG-L9).
@@ -116,7 +116,7 @@ Bez toho **rovnaké číslo adoption** môže znamenať tri rôzne príbehy.
 
 Globálny smer **nemení** potrebu detailu u konkrétnych feature.
 
-- **Confluence: Interné prelinkovanie v editore** - detail správania redaktora v JSON eventoch + zosúladenie so **`AiFeaturesUsageLog`** (trigger `[DATA_GAP DG-L8]`).
+- **Confluence: Interné prelinkovanie v editore** - detail správania redaktora v JSON eventoch + zosúladenie so **`AiFeaturesUsageLog`**: kedy zapisovať usage `[DATA_GAP DG-L8]`, presný `AiFeatureType` / slug pre modul `[DATA_GAP DG-L9]`.
 - **Shared layer** definuje **minimum** (join kľúč, `feature` identifikátor, časová os); **feature môže mať bohší lokálny log** podľa potreby QA a produktu.
 
 ### 5.3 Impact Layer (DataHub / reporting)
