@@ -1,7 +1,7 @@
 # AI Features - Shared Measurement (Draft v5)
 
-> **Nadväzuje na:** `docs/AI-Features_Shared-Measurement.txt` (Draft v4)  
-> **Zohľadňuje:** štruktúru Article message (`Article-message_final.txt`), feedback Core (Lukáš Š.), audit zhody a medzier oproti realite, zarovnanie s `docs/SEO_Copilot_Linkbuilding_MVP1_Spec.md` (Sekcia 15, DG-L7 až DG-L9).
+> **Nadväzuje na:** predchádzajúci interný draft smeru shared measurement (Product).  
+> **Zohľadňuje:** štruktúru Article message v Core (usage embed, identita článku), feedback Core, audit zhody a medzier; zarovnanie s Confluence: **Interné prelinkovanie v editore** (Article message / `AiFeaturesUsageLog`, DATA_GAP DG-L7 až DG-L9).
 
 Dátum: 2026-05-06
 
@@ -62,7 +62,7 @@ V message sú **viaceré identifikátory článku** (napr. `DocumentId`, `Entity
 **Odporúčanie pre nové zápisy a dokumentáciu:**
 
 - **Preferovať `ArticleDocumentId`** ako kandidáta na kanonický join medzi CMS usage, detailnými logmi feature a DataHub performance vrstvou, keďže je explicitne prítomný v `AiFeaturesUsageLog`.
-- **Finálne rozhodnutie** (vrátane alternatív pri migráciách alebo historických dátach) ostáva u **Core** - v linbuilding špecifikácii ako `[DATA_GAP DG-L7]`.
+- **Finálne rozhodnutie** (vrátane alternatív pri migráciách alebo historických dátach) ostáva u **Core** - v Confluence **Interné prelinkovanie v editore** ako `[DATA_GAP DG-L7]`.
 
 V textoch typu „`article_id`“ treba buď nahradiť konkrétnym názvom poľa, alebo vysvetliť alias (napr. `article_id` v príkladoch = placeholder pre dokument, v implementácii `ArticleDocumentId`).
 
@@ -96,7 +96,7 @@ Cieľ: konzistentný signál naprieč modulmi. **Toto nie je automaticky súčas
 
 | Rozsah | Popis |
 | A | Rozšírenie schémy embedu (napr. typ interakcie) - po dohode s Core |
-| B | Paralelný **feature-špecifický detail** (JSON / event pipeline) s **rovnakým kanonickým kľúčom** ako message (pozri linkbuilding Sekcia 9) |
+| B | Paralelný **feature-špecifický detail** (JSON / event pipeline) s **rovnakým kanonickým kľúčom** ako message (pozri Confluence: Interné prelinkovanie v editore - event logging / JSON) |
 | C | Kombinácia A+B podľa záťaže a citlivosti |
 
 **Navrhované typy interakcií (MVP zoznam):** `generated`, `opened`, `accepted`, `rejected`, `ignored`, `regenerated` (presný finálny enum produkt + dev).
@@ -116,7 +116,7 @@ Bez toho **rovnaké číslo adoption** môže znamenať tri rôzne príbehy.
 
 Globálny smer **nemení** potrebu detailu u konkrétnych feature.
 
-- **`SEO_Copilot_Linkbuilding_MVP1_Spec.md`:** detail správania redaktora v JSON eventoch (Sekcia 9) + zosúladenie so **`AiFeaturesUsageLog`** (trigger `[DATA_GAP DG-L8]`).
+- **Confluence: Interné prelinkovanie v editore** - detail správania redaktora v JSON eventoch + zosúladenie so **`AiFeaturesUsageLog`** (trigger `[DATA_GAP DG-L8]`).
 - **Shared layer** definuje **minimum** (join kľúč, `feature` identifikátor, časová os); **feature môže mať bohší lokálny log** podľa potreby QA a produktu.
 
 ### 5.3 Impact Layer (DataHub / reporting)
