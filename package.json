@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "sync:prusafinance": "node scripts/sync-prusafinance-public.mjs",
+    "sync:prusafinance": "node scripts/sync-prusafinance-public.mjs && node scripts/prusafinance-prefix-paths.mjs",
     "dev": "next dev",
-    "prebuild": "node scripts/sync-prusafinance-public.mjs",
+    "prebuild": "node scripts/sync-prusafinance-public.mjs && node scripts/prusafinance-prefix-paths.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
