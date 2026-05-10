@@ -92,6 +92,14 @@ function applyTransforms(html) {
   return s;
 }
 
+const markerSrc = path.join(root, copies[0][0]);
+if (!fs.existsSync(markerSrc)) {
+  console.warn(
+    "[sync-prusafinance] finance/Web not found — skipping regenerate (using committed public/prusafinance).",
+  );
+  process.exit(0);
+}
+
 fs.mkdirSync(outDir, { recursive: true });
 
 for (const [srcRel, destName] of copies) {
