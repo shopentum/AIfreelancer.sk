@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Obchodní podmínky — PrůšaFinance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --y:#FFDD00;--yd:#C9951A;--yp:#FFFBE5;
+  --bl:#0C0C0C;--gr:#6B6B6B;--gu:#F7F7F5;--gl:#E8E8E8;--w:#fff;
+  --serif:'DM Serif Display',Georgia,serif;
+  --sans:'DM Sans',sans-serif;
+  --max:800px;--pad:48px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--w);-webkit-font-smoothing:antialiased;color:var(--bl)}
+a{text-decoration:none;color:var(--yd)}
+a:hover{text-decoration:underline}
+button{cursor:pointer;font-family:var(--sans)}
+nav{position:sticky;top:0;z-index:200;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--gl)}
+.nav-inner{max-width:1100px;margin:0 auto;padding:0 var(--pad);height:64px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.nav-logo{font-family:var(--serif);font-size:20px;color:var(--bl);text-decoration:none}
+.nav-logo em{color:var(--yd);font-style:normal}
+.nav-links{display:flex;gap:4px;list-style:none}
+.nav-links a{padding:8px 12px;font-size:13.5px;color:var(--gr);border-radius:8px;transition:all .2s;display:flex;align-items:center;gap:5px;text-decoration:none}
+.nav-links a:hover{color:var(--bl);background:var(--gu)}
+.nav-links li{position:relative}
+.arrow{font-size:9px;opacity:.5}
+.dropdown{position:absolute;top:calc(100% + 8px);left:0;min-width:230px;background:var(--w);border:1px solid var(--gl);border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,.1);padding:8px;opacity:0;visibility:hidden;transform:translateY(-6px);transition:all .2s cubic-bezier(.22,1,.36,1);z-index:300}
+.nav-links li:hover .dropdown{opacity:1;visibility:visible;transform:none}
+.dropdown a{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:13.5px;color:var(--gr);border-radius:8px;transition:all .15s;background:none;text-decoration:none}
+.dropdown a:hover{background:var(--gu);color:var(--bl)}
+.d-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.d-text strong{display:block;font-size:13px;font-weight:500;color:var(--bl)}
+.d-text span{font-size:11.5px;color:var(--gr)}
+.nav-cta{padding:9px 20px;background:var(--y);color:var(--bl);font-size:13px;font-weight:600;border:none;border-radius:100px;transition:all .15s;white-space:nowrap}
+.nav-cta:hover{background:var(--yd);color:#fff}
+/* LEGAL PAGE STYLES */
+.legal-hero{background:var(--bl);padding:52px var(--pad) 48px}
+.legal-hero-inner{max-width:var(--max);margin:0 auto}
+.legal-tag{font-size:10.5px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--yd);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.legal-tag::before{content:'';width:16px;height:2px;background:var(--yd);display:block}
+.legal-h1{font-family:var(--serif);font-size:clamp(28px,4vw,42px);color:#fff;line-height:1.1;letter-spacing:-1px;margin-bottom:10px}
+.legal-updated{font-size:12.5px;color:rgba(255,255,255,.35)}
+.legal-body{max-width:var(--max);margin:0 auto;padding:56px var(--pad) 80px}
+.legal-body h2{font-family:var(--serif);font-size:22px;color:var(--bl);margin:40px 0 12px;letter-spacing:-.3px;line-height:1.2;padding-top:8px;border-top:1px solid var(--gl)}
+.legal-body h2:first-child{border-top:none;margin-top:0}
+.legal-body p{font-size:15px;font-weight:300;color:#333;line-height:1.8;margin-bottom:14px}
+.legal-body ul{padding-left:20px;margin-bottom:16px}
+.legal-body ul li{font-size:15px;font-weight:300;color:#333;line-height:1.8;margin-bottom:6px}
+.legal-body strong{font-weight:600;color:var(--bl)}
+.legal-body .highlight{padding:18px 22px;background:var(--yp);border-left:3px solid var(--yd);border-radius:0 10px 10px 0;margin:24px 0;font-size:14.5px;color:var(--bl);line-height:1.7}
+.legal-body .contact-box{padding:20px 24px;background:var(--gu);border-radius:12px;border:1px solid var(--gl);margin:24px 0}
+.legal-body .contact-box p{margin-bottom:4px;font-size:14px}
+/* FOOTER */
+footer{background:#0C0C0C;padding:48px var(--pad) 32px;border-top:1px solid rgba(255,255,255,.05)}
+.foot-top{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.5fr 2fr 1fr;gap:48px;padding-bottom:36px;border-bottom:1px solid rgba(255,255,255,.08)}
+.fl{font-family:var(--serif);font-size:20px;color:#fff;display:block;margin-bottom:10px;text-decoration:none}
+.fl em{color:var(--yd);font-style:normal}
+.fd{font-size:12.5px;color:rgba(255,255,255,.32);line-height:1.7;margin-bottom:14px}
+.fv{font-size:11px;color:rgba(255,255,255,.2);line-height:1.6;padding:10px 12px;border:1px solid rgba(255,255,255,.07);border-radius:8px}
+.fv strong{color:rgba(255,255,255,.4);font-weight:500}
+.fnh{font-size:10.5px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:14px}
+.fng{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}
+.fng a{display:block;font-size:13px;color:rgba(255,255,255,.38);padding:5px 0;transition:color .2s;text-decoration:none}
+.fng a:hover{color:var(--y)}
+.fsh{font-size:10.5px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:14px}
+.fsl{display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.38);padding:5px 0;transition:color .2s;text-decoration:none}
+.fsl:hover{color:var(--y)}
+.fsi{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fsi svg{width:13px;height:13px;fill:white}
+.soc-fb{background:#1877F2}.soc-li{background:#0A66C2}
+.soc-ig{background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#bc1888)}
+.foot-bot{max-width:1100px;margin:24px auto 0;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.foot-copy{font-size:11.5px;color:rgba(255,255,255,.18)}
+.foot-legal{display:flex;gap:20px}
+.foot-legal a{font-size:11.5px;color:rgba(255,255,255,.22);transition:color .2s;text-decoration:none}
+.foot-legal a:hover{color:var(--y)}
+@media(max-width:860px){
+  :root{--pad:20px}
+  .nav-links{display:none}
+  .foot-top{grid-template-columns:1fr;gap:28px}
+  .foot-bot{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="index.html">Průša<em>Finance</em></a>
+    <ul class="nav-links">
+      <li>
+        <a href="#">Cíle <span class="arrow">▾</span></a>
+        <div class="dropdown">
+          <a href="vlastni-domov.html"><div class="d-icon" style="background:#EFF6FF">🏠</div><div class="d-text"><strong>Vlastní domov</strong><span>Hypotéky a vlastní bydlení</span></div></a>
+          <a href="ochrana.html"><div class="d-icon" style="background:#FFF7ED">🛡️</div><div class="d-text"><strong>Ochrana Vás a rodiny</strong><span>Pojištění a finanční bezpečí</span></div></a>
+          <a href="budoucnost.html"><div class="d-icon" style="background:#F0FDF4">💰</div><div class="d-text"><strong>Klidná budoucnost</strong><span>Spoření a finanční plán</span></div></a>
+          <a href="zivotni-sen.html"><div class="d-icon" style="background:#FFFBE5">✈️</div><div class="d-text"><strong>Životní sen</strong><span>Splnění vašich životních cílů</span></div></a>
+        </div>
+      </li>
+      <li><a href="blog.html">Blog</a></li>
+      <li><a href="index.html#o-mne">O mně</a></li>
+      <li><a href="index.html#kontakt">Kontakt</a></li>
+    </ul>
+    <button class="nav-cta" onclick="window.location.href='index.html#kontakt'">☕ Zvu vás na kávu</button>
+  </div>
+</nav>
+
+<div class="legal-hero">
+  <div class="legal-hero-inner">
+    <div class="legal-tag">Právní informace</div>
+    <h1 class="legal-h1">Obchodní podmínky</h1>
+    <p class="legal-updated">Naposledy aktualizováno: 1. ledna 2025</p>
+  </div>
+</div>
+
+<div class="legal-body">
+
+  <div class="highlight">
+    Tyto obchodní podmínky upravují pravidla poskytování finančního poradenství prostřednictvím webu prusafinance.cz a osobní konzultací. Před zahájením spolupráce si je prosím přečtěte.
+  </div>
+
+  <h2>1. Poskytovatel služeb</h2>
+  <p><strong>Mgr. Martin Průša</strong><br>
+  Mgr. Martin Průša<br>
+  Ve Školce 457, 398 11 Protivín<br>
+  IČ: 07179235<br>
+  Vázaný zástupce Raiffeisen stavební spořitelny<br>
+  Vázaný zástupce Raiffeisen stavební spořitelny na základě smlouvy o obchodním zastoupení · Certifikace ČNB<br>
+  E-mail: <a href="mailto:MPrusa@obchod.rsts.cz">MPrusa@obchod.rsts.cz</a><br>
+  Telefon: <a href="tel:+420721360836">721 360 836</a></p>
+
+  <h2>2. Rozsah poskytovaných služeb</h2>
+  <p>Prostřednictvím prusafinance.cz nabízím tyto služby:</p>
+  <ul>
+    <li><strong>Finanční poradenství</strong> — analýza finanční situace klienta a doporučení vhodných produktů</li>
+    <li><strong>Zprostředkování hypotečních úvěrů</strong> — Raiffeisen stavební spořitelna</li>
+    <li><strong>Zprostředkování stavebního spoření</strong> — Raiffeisen stavební spořitelna</li>
+    <li><strong>Zprostředkování hypotečních úvěrů a spořicích produktů</strong> — zajišťováno přes Raiffeisen stavební spořitelnu</li>
+    <li><strong>Zprostředkování penzijního spoření</strong> — Generali penzijní společnost</li>
+    <li><strong>Zprostředkování pojištění</strong> — Generali pojišťovna, Uniqa pojišťovna</li>
+  </ul>
+  <p>Poradenství je vždy nezávazné. Ke sjednání produktu dochází až podpisem příslušné smlouvy s danou finanční institucí.</p>
+
+  <h2>3. Bezplatnost poradenství</h2>
+  <p>Finanční konzultace je pro klienta <strong>zcela bezplatná</strong>. Jsem odměňován provizí od finančních institucí za zprostředkování produktů. Tato skutečnost neovlivňuje objektivitu mého poradenství — vždy navrhuji řešení, které je pro klienta nejvýhodnější.</p>
+
+  <h2>4. Průběh konzultace</h2>
+  <ul>
+    <li>Konzultace probíhá osobně, telefonicky nebo online dle dohody</li>
+    <li>Klient poskytuje pravdivé a úplné informace nezbytné pro vypracování doporučení</li>
+    <li>Na základě konzultace vypracuji nezávazné doporučení — klient není povinen žádný produkt sjednat</li>
+    <li>Doporučení je zpracováno na základě informací poskytnutých klientem a aktuální nabídky finančních institucí</li>
+  </ul>
+
+  <h2>5. Povinnosti klienta</h2>
+  <ul>
+    <li>Poskytovat pravdivé a úplné informace o své finanční situaci</li>
+    <li>Informovat o všech závazcích a skutečnostech relevantních pro posouzení situace</li>
+    <li>Před podpisem jakéhokoliv dokumentu si jej důkladně přečíst</li>
+    <li>V případě nejasností se obrátit s dotazem před podpisem smlouvy</li>
+  </ul>
+
+  <h2>6. Odpovědnost</h2>
+  <p>Finanční poradenství je poskytováno s odbornou péčí a na základě aktuálně dostupných informací. Nicméně:</p>
+  <ul>
+    <li>Konečné rozhodnutí o sjednání produktu je vždy na klientovi</li>
+    <li>Za budoucí vývoj finančních trhů, úrokových sazeb a jiných externích faktorů neodpovídám</li>
+    <li>Výnosy finančních produktů závisí na vývoji trhu a nejsou zaručeny (s výjimkou produktů s garantovaným výnosem)</li>
+  </ul>
+
+  <h2>7. Ochrana osobních údajů</h2>
+  <p>Zpracování osobních údajů v rámci poskytování poradenství se řídí dokumentem <a href="gdpr.html">Ochrana osobních údajů a GDPR</a>, který je dostupný na tomto webu.</p>
+
+  <h2>8. Stížnosti a reklamace</h2>
+  <p>V případě nespokojenosti s poskytnutými službami mě prosím kontaktujte:</p>
+  <div class="contact-box">
+    <p><strong>E-mail:</strong> <a href="mailto:MPrusa@obchod.rsts.cz">MPrusa@obchod.rsts.cz</a></p>
+    <p><strong>Telefon:</strong> <a href="tel:+420721360836">721 360 836</a></p>
+    <p>Stížnost vyřídím bez zbytečného odkladu, nejpozději do <strong>30 dnů</strong> od doručení.</p>
+  </div>
+  <p>Spory lze také řešit mimosoudně prostřednictvím <strong>Finančního arbitra ČR</strong> (<a href="https://www.finarbitr.cz" target="_blank">www.finarbitr.cz</a>) nebo prostřednictvím <strong>České obchodní inspekce</strong> (<a href="https://www.coi.cz" target="_blank">www.coi.cz</a>).</p>
+
+  <h2>9. Rozhodné právo</h2>
+  <p>Tyto obchodní podmínky se řídí právem České republiky, zejména zákonem č. 89/2012 Sb. (občanský zákoník), zákonem č. 257/2016 Sb. (zákon o spotřebitelském úvěru) a zákonem č. 170/2018 Sb. (zákon o distribuci pojištění).</p>
+
+  <h2>10. Změny podmínek</h2>
+  <p>Tyto obchodní podmínky mohu průběžně aktualizovat. Aktuální verze je vždy dostupná na adrese prusafinance.cz/obchodni-podminky.html. O podstatných změnách budou stávající klienti informováni e-mailem.</p>
+
+</div>
+
+<footer>
+  <div class="foot-top">
+    <div>
+      <span class="fl">Průša<em>Finance</em></span>
+      <p class="fd">Komplexní finanční poradenství zaměřené na životní cíle — ne na produkty.</p>
+      <div class="fv"><strong>Vázaný zástupce</strong><br>Raiffeisen poradenské centrum<br>pod Mgr. Martin Průša</div>
+    </div>
+    <div>
+      <div class="fnh">Navigace</div>
+      <div class="fng">
+        <div>
+          <a href="vlastni-domov.html">🏠 Vlastní domov</a>
+          <a href="ochrana.html">🛡️ Ochrana Vás a rodiny</a>
+          <a href="budoucnost.html">💰 Klidná budoucnost</a>
+          <a href="zivotni-sen.html">✈️ Životní sen</a>
+        </div>
+        <div>
+          <a href="blog.html">📝 Blog</a>
+          <a href="index.html#kontakt">✉️ Kontakt</a>
+          <a href="gdpr.html">📄 GDPR</a>
+          <a href="obchodni-podminky.html">📋 Obch. podmínky</a>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="fsh">Sledujte mě</div>
+      <a class="fsl" href="#" target="_blank"><div class="fsi soc-fb"><svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></div>Facebook</a>
+      <a class="fsl" href="#" target="_blank"><div class="fsi soc-li"><svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></div>LinkedIn</a>
+      <a class="fsl" href="#" target="_blank"><div class="fsi soc-ig"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div>Instagram</a>
+    </div>
+  </div>
+  <div class="foot-bot">
+    <span class="foot-copy">© 2025 Mgr. Martin Průša · IČ: 07179235 · Certifikace ČNB</span>
+    <div class="foot-legal">
+      <a href="gdpr.html">GDPR &amp; Ochrana osobních údajů</a>
+      <a href="obchodni-podminky.html">Obchodní podmínky</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
