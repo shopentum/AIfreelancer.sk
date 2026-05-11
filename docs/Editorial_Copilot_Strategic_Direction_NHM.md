@@ -10,7 +10,7 @@ Dátum: 2026-05-07
 
 ## 1. Executive summary
 
-**Editorial Copilot** je v tomto zmysle **sprievodný panel**: redaktor vidí **zjednotený pohľad na stav článku**, dostáva **zoradené odporúčania** z už pripravovaných oblastí (SEO, interné linky, validácia kvality, Q&A, meranie interakcií) a **vždy rozhoduje on**. Systém má podporovať **jednu konzistentnú identitu článku** naprieč modulmi a logmi (article identity v zmysle Core / editorial analytics), aby šlo neskôr zmysluplne vyhodnocovať dopad.
+**Editorial Copilot** je v tomto zmysle **sprievodný panel**: redaktor vidí **zjednotený pohľad na stav článku**, dostáva **zoradené odporúčania** z už pripravovaných oblastí (validácia kvality, SEO kontrola formulára, Q&A, meranie interakcií) a **vždy rozhoduje on**. Systém má podporovať **jednu konzistentnú identitu článku** naprieč modulmi a logmi (article identity v zmysle Core / editorial analytics), aby šlo neskôr zmysluplne vyhodnocovať dopad.
 
 **Odporúčaný prístup (náklad vs. dopad):** prvý krok nech je **orchestrácia a súhrn v paneli**, nie investícia do nového foundation modelu ani do paralelných „samostatných AI aplikácií“ bez väzby na článok.
 
@@ -49,7 +49,6 @@ Nižšie uvedené oblasti **nenahrádzame** - MVP ich **prepája v jednom spriev
 
 | Oblast | Príspevok do Copilotu |
 | Editorial validation v CMS | model návrh → rozhodnutie redaktora → záznam; piliere vrátane dôvery, štýlu a SEO |
-| SEO Copilot - interné linkovanie (MVP1) | podmienený postup (tagy pred linkami), ľudské schválenie návrhov, NLP pre slovenčinu, logovanie udalostí |
 | SEO Content Checker - smer úpravy kľúčového slova | lematizácia / základný tvar bez LLM; otvorené body okolo rozsahu textu a bezpečného fallbacku |
 | Q&A modul - analytika správania | meranie adopcie z editora bez závislosti na okamžitom napojení na DataHub |
 | Zdieľaný merací rámec AI features | jednotná väzba usage logov na článok v zmysle Article message a editorial identity |
@@ -65,7 +64,7 @@ Nižšie uvedené oblasti **nenahrádzame** - MVP ich **prepája v jednom spriev
 
 **Primárna práca:** Jednotný **sprievodný panel** v editore, ktorý:
 
-- ukáže **jasný postup** (napr. validácia → prijatie tagov → návrhy interných odkazov → kontrola pred publikáciou podľa pravidiel brandu),
+- ukáže **jasný postup** (kontrola nálezov → práca v záložkách → súhrn pred odoslaním),
 - zníži **súčasný vizuálny šum** - namiesto paralelného kopa výstražných hlásení **priorita a krátky súhrn**,
 - zosúladí **identitu článku** v logoch naprieč modulmi podľa dohodnutého meracieho rámca.
 
@@ -76,20 +75,19 @@ Nižšie uvedené oblasti **nenahrádzame** - MVP ich **prepája v jednom spriev
 
 ### 6.2 Pravý panel ako výkladná skriňa (čo tam redaktor vidí)
 
-Dnes máme paralelné svety: **SEO**, **dôvera**, **štýl** - často s **aktívnymi návrhmi na prijatie** alebo úpravu. Pribúda **interné linkovanie** (návrhy odkazov po splnení predpokladov). Bez jednej „výkladnej skrine“ nie je zvonka zrejmé, **čo práve čaká na rozhodnutie** a **v akom poradí** to má zmysel riešiť.
+Paralelne bežia oblasti ako **SEO kontrola**, **dôvera**, **štýl** - často s **aktívnymi návrhmi na prijatie** alebo úpravu. Bez jednej „výkladnej skrine“ nie je zvonka zrejmé, **čo práve čaká na rozhodnutie** a **v akom poradí** to má zmysel riešiť.
 
 **Zmysel tejto sekcie v paneli:** nie nový obsahový pilier, ale **jeden zrozumiteľný rámec**, ktorý:
 
 | Vrstva panelu | Funkcia pre redaktora |
-| Hlavička alebo horný blok | **Čo teraz** - krátky súhrn pripravenosti článku a 1 až 3 priority pred odoslaním (blokujúce / upozornenie / príležitosť) |
-| Priebeh krokov | **Kde som vo workflow** - napr. či už sú spracované tagy pred tým, ako sa ponúknu interné odkazy |
+| Hlavička alebo horný blok | súhrn pripravenosti článku, počet vyriešených nálezov a krátka **Odporúčaná pozornosť** pred odoslaním |
+| Stav kontroly | či už prebehla validácia a či v pilieroch ostávajú otvorené položky — bez povinného vizuálneho „wizard“ krokovania |
 | Pilierové sekcie | **Dôvera**, **Štýl**, **SEO** - pod každým stav (v poriadku / vyžaduje pozornosť) a **zoznam aktívnych návrhov**, ktoré čakajú na prijatie alebo odmietnutie |
-| Interné linkovanie | Samostatná sekcia alebo pod SEO podľa UX rozhodnutia - vždy s jasným stavom „návrhy dostupné / čaká sa na predchádzajúci krok“ |
-| Spodný súhrn | **Čo ešte ostáva** - počet otvorených položiek bez opakovania celého zoznamu |
+| Spodný súhrn | odstránený v prospech súhrnu v hornej časti panelu (pripravenosť + nálezy); ďalšie detaily v záložkách |
 
 Panel tým nie je len súhrn chýb - je **vitrínou aktívnej práce**: kde systém ponúka konkrétny krok a kde už redaktor niečo schválil alebo odmietol. Detailná vizuálna špecifikácia je predmetom návrhu UX - tento odsek fixuje **informačný zámer**, aby nevznikal pocit „ďalší sidebar bez mapy“.
 
-**Prototyp v editore:** po spustení kontroly sa v pravom paneli zobrazí **postup vo workflow** (Kontrola nálezov → Tagy → Interné odkazy → Pred odoslaním), **stav interného linkovania** (vrátane závislosti na uložených tagoch), **Odporúčaná pozornosť** (až 3 položky: Blokuje / Upozornenie / Príležitosť, s odklikom do príslušnej záložky alebo nálezu), **Pripravenosť článku** a pätička **Zostáva v asistentovi** s počtom otvorených položiek - všetko nadväzuje na existujúci flow prijatia a odmietnutia návrhov v záložkách.
+**Prototyp v editore (`/nmh`):** po spustení kontroly pravý panel ukáže **sticky pripravenosť** (vrátane priebehu vyriešených nálezov), **Odporúčanú pozornosť** ako kompaktný textový zoznam (vrátane tagov a interných odkazov v poradí priority) a záložky **Dôvera**, **Štýl**, **SEO** s priebehom prijatia / odmietnutia návrhov.
 
 ### 6.3 Čo je zámerne mimo prvého MVP
 
@@ -101,8 +99,8 @@ Panel tým nie je len súhrn chýb - je **vitrínou aktívnej práce**: kde syst
 
 | Nový prvok | Účel |
 | Panel ako jeden vstupný rámec v editore | orientácia namiesto roztrúsených ovládacích prvkov |
-| Vrstvená štruktúra „výkladnej skrine“ | súlad s informačným zámerom z odseku 6.2 - čo teraz, priebeh, pilierové návrhy, linkovanie, spodný súhrn |
-| Jasná postupnosť krokov tam, kde už existujú závislosti | napr. tagy pred internými odkazmi podľa produktových pravidiel |
+| Vrstvená štruktúra „výkladnej skrine“ | súlad s informačným zámerom z odseku 6.2 |
+| Jednotný priebeh práce v paneli | kontrola → záložky → súhrn pripravenosti hore (bez samostatného workflow stripu ako povinného prvku) |
 | Jednotný kontrakt na udalosti v logoch | zrozumiteľné reportovanie a napojenie na analytiku |
 | Sekcia súhrnu pripravenosti článku | riadenie pozornosti redaktora pred odoslaním |
 
@@ -134,8 +132,9 @@ Orientačné signály:
 ## 9. Fázy po MVP (smer bez záväzných dátumov)
 
 1. **MVP:** orchestrácia v paneli, súhrn pripravenosti, konzistentné logovanie naprieč vybranými modulmi.  
-2. **Rozšírenie:** hlbšie prepojenie editorialnych rozhodnutí s výkonom článku v číslach.  
-3. **Personalizácia a spätná väzba:** systematické sledovanie toho, čo redakcie prijímajú vs. ignorujú - nadväznosť na adopčné metriky Q&A a ďalších modulov.
+2. **MVP2 (scoped rozšírenie):** samostatný strategický dokument bez opakovania MVP — [Editorial_Copilot_MVP2.md](./Editorial_Copilot_MVP2.md) (CMS moduly v paneli, SEO/checker hĺbšie, tagy/linkbuilding v orchestrácii, adopcia a minimum governance).  
+3. **Rozšírenie:** hlbšie prepojenie editorialnych rozhodnutí s výkonom článku v číslach (tam, kde sú dáta a metodika).  
+4. **Personalizácia a spätná väzba:** systematické sledovanie toho, čo redakcie prijímajú vs. ignorujú - nadväznosť na adopčné metriky Q&A a ďalších modulov.
 
 ---
 
