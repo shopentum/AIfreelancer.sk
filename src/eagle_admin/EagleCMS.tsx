@@ -68,9 +68,6 @@ import {
   ArrowLeft,
   Lock,
   Download,
-  Circle,
-  HelpCircle,
-  Newspaper,
 } from "lucide-react";
 import { flushSync } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -182,13 +179,6 @@ type AssistantPriorityItem = {
   /** Text odkazu pod kartou (predvolené Otvoriť). */
   actionLabel?: string;
 };
-
-/** Minimálny počet vybraných súvisiacich článkov v module CMS (prototypová detekcia). */
-const RELATED_ARTICLES_RECOMMENDED_MIN = 2;
-
-type PrototypeQaPollState = "none" | "draft" | "ready";
-
-type WorkflowStepStatus = "done" | "current" | "pending" | "locked";
 
 /** +2 alebo +3 body na Readiness po vyriešení nálezu (prototyp). */
 function nextReadinessBump(score: number): number {
@@ -373,10 +363,9 @@ const EagleCMS_Split: React.FC = () => {
   const [brand, setBrand] = useState('Nový Čas');
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const modalLinksSectionRef = useRef<HTMLDivElement>(null);
-  /** Sekcia simulácie modulov CMS (súvisiace články, Q&A) v Nastaveniach — scroll z asistenta. */
-  const cmsModulesSimSectionRef = useRef<HTMLDivElement>(null);
   /** true = modal otvorený cez "Zobraziť návrhy" → auto-scroll na linky */
   const modalScrollToLinksRef = useRef(false);
+  const aiAssistantScrollRef = useRef<HTMLDivElement>(null);
   const scrollRafRef = useRef<number | null>(null);
   const fadeClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const undoFlashClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -424,14 +413,14 @@ const EagleCMS_Split: React.FC = () => {
   /** SEO kľúče, ktoré redaktor vedome ignoroval (namiesto aplikovania návrhu). */
   const [ignoredSeoKeys, setIgnoredSeoKeys] = useState<Set<string>>(new Set());
 
-  /**
-   * Simulácia signálov z CMS modulov (prototyp — v produkcii API / embed).
-   * Asistent z nich robí ľahkú detekciu súladu prípravy článku.
-   */
-  const [prototypeRelatedArticleSlots, setPrototypeRelatedArticleSlots] =
-    useState(1);
-  const [prototypeQaPollState, setPrototypeQaPollState] =
-    useState<PrototypeQaPollState>("none");
+  /** Počet nálezov (dôvera + štýl + SEO) pri dokončení poslednej kontroly — pre „X/Y vyriešených“. */
+  const [auditFindingBaselineTotal, setAuditFindingBaselineTotal] = useState<
+    number | null
+  >(null);
+
+  /** Pri scrolle v paneli asistenta sa skryje titulok; score ostane sticky. */
+  const [aiAssistantTitleCollapsed, setAiAssistantTitleCollapsed] =
+    useState(false);
 
   /** Animovaný counter pre Readiness Score — beží od 0 po reálnu hodnotu pri validácii,
    *  plynule inkrementuje pri každom ďalšom vyriešení nálezu. */
@@ -454,6 +443,10 @@ const EagleCMS_Split: React.FC = () => {
     }, stepMs);
     return () => clearInterval(timer);
   }, [audit?.readinessScore]);
+
+  useEffect(() => {
+    if (!audit) setAiAssistantTitleCollapsed(false);
+  }, [audit]);
 
   /** Akcie redaktora na návrhy interných linkov: accepted | rejected. */
   const [linkActions, setLinkActions] = useState<Map<string, 'accepted' | 'rejected' | 'removed'>>(new Map());
@@ -620,6 +613,7 @@ const EagleCMS_Split: React.FC = () => {
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     if (simulateIntelligenceApiFailure) {
+      setAuditFindingBaselineTotal(null);
       setAudit(null);
       setSeoChangeLog([]);
       setResolvedClaims([]);
@@ -777,6 +771,15 @@ const EagleCMS_Split: React.FC = () => {
       at: auditCompletedAtRef.current,
       readinessScore: mockAudit.readinessScore,
     });
+
+    const seoIssuesCount = Object.values(mockAudit.seoAudit).filter(
+      (v) => v.status !== "pass",
+    ).length;
+    setAuditFindingBaselineTotal(
+      mockAudit.claims.length +
+        (mockAudit.linguisticClaims?.length ?? 0) +
+        seoIssuesCount,
+    );
 
     setAudit(mockAudit);
     setSeoChangeLog([]);
@@ -1488,15 +1491,10 @@ const EagleCMS_Split: React.FC = () => {
   const kroKBPhase = modalPhase === 'krok_b_loading' || modalPhase === 'krok_b_ready';
   const tagsAlreadyCommittedInModal = kroKBPhase || modalPhase === 'tags_ready' && tagsCommitted;
 
-  const scrollToCmsModulesSimSection = useCallback(() => {
-    setRightPanelMode("settings");
-    window.setTimeout(() => {
-      cmsModulesSimSectionRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-      });
-    }, 150);
-  }, []);
+  const pendingLinkSuggestionsCount = useMemo(() => {
+    if (!audit?.linkSuggestions?.length) return 0;
+    return audit.linkSuggestions.filter((s) => !linkActions.has(s.id)).length;
+  }, [audit?.linkSuggestions, linkActions]);
 
   const openAssistantItemsCount = useMemo(() => {
     if (!audit) return 0;
@@ -1504,16 +1502,17 @@ const EagleCMS_Split: React.FC = () => {
     for (const [k, v] of Object.entries(audit.seoAudit)) {
       if (v.status !== "pass" && !ignoredSeoKeys.has(k)) n += 1;
     }
-    if (prototypeRelatedArticleSlots < RELATED_ARTICLES_RECOMMENDED_MIN)
-      n += 1;
-    if (prototypeQaPollState !== "ready") n += 1;
     return n;
-  }, [
-    audit,
-    ignoredSeoKeys,
-    prototypeQaPollState,
-    prototypeRelatedArticleSlots,
-  ]);
+  }, [audit, ignoredSeoKeys]);
+
+  const findingsProgress = useMemo(() => {
+    if (!audit || auditFindingBaselineTotal == null) return null;
+    const resolved = Math.max(
+      0,
+      auditFindingBaselineTotal - openAssistantItemsCount,
+    );
+    return { resolved, total: auditFindingBaselineTotal };
+  }, [audit, auditFindingBaselineTotal, openAssistantItemsCount]);
 
   const assistantPriorities = useMemo((): AssistantPriorityItem[] => {
     if (!audit) return [];
@@ -1533,8 +1532,32 @@ const EagleCMS_Split: React.FC = () => {
         },
       });
     }
+
+    const tagsNeedsAttention =
+      !tagsCommitted || pendingLinkSuggestionsCount > 0;
+    out.push({
+      kind: tagsNeedsAttention ? "warn" : "info",
+      title: "Tagy a interné prelinkovania",
+      subtitle: !tagsCommitted
+        ? "Vygenerujte alebo potvrďte tagy a potom prejdite návrhy interných odkazov."
+        : pendingLinkSuggestionsCount > 0
+          ? `${pendingLinkSuggestionsCount} návrhov odkazu ešte čaká na prijatie alebo zamietnutie.`
+          : "Tagy a odkazy sú spracované; úpravy nájdete v Nastavenia.",
+      showSeverityLabel: false,
+      actionLabel: !tagsCommitted
+        ? "Generovať"
+        : pendingLinkSuggestionsCount > 0
+          ? "Odkazy"
+          : "Nastavenia",
+      onActivate: () => {
+        if (!tagsCommitted) openTagModal();
+        else if (pendingLinkSuggestionsCount > 0) openLinksModal();
+        else setRightPanelMode("settings");
+      },
+    });
+
     const medium = claimsSorted.find((c) => c.risk === "medium");
-    if (medium && out.length < 5 && medium.id !== high?.id) {
+    if (medium && out.length < 4 && medium.id !== high?.id) {
       out.push({
         kind: "warn",
         title: medium.reason,
@@ -1547,7 +1570,7 @@ const EagleCMS_Split: React.FC = () => {
       });
     }
     const ling = [...(audit.linguisticClaims ?? [])].sort(sortClaimsByRisk)[0];
-    if (ling && out.length < 5) {
+    if (ling && out.length < 4) {
       out.push({
         kind: "warn",
         title: ling.reason,
@@ -1562,7 +1585,7 @@ const EagleCMS_Split: React.FC = () => {
     const seoFail = Object.entries(audit.seoAudit).find(
       ([k, v]) => v.status !== "pass" && !ignoredSeoKeys.has(k),
     );
-    if (seoFail && out.length < 5) {
+    if (seoFail && out.length < 4) {
       const [k, v] = seoFail;
       const sk = k as SeoAuditKey;
       out.push({
@@ -1576,98 +1599,15 @@ const EagleCMS_Split: React.FC = () => {
         },
       });
     }
-    if (
-      prototypeRelatedArticleSlots < RELATED_ARTICLES_RECOMMENDED_MIN &&
-      out.length < 5
-    ) {
-      out.push({
-        kind: "info",
-        title: "Doplňte súvisiace články",
-        subtitle: `V module sú len ${prototypeRelatedArticleSlots} z odporúčaných aspoň ${RELATED_ARTICLES_RECOMMENDED_MIN} prepojení na súvisiaci obsah.`,
-        showSeverityLabel: false,
-        actionLabel: "Simulácia v nastaveniach",
-        onActivate: scrollToCmsModulesSimSection,
-      });
-    }
-    if (prototypeQaPollState !== "ready" && out.length < 5) {
-      const qaSubtitle =
-        prototypeQaPollState === "none"
-          ? "Článok nemá nastavenú anketu Q&A — interaktívna vrstva zvyšuje zapojenie čitateľov."
-          : "Anketa je rozpracovaná — dokončite otázku a odpovede v module Q&A.";
-      out.push({
-        kind: "info",
-        title:
-          prototypeQaPollState === "none"
-            ? "Zvážte pridanie ankety Q&A"
-            : "Dokončite nastavenie ankety Q&A",
-        subtitle: qaSubtitle,
-        showSeverityLabel: false,
-        actionLabel: "Simulácia v nastaveniach",
-        onActivate: scrollToCmsModulesSimSection,
-      });
-    }
-    return out.slice(0, 5);
+    return out.slice(0, 4);
   }, [
     audit,
     ignoredSeoKeys,
-    prototypeQaPollState,
-    prototypeRelatedArticleSlots,
-    scrollToCmsModulesSimSection,
+    openTagModal,
+    openLinksModal,
+    pendingLinkSuggestionsCount,
+    tagsCommitted,
   ]);
-
-  const workflowStepsDef = useMemo(() => {
-    const hasAudit = Boolean(audit);
-
-    const stepValidate: WorkflowStepStatus = isValidating
-      ? "current"
-      : hasAudit
-        ? "done"
-        : "pending";
-
-    const stepReview: WorkflowStepStatus = !hasAudit
-      ? "locked"
-      : openAssistantItemsCount > 0
-        ? "current"
-        : "done";
-
-    const stepPublish: WorkflowStepStatus = !hasAudit
-      ? "locked"
-      : openAssistantItemsCount === 0 && displayedScore >= 88
-        ? "done"
-        : "pending";
-
-    return [
-      {
-        id: "validate",
-        label: "Kontrola nálezov",
-        detail: isValidating
-          ? "Prebieha analýza…"
-          : hasAudit
-            ? "Záložky nižšie"
-            : "Spustite kontrolu",
-        status: stepValidate,
-      },
-      {
-        id: "review",
-        label: "Spracovanie nálezov",
-        detail: !hasAudit
-          ? "Po kontrole"
-          : openAssistantItemsCount > 0
-            ? `${openAssistantItemsCount} otvorených položiek`
-            : "Nálezy spracované",
-        status: stepReview,
-      },
-      {
-        id: "publish",
-        label: "Pred odoslaním",
-        detail:
-          stepPublish === "done"
-            ? "Asistent bez otvorených položiek"
-            : "Checklist redakcie",
-        status: stepPublish,
-      },
-    ];
-  }, [audit, isValidating, openAssistantItemsCount, displayedScore]);
 
   return (
     <>
@@ -2201,45 +2141,6 @@ const EagleCMS_Split: React.FC = () => {
                 Simulácia: výpadok Intelligence API (validácia / AI návrhy zlyhajú)
               </span>
             </label>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-violet-100 bg-violet-50/50 px-3 py-2 text-[11px] text-gray-700 shadow-sm">
-              <span className="font-black uppercase tracking-wide text-violet-900/90">
-                Moduly CMS (demo)
-              </span>
-              <label className="flex flex-wrap items-center gap-1.5 font-medium">
-                <Newspaper size={13} className="shrink-0 text-violet-600" aria-hidden />
-                <span>Súvisiace články</span>
-                <select
-                  className="rounded-md border border-gray-200 bg-white px-2 py-1 text-[11px] font-bold text-gray-800 outline-none focus:ring-1 focus:ring-violet-500"
-                  value={prototypeRelatedArticleSlots}
-                  onChange={(e) =>
-                    setPrototypeRelatedArticleSlots(Number(e.target.value))
-                  }
-                  aria-label="Počet vybraných súvisiacich článkov (simulácia)"
-                >
-                  {[0, 1, 2, 3].map((n) => (
-                    <option key={n} value={n}>
-                      {n} vybr.
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="flex flex-wrap items-center gap-1.5 font-medium">
-                <HelpCircle size={13} className="shrink-0 text-violet-600" aria-hidden />
-                <span>Q&A anketa</span>
-                <select
-                  className="rounded-md border border-gray-200 bg-white px-2 py-1 text-[11px] font-bold text-gray-800 outline-none focus:ring-1 focus:ring-violet-500"
-                  value={prototypeQaPollState}
-                  onChange={(e) =>
-                    setPrototypeQaPollState(e.target.value as PrototypeQaPollState)
-                  }
-                  aria-label="Stav ankety Q&A (simulácia)"
-                >
-                  <option value="none">žiadna</option>
-                  <option value="draft">rozprac.</option>
-                  <option value="ready">pripravená</option>
-                </select>
-              </label>
-            </div>
           </div>
         </div>
 
@@ -2606,91 +2507,6 @@ const EagleCMS_Split: React.FC = () => {
                       exit={{ opacity: 0, x: -20 }}
                       className="space-y-6"
                     >
-                      <div
-                        ref={cmsModulesSimSectionRef}
-                        className="overflow-hidden rounded-xl border border-violet-200 bg-white shadow-sm ring-1 ring-violet-100/80"
-                      >
-                        <div className="flex items-center gap-2 border-b border-gray-100 bg-violet-50/60 px-5 py-3">
-                          <Newspaper
-                            size={16}
-                            className="shrink-0 text-violet-600"
-                            aria-hidden
-                          />
-                          <h3 className="text-sm font-bold uppercase tracking-wider text-gray-700">
-                            Moduly článku (simulácia CMS)
-                          </h3>
-                        </div>
-                        <div className="space-y-4 p-5 text-xs leading-relaxed text-gray-600">
-                          <p>
-                            Odpovedá modulom{" "}
-                            <strong className="text-gray-800">
-                              Súvisiace články
-                            </strong>{" "}
-                            a{" "}
-                            <strong className="text-gray-800">Anketa Q&A</strong>{" "}
-                            v CMS. Asistent z hodnôt robí ľahkú detekciu pripravenosti
-                            (bez číselných predikcií výkonu).
-                          </p>
-                          <div className="grid gap-4 sm:grid-cols-2">
-                            <div className="space-y-1.5">
-                              <label className="flex items-center gap-1.5 font-bold text-gray-700">
-                                <Newspaper
-                                  size={14}
-                                  className="shrink-0 text-violet-600"
-                                  aria-hidden
-                                />
-                                Súvisiace články (počet slotov)
-                              </label>
-                              <select
-                                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 outline-none focus:ring-1 focus:ring-violet-500"
-                                value={prototypeRelatedArticleSlots}
-                                onChange={(e) =>
-                                  setPrototypeRelatedArticleSlots(
-                                    Number(e.target.value),
-                                  )
-                                }
-                              >
-                                {[0, 1, 2, 3].map((n) => (
-                                  <option key={n} value={n}>
-                                    {n === 0
-                                      ? "Žiadny vybraný"
-                                      : n === 1
-                                        ? "1 vybraný"
-                                        : `${n} vybrané`}
-                                    {n >= RELATED_ARTICLES_RECOMMENDED_MIN
-                                      ? " · spĺňa minimum"
-                                      : ""}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                            <div className="space-y-1.5">
-                              <label className="flex items-center gap-1.5 font-bold text-gray-700">
-                                <HelpCircle
-                                  size={14}
-                                  className="shrink-0 text-violet-600"
-                                  aria-hidden
-                                />
-                                Stav ankety Q&A
-                              </label>
-                              <select
-                                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 outline-none focus:ring-1 focus:ring-violet-500"
-                                value={prototypeQaPollState}
-                                onChange={(e) =>
-                                  setPrototypeQaPollState(
-                                    e.target.value as PrototypeQaPollState,
-                                  )
-                                }
-                              >
-                                <option value="none">Žiadna anketa</option>
-                                <option value="draft">Rozpracovaná</option>
-                                <option value="ready">Pripravená</option>
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
                       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                         <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50">
                           <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Hlavné nastavenia</h3>
@@ -3020,188 +2836,156 @@ const EagleCMS_Split: React.FC = () => {
                       </div>
                     </motion.div>
                   ) : (
-                    <motion.div 
+                    <motion.div
                       key="ai"
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      className="flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm"
+                      className="flex max-h-[min(88vh,52rem)] min-h-[260px] flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
                     >
-                      <div className="shrink-0 border-b border-gray-100 bg-gradient-to-br from-purple-50/90 via-white to-white px-4 pb-3 pt-4">
-                        <div className="flex gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-600 text-white shadow-sm ring-4 ring-purple-100">
-                            <Sparkles size={18} aria-hidden />
-                          </div>
-                          <div className="min-w-0 pt-0.5">
-                            <h3 className="text-sm font-bold leading-snug text-gray-900">
-                              Asistent kvality článku
-                            </h3>
-                            <p className="mt-1 text-xs leading-relaxed text-gray-600">
-                              Minútová kontrola pred odoslaním: prejdite nálezy podľa záložiek,
-                              každý návrh si{' '}
-                              <span className="font-semibold text-gray-800">
-                                prijmite alebo odmietnite
-                              </span>
-                              {' '}
-                              - nič sa do textu nevloží bez vášho súhlasu.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="shrink-0 border-b border-gray-100 bg-slate-50/95 px-3 py-3">
-                        <p className="mb-2 text-[10px] font-black uppercase tracking-wider text-gray-500">
-                          Postup vo workflow
-                        </p>
-                        <div className="flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                          {workflowStepsDef.map((step) => (
-                            <div
-                              key={step.id}
-                              className={cn(
-                                "flex min-w-[7.25rem] flex-1 flex-col rounded-lg border px-2 py-2",
-                                step.status === "current" &&
-                                  "border-purple-400 bg-purple-50/90 ring-1 ring-purple-200/80",
-                                step.status === "done" &&
-                                  "border-emerald-200 bg-emerald-50/50",
-                                step.status === "pending" &&
-                                  "border-gray-200 bg-white",
-                                step.status === "locked" &&
-                                  "border-gray-100 bg-gray-50/70 opacity-[0.72]",
-                              )}
-                            >
-                              <div className="mb-0.5 flex items-center gap-1">
-                                {step.status === "done" ? (
-                                  <CheckCircle2
-                                    className="shrink-0 text-emerald-500"
-                                    size={13}
-                                    aria-hidden
-                                  />
-                                ) : step.status === "current" ? (
-                                  <Circle
-                                    className="shrink-0 fill-purple-600 text-purple-600"
-                                    size={12}
-                                    aria-hidden
-                                  />
-                                ) : step.status === "locked" ? (
-                                  <Lock
-                                    className="shrink-0 text-gray-400"
-                                    size={11}
-                                    aria-hidden
-                                  />
-                                ) : (
-                                  <Circle
-                                    className="shrink-0 text-gray-300"
-                                    size={12}
-                                    aria-hidden
-                                  />
-                                )}
-                                <span className="text-[10px] font-bold leading-tight text-gray-900">
-                                  {step.label}
-                                </span>
-                              </div>
-                              <p className="text-[9px] leading-snug text-gray-500">
-                                {step.detail}
+                      <div
+                        ref={aiAssistantScrollRef}
+                        onScroll={(e) => {
+                          const st = e.currentTarget.scrollTop;
+                          setAiAssistantTitleCollapsed(st > 14);
+                        }}
+                        className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain"
+                      >
+                        <div
+                          className={cn(
+                            "shrink-0 overflow-hidden border-b border-gray-100 bg-gradient-to-br from-purple-50/90 via-white to-white transition-[max-height,opacity,padding] duration-200 ease-out",
+                            aiAssistantTitleCollapsed
+                              ? "max-h-0 border-b-0 py-0 opacity-0"
+                              : "max-h-[240px] px-4 pb-3 pt-4 opacity-100",
+                          )}
+                        >
+                          <div className="flex gap-3">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-600 text-white shadow-sm ring-4 ring-purple-100">
+                              <Sparkles size={18} aria-hidden />
+                            </div>
+                            <div className="min-w-0 pt-0.5">
+                              <h3 className="text-sm font-bold leading-snug text-gray-900">
+                                Asistent kvality článku
+                              </h3>
+                              <p className="mt-1 text-xs leading-relaxed text-gray-600">
+                                Minútová kontrola pred odoslaním: nálezy podľa záložiek, návrhy
+                                si{" "}
+                                <span className="font-semibold text-gray-800">
+                                  prijmite alebo odmietnite
+                                </span>{" "}
+                                — nič sa bez vášho súhlasu nevkladá do textu.
                               </p>
                             </div>
-                          ))}
+                          </div>
                         </div>
-                      </div>
 
-                      {audit && assistantPriorities.length > 0 ? (
-                        <div className="shrink-0 space-y-2 border-b border-gray-100 bg-white px-3 py-3">
-                          <p className="text-[10px] font-black uppercase tracking-wider text-gray-500">
-                            Odporúčaná pozornosť
-                          </p>
-                          <ul className="space-y-2">
-                            {assistantPriorities.map((p, idx) => (
-                              <li key={`ap-${idx}-${p.kind}-${p.title.slice(0, 32)}`}>
-                                <button
-                                  type="button"
-                                  onClick={p.onActivate}
-                                  className={cn(
-                                    "w-full rounded-lg border-l-4 px-3 py-2.5 text-left transition-colors hover:bg-gray-50/80",
-                                    p.kind === "block" &&
-                                      "border-l-rose-500 bg-rose-50/90",
-                                    p.kind === "warn" &&
-                                      "border-l-amber-500 bg-amber-50/86",
-                                    p.kind === "opportunity" &&
-                                      "border-l-sky-500 bg-sky-50/86",
-                                    p.kind === "info" &&
-                                      "border-l-slate-400 bg-slate-50/95",
-                                  )}
+                        <div className="sticky top-0 z-30 shrink-0 border-b border-gray-200 bg-white px-4 pb-2.5 pt-2 shadow-[0_6px_12px_-8px_rgba(15,23,42,0.35)]">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">
+                              Pripravenosť článku
+                            </span>
+                            <span
+                              className={cn(
+                                "text-xs font-black tabular-nums",
+                                displayedScore > 80
+                                  ? "text-emerald-600"
+                                  : displayedScore > 50
+                                    ? "text-yellow-600"
+                                    : "text-red-600",
+                              )}
+                            >
+                              {displayedScore}%
+                            </span>
+                          </div>
+                          <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-gray-200">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${displayedScore}%` }}
+                              className={cn(
+                                "h-full transition-all duration-1000",
+                                displayedScore > 80
+                                  ? "bg-emerald-500"
+                                  : displayedScore > 50
+                                    ? "bg-yellow-500"
+                                    : "bg-red-500",
+                              )}
+                            />
+                          </div>
+                          {findingsProgress ? (
+                            <p className="mt-1.5 text-[11px] leading-snug text-gray-600">
+                              <span className="font-semibold tabular-nums text-gray-900">
+                                {findingsProgress.resolved}
+                              </span>
+                              <span className="tabular-nums text-gray-500">
+                                /{findingsProgress.total}
+                              </span>{" "}
+                              nálezov vyriešených
+                            </p>
+                          ) : null}
+                        </div>
+
+                        {audit && assistantPriorities.length > 0 ? (
+                          <div className="shrink-0 border-b border-gray-100 bg-white px-4 pb-2 pt-2">
+                            <p className="mb-1 text-[10px] font-black uppercase tracking-wider text-gray-500">
+                              Odporúčaná pozornosť
+                            </p>
+                            <ul className="divide-y divide-gray-100">
+                              {assistantPriorities.map((p, idx) => (
+                                <li
+                                  key={`ap-${idx}-${p.kind}-${p.title.slice(0, 32)}`}
                                 >
-                                  <div className="flex items-start gap-2">
-                                    <span
-                                      className={cn(
-                                        "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black ring-1 ring-inset",
-                                        p.kind === "block" &&
-                                          "bg-rose-100 text-rose-900 ring-rose-200",
-                                        p.kind === "warn" &&
-                                          "bg-amber-100 text-amber-950 ring-amber-200",
-                                        p.kind === "opportunity" &&
-                                          "bg-sky-100 text-sky-950 ring-sky-200",
-                                        p.kind === "info" &&
-                                          "bg-slate-200/90 text-slate-800 ring-slate-300",
-                                      )}
-                                    >
-                                      {idx + 1}
+                                  <button
+                                    type="button"
+                                    onClick={p.onActivate}
+                                    className={cn(
+                                      "group flex w-full items-start gap-2 rounded-md px-1 py-2 text-left text-[11px] leading-snug transition-colors hover:bg-purple-50/50",
+                                      p.kind === "block" &&
+                                        "border-l-2 border-l-rose-500 pl-2",
+                                      p.kind === "warn" &&
+                                        "border-l-2 border-l-amber-500 pl-2",
+                                      p.kind === "info" && "pl-1",
+                                    )}
+                                  >
+                                    <span className="mt-0.5 shrink-0 tabular-nums text-[10px] font-bold text-gray-400">
+                                      {idx + 1}.
                                     </span>
-                                    <div className="min-w-0 flex-1">
+                                    <span className="min-w-0 flex-1 text-gray-700">
                                       {(p.showSeverityLabel ?? false) ? (
-                                        <span className="mb-0.5 block text-[9px] font-black uppercase tracking-wide text-gray-500">
+                                        <span
+                                          className={cn(
+                                            "mr-1.5 text-[9px] font-black uppercase tracking-wide",
+                                            p.kind === "block"
+                                              ? "text-rose-600"
+                                              : "text-amber-800",
+                                          )}
+                                        >
                                           {p.kind === "block"
                                             ? "Blokuje"
-                                            : p.kind === "warn"
-                                              ? "Upozornenie"
-                                              : "Príležitosť"}
+                                            : "Upozornenie"}
                                         </span>
                                       ) : null}
-                                      <p className="text-xs font-semibold leading-snug text-gray-900">
+                                      <span className="font-semibold text-gray-900">
                                         {p.title}
-                                      </p>
-                                      <p className="mt-0.5 text-[11px] leading-snug text-gray-600">
-                                        {p.subtitle}
-                                      </p>
-                                      <span className="mt-1 inline-flex items-center text-[10px] font-bold text-purple-600">
-                                        {p.actionLabel ?? "Otvoriť"}
-                                        <ChevronRight className="ml-0.5" size={12} />
                                       </span>
-                                    </div>
-                                  </div>
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ) : null}
-
-                      {/* Pripravenosť — súhrn po orchestrácii */}
-                      <div className="shrink-0 px-4 py-3 bg-gray-50/50 border-b border-gray-100">
-                        <div className="flex justify-between items-center mb-1.5">
-                          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
-                            Pripravenosť článku
-                          </span>
-                          <span className={cn(
-                            "text-xs font-black",
-                            displayedScore > 80 ? "text-emerald-600" : 
-                            displayedScore > 50 ? "text-yellow-600" : "text-red-600"
-                          )}>{displayedScore}%</span>
-                        </div>
-                        <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                          <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: `${displayedScore}%` }}
-                            className={cn(
-                              "h-full transition-all duration-1000",
-                              displayedScore > 80 ? "bg-emerald-500" : 
-                              displayedScore > 50 ? "bg-yellow-500" : "bg-red-500"
-                            )}
-                          />
-                        </div>
-                      </div>
+                                      <span className="text-gray-600">
+                                        {" "}
+                                        — {p.subtitle}
+                                      </span>
+                                    </span>
+                                    <ChevronRight
+                                      size={14}
+                                      className="mt-0.5 shrink-0 text-gray-300 transition-colors group-hover:text-purple-600"
+                                      aria-hidden
+                                    />
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : null}
 
                       {/* AI Tabs */}
-                      <div className="flex border-b border-gray-100 shrink-0">
+                      <div className="flex shrink-0 border-b border-gray-100 bg-white">
                         {[
                           { id: 'trust', label: 'Dôvera', icon: ShieldAlert, count: audit?.claims.length || 0 },
                           { id: 'linguistic', label: 'Štýl', icon: MousePointer2, count: audit?.linguisticClaims?.length || 0 },
@@ -3948,18 +3732,7 @@ const EagleCMS_Split: React.FC = () => {
                           )}
                         </AnimatePresence>
                       </div>
-                      {audit ? (
-                        <div className="shrink-0 border-t border-gray-200 bg-slate-800 px-4 py-2.5 text-white">
-                          <p className="text-[10px] font-black uppercase tracking-wider text-white/55">
-                            Zostáva v asistentovi
-                          </p>
-                          <p className="text-xs font-medium leading-snug">
-                            {openAssistantItemsCount === 0
-                              ? "Žiadne otvorené položky v tomto paneli. Pokračujte uložením alebo publikovaním podľa interného procesu."
-                              : `${openAssistantItemsCount} otvorených položiek — prejdite záložky alebo položky „Odporúčaná pozornosť“ vyššie.`}
-                          </p>
-                        </div>
-                      ) : null}
+                    </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
