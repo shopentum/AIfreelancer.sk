@@ -68,6 +68,7 @@ import {
   ArrowLeft,
   Lock,
   Download,
+  Circle,
 } from "lucide-react";
 import { flushSync } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -164,6 +165,17 @@ const RISK_ORDER: Record<Claim["risk"], number> = {
 function sortClaimsByRisk(a: Claim, b: Claim) {
   return RISK_ORDER[a.risk] - RISK_ORDER[b.risk];
 }
+
+type AssistantPriorityKind = "block" | "warn" | "opportunity";
+
+type AssistantPriorityItem = {
+  kind: AssistantPriorityKind;
+  title: string;
+  subtitle: string;
+  onActivate: () => void;
+};
+
+type WorkflowStepStatus = "done" | "current" | "pending" | "locked";
 
 /** +2 alebo +3 body na Readiness po vyriešení nálezu (prototyp). */
 function nextReadinessBump(score: number): number {
@@ -1452,6 +1464,204 @@ const EagleCMS_Split: React.FC = () => {
   const kroKBPhase = modalPhase === 'krok_b_loading' || modalPhase === 'krok_b_ready';
   const tagsAlreadyCommittedInModal = kroKBPhase || modalPhase === 'tags_ready' && tagsCommitted;
 
+  const openAssistantItemsCount = useMemo(() => {
+    if (!audit) return 0;
+    let n = audit.claims.length + (audit.linguisticClaims?.length ?? 0);
+    for (const [k, v] of Object.entries(audit.seoAudit)) {
+      if (v.status !== "pass" && !ignoredSeoKeys.has(k)) n += 1;
+    }
+    if (!tagsCommitted && (audit.tagSuggestions?.length ?? 0) > 0) {
+      const remaining = audit.tagSuggestions!.filter(
+        (t) => !removedTagIds.has(t.id),
+      ).length;
+      if (remaining > 0) n += 1;
+    }
+    if (tagsCommitted && audit.linkSuggestions?.length) {
+      n += audit.linkSuggestions.filter((s) => !linkActions.has(s.id)).length;
+    }
+    return n;
+  }, [audit, tagsCommitted, linkActions, removedTagIds, ignoredSeoKeys]);
+
+  const assistantPriorities = useMemo((): AssistantPriorityItem[] => {
+    if (!audit) return [];
+    const out: AssistantPriorityItem[] = [];
+    const claimsSorted = [...audit.claims].sort(sortClaimsByRisk);
+    const high = claimsSorted.find((c) => c.risk === "high");
+    if (high) {
+      out.push({
+        kind: "block",
+        title: high.reason,
+        subtitle:
+          "Dôvera · otvorte nález a rozhodnite sa (AI návrh alebo vlastná úprava)",
+        onActivate: () => {
+          setActiveAuditTab("trust");
+          setSelectedClaimId(high.id);
+        },
+      });
+    }
+    const medium = claimsSorted.find((c) => c.risk === "medium");
+    if (medium && out.length < 3 && medium.id !== high?.id) {
+      out.push({
+        kind: "warn",
+        title: medium.reason,
+        subtitle: "Dôvera · stredná závažnosť",
+        onActivate: () => {
+          setActiveAuditTab("trust");
+          setSelectedClaimId(medium.id);
+        },
+      });
+    }
+    const ling = [...(audit.linguisticClaims ?? [])].sort(sortClaimsByRisk)[0];
+    if (ling && out.length < 3) {
+      out.push({
+        kind: "warn",
+        title: ling.reason,
+        subtitle: "Štýl a čitateľnosť",
+        onActivate: () => {
+          setActiveAuditTab("linguistic");
+          setSelectedClaimId(ling.id);
+        },
+      });
+    }
+    const seoFail = Object.entries(audit.seoAudit).find(
+      ([k, v]) => v.status !== "pass" && !ignoredSeoKeys.has(k),
+    );
+    if (seoFail && out.length < 3) {
+      const [k, v] = seoFail;
+      const sk = k as SeoAuditKey;
+      out.push({
+        kind: "warn",
+        title: v.message.length > 72 ? `${v.message.slice(0, 72)}…` : v.message,
+        subtitle: `SEO · ${SEO_FIELD_LABEL[sk]}`,
+        onActivate: () => {
+          setActiveAuditTab("seo");
+          setSelectedClaimId(sk);
+        },
+      });
+    }
+    const tagRemain =
+      audit.tagSuggestions?.filter((t) => !removedTagIds.has(t.id)).length ?? 0;
+    if (!tagsCommitted && tagRemain > 0 && out.length < 3) {
+      out.push({
+        kind: "warn",
+        title: "Potvrďte návrhy tagov (Krok A)",
+        subtitle: `${tagRemain} tagov čaká na uloženie pred internými odkazmi`,
+        onActivate: () => {
+          setActiveAuditTab("seo");
+          setSelectedClaimId(null);
+        },
+      });
+    }
+    const pendLinks =
+      tagsCommitted && audit.linkSuggestions?.length
+        ? audit.linkSuggestions.filter((s) => !linkActions.has(s.id)).length
+        : 0;
+    if (pendLinks > 0 && out.length < 3) {
+      out.push({
+        kind: "opportunity",
+        title: `Interné odkazy: ${pendLinks} návrhov`,
+        subtitle: "V záložke SEO prijmite alebo odmietnite jednotlivo",
+        onActivate: () => {
+          setActiveAuditTab("seo");
+          setSelectedClaimId(null);
+        },
+      });
+    }
+    return out.slice(0, 3);
+  }, [audit, tagsCommitted, linkActions, removedTagIds, ignoredSeoKeys]);
+
+  const workflowStepsDef = useMemo(() => {
+    const hasAudit = Boolean(audit);
+    const tagRemain =
+      audit?.tagSuggestions?.filter((t) => !removedTagIds.has(t.id)).length ?? 0;
+    const pendingLinks =
+      tagsCommitted && audit?.linkSuggestions?.length
+        ? audit.linkSuggestions.filter((s) => !linkActions.has(s.id)).length
+        : 0;
+
+    const stepValidate: WorkflowStepStatus = isValidating
+      ? "current"
+      : hasAudit
+        ? "done"
+        : "pending";
+
+    const stepTags: WorkflowStepStatus = !hasAudit
+      ? "locked"
+      : tagsCommitted
+        ? "done"
+        : tagRemain > 0
+          ? "current"
+          : "pending";
+
+    const stepLinks: WorkflowStepStatus = !tagsCommitted
+      ? "locked"
+      : !(audit?.linkSuggestions?.length && audit.linkSuggestions.length > 0)
+        ? "done"
+        : pendingLinks > 0
+          ? "current"
+          : "done";
+
+    const stepPublish: WorkflowStepStatus = !hasAudit
+      ? "locked"
+      : openAssistantItemsCount === 0 && displayedScore >= 88
+        ? "done"
+        : "pending";
+
+    return [
+      {
+        id: "validate",
+        label: "Kontrola nálezov",
+        detail: isValidating
+          ? "Prebieha analýza…"
+          : hasAudit
+            ? "Záložky nižšie"
+            : "Spustite kontrolu",
+        status: stepValidate,
+      },
+      {
+        id: "tags",
+        label: "Tagy",
+        detail: !hasAudit
+          ? "Po kontrole"
+          : tagsCommitted
+            ? "Uložené (Krok A)"
+            : tagRemain > 0
+              ? `${tagRemain} návrhov`
+              : "Čaká na výber",
+        status: stepTags,
+      },
+      {
+        id: "links",
+        label: "Interné odkazy",
+        detail: !tagsCommitted
+          ? "Po uložení tagov"
+          : pendingLinks > 0
+            ? `${pendingLinks} čaká`
+            : hasAudit && audit?.linkSuggestions?.length
+              ? "Spracované"
+              : "Žiadne návrhy",
+        status: stepLinks,
+      },
+      {
+        id: "publish",
+        label: "Pred odoslaním",
+        detail:
+          stepPublish === "done"
+            ? "Asistent bez otvorených položiek"
+            : "Checklist redakcie",
+        status: stepPublish,
+      },
+    ];
+  }, [
+    audit,
+    isValidating,
+    tagsCommitted,
+    linkActions,
+    removedTagIds,
+    openAssistantItemsCount,
+    displayedScore,
+  ]);
+
   return (
     <>
     {/* ===== TAG + LINK GENERÁTOR MODAL ===== */}
@@ -2708,6 +2918,186 @@ const EagleCMS_Split: React.FC = () => {
                         </div>
                       </div>
 
+                      <div className="shrink-0 border-b border-gray-100 bg-slate-50/95 px-3 py-3">
+                        <p className="mb-2 text-[10px] font-black uppercase tracking-wider text-gray-500">
+                          Postup vo workflow
+                        </p>
+                        <div className="flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                          {workflowStepsDef.map((step) => (
+                            <div
+                              key={step.id}
+                              className={cn(
+                                "flex min-w-[7.25rem] flex-1 flex-col rounded-lg border px-2 py-2",
+                                step.status === "current" &&
+                                  "border-purple-400 bg-purple-50/90 ring-1 ring-purple-200/80",
+                                step.status === "done" &&
+                                  "border-emerald-200 bg-emerald-50/50",
+                                step.status === "pending" &&
+                                  "border-gray-200 bg-white",
+                                step.status === "locked" &&
+                                  "border-gray-100 bg-gray-50/70 opacity-[0.72]",
+                              )}
+                            >
+                              <div className="mb-0.5 flex items-center gap-1">
+                                {step.status === "done" ? (
+                                  <CheckCircle2
+                                    className="shrink-0 text-emerald-500"
+                                    size={13}
+                                    aria-hidden
+                                  />
+                                ) : step.status === "current" ? (
+                                  <Circle
+                                    className="shrink-0 fill-purple-600 text-purple-600"
+                                    size={12}
+                                    aria-hidden
+                                  />
+                                ) : step.status === "locked" ? (
+                                  <Lock
+                                    className="shrink-0 text-gray-400"
+                                    size={11}
+                                    aria-hidden
+                                  />
+                                ) : (
+                                  <Circle
+                                    className="shrink-0 text-gray-300"
+                                    size={12}
+                                    aria-hidden
+                                  />
+                                )}
+                                <span className="text-[10px] font-bold leading-tight text-gray-900">
+                                  {step.label}
+                                </span>
+                              </div>
+                              <p className="text-[9px] leading-snug text-gray-500">
+                                {step.detail}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {audit ? (
+                        <div
+                          className={cn(
+                            "shrink-0 border-b px-3 py-2.5 text-[11px] leading-snug",
+                            !tagsCommitted
+                              ? "border-slate-200 bg-slate-50 text-slate-700"
+                              : (() => {
+                                  const pend =
+                                    audit.linkSuggestions?.filter(
+                                      (s) => !linkActions.has(s.id),
+                                    ).length ?? 0;
+                                  return pend > 0
+                                    ? "border-blue-200 bg-blue-50/85 text-blue-950"
+                                    : "border-emerald-200 bg-emerald-50/70 text-emerald-950";
+                                })(),
+                          )}
+                        >
+                          <span className="font-bold">Interné linkovanie · </span>
+                          {!tagsCommitted
+                            ? "Návrhy odkazov sa sprístupnia po uložení tagov (Krok A)."
+                            : (() => {
+                                const pend =
+                                  audit.linkSuggestions?.filter(
+                                    (s) => !linkActions.has(s.id),
+                                  ).length ?? 0;
+                                if (pend > 0) {
+                                  return `${pend} návrhov čaká na rozhodnutie v záložke SEO.`;
+                                }
+                                return audit.linkSuggestions?.length
+                                  ? "Všetky aktuálne návrhy odkazov sú spracované."
+                                  : "Pre tento článok zatiaľ nie sú návrhy interných odkazov.";
+                              })()}
+                        </div>
+                      ) : null}
+
+                      {audit && assistantPriorities.length > 0 ? (
+                        <div className="shrink-0 space-y-2 border-b border-gray-100 bg-white px-3 py-3">
+                          <p className="text-[10px] font-black uppercase tracking-wider text-gray-500">
+                            Odporúčaná pozornosť
+                          </p>
+                          <ul className="space-y-2">
+                            {assistantPriorities.map((p, idx) => (
+                              <li key={`${p.kind}-${idx}-${p.title.slice(0, 24)}`}>
+                                <button
+                                  type="button"
+                                  onClick={p.onActivate}
+                                  className={cn(
+                                    "w-full rounded-lg border-l-4 px-3 py-2.5 text-left transition-colors hover:bg-gray-50/80",
+                                    p.kind === "block" &&
+                                      "border-l-rose-500 bg-rose-50/90",
+                                    p.kind === "warn" &&
+                                      "border-l-amber-500 bg-amber-50/86",
+                                    p.kind === "opportunity" &&
+                                      "border-l-sky-500 bg-sky-50/86",
+                                  )}
+                                >
+                                  <div className="flex items-start gap-2">
+                                    <span
+                                      className={cn(
+                                        "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black ring-1 ring-inset",
+                                        p.kind === "block" &&
+                                          "bg-rose-100 text-rose-900 ring-rose-200",
+                                        p.kind === "warn" &&
+                                          "bg-amber-100 text-amber-950 ring-amber-200",
+                                        p.kind === "opportunity" &&
+                                          "bg-sky-100 text-sky-950 ring-sky-200",
+                                      )}
+                                    >
+                                      {idx + 1}
+                                    </span>
+                                    <div className="min-w-0 flex-1">
+                                      <span className="text-[9px] font-black uppercase tracking-wide text-gray-500">
+                                        {p.kind === "block"
+                                          ? "Blokuje"
+                                          : p.kind === "warn"
+                                            ? "Upozornenie"
+                                            : "Príležitosť"}
+                                      </span>
+                                      <p className="text-xs font-semibold leading-snug text-gray-900">
+                                        {p.title}
+                                      </p>
+                                      <p className="mt-0.5 text-[11px] leading-snug text-gray-600">
+                                        {p.subtitle}
+                                      </p>
+                                      <span className="mt-1 inline-flex items-center text-[10px] font-bold text-purple-600">
+                                        Otvoriť
+                                        <ChevronRight className="ml-0.5" size={12} />
+                                      </span>
+                                    </div>
+                                  </div>
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
+
+                      {/* Pripravenosť — súhrn po orchestrácii */}
+                      <div className="shrink-0 px-4 py-3 bg-gray-50/50 border-b border-gray-100">
+                        <div className="flex justify-between items-center mb-1.5">
+                          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
+                            Pripravenosť článku
+                          </span>
+                          <span className={cn(
+                            "text-xs font-black",
+                            displayedScore > 80 ? "text-emerald-600" : 
+                            displayedScore > 50 ? "text-yellow-600" : "text-red-600"
+                          )}>{displayedScore}%</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${displayedScore}%` }}
+                            className={cn(
+                              "h-full transition-all duration-1000",
+                              displayedScore > 80 ? "bg-emerald-500" : 
+                              displayedScore > 50 ? "bg-yellow-500" : "bg-red-500"
+                            )}
+                          />
+                        </div>
+                      </div>
+
                       {/* AI Tabs */}
                       <div className="flex border-b border-gray-100 shrink-0">
                         {[
@@ -2740,31 +3130,6 @@ const EagleCMS_Split: React.FC = () => {
                             )}
                           </button>
                         ))}
-                      </div>
-
-                      {/* Readiness Score Progress Bar */}
-                      <div className="px-4 py-3 bg-gray-50/50 border-b border-gray-100 shrink-0">
-                        <div className="flex justify-between items-center mb-1.5">
-                          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
-                            Pripravenosť článku
-                          </span>
-                          <span className={cn(
-                            "text-xs font-black",
-                            displayedScore > 80 ? "text-emerald-600" : 
-                            displayedScore > 50 ? "text-yellow-600" : "text-red-600"
-                          )}>{displayedScore}%</span>
-                        </div>
-                        <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                          <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: `${displayedScore}%` }}
-                            className={cn(
-                              "h-full transition-all duration-1000",
-                              displayedScore > 80 ? "bg-emerald-500" : 
-                              displayedScore > 50 ? "bg-yellow-500" : "bg-red-500"
-                            )}
-                          />
-                        </div>
                       </div>
 
                       {/* AI Content Area */}
@@ -3481,6 +3846,18 @@ const EagleCMS_Split: React.FC = () => {
                           )}
                         </AnimatePresence>
                       </div>
+                      {audit ? (
+                        <div className="shrink-0 border-t border-gray-200 bg-slate-800 px-4 py-2.5 text-white">
+                          <p className="text-[10px] font-black uppercase tracking-wider text-white/55">
+                            Zostáva v asistentovi
+                          </p>
+                          <p className="text-xs font-medium leading-snug">
+                            {openAssistantItemsCount === 0
+                              ? "Žiadne otvorené položky v tomto paneli. Pokračujte uložením alebo publikovaním podľa interného procesu."
+                              : `${openAssistantItemsCount} otvorených položiek — prejdite záložky alebo položky „Odporúčaná pozornosť“ vyššie.`}
+                          </p>
+                        </div>
+                      ) : null}
                     </motion.div>
                   )}
                 </AnimatePresence>

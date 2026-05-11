@@ -89,6 +89,8 @@ Dnes máme paralelné svety: **SEO**, **dôvera**, **štýl** - často s **aktí
 
 Panel tým nie je len súhrn chýb - je **vitrínou aktívnej práce**: kde systém ponúka konkrétny krok a kde už redaktor niečo schválil alebo odmietol. Detailná vizuálna špecifikácia je predmetom návrhu UX - tento odsek fixuje **informačný zámer**, aby nevznikal pocit „ďalší sidebar bez mapy“.
 
+**Prototyp v editore:** po spustení kontroly sa v pravom paneli zobrazí **postup vo workflow** (Kontrola nálezov → Tagy → Interné odkazy → Pred odoslaním), **stav interného linkovania** (vrátane závislosti na uložených tagoch), **Odporúčaná pozornosť** (až 3 položky: Blokuje / Upozornenie / Príležitosť, s odklikom do príslušnej záložky alebo nálezu), **Pripravenosť článku** a pätička **Zostáva v asistentovi** s počtom otvorených položiek - všetko nadväzuje na existujúci flow prijatia a odmietnutia návrhov v záložkách.
+
 ### 6.3 Čo je zámerne mimo prvého MVP
 
 | Mimo prvého MVP | Dôvod |
