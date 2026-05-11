@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
-import NmhCopilotShowcase from "@/eagle_admin/NmhCopilotShowcase";
+import EagleCMS from "@/eagle_admin/EagleCMS";
 
 export const metadata: Metadata = {
-  title: "NMH — Editorial Copilot koncept",
+  title: "NMH — EAGLE Admin",
   description:
-    "Friendly ukážka pravého panelu: priority, workflow a pilierové návrhy (strategický koncept NMH).",
+    "Prototyp editora s asistentom kvality: dôvera, štýl, SEO, tagy a interné odkazy (HITL).",
   robots: { index: false, follow: false },
 };
 
@@ -16,5 +16,5 @@ export default async function NmhPage({
 }>) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <NmhCopilotShowcase />;
+  return <EagleCMS />;
 }

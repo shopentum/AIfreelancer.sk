@@ -2,7 +2,7 @@
 
 > **Typ dokumentu:** strategické zadanie / smer pre stakeholderov - **nie technická špecifikácia**.  
 > **Účel:** zjednotiť narratívu „kam ideme“ a ukázať, že veľkú časť hodnoty prinesie **zoradenie a orchestrácia už rozbehnutých schopností** okolo článku, nie nový AI model ako taký.  
-> **Forma prezentácie:** materiál je možné ukázať ako koncept **bočného panelu v editore** (napr. kontext **aifreelancer.sk / NMH**), ktorý **sprevádza redaktora** krokmi a súhrmom stavu - bez náhrady celého editora. Interaktívna ukážka UI (priority a výkladná skriňa): cesta **`/nmh`** v locale routingu (napr. `/sk/nmh`).
+> **Forma prezentácie:** **Plný prototyp editora** s pravým panelom asistenta je dostupný na ceste **`/nmh`** v locale routingu (napr. `/sk/nmh`) - rovnaký modul ako workflow s prijatím / odmietnutím návrhov.
 
 Dátum: 2026-05-07
 

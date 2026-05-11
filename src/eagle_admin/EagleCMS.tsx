@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useRouter, Link } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { 
   LayoutDashboard, 
   FileText, 
@@ -1790,14 +1790,14 @@ const EagleCMS_Split: React.FC = () => {
               <button className="flex items-center text-xs text-[#2C5282] font-medium hover:underline">
                 <ExternalLink size={14} className="mr-1" /> Nový článok
               </button>
-              <Link
+              <a
                 href="/nmh"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center bg-[#ED8936] text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-[#DD6B20] transition-colors"
               >
-                <Sparkles size={13} className="mr-1.5" /> Copilot koncept
-              </Link>
+                <Eye size={13} className="mr-1.5" /> Náhľad v novej karte
+              </a>
             </div>
             <div className="flex items-center space-x-2 border-l border-gray-200 pl-4">
               <div className="text-right">
@@ -2335,7 +2335,7 @@ const EagleCMS_Split: React.FC = () => {
                       : "text-gray-500 hover:bg-gray-50",
                   )}
                 >
-                  <Sparkles size={14} className="mr-2" /> Validovať článok
+                  <Sparkles size={14} className="mr-2" /> Asistent kvality
                   {audit && <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[8px] flex items-center justify-center text-white border-2 border-white">!</div>}
                 </button>
               </div>
@@ -2686,6 +2686,28 @@ const EagleCMS_Split: React.FC = () => {
                       exit={{ opacity: 0, x: -20 }}
                       className="flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm"
                     >
+                      <div className="shrink-0 border-b border-gray-100 bg-gradient-to-br from-purple-50/90 via-white to-white px-4 pb-3 pt-4">
+                        <div className="flex gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-600 text-white shadow-sm ring-4 ring-purple-100">
+                            <Sparkles size={18} aria-hidden />
+                          </div>
+                          <div className="min-w-0 pt-0.5">
+                            <h3 className="text-sm font-bold leading-snug text-gray-900">
+                              Asistent kvality článku
+                            </h3>
+                            <p className="mt-1 text-xs leading-relaxed text-gray-600">
+                              Minútová kontrola pred odoslaním: prejdite nálezy podľa záložiek,
+                              každý návrh si{' '}
+                              <span className="font-semibold text-gray-800">
+                                prijmite alebo odmietnite
+                              </span>
+                              {' '}
+                              - nič sa do textu nevloží bez vášho súhlasu.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
                       {/* AI Tabs */}
                       <div className="flex border-b border-gray-100 shrink-0">
                         {[
@@ -2723,7 +2745,9 @@ const EagleCMS_Split: React.FC = () => {
                       {/* Readiness Score Progress Bar */}
                       <div className="px-4 py-3 bg-gray-50/50 border-b border-gray-100 shrink-0">
                         <div className="flex justify-between items-center mb-1.5">
-                          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Readiness Score</span>
+                          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
+                            Pripravenosť článku
+                          </span>
                           <span className={cn(
                             "text-xs font-black",
                             displayedScore > 80 ? "text-emerald-600" : 
