@@ -2164,7 +2164,7 @@ const EagleCMS_Split: React.FC = () => {
             const top = editorMainScrollRef.current?.scrollTop ?? 0;
             setAiAssistantTitleCollapsed(top > 28);
           }}
-          className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain p-6"
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain bg-[#F0F2F5] px-6 pb-6 pt-0"
         >
           <div className="mx-auto grid w-full max-w-[1800px] grid-cols-12 items-start gap-6">
             {/* Left Column: Content */}
@@ -2879,7 +2879,7 @@ const EagleCMS_Split: React.FC = () => {
                           </div>
                         </div>
 
-                        <div className="sticky top-0 z-30 shrink-0 border-b border-gray-200 bg-white px-4 pb-2.5 pt-2 shadow-[0_6px_12px_-8px_rgba(15,23,42,0.35)]">
+                        <div className="sticky top-0 z-30 shrink-0 border-b border-gray-200 bg-white px-4 pb-2.5 pt-2">
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">
                               Pripravenosť článku
