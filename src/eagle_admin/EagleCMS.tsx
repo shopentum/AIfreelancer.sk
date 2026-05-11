@@ -365,7 +365,8 @@ const EagleCMS_Split: React.FC = () => {
   const modalLinksSectionRef = useRef<HTMLDivElement>(null);
   /** true = modal otvorený cez "Zobraziť návrhy" → auto-scroll na linky */
   const modalScrollToLinksRef = useRef(false);
-  const aiAssistantScrollRef = useRef<HTMLDivElement>(null);
+  /** Jediný vertikálny scroll editora — bez vnútorného scrollera v pravom paneli. */
+  const editorMainScrollRef = useRef<HTMLElement | null>(null);
   const scrollRafRef = useRef<number | null>(null);
   const fadeClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const undoFlashClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -2156,8 +2157,15 @@ const EagleCMS_Split: React.FC = () => {
           </div>
         ) : null}
 
-        {/* Editor Area: scroll na main — ľavý stĺpec prirodzene vysoký; pravý sticky v rámci main. */}
-        <main className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain p-6">
+        {/* Editor: jeden vertikálny scroll na <main>, pravý panel bez vlastného overflow. */}
+        <main
+          ref={editorMainScrollRef}
+          onScroll={() => {
+            const top = editorMainScrollRef.current?.scrollTop ?? 0;
+            setAiAssistantTitleCollapsed(top > 28);
+          }}
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain p-6"
+        >
           <div className="mx-auto grid w-full max-w-[1800px] grid-cols-12 items-start gap-6">
             {/* Left Column: Content */}
             <div className="col-span-12 flex flex-col gap-6 lg:col-span-8">
@@ -2841,16 +2849,8 @@ const EagleCMS_Split: React.FC = () => {
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      className="flex max-h-[min(88vh,52rem)] min-h-[260px] flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
+                      className="flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm"
                     >
-                      <div
-                        ref={aiAssistantScrollRef}
-                        onScroll={(e) => {
-                          const st = e.currentTarget.scrollTop;
-                          setAiAssistantTitleCollapsed(st > 14);
-                        }}
-                        className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain"
-                      >
                         <div
                           className={cn(
                             "shrink-0 overflow-hidden border-b border-gray-100 bg-gradient-to-br from-purple-50/90 via-white to-white transition-[max-height,opacity,padding] duration-200 ease-out",
@@ -3732,7 +3732,6 @@ const EagleCMS_Split: React.FC = () => {
                           )}
                         </AnimatePresence>
                       </div>
-                    </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
