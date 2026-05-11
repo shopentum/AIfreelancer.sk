@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useRouter } from "@/i18n/navigation";
+import { useRouter, Link } from "@/i18n/navigation";
 import { 
   LayoutDashboard, 
   FileText, 
@@ -1790,14 +1790,14 @@ const EagleCMS_Split: React.FC = () => {
               <button className="flex items-center text-xs text-[#2C5282] font-medium hover:underline">
                 <ExternalLink size={14} className="mr-1" /> Nový článok
               </button>
-              <a
+              <Link
                 href="/nmh"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center bg-[#ED8936] text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-[#DD6B20] transition-colors"
               >
-                <Eye size={13} className="mr-1.5" /> Náhľad
-              </a>
+                <Sparkles size={13} className="mr-1.5" /> Copilot koncept
+              </Link>
             </div>
             <div className="flex items-center space-x-2 border-l border-gray-200 pl-4">
               <div className="text-right">

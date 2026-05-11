@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
-import EagleCMS from "@/eagle_admin/EagleCMS";
-import NmhPasswordGate from "@/eagle_admin/NmhPasswordGate";
+import NmhCopilotShowcase from "@/eagle_admin/NmhCopilotShowcase";
 
 export const metadata: Metadata = {
-  title: "NMH — EAGLE Admin",
-  description: "Interný redakčný prototyp Media Decision Intelligence Engine.",
+  title: "NMH — Editorial Copilot koncept",
+  description:
+    "Friendly ukážka pravého panelu: priority, workflow a pilierové návrhy (strategický koncept NMH).",
   robots: { index: false, follow: false },
 };
 
@@ -16,9 +16,5 @@ export default async function NmhPage({
 }>) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return (
-    // <NmhPasswordGate>
-      <EagleCMS />
-    // </NmhPasswordGate>
-  );
+  return <NmhCopilotShowcase />;
 }
