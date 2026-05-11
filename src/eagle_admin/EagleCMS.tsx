@@ -69,6 +69,8 @@ import {
   Lock,
   Download,
   Circle,
+  HelpCircle,
+  Newspaper,
 } from "lucide-react";
 import { flushSync } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -166,14 +168,25 @@ function sortClaimsByRisk(a: Claim, b: Claim) {
   return RISK_ORDER[a.risk] - RISK_ORDER[b.risk];
 }
 
-type AssistantPriorityKind = "block" | "warn" | "opportunity";
+type AssistantPriorityKind = "block" | "warn" | "opportunity" | "info";
 
 type AssistantPriorityItem = {
   kind: AssistantPriorityKind;
   title: string;
   subtitle: string;
   onActivate: () => void;
+  /**
+   * Štítok závažnosti (Blokuje / Upozornenie / …) len tam, kde dáva zmysel.
+   */
+  showSeverityLabel?: boolean;
+  /** Text odkazu pod kartou (predvolené Otvoriť). */
+  actionLabel?: string;
 };
+
+/** Minimálny počet vybraných súvisiacich článkov v module CMS (prototypová detekcia). */
+const RELATED_ARTICLES_RECOMMENDED_MIN = 2;
+
+type PrototypeQaPollState = "none" | "draft" | "ready";
 
 type WorkflowStepStatus = "done" | "current" | "pending" | "locked";
 
@@ -360,6 +373,8 @@ const EagleCMS_Split: React.FC = () => {
   const [brand, setBrand] = useState('Nový Čas');
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const modalLinksSectionRef = useRef<HTMLDivElement>(null);
+  /** Sekcia simulácie modulov CMS (súvisiace články, Q&A) v Nastaveniach — scroll z asistenta. */
+  const cmsModulesSimSectionRef = useRef<HTMLDivElement>(null);
   /** true = modal otvorený cez "Zobraziť návrhy" → auto-scroll na linky */
   const modalScrollToLinksRef = useRef(false);
   const scrollRafRef = useRef<number | null>(null);
@@ -408,6 +423,15 @@ const EagleCMS_Split: React.FC = () => {
   const [pendingManualEdit, setPendingManualEdit] = useState<string | null>(null);
   /** SEO kľúče, ktoré redaktor vedome ignoroval (namiesto aplikovania návrhu). */
   const [ignoredSeoKeys, setIgnoredSeoKeys] = useState<Set<string>>(new Set());
+
+  /**
+   * Simulácia signálov z CMS modulov (prototyp — v produkcii API / embed).
+   * Asistent z nich robí ľahkú detekciu súladu prípravy článku.
+   */
+  const [prototypeRelatedArticleSlots, setPrototypeRelatedArticleSlots] =
+    useState(1);
+  const [prototypeQaPollState, setPrototypeQaPollState] =
+    useState<PrototypeQaPollState>("none");
 
   /** Animovaný counter pre Readiness Score — beží od 0 po reálnu hodnotu pri validácii,
    *  plynule inkrementuje pri každom ďalšom vyriešení nálezu. */
@@ -1464,23 +1488,32 @@ const EagleCMS_Split: React.FC = () => {
   const kroKBPhase = modalPhase === 'krok_b_loading' || modalPhase === 'krok_b_ready';
   const tagsAlreadyCommittedInModal = kroKBPhase || modalPhase === 'tags_ready' && tagsCommitted;
 
+  const scrollToCmsModulesSimSection = useCallback(() => {
+    setRightPanelMode("settings");
+    window.setTimeout(() => {
+      cmsModulesSimSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }, 150);
+  }, []);
+
   const openAssistantItemsCount = useMemo(() => {
     if (!audit) return 0;
     let n = audit.claims.length + (audit.linguisticClaims?.length ?? 0);
     for (const [k, v] of Object.entries(audit.seoAudit)) {
       if (v.status !== "pass" && !ignoredSeoKeys.has(k)) n += 1;
     }
-    if (!tagsCommitted && (audit.tagSuggestions?.length ?? 0) > 0) {
-      const remaining = audit.tagSuggestions!.filter(
-        (t) => !removedTagIds.has(t.id),
-      ).length;
-      if (remaining > 0) n += 1;
-    }
-    if (tagsCommitted && audit.linkSuggestions?.length) {
-      n += audit.linkSuggestions.filter((s) => !linkActions.has(s.id)).length;
-    }
+    if (prototypeRelatedArticleSlots < RELATED_ARTICLES_RECOMMENDED_MIN)
+      n += 1;
+    if (prototypeQaPollState !== "ready") n += 1;
     return n;
-  }, [audit, tagsCommitted, linkActions, removedTagIds, ignoredSeoKeys]);
+  }, [
+    audit,
+    ignoredSeoKeys,
+    prototypeQaPollState,
+    prototypeRelatedArticleSlots,
+  ]);
 
   const assistantPriorities = useMemo((): AssistantPriorityItem[] => {
     if (!audit) return [];
@@ -1493,6 +1526,7 @@ const EagleCMS_Split: React.FC = () => {
         title: high.reason,
         subtitle:
           "Dôvera · otvorte nález a rozhodnite sa (AI návrh alebo vlastná úprava)",
+        showSeverityLabel: true,
         onActivate: () => {
           setActiveAuditTab("trust");
           setSelectedClaimId(high.id);
@@ -1500,11 +1534,12 @@ const EagleCMS_Split: React.FC = () => {
       });
     }
     const medium = claimsSorted.find((c) => c.risk === "medium");
-    if (medium && out.length < 3 && medium.id !== high?.id) {
+    if (medium && out.length < 5 && medium.id !== high?.id) {
       out.push({
         kind: "warn",
         title: medium.reason,
         subtitle: "Dôvera · stredná závažnosť",
+        showSeverityLabel: true,
         onActivate: () => {
           setActiveAuditTab("trust");
           setSelectedClaimId(medium.id);
@@ -1512,11 +1547,12 @@ const EagleCMS_Split: React.FC = () => {
       });
     }
     const ling = [...(audit.linguisticClaims ?? [])].sort(sortClaimsByRisk)[0];
-    if (ling && out.length < 3) {
+    if (ling && out.length < 5) {
       out.push({
         kind: "warn",
         title: ling.reason,
         subtitle: "Štýl a čitateľnosť",
+        showSeverityLabel: false,
         onActivate: () => {
           setActiveAuditTab("linguistic");
           setSelectedClaimId(ling.id);
@@ -1526,58 +1562,61 @@ const EagleCMS_Split: React.FC = () => {
     const seoFail = Object.entries(audit.seoAudit).find(
       ([k, v]) => v.status !== "pass" && !ignoredSeoKeys.has(k),
     );
-    if (seoFail && out.length < 3) {
+    if (seoFail && out.length < 5) {
       const [k, v] = seoFail;
       const sk = k as SeoAuditKey;
       out.push({
         kind: "warn",
         title: v.message.length > 72 ? `${v.message.slice(0, 72)}…` : v.message,
         subtitle: `SEO · ${SEO_FIELD_LABEL[sk]}`,
+        showSeverityLabel: false,
         onActivate: () => {
           setActiveAuditTab("seo");
           setSelectedClaimId(sk);
         },
       });
     }
-    const tagRemain =
-      audit.tagSuggestions?.filter((t) => !removedTagIds.has(t.id)).length ?? 0;
-    if (!tagsCommitted && tagRemain > 0 && out.length < 3) {
+    if (
+      prototypeRelatedArticleSlots < RELATED_ARTICLES_RECOMMENDED_MIN &&
+      out.length < 5
+    ) {
       out.push({
-        kind: "warn",
-        title: "Potvrďte návrhy tagov (Krok A)",
-        subtitle: `${tagRemain} tagov čaká na uloženie pred internými odkazmi`,
-        onActivate: () => {
-          setActiveAuditTab("seo");
-          setSelectedClaimId(null);
-        },
+        kind: "info",
+        title: "Doplňte súvisiace články",
+        subtitle: `V module sú len ${prototypeRelatedArticleSlots} z odporúčaných aspoň ${RELATED_ARTICLES_RECOMMENDED_MIN} prepojení na súvisiaci obsah.`,
+        showSeverityLabel: false,
+        actionLabel: "Simulácia v nastaveniach",
+        onActivate: scrollToCmsModulesSimSection,
       });
     }
-    const pendLinks =
-      tagsCommitted && audit.linkSuggestions?.length
-        ? audit.linkSuggestions.filter((s) => !linkActions.has(s.id)).length
-        : 0;
-    if (pendLinks > 0 && out.length < 3) {
+    if (prototypeQaPollState !== "ready" && out.length < 5) {
+      const qaSubtitle =
+        prototypeQaPollState === "none"
+          ? "Článok nemá nastavenú anketu Q&A — interaktívna vrstva zvyšuje zapojenie čitateľov."
+          : "Anketa je rozpracovaná — dokončite otázku a odpovede v module Q&A.";
       out.push({
-        kind: "opportunity",
-        title: `Interné odkazy: ${pendLinks} návrhov`,
-        subtitle: "V záložke SEO prijmite alebo odmietnite jednotlivo",
-        onActivate: () => {
-          setActiveAuditTab("seo");
-          setSelectedClaimId(null);
-        },
+        kind: "info",
+        title:
+          prototypeQaPollState === "none"
+            ? "Zvážte pridanie ankety Q&A"
+            : "Dokončite nastavenie ankety Q&A",
+        subtitle: qaSubtitle,
+        showSeverityLabel: false,
+        actionLabel: "Simulácia v nastaveniach",
+        onActivate: scrollToCmsModulesSimSection,
       });
     }
-    return out.slice(0, 3);
-  }, [audit, tagsCommitted, linkActions, removedTagIds, ignoredSeoKeys]);
+    return out.slice(0, 5);
+  }, [
+    audit,
+    ignoredSeoKeys,
+    prototypeQaPollState,
+    prototypeRelatedArticleSlots,
+    scrollToCmsModulesSimSection,
+  ]);
 
   const workflowStepsDef = useMemo(() => {
     const hasAudit = Boolean(audit);
-    const tagRemain =
-      audit?.tagSuggestions?.filter((t) => !removedTagIds.has(t.id)).length ?? 0;
-    const pendingLinks =
-      tagsCommitted && audit?.linkSuggestions?.length
-        ? audit.linkSuggestions.filter((s) => !linkActions.has(s.id)).length
-        : 0;
 
     const stepValidate: WorkflowStepStatus = isValidating
       ? "current"
@@ -1585,21 +1624,11 @@ const EagleCMS_Split: React.FC = () => {
         ? "done"
         : "pending";
 
-    const stepTags: WorkflowStepStatus = !hasAudit
+    const stepReview: WorkflowStepStatus = !hasAudit
       ? "locked"
-      : tagsCommitted
-        ? "done"
-        : tagRemain > 0
-          ? "current"
-          : "pending";
-
-    const stepLinks: WorkflowStepStatus = !tagsCommitted
-      ? "locked"
-      : !(audit?.linkSuggestions?.length && audit.linkSuggestions.length > 0)
-        ? "done"
-        : pendingLinks > 0
-          ? "current"
-          : "done";
+      : openAssistantItemsCount > 0
+        ? "current"
+        : "done";
 
     const stepPublish: WorkflowStepStatus = !hasAudit
       ? "locked"
@@ -1619,28 +1648,14 @@ const EagleCMS_Split: React.FC = () => {
         status: stepValidate,
       },
       {
-        id: "tags",
-        label: "Tagy",
+        id: "review",
+        label: "Spracovanie nálezov",
         detail: !hasAudit
           ? "Po kontrole"
-          : tagsCommitted
-            ? "Uložené (Krok A)"
-            : tagRemain > 0
-              ? `${tagRemain} návrhov`
-              : "Čaká na výber",
-        status: stepTags,
-      },
-      {
-        id: "links",
-        label: "Interné odkazy",
-        detail: !tagsCommitted
-          ? "Po uložení tagov"
-          : pendingLinks > 0
-            ? `${pendingLinks} čaká`
-            : hasAudit && audit?.linkSuggestions?.length
-              ? "Spracované"
-              : "Žiadne návrhy",
-        status: stepLinks,
+          : openAssistantItemsCount > 0
+            ? `${openAssistantItemsCount} otvorených položiek`
+            : "Nálezy spracované",
+        status: stepReview,
       },
       {
         id: "publish",
@@ -1652,15 +1667,7 @@ const EagleCMS_Split: React.FC = () => {
         status: stepPublish,
       },
     ];
-  }, [
-    audit,
-    isValidating,
-    tagsCommitted,
-    linkActions,
-    removedTagIds,
-    openAssistantItemsCount,
-    displayedScore,
-  ]);
+  }, [audit, isValidating, openAssistantItemsCount, displayedScore]);
 
   return (
     <>
@@ -2194,6 +2201,45 @@ const EagleCMS_Split: React.FC = () => {
                 Simulácia: výpadok Intelligence API (validácia / AI návrhy zlyhajú)
               </span>
             </label>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-violet-100 bg-violet-50/50 px-3 py-2 text-[11px] text-gray-700 shadow-sm">
+              <span className="font-black uppercase tracking-wide text-violet-900/90">
+                Moduly CMS (demo)
+              </span>
+              <label className="flex flex-wrap items-center gap-1.5 font-medium">
+                <Newspaper size={13} className="shrink-0 text-violet-600" aria-hidden />
+                <span>Súvisiace články</span>
+                <select
+                  className="rounded-md border border-gray-200 bg-white px-2 py-1 text-[11px] font-bold text-gray-800 outline-none focus:ring-1 focus:ring-violet-500"
+                  value={prototypeRelatedArticleSlots}
+                  onChange={(e) =>
+                    setPrototypeRelatedArticleSlots(Number(e.target.value))
+                  }
+                  aria-label="Počet vybraných súvisiacich článkov (simulácia)"
+                >
+                  {[0, 1, 2, 3].map((n) => (
+                    <option key={n} value={n}>
+                      {n} vybr.
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex flex-wrap items-center gap-1.5 font-medium">
+                <HelpCircle size={13} className="shrink-0 text-violet-600" aria-hidden />
+                <span>Q&A anketa</span>
+                <select
+                  className="rounded-md border border-gray-200 bg-white px-2 py-1 text-[11px] font-bold text-gray-800 outline-none focus:ring-1 focus:ring-violet-500"
+                  value={prototypeQaPollState}
+                  onChange={(e) =>
+                    setPrototypeQaPollState(e.target.value as PrototypeQaPollState)
+                  }
+                  aria-label="Stav ankety Q&A (simulácia)"
+                >
+                  <option value="none">žiadna</option>
+                  <option value="draft">rozprac.</option>
+                  <option value="ready">pripravená</option>
+                </select>
+              </label>
+            </div>
           </div>
         </div>
 
@@ -2560,6 +2606,91 @@ const EagleCMS_Split: React.FC = () => {
                       exit={{ opacity: 0, x: -20 }}
                       className="space-y-6"
                     >
+                      <div
+                        ref={cmsModulesSimSectionRef}
+                        className="overflow-hidden rounded-xl border border-violet-200 bg-white shadow-sm ring-1 ring-violet-100/80"
+                      >
+                        <div className="flex items-center gap-2 border-b border-gray-100 bg-violet-50/60 px-5 py-3">
+                          <Newspaper
+                            size={16}
+                            className="shrink-0 text-violet-600"
+                            aria-hidden
+                          />
+                          <h3 className="text-sm font-bold uppercase tracking-wider text-gray-700">
+                            Moduly článku (simulácia CMS)
+                          </h3>
+                        </div>
+                        <div className="space-y-4 p-5 text-xs leading-relaxed text-gray-600">
+                          <p>
+                            Odpovedá modulom{" "}
+                            <strong className="text-gray-800">
+                              Súvisiace články
+                            </strong>{" "}
+                            a{" "}
+                            <strong className="text-gray-800">Anketa Q&A</strong>{" "}
+                            v CMS. Asistent z hodnôt robí ľahkú detekciu pripravenosti
+                            (bez číselných predikcií výkonu).
+                          </p>
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="space-y-1.5">
+                              <label className="flex items-center gap-1.5 font-bold text-gray-700">
+                                <Newspaper
+                                  size={14}
+                                  className="shrink-0 text-violet-600"
+                                  aria-hidden
+                                />
+                                Súvisiace články (počet slotov)
+                              </label>
+                              <select
+                                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 outline-none focus:ring-1 focus:ring-violet-500"
+                                value={prototypeRelatedArticleSlots}
+                                onChange={(e) =>
+                                  setPrototypeRelatedArticleSlots(
+                                    Number(e.target.value),
+                                  )
+                                }
+                              >
+                                {[0, 1, 2, 3].map((n) => (
+                                  <option key={n} value={n}>
+                                    {n === 0
+                                      ? "Žiadny vybraný"
+                                      : n === 1
+                                        ? "1 vybraný"
+                                        : `${n} vybrané`}
+                                    {n >= RELATED_ARTICLES_RECOMMENDED_MIN
+                                      ? " · spĺňa minimum"
+                                      : ""}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="flex items-center gap-1.5 font-bold text-gray-700">
+                                <HelpCircle
+                                  size={14}
+                                  className="shrink-0 text-violet-600"
+                                  aria-hidden
+                                />
+                                Stav ankety Q&A
+                              </label>
+                              <select
+                                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 outline-none focus:ring-1 focus:ring-violet-500"
+                                value={prototypeQaPollState}
+                                onChange={(e) =>
+                                  setPrototypeQaPollState(
+                                    e.target.value as PrototypeQaPollState,
+                                  )
+                                }
+                              >
+                                <option value="none">Žiadna anketa</option>
+                                <option value="draft">Rozpracovaná</option>
+                                <option value="ready">Pripravená</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
                       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                         <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50">
                           <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Hlavné nastavenia</h3>
@@ -2976,41 +3107,6 @@ const EagleCMS_Split: React.FC = () => {
                         </div>
                       </div>
 
-                      {audit ? (
-                        <div
-                          className={cn(
-                            "shrink-0 border-b px-3 py-2.5 text-[11px] leading-snug",
-                            !tagsCommitted
-                              ? "border-slate-200 bg-slate-50 text-slate-700"
-                              : (() => {
-                                  const pend =
-                                    audit.linkSuggestions?.filter(
-                                      (s) => !linkActions.has(s.id),
-                                    ).length ?? 0;
-                                  return pend > 0
-                                    ? "border-blue-200 bg-blue-50/85 text-blue-950"
-                                    : "border-emerald-200 bg-emerald-50/70 text-emerald-950";
-                                })(),
-                          )}
-                        >
-                          <span className="font-bold">Interné linkovanie · </span>
-                          {!tagsCommitted
-                            ? "Návrhy odkazov sa sprístupnia po uložení tagov (Krok A)."
-                            : (() => {
-                                const pend =
-                                  audit.linkSuggestions?.filter(
-                                    (s) => !linkActions.has(s.id),
-                                  ).length ?? 0;
-                                if (pend > 0) {
-                                  return `${pend} návrhov čaká na rozhodnutie v záložke SEO.`;
-                                }
-                                return audit.linkSuggestions?.length
-                                  ? "Všetky aktuálne návrhy odkazov sú spracované."
-                                  : "Pre tento článok zatiaľ nie sú návrhy interných odkazov.";
-                              })()}
-                        </div>
-                      ) : null}
-
                       {audit && assistantPriorities.length > 0 ? (
                         <div className="shrink-0 space-y-2 border-b border-gray-100 bg-white px-3 py-3">
                           <p className="text-[10px] font-black uppercase tracking-wider text-gray-500">
@@ -3018,7 +3114,7 @@ const EagleCMS_Split: React.FC = () => {
                           </p>
                           <ul className="space-y-2">
                             {assistantPriorities.map((p, idx) => (
-                              <li key={`${p.kind}-${idx}-${p.title.slice(0, 24)}`}>
+                              <li key={`ap-${idx}-${p.kind}-${p.title.slice(0, 32)}`}>
                                 <button
                                   type="button"
                                   onClick={p.onActivate}
@@ -3030,6 +3126,8 @@ const EagleCMS_Split: React.FC = () => {
                                       "border-l-amber-500 bg-amber-50/86",
                                     p.kind === "opportunity" &&
                                       "border-l-sky-500 bg-sky-50/86",
+                                    p.kind === "info" &&
+                                      "border-l-slate-400 bg-slate-50/95",
                                   )}
                                 >
                                   <div className="flex items-start gap-2">
@@ -3042,18 +3140,22 @@ const EagleCMS_Split: React.FC = () => {
                                           "bg-amber-100 text-amber-950 ring-amber-200",
                                         p.kind === "opportunity" &&
                                           "bg-sky-100 text-sky-950 ring-sky-200",
+                                        p.kind === "info" &&
+                                          "bg-slate-200/90 text-slate-800 ring-slate-300",
                                       )}
                                     >
                                       {idx + 1}
                                     </span>
                                     <div className="min-w-0 flex-1">
-                                      <span className="text-[9px] font-black uppercase tracking-wide text-gray-500">
-                                        {p.kind === "block"
-                                          ? "Blokuje"
-                                          : p.kind === "warn"
-                                            ? "Upozornenie"
-                                            : "Príležitosť"}
-                                      </span>
+                                      {(p.showSeverityLabel ?? false) ? (
+                                        <span className="mb-0.5 block text-[9px] font-black uppercase tracking-wide text-gray-500">
+                                          {p.kind === "block"
+                                            ? "Blokuje"
+                                            : p.kind === "warn"
+                                              ? "Upozornenie"
+                                              : "Príležitosť"}
+                                        </span>
+                                      ) : null}
                                       <p className="text-xs font-semibold leading-snug text-gray-900">
                                         {p.title}
                                       </p>
@@ -3061,7 +3163,7 @@ const EagleCMS_Split: React.FC = () => {
                                         {p.subtitle}
                                       </p>
                                       <span className="mt-1 inline-flex items-center text-[10px] font-bold text-purple-600">
-                                        Otvoriť
+                                        {p.actionLabel ?? "Otvoriť"}
                                         <ChevronRight className="ml-0.5" size={12} />
                                       </span>
                                     </div>
