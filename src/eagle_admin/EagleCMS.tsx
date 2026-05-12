@@ -172,10 +172,6 @@ type AssistantPriorityItem = {
   title: string;
   subtitle: string;
   onActivate: () => void;
-  /**
-   * Štítok závažnosti (Blokuje / Upozornenie / …) len tam, kde dáva zmysel.
-   */
-  showSeverityLabel?: boolean;
   /** Text odkazu pod kartou (predvolené Otvoriť). */
   actionLabel?: string;
 };
@@ -1526,7 +1522,6 @@ const EagleCMS_Split: React.FC = () => {
         title: high.reason,
         subtitle:
           "Dôvera · otvorte nález a rozhodnite sa (AI návrh alebo vlastná úprava)",
-        showSeverityLabel: true,
         onActivate: () => {
           setActiveAuditTab("trust");
           setSelectedClaimId(high.id);
@@ -1544,7 +1539,6 @@ const EagleCMS_Split: React.FC = () => {
         : pendingLinkSuggestionsCount > 0
           ? `${pendingLinkSuggestionsCount} návrhov odkazu ešte čaká na prijatie alebo zamietnutie.`
           : "Tagy a odkazy sú spracované; úpravy nájdete v Nastavenia.",
-      showSeverityLabel: false,
       actionLabel: !tagsCommitted
         ? "Generovať"
         : pendingLinkSuggestionsCount > 0
@@ -1563,7 +1557,6 @@ const EagleCMS_Split: React.FC = () => {
         kind: "warn",
         title: medium.reason,
         subtitle: "Dôvera · stredná závažnosť",
-        showSeverityLabel: true,
         onActivate: () => {
           setActiveAuditTab("trust");
           setSelectedClaimId(medium.id);
@@ -1576,7 +1569,6 @@ const EagleCMS_Split: React.FC = () => {
         kind: "warn",
         title: ling.reason,
         subtitle: "Štýl a čitateľnosť",
-        showSeverityLabel: false,
         onActivate: () => {
           setActiveAuditTab("linguistic");
           setSelectedClaimId(ling.id);
@@ -1593,7 +1585,6 @@ const EagleCMS_Split: React.FC = () => {
         kind: "warn",
         title: v.message.length > 72 ? `${v.message.slice(0, 72)}…` : v.message,
         subtitle: `SEO · ${SEO_FIELD_LABEL[sk]}`,
-        showSeverityLabel: false,
         onActivate: () => {
           setActiveAuditTab("seo");
           setSelectedClaimId(sk);
