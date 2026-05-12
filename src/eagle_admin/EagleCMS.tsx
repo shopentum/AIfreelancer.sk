@@ -2922,7 +2922,7 @@ const EagleCMS_Split: React.FC = () => {
                             "shrink-0 overflow-hidden border-b border-gray-100 bg-gradient-to-br from-purple-50/90 via-white to-white transition-[max-height,opacity,padding] duration-200 ease-out",
                             aiAssistantTitleCollapsed
                               ? "max-h-0 border-b-0 py-0 opacity-0"
-                              : "max-h-[240px] px-4 pb-3 pt-4 opacity-100",
+                              : "max-h-[340px] px-4 pb-3 pt-4 opacity-100",
                           )}
                         >
                           <div className="flex gap-3">
@@ -2930,60 +2930,69 @@ const EagleCMS_Split: React.FC = () => {
                               <Sparkles size={18} aria-hidden />
                             </div>
                             <div className="min-w-0 pt-0.5">
-                              <h3 className="text-sm font-bold leading-snug text-gray-900">
-                                Asistent kvality článku
+                              <h3 className="text-sm font-bold leading-snug tracking-tight text-slate-900">
+                                Editorial Copilot
                               </h3>
-                              <p className="mt-1 text-xs leading-relaxed text-gray-600">
-                                Váš článok si zaslúži istotu pred odoslaním. Tu nájdete
-                                spojenca, ktorý zhrnie podnety a návrhy — vy ich doladíte vo
-                                vlastnom tempe a{" "}
-                                <span className="font-semibold text-gray-800">
-                                  posledné slovo máte vždy vy
-                                </span>
-                                ; bez vášho súhlasu sa do textu nič nedostane.
+                              <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
+                                Pomáha pripraviť kvalitnejší a výkonnejší článok pred
+                                publikovaním. Upozorní na riziká, odporučí úpravy a pripraví
+                                AI návrhy pre SEO, čitateľnosť aj dôveryhodnosť - finálne
+                                rozhodnutie však vždy zostáva na vás.
                               </p>
                             </div>
                           </div>
                         </div>
 
-                        <div className="sticky top-0 z-30 shrink-0 border-b border-gray-200 bg-white px-4 pb-2.5 pt-2">
+                        <div
+                          className={cn(
+                            "sticky top-0 z-30 shrink-0 border-b border-slate-200/90 bg-gradient-to-b from-white via-white to-slate-50/90 px-4 pb-3 pt-3",
+                            "shadow-[0_14px_28px_-12px_rgba(15,23,42,0.12),0_4px_12px_-6px_rgba(15,23,42,0.06)]",
+                          )}
+                        >
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">
+                            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                               Pripravenosť článku
                             </span>
                             <span
                               className={cn(
-                                "text-xs font-black tabular-nums",
+                                "text-xs font-bold tabular-nums tracking-tight",
                                 displayedScore > 80
-                                  ? "text-emerald-600"
+                                  ? "text-emerald-700"
                                   : displayedScore > 50
-                                    ? "text-yellow-600"
-                                    : "text-red-600",
+                                    ? "text-amber-700"
+                                    : "text-red-700",
                               )}
                             >
                               {displayedScore}%
                             </span>
                           </div>
-                          <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-gray-200">
+                          <div
+                            className="mt-2.5 w-full overflow-hidden rounded-full bg-slate-100 p-1 shadow-[inset_0_1px_3px_rgba(15,23,42,0.07)] ring-1 ring-slate-200/80"
+                            role="progressbar"
+                            aria-valuenow={displayedScore}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-label="Pripravenosť článku"
+                          >
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${displayedScore}%` }}
                               className={cn(
-                                "h-full transition-all duration-1000",
+                                "h-2.5 min-w-0 rounded-full shadow-[0_1px_2px_rgba(255,255,255,0.35)_inset,0_1px_3px_rgba(15,23,42,0.12)] transition-all duration-1000",
                                 displayedScore > 80
-                                  ? "bg-emerald-500"
+                                  ? "bg-gradient-to-r from-emerald-600 to-emerald-500"
                                   : displayedScore > 50
-                                    ? "bg-yellow-500"
-                                    : "bg-red-500",
+                                    ? "bg-gradient-to-r from-amber-500 to-amber-400"
+                                    : "bg-gradient-to-r from-red-600 to-red-500",
                               )}
                             />
                           </div>
                           {findingsProgress ? (
-                            <p className="mt-1.5 text-[11px] leading-snug text-gray-600">
-                              <span className="font-semibold tabular-nums text-gray-900">
+                            <p className="mt-2 text-[11px] leading-snug text-slate-600">
+                              <span className="font-semibold tabular-nums text-slate-900">
                                 {findingsProgress.resolved}
                               </span>
-                              <span className="tabular-nums text-gray-500">
+                              <span className="tabular-nums text-slate-500">
                                 /{findingsProgress.total}
                               </span>{" "}
                               nálezov vyriešených
