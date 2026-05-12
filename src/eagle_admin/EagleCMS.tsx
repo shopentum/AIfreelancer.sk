@@ -184,6 +184,10 @@ type AssistantPriorityItem = {
   onActivate: () => void;
   /** Text odkazu pod kartou (predvolené Otvoriť). */
   actionLabel?: string;
+  /** Stabilný kľúč pre zoznam priorít (bez indexu). */
+  rowKey: string;
+  /** Vyriešené — zelený riadok, navigácia na rekapituláciu. */
+  done?: boolean;
 };
 
 /** +2 alebo +3 body na Readiness po vyriešení nálezu (prototyp). */
@@ -343,6 +347,43 @@ type ResolvedClaimRecord = {
   actorName: string;
   resolutionType: "ai_fix" | "manual" | "ignored";
 };
+
+/** Poradie SEO položiek pre horný prúžok priorít (najprv otvorené výstrahy, potom rekapitulácia aplikovaných). */
+const SEO_AUDIT_PRIORITY_KEYS = Object.keys(SEO_FIELD_LABEL) as SeoAuditKey[];
+
+function mergeTrustStripRows(
+  openClaims: Claim[],
+  resolvedRows: ResolvedClaimRecord[],
+): { claim: Claim; resolved?: ResolvedClaimRecord }[] {
+  const map = new Map<string, { claim: Claim; resolved?: ResolvedClaimRecord }>();
+  for (const r of resolvedRows) {
+    if (r.tab !== "trust") continue;
+    map.set(r.claim.id, { claim: r.claim, resolved: r });
+  }
+  for (const c of openClaims) {
+    const ex = map.get(c.id);
+    if (ex?.resolved) continue;
+    map.set(c.id, { claim: c });
+  }
+  return [...map.values()].sort((a, b) => sortClaimsByRisk(a.claim, b.claim));
+}
+
+function mergeLinguisticStripRows(
+  openClaims: Claim[],
+  resolvedRows: ResolvedClaimRecord[],
+): { claim: Claim; resolved?: ResolvedClaimRecord }[] {
+  const map = new Map<string, { claim: Claim; resolved?: ResolvedClaimRecord }>();
+  for (const r of resolvedRows) {
+    if (r.tab !== "linguistic") continue;
+    map.set(r.claim.id, { claim: r.claim, resolved: r });
+  }
+  for (const c of openClaims) {
+    const ex = map.get(c.id);
+    if (ex?.resolved) continue;
+    map.set(c.id, { claim: c });
+  }
+  return [...map.values()].sort((a, b) => sortClaimsByRisk(a.claim, b.claim));
+}
 
 /** Ukážkový text článku (~2× pôvodná dĺžka) pre realistický scroll a highlight. */
 const EAGLE_DEMO_ARTICLE = [
@@ -893,7 +934,7 @@ const EagleCMS_Split: React.FC = () => {
     setScrollTop(ta.scrollTop);
   }, [content]);
 
-  const handleResolvedCardClick = (r: ResolvedClaimRecord) => {
+  const handleResolvedCardClick = useCallback((r: ResolvedClaimRecord) => {
     setSelectedClaimId(r.claim.id);
     const ta = editorRef.current;
     if (!ta) return;
@@ -912,7 +953,7 @@ const EagleCMS_Split: React.FC = () => {
     }
     ta.scrollTop = Math.max(0, line * lineHeight - ta.clientHeight * 0.2);
     setScrollTop(ta.scrollTop);
-  };
+  }, [content]);
 
   const onEditorScroll = useCallback((e: React.UIEvent<HTMLTextAreaElement>) => {
     const next = e.currentTarget.scrollTop;
@@ -1074,7 +1115,6 @@ const EagleCMS_Split: React.FC = () => {
     }
     setClaimAiProposal(null);
     setPendingManualEdit(null);
-    if (selectedClaimId === claim.id) setSelectedClaimId(null);
   };
 
   const handleIgnoreClaim = useCallback(
@@ -1109,9 +1149,8 @@ const EagleCMS_Split: React.FC = () => {
         });
       }
       setPendingManualEdit(null);
-      if (selectedClaimId === claim.id) setSelectedClaimId(null);
     },
-    [audit, collaborationLockDemo, selectedClaimId],
+    [audit, collaborationLockDemo],
   );
 
   const handleConfirmManualEdit = useCallback(
@@ -1147,9 +1186,8 @@ const EagleCMS_Split: React.FC = () => {
         });
       }
       setPendingManualEdit(null);
-      if (selectedClaimId === claim.id) setSelectedClaimId(null);
     },
-    [audit, collaborationLockDemo, content, selectedClaimId],
+    [audit, collaborationLockDemo, content],
   );
 
   const handleIgnoreSeoSuggestion = useCallback(
@@ -1159,9 +1197,8 @@ const EagleCMS_Split: React.FC = () => {
       if (audit) {
         setAudit({ ...audit, readinessScore: nextReadinessBump(audit.readinessScore) });
       }
-      if (selectedClaimId === key) setSelectedClaimId(null);
     },
-    [audit, collaborationLockDemo, selectedClaimId],
+    [audit, collaborationLockDemo],
   );
 
   const handleTagSetCommit = useCallback(() => {
@@ -1495,7 +1532,6 @@ const EagleCMS_Split: React.FC = () => {
           },
         };
       });
-      setSelectedClaimId(null);
     },
     [
       audit,
@@ -1609,32 +1645,42 @@ const EagleCMS_Split: React.FC = () => {
   const assistantPriorities = useMemo((): AssistantPriorityItem[] => {
     if (!audit) return [];
     const out: AssistantPriorityItem[] = [];
-    const claimsSorted = [...audit.claims].sort(sortClaimsByRisk);
-    const high = claimsSorted.find((c) => c.risk === "high");
-    if (high) {
+
+    const trustMerged = mergeTrustStripRows(audit.claims, resolvedClaims);
+    const highTrust = trustMerged.find((r) => r.claim.risk === "high");
+    if (highTrust && out.length < 5) {
+      const done = Boolean(highTrust.resolved);
       out.push({
-        kind: "block",
-        title: high.reason,
-        subtitle:
-          "Dôvera · otvorte nález a rozhodnite sa (AI návrh alebo vlastná úprava)",
+        rowKey: `trust-high-${highTrust.claim.id}`,
+        kind: done ? "info" : "block",
+        done,
+        title: highTrust.claim.reason,
+        subtitle: done
+          ? "Dôvera · vyriešené · ťuknite pre rekapituláciu zmeny v článku"
+          : "Dôvera · otvorte nález a rozhodnite sa (AI návrh alebo vlastná úprava)",
         onActivate: () => {
           setRightPanelMode("ai");
           setActiveAuditTab("trust");
-          handleClaimClick(high);
+          if (done && highTrust.resolved)
+            handleResolvedCardClick(highTrust.resolved);
+          else handleClaimClick(highTrust.claim);
         },
       });
     }
 
     const tagsNeedsAttention =
       !tagsCommitted || pendingLinkSuggestionsCount > 0;
+    const tagsDone = !tagsNeedsAttention;
     out.push({
-      kind: tagsNeedsAttention ? "warn" : "info",
+      rowKey: "tags-links",
+      kind: tagsDone ? "info" : tagsNeedsAttention ? "warn" : "info",
+      done: tagsDone,
       title: "Tagy a interné prelinkovania",
       subtitle: !tagsCommitted
         ? "Vygenerujte alebo potvrďte tagy a potom prejdite návrhy interných odkazov."
         : pendingLinkSuggestionsCount > 0
           ? `${pendingLinkSuggestionsCount} návrhov odkazu ešte čaká na prijatie alebo zamietnutie.`
-          : "Tagy a odkazy sú spracované; úpravy nájdete v Nastavenia.",
+          : "Hotovo · tagy a odkazy sú spracované · ťuknite pre Nastavenia.",
       actionLabel: !tagsCommitted
         ? "Generovať"
         : pendingLinkSuggestionsCount > 0
@@ -1653,42 +1699,94 @@ const EagleCMS_Split: React.FC = () => {
       },
     });
 
-    const medium = claimsSorted.find((c) => c.risk === "medium");
-    if (medium && out.length < 5 && medium.id !== high?.id) {
+    const mediumTrust = trustMerged.find(
+      (r) =>
+        r.claim.risk === "medium" &&
+        r.claim.id !== highTrust?.claim.id,
+    );
+    if (mediumTrust && out.length < 5) {
+      const done = Boolean(mediumTrust.resolved);
       out.push({
-        kind: "warn",
-        title: medium.reason,
-        subtitle: "Dôvera · stredná závažnosť",
+        rowKey: `trust-med-${mediumTrust.claim.id}`,
+        kind: done ? "info" : "warn",
+        done,
+        title: mediumTrust.claim.reason,
+        subtitle: done
+          ? "Dôvera · vyriešené · ťuknite pre rekapituláciu zmeny v článku"
+          : "Dôvera · stredná závažnosť",
         onActivate: () => {
           setRightPanelMode("ai");
           setActiveAuditTab("trust");
-          handleClaimClick(medium);
+          if (done && mediumTrust.resolved)
+            handleResolvedCardClick(mediumTrust.resolved);
+          else handleClaimClick(mediumTrust.claim);
         },
       });
     }
-    const ling = [...(audit.linguisticClaims ?? [])].sort(sortClaimsByRisk)[0];
-    if (ling && out.length < 5) {
+
+    const lingMerged = mergeLinguisticStripRows(
+      audit.linguisticClaims ?? [],
+      resolvedClaims,
+    );
+    const lingFirst = lingMerged[0];
+    if (lingFirst && out.length < 5) {
+      const done = Boolean(lingFirst.resolved);
       out.push({
-        kind: "warn",
-        title: ling.reason,
-        subtitle: "Štýl a čitateľnosť",
+        rowKey: `ling-${lingFirst.claim.id}`,
+        kind: done ? "info" : "warn",
+        done,
+        title: lingFirst.claim.reason,
+        subtitle: done
+          ? "Štýl · vyriešené · ťuknite pre rekapituláciu zmeny v článku"
+          : "Štýl a čitateľnosť",
         onActivate: () => {
           setRightPanelMode("ai");
           setActiveAuditTab("linguistic");
-          handleClaimClick(ling);
+          if (done && lingFirst.resolved)
+            handleResolvedCardClick(lingFirst.resolved);
+          else handleClaimClick(lingFirst.claim);
         },
       });
     }
-    const seoFail = Object.entries(audit.seoAudit).find(
-      ([k, v]) => v.status !== "pass" && !ignoredSeoKeys.has(k),
-    );
-    if (seoFail && out.length < 5) {
-      const [k, v] = seoFail;
-      const sk = k as SeoAuditKey;
+
+    type SeoStripSlot = {
+      key: SeoAuditKey;
+      done: boolean;
+      message: string;
+    };
+    let seoStrip: SeoStripSlot | null = null;
+    for (const k of SEO_AUDIT_PRIORITY_KEYS) {
+      if (ignoredSeoKeys.has(k)) continue;
+      const item = audit.seoAudit[k];
+      if (item.status !== "pass") {
+        seoStrip = { key: k, done: false, message: item.message };
+        break;
+      }
+    }
+    if (!seoStrip) {
+      for (const k of SEO_AUDIT_PRIORITY_KEYS) {
+        if (ignoredSeoKeys.has(k)) continue;
+        if (seoChangeLog.some((e) => e.key === k)) {
+          const item = audit.seoAudit[k];
+          seoStrip = { key: k, done: true, message: item.message };
+          break;
+        }
+      }
+    }
+    if (seoStrip && out.length < 5) {
+      const sk = seoStrip.key;
+      const title =
+        seoStrip.message.length > 72
+          ? `${seoStrip.message.slice(0, 72)}…`
+          : seoStrip.message;
       out.push({
-        kind: "warn",
-        title: v.message.length > 72 ? `${v.message.slice(0, 72)}…` : v.message,
-        subtitle: `SEO · ${SEO_FIELD_LABEL[sk]}`,
+        rowKey: `seo-${sk}`,
+        kind: seoStrip.done ? "info" : "warn",
+        done: seoStrip.done,
+        title,
+        subtitle: seoStrip.done
+          ? `SEO · ${SEO_FIELD_LABEL[sk]} · vyriešené · rekapitulácia`
+          : `SEO · ${SEO_FIELD_LABEL[sk]}`,
         onActivate: () => {
           setRightPanelMode("ai");
           setActiveAuditTab("seo");
@@ -1696,8 +1794,10 @@ const EagleCMS_Split: React.FC = () => {
         },
       });
     }
+
     if (out.length < 5) {
       out.push({
+        rowKey: "seo-keyword-bold-tip",
         kind: "opportunity",
         title: "Automaticky zvýrazniť kľúčové slová boldom",
         subtitle:
@@ -1713,10 +1813,13 @@ const EagleCMS_Split: React.FC = () => {
   }, [
     audit,
     handleClaimClick,
+    handleResolvedCardClick,
     ignoredSeoKeys,
     openTagModal,
     openLinksModal,
     pendingLinkSuggestionsCount,
+    resolvedClaims,
+    seoChangeLog,
     tagsCommitted,
   ]);
 
@@ -3051,48 +3154,77 @@ const EagleCMS_Split: React.FC = () => {
                             </p>
                             <ul className="flex flex-col gap-2">
                               {assistantPriorities.map((p, idx) => (
-                                <li
-                                  key={`ap-${idx}-${p.kind}-${p.title.slice(0, 32)}`}
-                                >
+                                <li key={`ap-${p.rowKey}`}>
                                   <button
                                     type="button"
                                     onClick={p.onActivate}
                                     className={cn(
                                       "group w-full cursor-pointer rounded-lg border text-left outline-none transition-all duration-150",
-                                      "border-gray-200/90 bg-white px-2.5 py-2 shadow-sm",
-                                      "hover:border-purple-400/80 hover:bg-purple-50/90 hover:shadow-md",
+                                      "px-2.5 py-2 shadow-sm",
                                       "active:scale-[0.995]",
-                                      "focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2",
-                                      p.kind === "block" &&
-                                        "ring-1 ring-rose-100/70 hover:ring-rose-200/80",
-                                      p.kind === "warn" &&
-                                        "ring-1 ring-amber-100/70 hover:ring-amber-200/70",
-                                      p.kind === "info" &&
-                                        "ring-1 ring-gray-100/70 hover:ring-gray-200/80",
-                                      p.kind === "opportunity" &&
-                                        "ring-1 ring-emerald-100/70 hover:ring-emerald-200/70",
+                                      "focus-visible:ring-2 focus-visible:ring-offset-2",
+                                      p.done
+                                        ? "border-emerald-200/90 bg-emerald-50/85 ring-1 ring-emerald-100/80 hover:border-emerald-400/70 hover:bg-emerald-50 hover:shadow-md focus-visible:ring-emerald-500 focus-visible:ring-offset-emerald-50/50"
+                                        : cn(
+                                            "border-gray-200/90 bg-white focus-visible:ring-purple-500",
+                                            "hover:border-purple-400/80 hover:bg-purple-50/90 hover:shadow-md",
+                                            p.kind === "block" &&
+                                              "ring-1 ring-rose-100/70 hover:ring-rose-200/80",
+                                            p.kind === "warn" &&
+                                              "ring-1 ring-amber-100/70 hover:ring-amber-200/70",
+                                            p.kind === "info" &&
+                                              "ring-1 ring-gray-100/70 hover:ring-gray-200/80",
+                                            p.kind === "opportunity" &&
+                                              "ring-1 ring-emerald-100/70 hover:ring-emerald-200/70",
+                                          ),
                                     )}
                                   >
                                     <div className="flex gap-2">
-                                      <span className="mt-0.5 shrink-0 tabular-nums text-[11px] font-bold text-gray-400">
+                                      <span
+                                        className={cn(
+                                          "mt-0.5 shrink-0 tabular-nums text-[11px] font-bold",
+                                          p.done ? "text-emerald-700/80" : "text-gray-400",
+                                        )}
+                                      >
                                         {idx + 1}.
                                       </span>
                                       <div className="min-w-0 flex-1 space-y-1">
                                         <div className="flex items-start justify-between gap-2">
-                                          <span className="text-[12px] font-bold leading-snug text-gray-900">
+                                          <span
+                                            className={cn(
+                                              "text-[12px] font-bold leading-snug",
+                                              p.done ? "text-emerald-950" : "text-gray-900",
+                                            )}
+                                          >
                                             {p.title}
                                           </span>
                                           <ChevronRight
                                             size={14}
-                                            className="mt-0.5 shrink-0 text-gray-400 transition-colors group-hover:text-purple-700 group-hover:translate-x-0.5"
+                                            className={cn(
+                                              "mt-0.5 shrink-0 transition-colors group-hover:translate-x-0.5",
+                                              p.done
+                                                ? "text-emerald-600 group-hover:text-emerald-800"
+                                                : "text-gray-400 group-hover:text-purple-700",
+                                            )}
                                             aria-hidden
                                           />
                                         </div>
-                                        <p className="text-[11px] leading-snug text-gray-600">
+                                        <p
+                                          className={cn(
+                                            "text-[11px] leading-snug",
+                                            p.done ? "text-emerald-900/85" : "text-gray-600",
+                                          )}
+                                        >
                                           {p.subtitle}
                                         </p>
-                                        {p.kind === "block" ||
-                                        p.kind === "warn" ? (
+                                        {p.done ? (
+                                          <div className="flex justify-end pt-0.5">
+                                            <span className="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-emerald-900 ring-1 ring-emerald-200/80">
+                                              Hotovo
+                                            </span>
+                                          </div>
+                                        ) : p.kind === "block" ||
+                                          p.kind === "warn" ? (
                                           <div className="flex justify-end pt-0.5">
                                             <span
                                               className={cn(
@@ -3124,7 +3256,11 @@ const EagleCMS_Split: React.FC = () => {
                         ) : null}
 
                       {/* AI Tabs */}
-                      <div className="flex shrink-0 border-b border-gray-100 bg-white">
+                      <div
+                        className="flex shrink-0 gap-1 border-b border-slate-300/90 bg-slate-200 px-2 pt-2"
+                        role="tablist"
+                        aria-label="Kategórie kontroly"
+                      >
                         {[
                           { id: 'trust', label: 'Dôvera', icon: ShieldAlert, count: audit?.claims.length || 0 },
                           { id: 'linguistic', label: 'Štýl', icon: MousePointer2, count: audit?.linguisticClaims?.length || 0 },
@@ -3132,6 +3268,9 @@ const EagleCMS_Split: React.FC = () => {
                         ].map((tab) => (
                           <button 
                             key={tab.id}
+                            type="button"
+                            role="tab"
+                            aria-selected={activeAuditTab === tab.id}
                             onClick={() => {
                               setActiveAuditTab(
                                 tab.id as "trust" | "linguistic" | "seo",
@@ -3139,19 +3278,31 @@ const EagleCMS_Split: React.FC = () => {
                               setSelectedClaimId(null);
                             }}
                             className={cn(
-                              "flex-1 py-4 flex flex-col items-center justify-center space-y-1 transition-all relative",
-                              activeAuditTab === tab.id ? "text-purple-600" : "text-gray-400 hover:text-gray-600"
+                              "relative flex flex-1 flex-col items-center justify-center gap-1 rounded-t-lg px-2 pb-3 pt-3 outline-none transition-colors",
+                              activeAuditTab === tab.id
+                                ? "z-[1] bg-white text-purple-700 shadow-[0_-2px_12px_rgba(15,23,42,0.06)] ring-1 ring-slate-300/70 ring-b-white"
+                                : "text-slate-500 hover:bg-slate-300/45 hover:text-slate-800",
                             )}
                           >
-                            <tab.icon size={20} />
-                            <span className="text-[9px] font-black uppercase tracking-widest">{tab.label}</span>
+                            {activeAuditTab === tab.id ? (
+                              <span
+                                className="pointer-events-none absolute left-2 right-2 top-0 h-[3px] rounded-full bg-purple-600"
+                                aria-hidden
+                              />
+                            ) : null}
+                            <tab.icon size={20} className="relative shrink-0" />
+                            <span className="relative text-[9px] font-black uppercase tracking-widest">
+                              {tab.label}
+                            </span>
                             {tab.count > 0 && (
-                              <span className="absolute top-2 right-4 bg-red-500 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">
+                              <span className={cn(
+                                "absolute top-2 right-3 flex h-4 w-4 items-center justify-center rounded-full border-2 text-[8px] font-black text-white",
+                                activeAuditTab === tab.id
+                                  ? "border-white bg-red-500"
+                                  : "border-slate-200 bg-red-500",
+                              )}>
                                 {tab.count}
                               </span>
-                            )}
-                            {activeAuditTab === tab.id && (
-                              <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-1 bg-purple-600" />
                             )}
                           </button>
                         ))}
@@ -3169,7 +3320,7 @@ const EagleCMS_Split: React.FC = () => {
                             <p>{sidebarAiBanner}</p>
                           </div>
                         ) : null}
-                        <AnimatePresence mode="wait">
+                        <AnimatePresence initial={false}>
                           {isValidating ? (
                             <div className="h-full flex flex-col items-center justify-center space-y-4 py-12">
                               <RefreshCw className="animate-spin text-purple-600" size={32} />
@@ -3177,7 +3328,7 @@ const EagleCMS_Split: React.FC = () => {
                             </div>
                           ) : selectedClaimId ? (
                             <motion.div 
-                              key="detail"
+                              key={`detail-${selectedClaimId}`}
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
                               className="space-y-6"
