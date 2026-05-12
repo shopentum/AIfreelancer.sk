@@ -87,6 +87,16 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/** Krátke odporúčanie pre Copilot panel (fallback ak mock nemá recommendationShort). */
+function claimRecommendationShortLine(c: Claim): string {
+  const short = c.recommendationShort?.trim();
+  if (short) return short;
+  const ra = c.recommendedAction.trim();
+  const cut = ra.split(/(?<=[.;!?])\s+/)[0]?.trim();
+  if (cut && cut.length <= 140) return cut.endsWith(".") ? cut : `${cut}.`;
+  return ra.length > 120 ? `${ra.slice(0, 117)}…` : ra;
+}
+
 /** Fallback tag/link dáta pre modal — nezávislé od audit stavu. */
 const MODAL_TAG_SUGGESTIONS: TagSuggestion[] = [
   { id: 'tag-p1', label: 'Dejan Stojković', url: '/tag/dejan-stojkovic', category: 'Osoba' },
@@ -413,7 +423,10 @@ const EagleCMS_Split: React.FC = () => {
   const [claimAiProposal, setClaimAiProposal] = useState<{
     claimId: string;
     proposedText: string;
+    attemptIndex: number;
   } | null>(null);
+  const claimAiProposalRef = useRef(claimAiProposal);
+  claimAiProposalRef.current = claimAiProposal;
   const [claimAiProposalLoading, setClaimAiProposalLoading] = useState(false);
   /** SEO kľúče, ktoré redaktor vedome ignoroval (namiesto aplikovania návrhu). */
   const [ignoredSeoKeys, setIgnoredSeoKeys] = useState<Set<string>>(new Set());
@@ -720,6 +733,7 @@ const EagleCMS_Split: React.FC = () => {
           whyFlagged:
             "Systém nenašiel v texte konkrétny zdroj (citáciu alebo odkaz na štúdiu), ktorý by podložil toto medicínske tvrdenie ako hotovú istotu.",
           recommendedAction: 'Zmiernite tón tvrdenia na "potenciálny prínos" alebo "predmet skúmania".',
+          recommendationShort: "Zjemniť formuláciu a vyhnúť sa slovu „prelom“ bez zdroja.",
           startIndex: 0,
           endIndex: 0
         },
@@ -732,6 +746,7 @@ const EagleCMS_Split: React.FC = () => {
           whyFlagged:
             "Pri cenovom tvrdení v článku chýba konkrétna suma, rozpätie alebo porovnanie s overiteľným referenčným zdrojom.",
           recommendedAction: 'Uveďte približnú cenovú reláciu alebo porovnanie s inými doplnkami.',
+          recommendationShort: "Doplňte konkrétnu cenu alebo rozumné rozpätie.",
           startIndex: 0,
           endIndex: 0
         },
@@ -744,6 +759,7 @@ const EagleCMS_Split: React.FC = () => {
           whyFlagged:
             "Tvrdenie je priradené k citovanému názoru, no model stále hládi riziko zovšeobecnenia bez kontextu dávkovania a indikácie.",
           recommendedAction: 'Ponechať, ale uistiť sa, že meno expertky je správne uvedené.',
+          recommendationShort: "Overte citáciu a kontext pri citovanom názore.",
           startIndex: 0,
           endIndex: 0
         }
@@ -758,6 +774,7 @@ const EagleCMS_Split: React.FC = () => {
           whyFlagged:
             "Systém vyhodnotil úvod ako veľmi hustý odborný blok bez postupného vysvetlenia pre bežného čitateľa.",
           recommendedAction: 'Preformulujte úvod na niečo údernejšie, napríklad: "Zabudnite na svaly! Populárny fitness prášok môže zachrániť váš mozog."',
+          recommendationShort: "Skrátiť a zjednodušiť úvod pre široké publikum.",
           startIndex: 0,
           endIndex: 0
         },
@@ -770,6 +787,7 @@ const EagleCMS_Split: React.FC = () => {
           whyFlagged:
             "V tomto odseku chýba laický „mostík“ medzi odborným termínom a jeho významom v bežnom jazyku.",
           recommendedAction: 'Nahraďte odborné termíny jednoduchším vysvetlením: "Kreatín funguje ako turbo palivo pre mozgové bunky."',
+          recommendationShort: "Vysvetliť ATP laicky alebo nahradiť jednou vetou.",
           startIndex: 0,
           endIndex: 0
         }
@@ -929,7 +947,10 @@ const EagleCMS_Split: React.FC = () => {
     ta.style.height = `${ta.scrollHeight}px`;
   }, [content]);
 
-  const handleRequestClaimAiProposal = async (claim: Claim) => {
+  const handleRequestClaimAiProposal = async (
+    claim: Claim,
+    opts?: { regenerate?: boolean },
+  ) => {
     if (collaborationLockDemo) return;
     if (simulateIntelligenceApiFailure) {
       setSidebarAiBanner(
@@ -945,10 +966,20 @@ const EagleCMS_Split: React.FC = () => {
       return;
     }
     setSidebarAiBanner(null);
-    setClaimAiProposal(null);
+    if (!opts?.regenerate) {
+      setClaimAiProposal(null);
+    }
+    const attemptIndex =
+      opts?.regenerate &&
+      claimAiProposalRef.current?.claimId === claim.id
+        ? claimAiProposalRef.current.attemptIndex + 1
+        : 0;
+
     setClaimAiProposalLoading(true);
     try {
-      const proposedText = await proposeClaimFix(claim.text, content);
+      const proposedText = await proposeClaimFix(claim.text, content, {
+        regenerateAttempt: attemptIndex,
+      });
       if (collaborationLockDemo) return;
       if (simulateIntelligenceApiFailure) {
         setSidebarAiBanner(
@@ -960,6 +991,7 @@ const EagleCMS_Split: React.FC = () => {
       setClaimAiProposal({
         claimId: claim.id,
         proposedText,
+        attemptIndex,
       });
     } finally {
       setClaimAiProposalLoading(false);
@@ -3210,131 +3242,208 @@ const EagleCMS_Split: React.FC = () => {
                                     : undefined;
 
                                 if (claim) {
+                                  const recommendationLine =
+                                    claimRecommendationShortLine(claim);
                                   return (
-                                    <div className="space-y-5">
-                                      {/* TL;DR */}
+                                    <div className="space-y-4">
+                                      <div className="rounded-2xl border border-slate-200 bg-slate-50/90 p-4 ring-1 ring-slate-100">
+                                        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                                          Citácia
+                                        </p>
+                                        <p className="text-[15px] font-semibold leading-relaxed text-slate-900">
+                                          {"\u201E"}
+                                          {claim.text}
+                                          {"\u201C"}
+                                        </p>
+                                      </div>
+
+                                      <div>
+                                        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                                          Problém
+                                        </p>
+                                        <p className="mt-1 text-base font-semibold leading-snug text-slate-900">
+                                          {claim.reason}
+                                        </p>
+                                        <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+                                          {claim.explanation}
+                                        </p>
+                                      </div>
+
                                       {claim.whyFlagged ? (
-                                        <div className="rounded-xl border border-blue-100 bg-blue-50/60 px-3 py-2.5">
-                                          <p className="text-[9px] font-black uppercase tracking-widest text-blue-500 mb-1">TL;DR</p>
-                                          <p className="text-xs font-medium leading-relaxed text-blue-950/90">
+                                        <details className="group rounded-xl border border-slate-100 bg-slate-50/60 text-left">
+                                          <summary className="cursor-pointer list-none px-3 py-2 text-xs font-medium text-slate-500 hover:bg-slate-100/80 hover:text-slate-700 [&::-webkit-details-marker]:hidden">
+                                            <span className="inline-flex items-center gap-1.5">
+                                              Prečo sme to označili
+                                              <ChevronDown
+                                                size={14}
+                                                className="shrink-0 text-slate-400 transition-transform group-open:rotate-180"
+                                                aria-hidden
+                                              />
+                                            </span>
+                                          </summary>
+                                          <p className="border-t border-slate-100 px-3 pb-3 pt-2 text-xs leading-relaxed text-slate-600">
                                             {claim.whyFlagged}
                                           </p>
-                                        </div>
+                                        </details>
                                       ) : null}
-                                      {/* Citácia */}
-                                      <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-4">
-                                        <p className="text-sm font-semibold leading-relaxed text-gray-900">
-                                          {"\u201E"}{claim.text}{"\u201C"}
-                                        </p>
-                                      </div>
-                                      <div className="space-y-2">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                                          Dôvod nálezu
-                                        </p>
-                                        <p className="text-sm font-bold text-gray-800">{claim.reason}</p>
-                                        <p className="text-xs leading-relaxed text-gray-600">{claim.explanation}</p>
-                                      </div>
-                                      <div className="space-y-3 border-t border-gray-100 pt-4">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                                          Odporúčaná akcia
-                                        </p>
-                                        <p className="text-sm font-medium leading-snug text-gray-700">
-                                          {claim.recommendedAction}
-                                        </p>
 
-                                        {claimAiProposal?.claimId === claim.id ? (
-                                          <>
-                                            <div className="space-y-2 pt-1">
-                                              <p className="text-[10px] font-black uppercase tracking-widest text-purple-600">
-                                                Navrhovaná úprava
-                                              </p>
-                                              <div className="grid gap-3 sm:grid-cols-2">
-                                                <div className="rounded-xl border border-gray-200 bg-white p-3">
-                                                  <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
-                                                    Pôvodný úsek
-                                                  </p>
-                                                  <p className="text-sm leading-relaxed text-gray-800">
-                                                    {claim.text}
-                                                  </p>
-                                                </div>
-                                                <div className="rounded-xl border border-purple-200 bg-purple-50/50 p-3">
-                                                  <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-purple-700">
-                                                    Návrh
-                                                  </p>
-                                                  <p className="text-sm leading-relaxed text-gray-900">
-                                                    {claimAiProposal.proposedText}
-                                                  </p>
-                                                </div>
+                                      <div className="rounded-xl border border-slate-100 bg-white px-3 py-2.5 shadow-sm ring-1 ring-slate-100/80">
+                                        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                                          Odporúčanie
+                                        </p>
+                                        <p className="mt-1 text-sm font-medium leading-snug text-slate-700">
+                                          {recommendationLine}
+                                        </p>
+                                      </div>
+
+                                      {claimAiProposal?.claimId === claim.id ? (
+                                        <>
+                                          <div className="space-y-3 rounded-2xl border-2 border-purple-200/90 bg-gradient-to-b from-purple-50/80 to-white p-4 shadow-sm ring-1 ring-purple-100/70">
+                                            <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-purple-800">
+                                              Navrhovaná úprava
+                                            </p>
+                                            <div className="grid gap-3 sm:grid-cols-2">
+                                              <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                                                <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                                                  Pôvodný úsek
+                                                </p>
+                                                <p className="text-sm leading-relaxed text-slate-800">
+                                                  {claim.text}
+                                                </p>
+                                              </div>
+                                              <div className="rounded-xl border border-purple-300/80 bg-purple-50/80 p-3 shadow-sm">
+                                                <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-purple-900">
+                                                  Návrh
+                                                </p>
+                                                <p className="text-sm font-medium leading-relaxed text-slate-900">
+                                                  {claimAiProposal.proposedText}
+                                                </p>
                                               </div>
                                             </div>
-                                            <div className="grid grid-cols-1 gap-2 pt-2">
+                                          </div>
+                                          <div className="grid grid-cols-1 gap-2">
+                                            <button
+                                              type="button"
+                                              disabled={
+                                                collaborationLockDemo ||
+                                                claimAiProposalLoading
+                                              }
+                                              onClick={() =>
+                                                handleApplyClaimAiProposal(claim)
+                                              }
+                                              className={cn(
+                                                "flex w-full items-center justify-center rounded-xl py-3 text-xs font-bold shadow-lg transition-all",
+                                                collaborationLockDemo ||
+                                                  claimAiProposalLoading
+                                                  ? "cursor-not-allowed bg-gray-200 text-gray-500 shadow-none"
+                                                  : "bg-purple-600 text-white shadow-purple-100 hover:bg-purple-700",
+                                              )}
+                                            >
+                                              <CheckCircle2
+                                                size={14}
+                                                className="mr-2"
+                                              />{" "}
+                                              Použiť návrh
+                                            </button>
+                                            <button
+                                              type="button"
+                                              disabled={
+                                                collaborationLockDemo ||
+                                                claimAiProposalLoading
+                                              }
+                                              onClick={() =>
+                                                handleRequestClaimAiProposal(
+                                                  claim,
+                                                  { regenerate: true },
+                                                )
+                                              }
+                                              className={cn(
+                                                "flex w-full items-center justify-center rounded-xl border-2 border-purple-200 bg-white py-3 text-xs font-bold text-purple-800 transition-all",
+                                                collaborationLockDemo ||
+                                                  claimAiProposalLoading
+                                                  ? "cursor-not-allowed border-gray-200 text-gray-400"
+                                                  : "hover:border-purple-300 hover:bg-purple-50/60",
+                                              )}
+                                            >
+                                              {claimAiProposalLoading ? (
+                                                <>
+                                                  <RefreshCw
+                                                    size={14}
+                                                    className="mr-2 animate-spin"
+                                                  />
+                                                  Generujem nový návrh…
+                                                </>
+                                              ) : (
+                                                <>
+                                                  <RefreshCw
+                                                    size={14}
+                                                    className="mr-2"
+                                                  />
+                                                  Generovať znova
+                                                </>
+                                              )}
+                                            </button>
+                                            {pendingManualEdit === claim.id ? (
                                               <button
                                                 type="button"
-                                                disabled={collaborationLockDemo}
                                                 onClick={() =>
-                                                  handleApplyClaimAiProposal(claim)
+                                                  handleConfirmManualEdit(claim)
                                                 }
-                                                className={cn(
-                                                  "flex w-full items-center justify-center rounded-xl py-3 text-xs font-bold shadow-lg transition-all",
-                                                  collaborationLockDemo
-                                                    ? "cursor-not-allowed bg-gray-200 text-gray-500 shadow-none"
-                                                    : "bg-purple-600 text-white shadow-purple-100 hover:bg-purple-700",
-                                                )}
+                                                className="flex w-full items-center justify-center rounded-xl border border-emerald-400 bg-emerald-50 py-3 text-xs font-bold text-emerald-800 transition-all hover:bg-emerald-100"
                                               >
                                                 <CheckCircle2
                                                   size={14}
                                                   className="mr-2"
                                                 />{" "}
-                                                Použiť návrh
+                                                Potvrdiť opravu
                                               </button>
-                                              {pendingManualEdit === claim.id ? (
-                                                <button
-                                                  type="button"
-                                                  onClick={() =>
-                                                    handleConfirmManualEdit(claim)
-                                                  }
-                                                  className="flex w-full items-center justify-center rounded-xl border border-emerald-400 bg-emerald-50 py-3 text-xs font-bold text-emerald-800 transition-all hover:bg-emerald-100"
-                                                >
-                                                  <CheckCircle2
-                                                    size={14}
-                                                    className="mr-2"
-                                                  />{" "}
-                                                  Potvrdiť opravu
-                                                </button>
-                                              ) : (
-                                                <button
-                                                  type="button"
-                                                  onClick={() => {
-                                                    setClaimAiProposal(null);
-                                                    setPendingManualEdit(claim.id);
-                                                    handleClaimClick(claim);
-                                                    editorRef.current?.focus();
-                                                  }}
-                                                  className="flex w-full items-center justify-center rounded-xl border border-gray-200 bg-white py-3 text-xs font-bold text-gray-700 transition-all hover:bg-gray-50"
-                                                >
-                                                  <Edit3 size={14} className="mr-2" />{" "}
-                                                  Upraviť ručne
-                                                </button>
-                                              )}
+                                            ) : (
                                               <button
                                                 type="button"
-                                                disabled={collaborationLockDemo}
-                                                onClick={() =>
-                                                  handleIgnoreClaim(claim)
+                                                disabled={
+                                                  claimAiProposalLoading
                                                 }
+                                                onClick={() => {
+                                                  setClaimAiProposal(null);
+                                                  setPendingManualEdit(
+                                                    claim.id,
+                                                  );
+                                                  handleClaimClick(claim);
+                                                  editorRef.current?.focus();
+                                                }}
                                                 className={cn(
-                                                  "flex w-full items-center justify-center rounded-xl border py-2.5 text-xs font-bold transition-all",
-                                                  collaborationLockDemo
-                                                    ? "cursor-not-allowed border-gray-100 bg-gray-50 text-gray-400"
-                                                    : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700",
+                                                  "flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white py-3 text-xs font-bold text-slate-700 transition-all hover:bg-slate-50",
+                                                  claimAiProposalLoading &&
+                                                    "cursor-not-allowed opacity-50",
                                                 )}
                                               >
-                                                <X size={13} className="mr-2" />{" "}
-                                                Ignorovať
+                                                <Edit3 size={14} className="mr-2" />{" "}
+                                                Upraviť ručne
                                               </button>
-                                            </div>
-                                          </>
-                                        ) : (
+                                            )}
+                                            <button
+                                              type="button"
+                                              disabled={
+                                                collaborationLockDemo ||
+                                                claimAiProposalLoading
+                                              }
+                                              onClick={() =>
+                                                handleIgnoreClaim(claim)
+                                              }
+                                              className={cn(
+                                                "flex w-full items-center justify-center rounded-xl border py-2.5 text-xs font-bold transition-all",
+                                                collaborationLockDemo ||
+                                                  claimAiProposalLoading
+                                                  ? "cursor-not-allowed border-gray-100 bg-gray-50 text-gray-400"
+                                                  : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-700",
+                                              )}
+                                            >
+                                              <X size={13} className="mr-2" />{" "}
+                                              Ignorovať
+                                            </button>
+                                          </div>
+                                        </>
+                                      ) : (
                                           <div className="grid grid-cols-1 gap-2 pt-2">
                                             <button
                                               type="button"
@@ -3388,12 +3497,17 @@ const EagleCMS_Split: React.FC = () => {
                                             ) : (
                                               <button
                                                 type="button"
+                                                disabled={claimAiProposalLoading}
                                                 onClick={() => {
                                                   setPendingManualEdit(claim.id);
                                                   handleClaimClick(claim);
                                                   editorRef.current?.focus();
                                                 }}
-                                                className="flex w-full items-center justify-center rounded-xl border border-gray-200 bg-white py-3 text-xs font-bold text-gray-700 transition-all hover:bg-gray-50"
+                                                className={cn(
+                                                  "flex w-full items-center justify-center rounded-xl border border-gray-200 bg-white py-3 text-xs font-bold text-gray-700 transition-all hover:bg-gray-50",
+                                                  claimAiProposalLoading &&
+                                                    "cursor-not-allowed opacity-50",
+                                                )}
                                               >
                                                 <Edit3 size={14} className="mr-2" />{" "}
                                                 Upraviť ručne
@@ -3401,13 +3515,17 @@ const EagleCMS_Split: React.FC = () => {
                                             )}
                                             <button
                                               type="button"
-                                              disabled={collaborationLockDemo}
+                                              disabled={
+                                                collaborationLockDemo ||
+                                                claimAiProposalLoading
+                                              }
                                               onClick={() =>
                                                 handleIgnoreClaim(claim)
                                               }
                                               className={cn(
                                                 "flex w-full items-center justify-center rounded-xl border py-2.5 text-xs font-bold transition-all",
-                                                collaborationLockDemo
+                                                collaborationLockDemo ||
+                                                  claimAiProposalLoading
                                                   ? "cursor-not-allowed border-gray-100 bg-gray-50 text-gray-400"
                                                   : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700",
                                               )}
@@ -3416,8 +3534,7 @@ const EagleCMS_Split: React.FC = () => {
                                               Ignorovať
                                             </button>
                                           </div>
-                                        )}
-                                      </div>
+                                      )}
                                     </div>
                                   );
                                 }

@@ -5,7 +5,7 @@ import EagleCMS from "@/eagle_admin/EagleCMS";
 export const metadata: Metadata = {
   title: "NMH — EAGLE Admin",
   description:
-    "Prototyp editora s asistentom kvality: dôvera, štýl, SEO, tagy a interné odkazy (HITL).",
+    "Prototyp editora s asistentom kvality: dôvera, štýl, SEO a HITL návrhy.",
   robots: { index: false, follow: false },
 };
 

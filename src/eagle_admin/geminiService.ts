@@ -13,6 +13,8 @@ export type Claim = {
   /** Jedna veta „education layer“ — prečo model nález zdvihol (nie len názov kategórie). */
   whyFlagged?: string;
   recommendedAction: string;
+  /** Krátka verzia odporúčania pre Copilot UI (jedna veta). */
+  recommendationShort?: string;
   startIndex: number;
   endIndex: number;
 };
@@ -79,8 +81,10 @@ export async function analyzeArticleHolistic(
 export async function proposeClaimFix(
   claimText: string,
   _fullArticle: string,
+  options?: { regenerateAttempt?: number },
 ): Promise<string> {
-  await new Promise((r) => setTimeout(r, 900));
+  await new Promise((r) => setTimeout(r, 700));
+  const attempt = options?.regenerateAttempt ?? 0;
   const t = claimText.trim();
   if (!t) return claimText;
 
@@ -93,6 +97,30 @@ export async function proposeClaimFix(
     "energiu v podobe ATP",
   );
 
+  if (attempt >= 1) {
+    out = out.replace(/\bmožný prínos\b/gi, "potenciálny prínos");
+    out = out.replace(
+      /\bv doplnkovej liečbe\b/gi,
+      "pri doplnkovej podpore",
+    );
+    out = out.replace(/\bniekoľko eur\b/gi, "približne 15–25 €");
+    out = out.replace(
+      /\benergiu v podobe ATP\b/gi,
+      "viac energetickej pohody bunkám",
+    );
+  }
+  if (attempt >= 2) {
+    out = out.replace(/\bpotenciálny prínos\b/gi, "možný prínos");
+    out = out.replace(
+      /\bpri doplnkovej podpore\b/gi,
+      "v kontexte doplnkovej starostlivosti",
+    );
+  }
+
+  if (out === t && attempt === 0) {
+    const soft = t.replace(/\s+/g, " ").trim();
+    return soft.length > 0 ? soft : t;
+  }
   if (out === t) {
     const soft = t.replace(/\s+/g, " ").trim();
     return soft.length > 0 ? soft : t;
