@@ -872,7 +872,7 @@ const EagleCMS_Split: React.FC = () => {
     }
   }, [audit, getClaimAtPosition]);
 
-  const handleClaimClick = (claim: Claim) => {
+  const handleClaimClick = useCallback((claim: Claim) => {
     setSelectedClaimId(claim.id);
     if (!claimFirstSeenRef.current[claim.id]) {
       claimFirstSeenRef.current[claim.id] = Date.now();
@@ -891,7 +891,7 @@ const EagleCMS_Split: React.FC = () => {
     }
     ta.scrollTop = Math.max(0, line * lineHeight - ta.clientHeight * 0.2);
     setScrollTop(ta.scrollTop);
-  };
+  }, [content]);
 
   const handleResolvedCardClick = (r: ResolvedClaimRecord) => {
     setSelectedClaimId(r.claim.id);
@@ -1618,8 +1618,9 @@ const EagleCMS_Split: React.FC = () => {
         subtitle:
           "Dôvera · otvorte nález a rozhodnite sa (AI návrh alebo vlastná úprava)",
         onActivate: () => {
+          setRightPanelMode("ai");
           setActiveAuditTab("trust");
-          setSelectedClaimId(high.id);
+          handleClaimClick(high);
         },
       });
     }
@@ -1640,9 +1641,15 @@ const EagleCMS_Split: React.FC = () => {
           ? "Odkazy"
           : "Nastavenia",
       onActivate: () => {
-        if (!tagsCommitted) openTagModal();
-        else if (pendingLinkSuggestionsCount > 0) openLinksModal();
-        else setRightPanelMode("settings");
+        if (!tagsCommitted) {
+          setRightPanelMode("ai");
+          openTagModal();
+        } else if (pendingLinkSuggestionsCount > 0) {
+          setRightPanelMode("ai");
+          openLinksModal();
+        } else {
+          setRightPanelMode("settings");
+        }
       },
     });
 
@@ -1653,8 +1660,9 @@ const EagleCMS_Split: React.FC = () => {
         title: medium.reason,
         subtitle: "Dôvera · stredná závažnosť",
         onActivate: () => {
+          setRightPanelMode("ai");
           setActiveAuditTab("trust");
-          setSelectedClaimId(medium.id);
+          handleClaimClick(medium);
         },
       });
     }
@@ -1665,8 +1673,9 @@ const EagleCMS_Split: React.FC = () => {
         title: ling.reason,
         subtitle: "Štýl a čitateľnosť",
         onActivate: () => {
+          setRightPanelMode("ai");
           setActiveAuditTab("linguistic");
-          setSelectedClaimId(ling.id);
+          handleClaimClick(ling);
         },
       });
     }
@@ -1681,6 +1690,7 @@ const EagleCMS_Split: React.FC = () => {
         title: v.message.length > 72 ? `${v.message.slice(0, 72)}…` : v.message,
         subtitle: `SEO · ${SEO_FIELD_LABEL[sk]}`,
         onActivate: () => {
+          setRightPanelMode("ai");
           setActiveAuditTab("seo");
           setSelectedClaimId(sk);
         },
@@ -1693,6 +1703,7 @@ const EagleCMS_Split: React.FC = () => {
         subtitle:
           "SEO · odporúčanie pre čitateľnosť hlavného kľúčového slova v tele článku",
         onActivate: () => {
+          setRightPanelMode("ai");
           setActiveAuditTab("seo");
           setSelectedClaimId(null);
         },
@@ -1701,6 +1712,7 @@ const EagleCMS_Split: React.FC = () => {
     return out.slice(0, 5);
   }, [
     audit,
+    handleClaimClick,
     ignoredSeoKeys,
     openTagModal,
     openLinksModal,
@@ -3046,15 +3058,19 @@ const EagleCMS_Split: React.FC = () => {
                                     type="button"
                                     onClick={p.onActivate}
                                     className={cn(
-                                      "group w-full rounded-lg border text-left transition-colors",
-                                      "border-gray-100 bg-white px-2.5 py-2 hover:bg-purple-50/35 hover:border-purple-100/90",
+                                      "group w-full cursor-pointer rounded-lg border text-left outline-none transition-all duration-150",
+                                      "border-gray-200/90 bg-white px-2.5 py-2 shadow-sm",
+                                      "hover:border-purple-400/80 hover:bg-purple-50/90 hover:shadow-md",
+                                      "active:scale-[0.995]",
+                                      "focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2",
                                       p.kind === "block" &&
-                                        "ring-1 ring-rose-100/70",
+                                        "ring-1 ring-rose-100/70 hover:ring-rose-200/80",
                                       p.kind === "warn" &&
-                                        "ring-1 ring-amber-100/70",
-                                      p.kind === "info" && "ring-1 ring-gray-100/70",
+                                        "ring-1 ring-amber-100/70 hover:ring-amber-200/70",
+                                      p.kind === "info" &&
+                                        "ring-1 ring-gray-100/70 hover:ring-gray-200/80",
                                       p.kind === "opportunity" &&
-                                        "ring-1 ring-emerald-100/70",
+                                        "ring-1 ring-emerald-100/70 hover:ring-emerald-200/70",
                                     )}
                                   >
                                     <div className="flex gap-2">
@@ -3068,7 +3084,7 @@ const EagleCMS_Split: React.FC = () => {
                                           </span>
                                           <ChevronRight
                                             size={14}
-                                            className="mt-0.5 shrink-0 text-gray-300 transition-colors group-hover:text-purple-600"
+                                            className="mt-0.5 shrink-0 text-gray-400 transition-colors group-hover:text-purple-700 group-hover:translate-x-0.5"
                                             aria-hidden
                                           />
                                         </div>
