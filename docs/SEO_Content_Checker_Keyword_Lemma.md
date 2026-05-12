@@ -74,17 +74,16 @@ Hl. kľúčové slovo **„kreatín“** (jednoslovné; lemma modelu pre základ
 
 ## Závislosti a prepojenia
 
-- **Linkbuilding MVP1** už počíta so **SpaCy `sk_core_news_lg`** (NLP pipeline / ST-1 v linkbuilding spec – DataHub). Pre SEO Content Checker je rovnaká **knižnica + model** produktovo daná; ideálne je **nezavádzať druhý paralelný „SpaCy svet“**, ak už existuje nasadená vrstva z linkbuildingu.
-- **Preferovaný postup pri grooming:** zistiť, kde presne beží ST-1 pipeline; ak validácia článku má prístup do **tej istej služby**, použiť **zdieľaný helper / modul** (jedna inicializácia modelu, jedna verzia závislostí). Ak validácia beží **inde** (iný runtime alebo proces), zmysel má **interné API alebo RPC** na už existujúcu NLP vrstvu namiesto duplicitného načítania modelu v ďalšom uzle – náročnosť je vtedy typicky **stredná** (kontrakt, latencia pri uložení, error handling), nie mesačný projekt.
-- **Výnimka (časovanie):** ak by SEO Checker lemma task vstúpil **pred** dostupnosťou NLP vrstvy z linkbuildingu, krátkodobo je akceptovateľná lokálna integrácia SpaCy v mieste validácie s **explicitnou backlog položkou** na konsolidáciu po doručení ST-1 – aby sa predišlo dvom rozchádzajúcim nasadeniam modelu bez potreby.
+- **Linkbuilding MVP1** už počíta so **SpaCy `sk_core_news_lg`** (NLP pipeline / ST-1 v linkbuilding spec). Pre SEO Content Checker je rovnaká **knižnica + model** produktovo daná, ideálne je **nezavádzať druhý paralelný „SpaCy svet“**, ak už existuje nasadená vrstva z linkbuildingu.
+- **Preferovaný postup pri grooming:** zistiť, kde presne beží ST-1 pipeline; ak validácia článku má prístup do **tej istej služby**, použiť **zdieľaný helper / modul** (jedna inicializácia modelu, jedna verzia závislostí). Ak validácia beží **inde** (iný runtime alebo proces), zmysel má **interné API alebo RPC** na už existujúcu NLP vrstvu namiesto duplicitného načítania modelu v ďalšom uzle – náročnosť je vtedy typicky **stredná** (kontrakt, latencia pri uložení, error handling).
 
 ---
 
-## Kroky pre grooming (checklist)
+## Kroky / Checklist
 
-0. **Architektúra:** overiť dostupnosť NLP vrstvy z linkbuildingu (ST-1); ak áno, napojiť validáciu na ňu alebo zdieľaný modul namiesto duplicity modelu.
+0. **Architektúra:** overiť dostupnosť NLP vrstvy z linkbuildingu (ST-1), napojiť validáciu na ňu alebo zdieľaný modul namiesto duplicity modelu.
 1. Integrovať SpaCy (`sk_core_news_lg`) do existujúceho validačného bodu pre HS v troch poliach (alebo cez zdieľanú NLP vrstvu podľa bodu 0).
-2. Zmeniť porovnanie výskytu: exact → lemma; zachovať zvyšok validačného rámca.
+2. Zmeniť porovnanie výskytu: exact → lemma, zachovať zvyšok validačného rámca.
 3. Dodať **fallback na exact match** pri zlyhaní lematizácie.
 4. Doplniť automatické testy a QA scenáre (skloňovanie, negatívne prípady, edge cases podľa potreby).
 
@@ -93,3 +92,33 @@ Hl. kľúčové slovo **„kreatín“** (jednoslovné; lemma modelu pre základ
 ## Záver
 
 Ide o **jednu zmenu porovnávacieho primitívu** v rámci už definovanej validácie v troch poliach. Knižnica a smer sú dané (**SpaCy `sk_core_news_lg`**); dev task je **implementácia, testy a fallback**, nie opätovná produktová analýza výberu NLP nástroja.
+
+---
+
+## Blok na Jira (paste)
+
+Nižšie skrátený text pre popis ticketu / story; celý podklad zostáva v tomto dokumente vyššie.
+
+### Úvod a cieľ
+
+SEO Content Checker dnes vyžaduje **exact match** hlavného kľúčového slova (HS); v slovenčine to tlačí redakciu do neprirodzených tvarov a obchádza zmysel validácie.
+
+**Cieľ:** nahradiť porovnanie **lemma match** cez **SpaCy `sk_core_news_lg`**, **bez zmeny** ostatných pravidiel SEO Checker a **bez zmeny** rámca polí **nadpis / perex / telo**. Detailný návrh a grooming: tento súbor (`SEO_Content_Checker_Keyword_Lemma.md`).
+
+### Zadanie (strovo)
+
+- **Exact match → lemma match** pre HS v troch poliach; ostatná business logika okolo kontroly ostáva.
+- **Preferovať** reuse existujúcej NLP vrstvy z **Linkbuilding MVP1 (ST-1)**; **nepridávať** druhú SpaCy infra bez dôvodu (viď sekcia závislostí vyššie).
+- **Fallback:** pri chybe NLP / lematizácie → **exact match ako dnes**; **publish nesmie** zlyhávať kvôli výpadku NLP vrstvy.
+- Porovnanie cez **lemma z modelu**, nie fuzzy matching ani edit-distance heuristika.
+- **Príklad:** HS „kreatín“ → **pass** pre skloňované tvary so zhodnou lemou (napr. kreatínu, kreatínom, …); **fail** pre slová bez lemma zhody s HS.
+- **Súčasť tasku:** unit / integračné testy; QA scenáre (skloňovanie, negatíva, edge cases podľa potreby); základný pohľad na performance (init modelu / caching podľa existujúceho backend patternu).
+
+### Akceptačné kritériá / DoD
+
+1. SEO Content Checker používa **lemma match** pre HS cez **SpaCy `sk_core_news_lg`** na poliach **nadpis**, **perex**, **telo článku**.
+2. **Ostatné business pravidlá** SEO Checker ostávajú **bezo zmeny**.
+3. Skloňované tvary HS **prejdú** pri lemma zhode; **nie je** použitý fuzzy matching ani heuristika podobnosti znakov.
+4. Pri zlyhaní NLP vrstvy funguje **fallback na exact match**; publish workflow **nie je** blokovaný výpadkom NLP.
+5. Implementácia **rešpektuje / napája** existujúcu NLP vrstvu z Linkbuilding MVP1 (ST-1), ak je dostupná (nie duplicitná infra bez potreby).
+6. Doplnené **unit / integračné** testy a **QA scenáre**: pozitívne lemma match, negatíva bez lemma zhody, edge cases podľa potreby; základné overenie performance dopadu.
