@@ -2868,12 +2868,13 @@ const EagleCMS_Split: React.FC = () => {
                                 Asistent kvality článku
                               </h3>
                               <p className="mt-1 text-xs leading-relaxed text-gray-600">
-                                Minútová kontrola pred odoslaním: nálezy podľa záložiek, návrhy
-                                si{" "}
+                                Váš článok si zaslúži istotu pred odoslaním. Tu nájdete
+                                spojenca, ktorý zhrnie podnety a návrhy — vy ich doladíte vo
+                                vlastnom tempe a{" "}
                                 <span className="font-semibold text-gray-800">
-                                  prijmite alebo odmietnite
-                                </span>{" "}
-                                — nič sa bez vášho súhlasu nevkladá do textu.
+                                  posledné slovo máte vždy vy
+                                </span>
+                                ; bez vášho súhlasu sa do textu nič nedostane.
                               </p>
                             </div>
                           </div>
@@ -2925,11 +2926,11 @@ const EagleCMS_Split: React.FC = () => {
                         </div>
 
                         {audit && assistantPriorities.length > 0 ? (
-                          <div className="shrink-0 border-b border-gray-100 bg-white px-4 pb-2 pt-2">
-                            <p className="mb-1 text-[10px] font-black uppercase tracking-wider text-gray-500">
+                          <div className="shrink-0 border-b border-gray-100 bg-gradient-to-b from-purple-50/50 via-white to-white px-4 py-4">
+                            <p className="mb-3 text-xs font-black uppercase tracking-[0.14em] text-gray-700">
                               Odporúčaná pozornosť
                             </p>
-                            <ul className="divide-y divide-gray-100">
+                            <ul className="flex flex-col gap-3">
                               {assistantPriorities.map((p, idx) => (
                                 <li
                                   key={`ap-${idx}-${p.kind}-${p.title.slice(0, 32)}`}
@@ -2938,45 +2939,52 @@ const EagleCMS_Split: React.FC = () => {
                                     type="button"
                                     onClick={p.onActivate}
                                     className={cn(
-                                      "group flex w-full items-start gap-2 rounded-md px-1 py-2 text-left text-[11px] leading-snug transition-colors hover:bg-purple-50/50",
+                                      "group w-full rounded-xl border text-left transition-colors",
+                                      "border-gray-100 bg-white/90 px-3.5 py-3.5 shadow-sm hover:bg-purple-50/40 hover:border-purple-100",
                                       p.kind === "block" &&
-                                        "border-l-2 border-l-rose-500 pl-2",
+                                        "ring-1 ring-rose-100/80",
                                       p.kind === "warn" &&
-                                        "border-l-2 border-l-amber-500 pl-2",
-                                      p.kind === "info" && "pl-1",
+                                        "ring-1 ring-amber-100/80",
+                                      p.kind === "info" && "ring-1 ring-gray-100/80",
                                     )}
                                   >
-                                    <span className="mt-0.5 shrink-0 tabular-nums text-[10px] font-bold text-gray-400">
-                                      {idx + 1}.
-                                    </span>
-                                    <span className="min-w-0 flex-1 text-gray-700">
-                                      {(p.showSeverityLabel ?? false) ? (
-                                        <span
-                                          className={cn(
-                                            "mr-1.5 text-[9px] font-black uppercase tracking-wide",
-                                            p.kind === "block"
-                                              ? "text-rose-600"
-                                              : "text-amber-800",
-                                          )}
-                                        >
-                                          {p.kind === "block"
-                                            ? "Blokuje"
-                                            : "Upozornenie"}
-                                        </span>
-                                      ) : null}
-                                      <span className="font-semibold text-gray-900">
-                                        {p.title}
+                                    <div className="flex gap-2.5">
+                                      <span className="mt-0.5 shrink-0 tabular-nums text-xs font-bold text-gray-400">
+                                        {idx + 1}.
                                       </span>
-                                      <span className="text-gray-600">
-                                        {" "}
-                                        — {p.subtitle}
-                                      </span>
-                                    </span>
-                                    <ChevronRight
-                                      size={14}
-                                      className="mt-0.5 shrink-0 text-gray-300 transition-colors group-hover:text-purple-600"
-                                      aria-hidden
-                                    />
+                                      <div className="min-w-0 flex-1 space-y-2">
+                                        <div className="flex items-start justify-between gap-2">
+                                          <span className="text-sm font-bold leading-snug text-gray-900">
+                                            {p.title}
+                                          </span>
+                                          <ChevronRight
+                                            size={16}
+                                            className="mt-0.5 shrink-0 text-gray-300 transition-colors group-hover:text-purple-600"
+                                            aria-hidden
+                                          />
+                                        </div>
+                                        <p className="text-xs leading-relaxed text-gray-600">
+                                          {p.subtitle}
+                                        </p>
+                                        {(p.kind === "block" ||
+                                          p.kind === "warn") ? (
+                                          <div className="flex justify-end pt-0.5">
+                                            <span
+                                              className={cn(
+                                                "inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide",
+                                                p.kind === "block"
+                                                  ? "bg-rose-100 text-rose-800 ring-1 ring-rose-200/80"
+                                                  : "bg-amber-100 text-amber-900 ring-1 ring-amber-200/80",
+                                              )}
+                                            >
+                                              {p.kind === "block"
+                                                ? "Blokuje"
+                                                : "Upozornenie"}
+                                            </span>
+                                          </div>
+                                        ) : null}
+                                      </div>
+                                    </div>
                                   </button>
                                 </li>
                               ))}
