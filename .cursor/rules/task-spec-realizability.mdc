@@ -1,0 +1,11 @@
+---
+description: Tasky a špecifikácie musia byť realizovateľné bez omáčok; výnimka len explicitná analýza s DATA GAP.
+alwaysApply: true
+---
+
+# Tasky a špecifikácie – realizovateľnosť
+
+- **Predvolene:** task má byť **jasne realizovateľný devom** – úzky scope, zrozumiteľné AC/DoD, čo sa mení v systéme a ako sa overí hotové. Žiadne rozvláčne „preskúmajme možnosti“ bez rozhodnutia alebo vlastnej práce produktu/architektúry.
+- **Žiadne omáčky:** krátky popis; neduplikovať medzi „Zadanie“ a „AC“ ten istý zmysel; žiadne vágnosti typu „optimalizovať“ bez merateľného kritéria.
+- **Výnimka – analýza / discovery:** len ak je ticket **výslovne** analýza (spike, research, brainstorming) a obsahuje **DATA GAP alebo otvorené body** na doplnenie pred implementáciou. Výstupom môže byť rozhodnutie alebo rozpad na ďalšie tasky – nie priamy „nasadíme do produkcie“ bez uzavretia medzier.
+- **Podkladový dokument:** odkaz na detail je v poriadku; text tasku musí stačiť na grooming bez povinného čítania dlhého dokumentu.
