@@ -10,7 +10,15 @@ Dátum: 2026-05-07
 
 ## 1. Executive summary
 
-**Editorial Copilot** je v tomto zmysle **sprievodný panel**: redaktor vidí **zjednotený pohľad na stav článku**, dostáva **zoradené odporúčania** z už pripravovaných oblastí (validácia kvality, SEO kontrola formulára, Q&A, meranie interakcií) a **vždy rozhoduje on**. Systém má podporovať **jednu konzistentnú identitu článku** naprieč modulmi a logmi (article identity v zmysle Core / editorial analytics), aby šlo neskôr zmysluplne vyhodnocovať dopad.
+**Editorial Copilot** je v tomto zmysle **sprievodný panel**: redaktor vidí **zjednotený pohľad na stav článku**, dostáva **zoradené odporúčania** z už pripravovaných oblastí a **vždy rozhoduje on**. Systém má podporovať **jednu konzistentnú identitu článku** naprieč modulmi a logmi (article identity v zmysle Core / editorial analytics), aby šlo neskôr zmysluplne vyhodnocovať dopad.
+
+**Orchestrácia v MVP sa opiera najmä o tieto línie práce:**
+
+- **SEO Content Checker** - validácia hlavného kľúčového slova a súvisiacich SEO pravidiel formulára (napr. smer lemma match bez LLM).
+- **Linkbuilding** - interné prelinkovanie a návrhy odkazov v kontexte článku (nadväznosť na linkbuilding / Article Performance iniciatívy).
+- **Tagy** - práca s tagmi ako vstupom a kontextom pre ďalšie kroky v editore.
+- **Editorial validation - pilierová vrstva** - **štýl** a **dôvera**; v paneli súdržne aj **SEO** ako pilier (návrh → rozhodnutie redaktora → záznam).
+- **Meranie v editore (ankety, krátke dotazy)** - adopcia a správanie redaktora pri nástrojoch a návrhoch; **nie** čitateľské Q&A na fronte článku; reportovanie môže ísť **bez závislosti na okamžitom napojení na DataHub**.
 
 **Odporúčaný prístup (náklad vs. dopad):** prvý krok nech je **orchestrácia a súhrn v paneli**, nie investícia do nového foundation modelu ani do paralelných „samostatných AI aplikácií“ bez väzby na článok.
 
@@ -50,9 +58,8 @@ Nižšie uvedené oblasti **nenahrádzame** - MVP ich **prepája v jednom spriev
 | Oblast | Príspevok do Copilotu |
 | Editorial validation v CMS | model návrh → rozhodnutie redaktora → záznam; piliere vrátane dôvery, štýlu a SEO |
 | SEO Content Checker - smer úpravy kľúčového slova | lematizácia / základný tvar bez LLM; otvorené body okolo rozsahu textu a bezpečného fallbacku |
-| Q&A modul - analytika správania | meranie adopcie z editora bez závislosti na okamžitom napojení na DataHub |
+| Meranie v editore (ankety, krátke dotazy, adopcia) | analytika správania redaktora pri nástrojoch a návrhoch; **nie** čitateľské Q&A na fronte článku; bez závislosti na okamžitom napojení na DataHub |
 | Zdieľaný merací rámec AI features | jednotná väzba usage logov na článok v zmysle Article message a editorial identity |
-| Proces vývoja (Jira / Confluence) | voliteľná vrstva: kontrola kvality rozhodnutia pred vývojom - ak organizácia vyžaduje |
 
 Širší strategický rámec Article Performance / MDIE zostáva nadväznosťou na úrovni vízie produktu.
 
@@ -134,7 +141,7 @@ Orientačné signály:
 1. **MVP:** orchestrácia v paneli, súhrn pripravenosti, konzistentné logovanie naprieč vybranými modulmi.  
 2. **MVP2 (scoped rozšírenie):** samostatný strategický dokument bez opakovania MVP — [Editorial_Copilot_MVP2.md](./Editorial_Copilot_MVP2.md) (CMS moduly v paneli, SEO/checker hĺbšie, tagy/linkbuilding v orchestrácii, adopcia a minimum governance).  
 3. **Rozšírenie:** hlbšie prepojenie editorialnych rozhodnutí s výkonom článku v číslach (tam, kde sú dáta a metodika).  
-4. **Personalizácia a spätná väzba:** systematické sledovanie toho, čo redakcie prijímajú vs. ignorujú - nadväznosť na adopčné metriky Q&A a ďalších modulov.
+4. **Personalizácia a spätná väzba:** systematické sledovanie toho, čo redakcie prijímajú vs. ignorujú - nadväznosť na adopčné metriky z **merania v editore** (ankety, dotazy) a ďalších modulov.
 
 ---
 
