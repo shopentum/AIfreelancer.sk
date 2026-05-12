@@ -4,7 +4,13 @@
 > **Účel:** zjednotiť narratívu „kam ideme“ a ukázať, že veľkú časť hodnoty prinesie **zoradenie a orchestrácia už rozbehnutých schopností** okolo článku, nie nový AI model ako taký.  
 > **Forma prezentácie:** **Plný prototyp editora** s pravým panelom asistenta je dostupný na ceste **`/nmh`** v locale routingu (napr. `/sk/nmh`) - rovnaký modul ako workflow s prijatím / odmietnutím návrhov.
 
-Dátum: 2026-05-08 (úprava: MVP rámec — article state, lifecycle odporúčania, runtime vs publish)
+Dátum: 2026-05-08 (úprava: MVP rámec; §1.1 LLM feedback vs agregované signály)
+
+---
+
+## Changelog (strategický dokument)
+
+- **2026-05-08:** doplnené **§1.1** — čoho sa týka LLM feedback vs agregované signály; úprava jednovetovej definície §3 a väzba v §A article state.
 
 ---
 
@@ -20,7 +26,23 @@ Dátum: 2026-05-08 (úprava: MVP rámec — article state, lifecycle odporúčan
 - **Editorial validation - pilierová vrstva** - **štýl** a **dôvera**; v paneli súdržne aj **SEO** ako pilier (návrh → rozhodnutie redaktora → záznam).
 - **Meranie v editore (ankety, krátke dotazy)** - adopcia a správanie redaktora pri nástrojoch a návrhoch; **nie** čitateľské Q&A na fronte článku; reportovanie môže ísť **bez závislosti na okamžitom napojení na DataHub**.
 
-**Odporúčaný prístup (náklad vs. dopad):** prvý krok nech je **orchestrácia a súhrn v paneli**, nie investícia do nového foundation modelu ani do paralelných „samostatných AI aplikácií“ bez väzby na článok.
+**Odporúčaný prístup (náklad vs. dopad):** prvý krok nech je **orchestrácia a súhrn v paneli**, nie nová izolovaná „AI aplikácia“ bez väzby na článok. **LLM** má zmysel **cieľene** pri editorialnej interpretácii textu (nižšie), nie ako náhrada za všetky moduly ani ako jediný zdroj signálov.
+
+### 1.1 Čoho sa týka LLM feedback (kontext na review dokumentov)
+
+**Panel robí dve komplementárne veci:**
+
+1. **Zoraďuje odporúčania z existujúcich oblastí** editora / CMS — napr. SEO pravidlá formulára, **tagy**, **linkbuilding** / interné odkazy, ďalšie **workflow signály** podľa dohody s Core. Tieto línie ostávajú **vlastnými modulmi**; Copilot ich **agreguje a prioritizuje v jednom mieste**, nie nahrádza ich backend celkom.
+
+2. **Dopĺňa LLM feedback nad obsahom článku** tam, kde je potrebná jazyková a kontextová interpretácia textu, najmä pre oblasti ako:
+   - **dôvera** (napr. silné tvrdenia, náznaky rizík v zmysle produktovej definície — vždy s ľudským rozhodnutím),
+   - **štýl** a **tonalita** (zhoda so značkou / redakčným profilom),
+   - **čitateľnosť** (orientačne; bez náhrady za samostatný plný „readability engine“, ak ho produkt nedefinuje inak),
+   - **potenciálne rizikové formulácie** (signál na posúdenie redaktorom; nie autonómna zmena textu).
+
+**Spoločné pre oba typy vstupov:** panel **pomáha redaktorovi prioritizovať pozornosť pred publishom** a eviduje **jednotný životný cyklus odporúčania**: návrh → **prijatie** / **odmietnutie** / **ignorovanie** / **manuálna úprava** → záznam v logu (kontrakt s Core na ďalšiu analytiku).
+
+*Tento odsek má zabrániť čítaniu dokumentov tak, že „Copilot je len LLM“, alebo že „Copilot nerieši LLM“ — obe tvrdenia sú nepresné.*
 
 ---
 
@@ -36,7 +58,7 @@ Dátum: 2026-05-08 (úprava: MVP rámec — article state, lifecycle odporúčan
 
 ## 3. Produktová definícia (jedna veta)
 
-**Editorial Copilot vedie redaktora kontextom článku**: číta dostupné signály z modulov, zoraďuje odporúčania, drží dohodnutý workflow a zapisuje rozhodnutia tak, aby ich bolo možné vyhodnotiť voči výkonu obsahu po publikácii.
+**Editorial Copilot vedie redaktora kontextom článku**: číta **signály z modulov** (SEO, tagy, linkbuilding, workflow, …) aj **LLM feedback nad textom** tam, kde je to zmysluplné (dôvera, štýl, tonalita, čitateľnosť, rizikové formulácie — pozri stratégiu §1.1); zoraďuje odporúčania; drží životný cyklus rozhodnutí a zapisuje ich tak, aby ich bolo možné vyhodnotiť voči výkonu obsahu po publikácii.
 
 ---
 
@@ -71,7 +93,7 @@ Nasledujúce tri body **nezväčšujú zámer na novú architektúru**; upresňu
 
 ### A. Article state (jednotná identita článku)
 
-Editorial Copilot pracuje nad **jednotnou identitou článku (article state)**, ktorá agreguje signály z viacerých modulov editora (SEO, dôvera, štýl, tagy, linkbuilding, využitie AI prostriedkov, workflow stav podľa dohody s Core).
+Editorial Copilot pracuje nad **jednotnou identitou článku (article state)**, ktorá agreguje signály z viacerých modulov editora (SEO, tagy, linkbuilding, workflow stav, …) a zároveň signály z **editorialnej kontroly nad textom**, vrátane tam, kde vstup **doplňuje LLM** (dôvera, štýl, tonalita, čitateľnosť, rizikové formulácie — pozri **§1.1**).
 
 Pravý panel **nie je samostatný AI nástroj**, ale **orchestrujúca vrstva nad stavom článku**: zoraďuje pozornosť a akcie redaktora a nemá zakladať paralelnú „druhú pravdu“ mimo zdieľaného stavu článku v CMS.
 

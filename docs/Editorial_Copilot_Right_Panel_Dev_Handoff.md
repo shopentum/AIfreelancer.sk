@@ -1,13 +1,17 @@
 # Editorial Copilot — pravý panel: podklad pre vývoj (handoff)
 
-**Verzia dokumentu:** 0.5  
+**Verzia dokumentu:** 0.6  
 **Status:** Sekcia 1 — čaká na validáciu scope. Sekcie 2–5 — obsah v súlade s repozitárom (`src/features/editorial-copilot/`). Core/API payloady pri callbackoch — doplnenie podľa Jira/Confluence (mimo rozsahu prvého FE extraktu).
 
-**Súvislosť:** Produkt — [`Editorial_Copilot_Strategic_Direction_NHM.md`](./Editorial_Copilot_Strategic_Direction_NHM.md). Prototyp editora: **`/[locale]/nmh`** → `EagleCMS.tsx`. Kontrakt + fixture scenáre: **`/[locale]/nmh/copilot-blueprint`**.
+**Súvislosť:** Produkt — [`Editorial_Copilot_Strategic_Direction_NHM.md`](./Editorial_Copilot_Strategic_Direction_NHM.md) (vrátane §1.1: agregované signály vs LLM feedback nad textom). Prototyp editora: **`/[locale]/nmh`** → `EagleCMS.tsx`. Kontrakt + fixture scenáre: **`/[locale]/nmh/copilot-blueprint`**.
 
 ---
 
 ## Changelog
+
+### v0.6
+
+- Sekcia 1: kontext **LLM feedback** vs **agregované modulové signály** (SEO, tagy, linkbuilding, workflow); zarovnanie so strategickým dokumentom §1.1.
 
 ### v0.5
 
@@ -66,6 +70,17 @@ Pripraviť **jednu jasnú UI vrstvu** pre **pravý panel „Editorial Copilot“
 - akcie typu validácia, návrhy AI, ignorovať / aplikovať atď.
 
 **Záměr pre vývoj:** oddeliť „**vizuál, layout, animácie a prázdne/stavy**“ od „**načítanie článku, API Intelligence, persistencia**“. Nemusí to znamenať okamžitý Storybook — stačí dohodnutá **hranica súborov a kontrakt udalostí** (`props` + `callbacks`), aby ste mohli **prepojiť káble** bez redesignu layoutu.
+
+### 1.1a Čoho sa týka LLM feedback (product kontext)
+
+Panel **nie je** výhradne „LLM nástroj“ ani výhradne „agregátor pravidiel“. Plní **obe funkcie**:
+
+| Vrstva | Príklady | Poznámka pre FE/Core |
+|--------|-----------|----------------------|
+| **Agregované odporúčania** | SEO kontrola formulára, tagy, linkbuilding / interné odkazy, ďalšie workflow signály z CMS | Panel **zoraďuje a prioritizuje**; zdroj pravdy ostáva v príslušných moduloch/API. |
+| **LLM feedback nad obsahom článku** | **Dôvera**, **štýl**, **tonalita**, **čitateľnosť**, **potenciálne rizikové formulácie** | Výstupy sú **návrhy** na ľudské rozhodnutie; nie autonómna publikácia ani náhrada všetkých modulov. |
+
+**Jednotný životný cyklus odporúčania** platí pre oba typy: **návrh** → **prijatie** / **odmietnutie** / **ignorovanie** / **manuálna úprava** → **záznam** (logovanie podľa kontraktu s Core). Produktová rozísťovka je v stratégii [`Editorial_Copilot_Strategic_Direction_NHM.md`](./Editorial_Copilot_Strategic_Direction_NHM.md) (Executive summary, **§1.1**).
 
 ### 1.2 Čo je IN scope (tento handoff)
 
@@ -245,7 +260,7 @@ Playground na route nahradzuje prvý beh Storybooku; po dohode s FE možno prida
 ### Postup (prvá stránka v spáci)
 
 1. Otvor space **NMH** → **Create** (Blank page).
-2. **Title (navrhovaný):** `Editorial Copilot — pravý panel: handoff pre vývoj (v0.5)`
+2. **Title (navrhovaný):** `Editorial Copilot — pravý panel: handoff pre vývoj (v0.6)`
 3. **Obsah:** skopíruj celý dokument od nadpisu `# Editorial Copilot` vyššie až po vetu *„nie je záväzný backlog…“* (bez tejto prílohy — alebo ju pridaj ako sekciu „Interné: ako publikovať“, podľa uváženia).
 4. **Markdown v Confluence Cloud:** podľa verzie editora buď priame vloženie, alebo **/** → *Markdown* → vloženie; ak tabuľky nesedia, skopíruj ich ručne z náhľadu v IDE alebo ako HTML export z nástroja, ktorý tí používajú.
 5. **Odkaz na strategiu:** relatívny odkaz `Editorial_Copilot_Strategic_Direction_NHM.md` v Confluence nereflektuje repo — doplň buď odkaz na GitHub/raw súbor, alebo duplicitný Confluence dokument so strategickým smerom.
