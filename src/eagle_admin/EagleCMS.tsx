@@ -422,6 +422,12 @@ const EagleCMS_Split: React.FC = () => {
   const modalScrollToLinksRef = useRef(false);
   /** Jediný vertikálny scroll editora — bez vnútorného scrollera v pravom paneli. */
   const editorMainScrollRef = useRef<HTMLElement | null>(null);
+  /** Kotva na kartu „Text článku“ — po HITL aplikácii AI úpravy rolujeme hlavný scroll aj výber v textarea. */
+  const editorArticleBodyAnchorRef = useRef<HTMLDivElement>(null);
+  /** Kotva na aktívny detail nálezu v Copilot paneli (Vyriešené / SEO rekapitulácia). */
+  const copilotDetailAnchorRef = useRef<HTMLDivElement>(null);
+  /** Sekcia „Odporúčané“ — krátka navigácia po vyriešení položky. */
+  const assistantPrioritiesSectionRef = useRef<HTMLDivElement>(null);
   const scrollRafRef = useRef<number | null>(null);
   const fadeClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const undoFlashClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -963,6 +969,60 @@ const EagleCMS_Split: React.FC = () => {
     setScrollTop(ta.scrollTop);
   }, [content]);
 
+  const scheduleScrollCopilotDetailIntoView = useCallback(() => {
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        copilotDetailAnchorRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "nearest",
+        });
+      });
+    });
+  }, []);
+
+  const scheduleScrollEditorToAppliedPassage = useCallback(
+    (rangeStart: number, rangeEnd: number, contentSnapshot: string) => {
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          editorArticleBodyAnchorRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "nearest",
+          });
+          const ta = editorRef.current;
+          if (!ta) return;
+          ta.focus();
+          const len = contentSnapshot.length;
+          const end = Math.min(Math.max(rangeEnd, 0), len);
+          const start = Math.min(Math.max(rangeStart, 0), end);
+          ta.setSelectionRange(start, end);
+          const lh = parseFloat(getComputedStyle(ta).lineHeight);
+          const lineHeight = Number.isFinite(lh) && lh > 0 ? lh : 26;
+          let line = 0;
+          for (let i = 0; i < start; i++) {
+            if (contentSnapshot[i] === "\n") line++;
+          }
+          ta.scrollTop = Math.max(0, line * lineHeight - ta.clientHeight * 0.25);
+          setScrollTop(ta.scrollTop);
+        });
+      });
+    },
+    [],
+  );
+
+  const handleGoToAssistantPriorities = useCallback(() => {
+    setSelectedClaimId(null);
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        assistantPrioritiesSectionRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
+    });
+  }, []);
+
   const onEditorScroll = useCallback((e: React.UIEvent<HTMLTextAreaElement>) => {
     const next = e.currentTarget.scrollTop;
     if (scrollRafRef.current !== null) {
@@ -1123,6 +1183,9 @@ const EagleCMS_Split: React.FC = () => {
     }
     setClaimAiProposal(null);
     setPendingManualEdit(null);
+
+    scheduleScrollEditorToAppliedPassage(idx, fadeEnd, newContent);
+    window.setTimeout(() => scheduleScrollCopilotDetailIntoView(), 280);
   };
 
   const handleIgnoreClaim = useCallback(
@@ -1157,8 +1220,9 @@ const EagleCMS_Split: React.FC = () => {
         });
       }
       setPendingManualEdit(null);
+      window.setTimeout(() => scheduleScrollCopilotDetailIntoView(), 200);
     },
-    [audit, collaborationLockDemo],
+    [audit, collaborationLockDemo, scheduleScrollCopilotDetailIntoView],
   );
 
   const handleConfirmManualEdit = useCallback(
@@ -1194,8 +1258,23 @@ const EagleCMS_Split: React.FC = () => {
         });
       }
       setPendingManualEdit(null);
+      const hitIdx = content.indexOf(claim.text);
+      if (hitIdx !== -1) {
+        scheduleScrollEditorToAppliedPassage(
+          hitIdx,
+          hitIdx + claim.text.length,
+          content,
+        );
+      }
+      window.setTimeout(() => scheduleScrollCopilotDetailIntoView(), 280);
     },
-    [audit, collaborationLockDemo, content],
+    [
+      audit,
+      collaborationLockDemo,
+      content,
+      scheduleScrollCopilotDetailIntoView,
+      scheduleScrollEditorToAppliedPassage,
+    ],
   );
 
   const handleIgnoreSeoSuggestion = useCallback(
@@ -1474,12 +1553,14 @@ const EagleCMS_Split: React.FC = () => {
           },
         };
       });
+      window.setTimeout(() => scheduleScrollCopilotDetailIntoView(), 220);
     },
     [
       audit,
       collaborationLockDemo,
       perex,
       pushArticleSnapshot,
+      scheduleScrollCopilotDetailIntoView,
       seoTitle,
       simulateIntelligenceApiFailure,
       title,
@@ -2514,7 +2595,10 @@ const EagleCMS_Split: React.FC = () => {
               </div>
 
               {/* Text článku Card */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+              <div
+                ref={editorArticleBodyAnchorRef}
+                className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col"
+              >
                 <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                   <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Text článku <span className="text-red-500">*</span></h3>
                 </div>
@@ -3089,7 +3173,10 @@ const EagleCMS_Split: React.FC = () => {
                         </div>
 
                         {audit && assistantPriorities.length > 0 ? (
-                          <div className="shrink-0 border-b border-gray-100 bg-gradient-to-b from-purple-50/40 via-white to-white px-3 py-3">
+                          <div
+                            ref={assistantPrioritiesSectionRef}
+                            className="shrink-0 border-b border-gray-100 bg-gradient-to-b from-purple-50/40 via-white to-white px-3 py-3 scroll-mt-4"
+                          >
                             <p className="mb-2 text-[11px] font-black uppercase tracking-[0.12em] text-gray-700">
                               Odporúčané
                             </p>
@@ -3267,10 +3354,11 @@ const EagleCMS_Split: React.FC = () => {
                             </div>
                           ) : selectedClaimId ? (
                             <motion.div 
+                              ref={copilotDetailAnchorRef}
                               key={`detail-${selectedClaimId}`}
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
-                              className="space-y-6"
+                              className="space-y-6 scroll-mt-6"
                             >
                               <button 
                                 onClick={() => setSelectedClaimId(null)}
@@ -3330,6 +3418,29 @@ const EagleCMS_Split: React.FC = () => {
                                           </p>
                                         </div>
                                       </div>
+                                      {audit &&
+                                      assistantPriorities.length > 0 ? (
+                                        <div className="border-t border-gray-100 pt-4">
+                                          <button
+                                            type="button"
+                                            disabled={collaborationLockDemo}
+                                            onClick={handleGoToAssistantPriorities}
+                                            className={cn(
+                                              "flex w-full items-center justify-center gap-1 rounded-lg border px-3 py-2 text-[11px] font-bold transition-colors",
+                                              collaborationLockDemo
+                                                ? "cursor-not-allowed border-gray-100 bg-gray-50 text-gray-400"
+                                                : "border-purple-200/80 bg-purple-50/50 text-purple-900 hover:border-purple-300 hover:bg-purple-50",
+                                            )}
+                                          >
+                                            Pozrieť hlavné odporúčania
+                                            <ChevronRight
+                                              size={14}
+                                              className="opacity-70"
+                                              aria-hidden
+                                            />
+                                          </button>
+                                        </div>
+                                      ) : null}
                                     </div>
                                   );
                                 }
@@ -3778,6 +3889,32 @@ const EagleCMS_Split: React.FC = () => {
                                         >
                                           <X size={13} className="mr-2" /> Ignorovať
                                         </button>
+                                      ) : null}
+
+                                      {(seoApplied ||
+                                        ignoredSeoKeys.has(seoKey)) &&
+                                      audit &&
+                                      assistantPriorities.length > 0 ? (
+                                        <div className="border-t border-gray-100 pt-4">
+                                          <button
+                                            type="button"
+                                            disabled={collaborationLockDemo}
+                                            onClick={handleGoToAssistantPriorities}
+                                            className={cn(
+                                              "flex w-full items-center justify-center gap-1 rounded-lg border px-3 py-2 text-[11px] font-bold transition-colors",
+                                              collaborationLockDemo
+                                                ? "cursor-not-allowed border-gray-100 bg-gray-50 text-gray-400"
+                                                : "border-purple-200/80 bg-purple-50/50 text-purple-900 hover:border-purple-300 hover:bg-purple-50",
+                                            )}
+                                          >
+                                            Pozrieť hlavné odporúčania
+                                            <ChevronRight
+                                              size={14}
+                                              className="opacity-70"
+                                              aria-hidden
+                                            />
+                                          </button>
+                                        </div>
                                       ) : null}
                                     </div>
                                   );
