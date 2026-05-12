@@ -228,6 +228,9 @@ const PROTOTYPE_SESSION_USER = {
  */
 const PROTOTYPE_COLLAB_LOCK_HOLDER = "Jana Kováčová";
 
+/** Prototyp: checkboxy simulácií v hornom paneli — v ukážke vypnuté. */
+const SHOW_PROTOTYPE_SIMULATIONS = false;
+
 function formatAuditTimestamp(ts: number): string {
   try {
     return new Intl.DateTimeFormat("sk-SK", {
@@ -2252,7 +2255,9 @@ const EagleCMS_Split: React.FC = () => {
                 <ShieldAlert size={18} className="text-purple-600" />
               </div>
               <div>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">EAGLE CMS</p>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">
+                  Editorial Copilot
+                </p>
                 <p className="text-xs font-bold text-gray-700">Asistent kvality článku</p>
               </div>
             </div>
@@ -2321,16 +2326,16 @@ const EagleCMS_Split: React.FC = () => {
                         : `Späť (${articleHistory.length}) — vrátiť poslednú AI úpravu`
                   }
                   className={cn(
-                    "flex h-9 shrink-0 items-center justify-center gap-1 rounded-xl border text-gray-700 transition-all",
-                    articleHistory.length > 0 && !collaborationLockDemo
-                      ? "min-w-14 px-2"
-                      : "w-9 px-0",
+                    "flex h-9 shrink-0 items-center justify-center gap-1 rounded-xl border px-2 text-gray-700 transition-all",
                     articleHistory.length === 0 || collaborationLockDemo
                       ? "cursor-not-allowed border-gray-200 bg-gray-50 text-gray-300"
                       : "border-gray-200 bg-white shadow-sm hover:border-purple-200 hover:bg-purple-50 hover:text-purple-700 active:scale-95",
                   )}
                 >
                   <History size={16} aria-hidden />
+                  <span className="text-[10px] font-black uppercase tracking-wide">
+                    Späť
+                  </span>
                   {articleHistory.length > 0 && !collaborationLockDemo ? (
                     <span className="text-[10px] font-black tabular-nums text-purple-900/90">
                       ({articleHistory.length})
@@ -2350,37 +2355,39 @@ const EagleCMS_Split: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex max-w-full flex-col gap-2 sm:items-end">
-            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-[11px] text-gray-600 shadow-sm select-none">
-              <input
-                type="checkbox"
-                checked={collaborationLockDemo}
-                onChange={(e) => setCollaborationLockDemo(e.target.checked)}
-                className="h-3.5 w-3.5 shrink-0 rounded border-gray-300 text-purple-600"
-              />
-              <span className="font-medium">
-                Prototyp: druhý editor v článku (read-only pre AI a text)
-              </span>
-            </label>
-            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2 text-[11px] text-amber-950 shadow-sm select-none">
-              <input
-                type="checkbox"
-                checked={simulateIntelligenceApiFailure}
-                onChange={(e) => {
-                  const on = e.target.checked;
-                  setSimulateIntelligenceApiFailure(on);
-                  if (!on) setSidebarAiBanner(null);
-                }}
-                className="h-3.5 w-3.5 shrink-0 rounded border-amber-400 text-amber-600"
-              />
-              <span className="font-medium">
-                Simulácia: výpadok Intelligence API (validácia / AI návrhy zlyhajú)
-              </span>
-            </label>
-          </div>
+          {SHOW_PROTOTYPE_SIMULATIONS ? (
+            <div className="flex max-w-full flex-col gap-2 sm:items-end">
+              <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-[11px] text-gray-600 shadow-sm select-none">
+                <input
+                  type="checkbox"
+                  checked={collaborationLockDemo}
+                  onChange={(e) => setCollaborationLockDemo(e.target.checked)}
+                  className="h-3.5 w-3.5 shrink-0 rounded border-gray-300 text-purple-600"
+                />
+                <span className="font-medium">
+                  Prototyp: druhý editor v článku (read-only pre AI a text)
+                </span>
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2 text-[11px] text-amber-950 shadow-sm select-none">
+                <input
+                  type="checkbox"
+                  checked={simulateIntelligenceApiFailure}
+                  onChange={(e) => {
+                    const on = e.target.checked;
+                    setSimulateIntelligenceApiFailure(on);
+                    if (!on) setSidebarAiBanner(null);
+                  }}
+                  className="h-3.5 w-3.5 shrink-0 rounded border-amber-400 text-amber-600"
+                />
+                <span className="font-medium">
+                  Simulácia: výpadok Intelligence API (validácia / AI návrhy zlyhajú)
+                </span>
+              </label>
+            </div>
+          ) : null}
         </div>
 
-        {collaborationLockDemo ? (
+        {SHOW_PROTOTYPE_SIMULATIONS && collaborationLockDemo ? (
           <div className="flex shrink-0 items-center gap-2 border-b border-amber-200 bg-amber-50 px-6 py-2 text-xs text-amber-950">
             <Lock className="shrink-0 text-amber-700" size={14} aria-hidden />
             <span>
@@ -2392,7 +2399,7 @@ const EagleCMS_Split: React.FC = () => {
           </div>
         ) : null}
 
-        {/* Editor: jeden vertikálny scroll na <main>, pravý panel bez vlastného overflow. */}
+        {/* Editor: vertikálny scroll na <main>; Editorial Copilot má vlastný scroll pri max. výške. */}
         <main
           ref={editorMainScrollRef}
           onScroll={() => {
@@ -2732,13 +2739,13 @@ const EagleCMS_Split: React.FC = () => {
                     }
                   }}
                   className={cn(
-                    "relative flex flex-1 items-center justify-center rounded-lg py-2 text-xs font-bold transition-all",
+                    "relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-lg py-2 px-1 text-center text-[10px] font-bold leading-tight transition-all sm:flex-row sm:gap-0 sm:text-xs",
                     rightPanelMode === "ai"
                       ? "bg-purple-600 text-white shadow-md"
                       : "text-gray-500 hover:bg-gray-50",
                   )}
                 >
-                  <Sparkles size={14} className="mr-2" /> Asistent kvality
+                  <Sparkles size={14} className="mr-1 shrink-0 sm:mr-2" /> Editorial Copilot
                   {audit && <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[8px] flex items-center justify-center text-white border-2 border-white">!</div>}
                 </button>
               </div>
@@ -3087,7 +3094,7 @@ const EagleCMS_Split: React.FC = () => {
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      className="flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm"
+                      className="flex max-h-[60vh] flex-col overflow-x-hidden overflow-y-auto rounded-2xl border border-gray-200 bg-white shadow-sm"
                     >
                         <div
                           className={cn(
@@ -3360,12 +3367,39 @@ const EagleCMS_Split: React.FC = () => {
                               animate={{ opacity: 1, y: 0 }}
                               className="space-y-6 scroll-mt-6"
                             >
-                              <button 
-                                onClick={() => setSelectedClaimId(null)}
-                                className="flex items-center text-[10px] font-black text-gray-400 uppercase hover:text-purple-600 transition-colors"
-                              >
-                                <ArrowLeft size={12} className="mr-1" /> Späť na zoznam
-                              </button>
+                              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedClaimId(null)}
+                                  className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-left text-xs font-bold text-gray-800 shadow-sm transition-colors hover:border-purple-300 hover:bg-purple-50 hover:text-purple-900"
+                                >
+                                  <ArrowLeft size={14} className="shrink-0" aria-hidden />
+                                  <span>Späť</span>
+                                  <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                                    na zoznam
+                                  </span>
+                                </button>
+                                {articleHistory.length > 0 ? (
+                                  <button
+                                    type="button"
+                                    onClick={undoLastArticleSnapshot}
+                                    disabled={collaborationLockDemo}
+                                    title="Obnoví posledný stav článku pred AI / SEO úpravou (rovnako ako Späť v hornom paneli)."
+                                    className={cn(
+                                      "flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-[11px] font-bold transition-colors",
+                                      collaborationLockDemo
+                                        ? "cursor-not-allowed border-gray-100 bg-gray-50 text-gray-400"
+                                        : "border-amber-200/90 bg-amber-50/80 text-amber-950 hover:border-amber-300 hover:bg-amber-50",
+                                    )}
+                                  >
+                                    <Undo2 size={14} aria-hidden />
+                                    Vrátiť úpravu článku
+                                    <span className="tabular-nums text-amber-800/90">
+                                      ({articleHistory.length})
+                                    </span>
+                                  </button>
+                                ) : null}
+                              </div>
                               
                               {(() => {
                                 const resolved = resolvedClaims.find(
