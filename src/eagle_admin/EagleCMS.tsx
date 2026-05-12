@@ -87,6 +87,14 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/** Krátka hláska pre počet návrhov odkazov v paneli (bez duplicitnej akcie mimo modalu). */
+function linkSuggestionsReadyLabel(n: number): string {
+  if (n <= 0) return "";
+  if (n === 1) return "1 návrh pripravený";
+  if (n >= 2 && n <= 4) return `${n} návrhy pripravené`;
+  return `${n} návrhov pripravených`;
+}
+
 /** Krátke odporúčanie pre Copilot panel (fallback ak mock nemá recommendationShort). */
 function claimRecommendationShortLine(c: Claim): string {
   const short = c.recommendationShort?.trim();
@@ -1212,58 +1220,6 @@ const EagleCMS_Split: React.FC = () => {
     });
   }, []);
 
-  const handleLinkAccept = useCallback((s: LinkSuggestion) => {
-    if (!audit) return;
-    setLinkActions(prev => new Map(prev).set(s.id, 'accepted'));
-    setAudit({ ...audit, readinessScore: nextReadinessBump(audit.readinessScore) });
-    studyLogRef.current.push({
-      type: "link_suggestion_accepted",
-      at: Date.now(),
-      suggestion_id: s.id,
-      suggestion_type: "internal_link",
-      anchor_text: s.anchor,
-      target_id: s.target,
-      context_snippet: s.context,
-      suggestion_source: "ai",
-    });
-  }, [audit]);
-
-  const handleLinkReject = useCallback((s: LinkSuggestion) => {
-    setLinkActions(prev => new Map(prev).set(s.id, 'rejected'));
-    studyLogRef.current.push({
-      type: "link_suggestion_rejected",
-      at: Date.now(),
-      suggestion_id: s.id,
-      suggestion_type: "internal_link",
-      anchor_text: s.anchor,
-      target_id: s.target,
-      suggestion_source: "ai",
-    });
-  }, []);
-
-  const handleLinkAcceptAll = useCallback(() => {
-    if (!audit) return;
-    const pending = (audit.linkSuggestions ?? []).filter(s => !linkActions.has(s.id));
-    if (pending.length === 0) return;
-    const newMap = new Map(linkActions);
-    pending.forEach(s => newMap.set(s.id, 'accepted'));
-    setLinkActions(newMap);
-    const bump = pending.reduce((acc) => nextReadinessBump(acc), audit.readinessScore);
-    setAudit({ ...audit, readinessScore: bump });
-    pending.forEach(s => {
-      studyLogRef.current.push({
-        type: "link_suggestion_accepted",
-        at: Date.now(),
-        suggestion_id: s.id,
-        suggestion_type: "internal_link",
-        anchor_text: s.anchor,
-        target_id: s.target,
-        context_snippet: s.context,
-        suggestion_source: "ai",
-      });
-    });
-  }, [audit, linkActions]);
-
   // --- Tag modal handlers ---
   const openTagModal = useCallback(() => {
     const tags = audit?.tagSuggestions?.length ? audit.tagSuggestions : MODAL_TAG_SUGGESTIONS;
@@ -1433,22 +1389,6 @@ const EagleCMS_Split: React.FC = () => {
     modalScrollToLinksRef.current = true;
     setShowTagModal(true);
   }, [prepareEditModal]);
-
-  /** Potvrdenie tagov z SEO panela — zarovnané s modalovým krokom A → rovno otvorí krok B (prelinkovania). */
-  const handleTagSetCommit = useCallback(() => {
-    if (!audit) return;
-    const remaining = (audit.tagSuggestions ?? []).filter((t) => !removedTagIds.has(t.id));
-    setTagsCommitted(true);
-    setAudit({ ...audit, readinessScore: nextReadinessBump(audit.readinessScore) });
-    studyLogRef.current.push({
-      type: "tags_committed",
-      at: Date.now(),
-      tags: remaining.map((t) => ({ id: t.id, label: t.label, url: t.url })),
-      removedCount: (audit.tagSuggestions ?? []).length - remaining.length,
-      suggestion_source: "ai",
-    });
-    openLinksModal();
-  }, [audit, removedTagIds, openLinksModal]);
 
   const applySeoSuggestion = useCallback(
     (key: SeoAuditKey) => {
@@ -1626,6 +1566,13 @@ const EagleCMS_Split: React.FC = () => {
     return audit.linkSuggestions.filter((s) => !linkActions.has(s.id)).length;
   }, [audit?.linkSuggestions, linkActions]);
 
+  /** Jedna cesta: celý workflow tagov a odkazov len v modale; panel len orchestruje. */
+  const openTagsLinksWizard = useCallback(() => {
+    setRightPanelMode("ai");
+    if (!tagsCommitted) openTagModal();
+    else openLinksModal();
+  }, [tagsCommitted, openTagModal, openLinksModal]);
+
   const openAssistantItemsCount = useMemo(() => {
     if (!audit) return 0;
     let n = audit.claims.length + (audit.linguisticClaims?.length ?? 0);
@@ -1673,31 +1620,22 @@ const EagleCMS_Split: React.FC = () => {
     const tagsNeedsAttention =
       !tagsCommitted || pendingLinkSuggestionsCount > 0;
     const tagsDone = !tagsNeedsAttention;
+    const suggestedTagCount = modalTags.filter(
+      (t) => !removedTagIds.has(t.id),
+    ).length;
     out.push({
       rowKey: "tags-links",
       kind: tagsDone ? "info" : tagsNeedsAttention ? "warn" : "info",
       done: tagsDone,
       title: "Tagy a interné prelinkovania",
       subtitle: !tagsCommitted
-        ? "Vygenerujte alebo potvrďte tagy a potom prejdite návrhy interných odkazov."
+        ? `${suggestedTagCount} navrhovaných tagov · spustite sprievodcu`
         : pendingLinkSuggestionsCount > 0
-          ? `${pendingLinkSuggestionsCount} návrhov odkazu ešte čaká na prijatie alebo zamietnutie.`
-          : "Hotovo · tagy a odkazy sú spracované · ťuknite pre Nastavenia.",
-      actionLabel: !tagsCommitted
-        ? "Generovať"
-        : pendingLinkSuggestionsCount > 0
-          ? "Odkazy"
-          : "Nastavenia",
+          ? linkSuggestionsReadyLabel(pendingLinkSuggestionsCount)
+          : "Hotovo · ťuknite pre rekapituláciu v sprievodcovi",
+      actionLabel: "Sprievodca",
       onActivate: () => {
-        if (!tagsCommitted) {
-          setRightPanelMode("ai");
-          openTagModal();
-        } else if (pendingLinkSuggestionsCount > 0) {
-          setRightPanelMode("ai");
-          openLinksModal();
-        } else {
-          setRightPanelMode("settings");
-        }
+        openTagsLinksWizard();
       },
     });
 
@@ -1817,9 +1755,10 @@ const EagleCMS_Split: React.FC = () => {
     handleClaimClick,
     handleResolvedCardClick,
     ignoredSeoKeys,
-    openTagModal,
-    openLinksModal,
+    linkActions,
+    openTagsLinksWizard,
     pendingLinkSuggestionsCount,
+    removedTagIds,
     resolvedClaims,
     seoChangeLog,
     tagsCommitted,
@@ -4039,184 +3978,53 @@ const EagleCMS_Split: React.FC = () => {
                                         </div>
                                       );
                                     })}
-                                </div>
-                              )}
-                              {/* Navrhované tagy — chip set */}
-                              {activeAuditTab === 'seo' && audit?.tagSuggestions && audit.tagSuggestions.length > 0 && (
-                                <div className="mt-4">
-                                  <div className="flex items-center justify-between pb-2">
-                                    <div className="flex flex-col gap-0.5">
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-[11px] font-black uppercase tracking-wide text-gray-500">
-                                          Navrhované tagy
-                                        </span>
-                                        <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold text-violet-700">
-                                          {audit.tagSuggestions.filter((t) => !removedTagIds.has(t.id)).length} tagov
-                                        </span>
-                                      </div>
-                                      {!tagsCommitted && (
-                                        <p className="text-[10px] leading-snug text-gray-500">
-                                          Po potvrdení sa otvorí ten istý sprievodca ako z Copilotu — krok s internými
-                                          odkazmi.
-                                        </p>
-                                      )}
-                                    </div>
-                                    {!tagsCommitted && (() => {
-                                      const remaining = audit.tagSuggestions.filter(t => !removedTagIds.has(t.id));
-                                      return remaining.length >= 2 ? (
-                                        <button
-                                          type="button"
-                                          onClick={handleTagSetCommit}
-                                          className="rounded-lg border border-violet-300 bg-violet-50 px-2.5 py-1 text-[11px] font-bold text-violet-800 transition-all hover:bg-violet-100"
-                                          title={`Pridá všetkých ${remaining.length} tagov naraz`}
-                                        >
-                                          Pridať všetky ({remaining.length})
-                                        </button>
-                                      ) : remaining.length === 1 ? (
-                                        <button
-                                          type="button"
-                                          onClick={handleTagSetCommit}
-                                          className="rounded-lg border border-violet-300 bg-violet-50 px-2.5 py-1 text-[11px] font-bold text-violet-800 transition-all hover:bg-violet-100"
-                                        >
-                                          Pridať tag
-                                        </button>
-                                      ) : null;
-                                    })()}
-                                    {tagsCommitted && (
-                                      <span className="flex items-center gap-1 text-[10px] font-black uppercase text-emerald-700">
-                                        <CheckCircle2 size={11} /> Pridané
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="flex flex-wrap gap-1.5">
-                                    {audit.tagSuggestions.map((tag) => {
-                                      const removed = removedTagIds.has(tag.id);
-                                      if (removed) return null;
-                                      return (
-                                        <div
-                                          key={tag.id}
-                                          className={cn(
-                                            "group flex items-center gap-1 rounded-full border px-2.5 py-1 text-[12px] font-semibold transition-all",
-                                            tagsCommitted
-                                              ? "border-emerald-300 bg-emerald-50 text-emerald-800"
-                                              : "border-violet-200 bg-violet-50 text-violet-800 hover:border-violet-300",
-                                          )}
-                                        >
-                                          <a
-                                            href={tag.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="hover:underline"
-                                            title={tag.url}
-                                          >
-                                            {tag.label}
-                                          </a>
-                                          {!tagsCommitted && (
-                                            <button
-                                              type="button"
-                                              onClick={() => handleTagRemove(tag)}
-                                              className="ml-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full text-violet-400 opacity-60 transition-opacity hover:bg-violet-200 hover:opacity-100"
-                                              title="Odstrániť tag"
-                                            >
-                                              ×
-                                            </button>
-                                          )}
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                  {audit.tagSuggestions.every(t => removedTagIds.has(t.id)) && (
-                                    <p className="mt-2 text-[11px] text-gray-400 italic">Všetky tagy boli odstránené.</p>
-                                  )}
-                                </div>
-                              )}
-                              {/* Tagy & Interné linky — SEO Copilot MVP1 */}
-                              {activeAuditTab === 'seo' && audit?.linkSuggestions && audit.linkSuggestions.length > 0 && (
-                                <div className="mt-4 space-y-2">
-                                  <div className="flex items-center justify-between pb-1">
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-[11px] font-black uppercase tracking-wide text-gray-500">Tagy & Interné linky</span>
-                                      <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">
-                                        {audit.linkSuggestions.filter(s => !linkActions.has(s.id)).length} nových
-                                      </span>
-                                    </div>
-                                    {(() => {
-                                      const pending = audit.linkSuggestions.filter(s => !linkActions.has(s.id));
-                                      return pending.length >= 2 ? (
-                                        <button
-                                          type="button"
-                                          onClick={handleLinkAcceptAll}
-                                          className="rounded-lg border border-blue-300 bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-800 transition-all hover:bg-blue-100"
-                                          title={`Prijme všetkých ${pending.length} návrhov linkov naraz`}
-                                        >
-                                          Pridať všetky ({pending.length})
-                                        </button>
-                                      ) : pending.length === 1 ? (
-                                        <button
-                                          type="button"
-                                          onClick={() => handleLinkAccept(audit.linkSuggestions!.find(s => !linkActions.has(s.id))!)}
-                                          className="rounded-lg border border-blue-300 bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-800 transition-all hover:bg-blue-100"
-                                        >
-                                          Pridať link
-                                        </button>
-                                      ) : null;
-                                    })()}
-                                  </div>
-                                  {audit.linkSuggestions.map((s) => {
-                                    const action = linkActions.get(s.id);
-                                    return (
-                                      <div
-                                        key={s.id}
+                                  {(modalTags.length > 0 || modalLinks.length > 0) && (
+                                    <div className="mt-4 rounded-xl border border-violet-200/90 bg-gradient-to-b from-violet-50/70 to-white p-4 shadow-sm ring-1 ring-violet-100/80">
+                                      <p className="text-[10px] font-black uppercase tracking-[0.1em] text-violet-800">
+                                        Tagy a interné odkazy
+                                      </p>
+                                      <p className="mt-2 text-[13px] font-bold leading-snug text-gray-900">
+                                        {!tagsCommitted
+                                          ? `${modalTags.filter((t) => !removedTagIds.has(t.id)).length} navrhovaných tagov`
+                                          : pendingLinkSuggestionsCount > 0
+                                            ? linkSuggestionsReadyLabel(pendingLinkSuggestionsCount)
+                                            : "Hotovo"}
+                                      </p>
+                                      <p className="mt-1.5 text-[11px] leading-relaxed text-gray-600">
+                                        Schvaľovanie a úpravy sú výhradne v modálnom sprievodcovi — tu je iba súhrn stavu a
+                                        odkaz na ten istý workflow ako v hornej pozornosti.
+                                      </p>
+                                      <ul className="mt-2 space-y-0.5 text-[11px] text-gray-500">
+                                        <li>
+                                          · Návrhy tagov:{" "}
+                                          <span className="font-semibold tabular-nums text-gray-700">
+                                            {modalTags.filter((t) => !removedTagIds.has(t.id)).length}
+                                          </span>
+                                        </li>
+                                        <li>
+                                          · Interné odkazy (spracované / celkom):{" "}
+                                          <span className="font-semibold tabular-nums text-gray-700">
+                                            {modalLinks.filter((s) => linkActions.has(s.id)).length}
+                                            {" / "}
+                                            {modalLinks.length}
+                                          </span>
+                                        </li>
+                                      </ul>
+                                      <button
+                                        type="button"
+                                        disabled={collaborationLockDemo}
+                                        onClick={() => openTagsLinksWizard()}
                                         className={cn(
-                                          "rounded-xl border p-3 shadow-sm transition-all",
-                                          action === 'accepted'
-                                            ? "border-l-[3px] border-l-emerald-400 border-gray-200 bg-emerald-50/35 opacity-70"
-                                            : action === 'rejected'
-                                              ? "border-l-[3px] border-l-gray-300 border-gray-200 bg-gray-50/50 opacity-60"
-                                              : "border-l-[3px] border-l-blue-400 border-gray-200 bg-blue-50/30 hover:border-gray-300 hover:shadow",
+                                          "mt-4 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold shadow-sm transition-all",
+                                          collaborationLockDemo
+                                            ? "cursor-not-allowed bg-gray-200 text-gray-500"
+                                            : "bg-violet-600 text-white hover:bg-violet-700",
                                         )}
                                       >
-                                        <div className="mb-1 flex items-center justify-between">
-                                          <p className="text-[10px] font-black uppercase text-gray-500">Interný link</p>
-                                          {action ? (
-                                            <span className={cn(
-                                              "flex items-center gap-1 text-[10px] font-black uppercase",
-                                              action === 'accepted' ? "text-emerald-700" : "text-gray-500",
-                                            )}>
-                                              <CheckCircle2 size={11} />
-                                              {action === 'accepted' ? 'Pridané' : 'Odmietnuté'}
-                                            </span>
-                                          ) : (
-                                            <div className="h-2 w-2 rounded-full bg-blue-500" />
-                                          )}
-                                        </div>
-                                        <p className="text-[13px] font-semibold text-gray-900">
-                                          <span className="rounded bg-blue-100/70 px-1 text-blue-800">{s.anchor}</span>
-                                          <span className="mx-1.5 text-gray-400">→</span>
-                                          <span className="text-blue-700">{s.target}</span>
-                                        </p>
-                                        <p className="mt-1 text-[11px] leading-snug text-gray-500 italic">{s.context}</p>
-                                        {!action && (
-                                          <div className="mt-2.5 flex gap-2">
-                                            <button
-                                              type="button"
-                                              onClick={() => handleLinkAccept(s)}
-                                              className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 py-1.5 text-[11px] font-bold text-emerald-800 transition-all hover:bg-emerald-100"
-                                            >
-                                              <CheckCircle2 size={12} /> Pridať link
-                                            </button>
-                                            <button
-                                              type="button"
-                                              onClick={() => handleLinkReject(s)}
-                                              className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-gray-200 bg-gray-50 py-1.5 text-[11px] font-bold text-gray-600 transition-all hover:bg-gray-100"
-                                            >
-                                              Odmietnuť
-                                            </button>
-                                          </div>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
+                                        <Sparkles size={14} aria-hidden /> Otvoriť sprievodcu
+                                      </button>
+                                    </div>
+                                  )}
                                 </div>
                               )}
                               {!audit && !isValidating && (
