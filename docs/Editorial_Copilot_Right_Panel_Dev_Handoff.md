@@ -56,7 +56,7 @@ Pripraviť **jednu jasnú UI vrstvu** pre **pravý panel „Editorial Copilot“
 
 1. Vizuál pravého panelu ostane funkčne ako teraz.
 2. Dohodneme **zoznam udalostí navonok** (nižšie v dokumente doplníme tabuľku po Sekcii 1).
-3. Dátové štruktúry čerpajú z existujúcich typov (`ArticleAudit`, `Claim`, SEO kľúče…) alebo z ich **úzkemusubset pre panel**.
+3. Dátové štruktúry čerpajú z existujúcich typov (`ArticleAudit`, `Claim`, SEO kľúče…) alebo z ich **úzkeho subsetu pre panel**.
 
 ### 1.5 Otázky na vývoj (na prvý sync)
 
@@ -133,3 +133,28 @@ Implementácia až po odsúhlasení boundary.
 ---
 
 *Tento dokument je interný podklad pre tímový alignment; nie je záväzný backlog bez vývojového odhadnutia.*
+
+---
+
+## Príloha: Nahodenie do Confluence (space News & Media / NMH)
+
+**Cieľové miesto:** [NMH space — Overview](https://aifreelancer.atlassian.net/wiki/spaces/NMH/overview) (vyžaduje prihlásenie Atlassian účtom do `aifreelancer.atlassian.net`).
+
+**Poznámka:** Automatické vytvorenie stránky cez API/MCP z tohto prostredia nie je dostupné bez nakonfigurovaného Atlassian MCP a oprávnení; zdroj pravdy ostáva tento súbor v git.
+
+### Postup (prvá stránka v spáci)
+
+1. Otvor space **NMH** → **Create** (Blank page).
+2. **Title (navrhovaný):** `Editorial Copilot — pravý panel: handoff pre vývoj (v0.1)`
+3. **Obsah:** skopíruj celý dokument od nadpisu `# Editorial Copilot` vyššie až po vetu *„nie je záväzný backlog…“* (bez tejto prílohy — alebo ju pridaj ako sekciu „Interné: ako publikovať“, podľa uváženia).
+4. **Markdown v Confluence Cloud:** podľa verzie editora buď priame vloženie, alebo **/** → *Markdown* → vloženie; ak tabuľky nesedia, skopíruj ich ručne z náhľadu v IDE alebo ako HTML export z nástroja, ktorý tí používajú.
+5. **Odkaz na strategiu:** relatívny odkaz `Editorial_Copilot_Strategic_Direction_NHM.md` v Confluence nereflektuje repo — doplň buď odkaz na GitHub/raw súbor, alebo duplicitný Confluence dokument so strategickým smerom.
+
+### Metadata na stránke (odporúčané)
+
+| Pole | Hodnota |
+|------|--------|
+| Labels | `editorial-copilot`, `frontend`, `nmh`, `handoff` |
+| Parent | Overview alebo prázdny root space (podľa vašej štruktúry) |
+
+Po zverejnení sem doplň URL stránky do README alebo do komentára v PR (voliteľné).
