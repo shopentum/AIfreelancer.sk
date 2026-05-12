@@ -1,30 +1,54 @@
 # Editorial Copilot — pravý panel: podklad pre vývoj (handoff)
 
-**Verzia dokumentu:** 0.4  
-**Stav:** *Sekcia 1 ostáva na validáciu; Sekcie 3 a 5 sú previazané s kódom; Sekcia 4 je doplnená stavovou maticou a odporúčaným postupom integrácie (fáza 1–2). Tento dokument explicitne ramuje zdroj pravdy (Eagle) vs cieľový modul.*  
-**Súvislosť:** produktový smer je v [`Editorial_Copilot_Strategic_Direction_NHM.md`](./Editorial_Copilot_Strategic_Direction_NHM.md). Technický zdroj prototypu: Next route **`/[locale]/nmh`** (napr. `/sk/nmh`), komponent `EagleCMS.tsx`. Izolovaný kontrakt + náhľad scenárov: **`/[locale]/nmh/copilot-blueprint`**.
+**Verzia dokumentu:** 0.5  
+**Status:** Sekcia 1 — čaká na validáciu scope. Sekcie 2–5 — obsah v súlade s repozitárom (`src/features/editorial-copilot/`). Core/API payloady pri callbackoch — doplnenie podľa Jira/Confluence (mimo rozsahu prvého FE extraktu).
+
+**Súvislosť:** Produkt — [`Editorial_Copilot_Strategic_Direction_NHM.md`](./Editorial_Copilot_Strategic_Direction_NHM.md). Prototyp editora: **`/[locale]/nmh`** → `EagleCMS.tsx`. Kontrakt + fixture scenáre: **`/[locale]/nmh/copilot-blueprint`**.
 
 ---
 
-## Framing pre vývoj (zdroj pravdy vs modul)
+## Changelog
 
-Tento handoff má vývoju jednoznačne povedať, **čo je dnes kanon** a **kam smerujeme**, aby nedošlo k dvojitému výkladu medzi prototypom a modulom.
+### v0.5
 
-- **`EagleCMS.tsx` na `/nmh`** je **zatiaľ zdroj pravdy** pre **kompletný vizuál a reálne správanie** pravého Copilot panelu (vrátane hrán, ktoré blueprint ešte nekopíruje 1:1).
-- **`src/features/editorial-copilot/`** je **pripravený izolovaný balík** pre budúci modul: **typy**, **callbacks**, **fixtures**, **blueprint** a **playground**.
-- **Blueprint a playground** panel z Eagle **zatiaľ nenahrádzajú**; slúžia ako **referenčný kontrakt** a **review / demo priestor** bez potreby spúšťať celý editor.
-- **Cieľ ďalšej fázy** je **extrahovať ten istý JSX a logiku** pravého panelu z `EagleCMS.tsx` do modulu tak, aby **Eagle ostal host / kontajner** a **panel žil samostatne** s **rovnakým správaním** ako dnes na `/nmh`, nad už pripravenou vrstvou kontraktu a fixtures.
+- Redakcia tónu dokumentu (changelog, status); presná definícia prototyp vs modul bez meta-komentára.
 
-**Zhrnutie pre sync:** dnes je kanon **Eagle**; cieľový stav je **izolovaný modul** s **rovnakým správaním** ako Eagle + **už pripravený contract / fixtures layer**.
+### v0.4
+
+- Blok **Prototyp vs modul**: kanon vizuálu a správania (`EagleCMS` / `/nmh`) vs pripravený modul (`src/features/editorial-copilot/`).
+- Upresnenie úlohy blueprint/playground (kontrakt, review; nie náhrada plného panelu).
+
+### v0.3
+
+- Doplnená stavová matica panelu (loading / zoznam / detail / resolved / banner / undo).
+- Doplnený integračný playbook pre FE extrakciu a phased rollout.
+- Zosúladenie fixtures ↔ state matrix.
+- Zjednotenie DoD a názvoslovia dokumentu.
+- Doplnené väzby medzi fixtures, stavmi a callback kontraktom.
+
+**Cieľ zmien v0.3:** minimalizovať priestor na rozdielnu interpretáciu FE správania počas implementácie.
 
 ---
 
-## Ako s týmto dokumentom pracovať
+## Prototyp vs modul (zdroj pravdy)
 
-1. **Teraz:** Prosím potvrďte alebo doplníte **Sekciu 1** (rozsah a integračná hranica). Bez nej nemá zmysel uzamykať backendové payloady pri callbackoch.
-2. **Už hotové v druhom reze:** Kanonický view-model a callbacks (Sekcie 2–3), fixtures + playground (Sekcia 5), **stavová matica a postup integrácie** (Sekcia 4).
-3. **Ešte závislé od Core/API:** Presné payloady a chybové kódy pri `onValidate` / apply / ignore — doplníme po vašom podklade z Jira/Confluence (nie je blokér pre prvý FE extrakt).
-4. **Mimo scope:** Celý zvyšok EAGLE editora (ľavý stĺpec, formulár článku, modal tagov ako celok) zostáva mimo tohto handoffu, ak nie je explicitne spomenuté.
+- **`EagleCMS.tsx`**, route **`/[locale]/nmh`**: zdroj pravdy pre kompletný vizuál a správanie pravého Copilot panelu (vrátane hrán, ktoré blueprint ešte nekópiuje 1:1).
+- **`src/features/editorial-copilot/`**: izolovaný balík pre budúci modul — typy, callbacks, fixtures, blueprint, playground.
+- **Blueprint / playground**: nenahrádzajú panel z Eagle; slúžia ako referenčný kontrakt a náhľad scenárov bez spustenia celého editora.
+- **Nasledujúca implementačná fáza:** extrakcia JSX a logiky pravého panelu z `EagleCMS.tsx` do modulu; `EagleCMS` ostáva hostiteľ; správanie zostáva zhodné s `/nmh`; kontrakt a fixtures sú už pripravené.
+
+**Implementačný zámer:** aktuálny kanon = Eagle; cieľ = samostatný modul so zhodným správaním + existujúca vrstva kontraktu a fixtures.
+
+---
+
+## Práca s dokumentom
+
+| Položka | Popis |
+|--------|--------|
+| **Scope (Sekcia 1)** | Validácia rozsahu a integračnej hranice pred uzamykaním backend payloadov pri callbackoch. |
+| **Obsah v repozitári** | View-model a callbacks (Sekcie 2–3); stavová matica a integračný postup (Sekcia 4); fixtures a playground (Sekcia 5). |
+| **Doplnenie neskôr** | Presné payloady a chybové stavy Core/API pri `onValidate` / apply / ignore (Jira/Confluence). Nie je podmienkou prvého FE extraktu. |
+| **Mimo scope** | Ľavý stĺpec editora, celý modal tagov/odkazov, backendová autorizácia — ak nie je výslovne v Sekcii 1. |
 
 ---
 
@@ -69,8 +93,8 @@ Pripraviť **jednu jasnú UI vrstvu** pre **pravý panel „Editorial Copilot“
 **Minimum na začatie práce bez megarefaktoru:**
 
 1. Vizuál pravého panelu ostane funkčne ako teraz.
-2. Dohodneme **zoznam udalostí navonok** (nižšie v dokumente doplníme tabuľku po Sekcii 1).
-3. Dátové štruktúry čerpajú z existujúcich typov (`ArticleAudit`, `Claim`, SEO kľúče…) alebo z ich **úzkeho subsetu pre panel**.
+2. Zoznam udalostí navonok — **Sekcia 3** + typ `EditorialCopilotPanelCallbacks` v repozitári.
+3. Dátové štruktúry čerpajú z existujúcich typov (`ArticleAudit`, `Claim`, SEO kľúče…) alebo z ich úzkeho subsetu pre panel.
 
 ### 1.5 Otázky na vývoj (na prvý sync)
 
@@ -124,7 +148,7 @@ Payload na strane Core/API ostáva na vývoj — blueprint volá len tieto funkc
 
 ## Sekcia 4 — Stavová matica a postup integrácie
 
-**Účel:** Zjednotiť očakávania medzi produktom a FE: **ktoré kombinácie view-modelu** znamenajú čo v UI, a **v akom poradí** bezpečne ťahať JSX z `EagleCMS.tsx` bez redesignu.
+**Účel:** Mapovanie kombinácií `EditorialCopilotPanelViewModel` na správanie UI; poradie krokov pri extrakcii JSX z `EagleCMS.tsx` (bez zmeny správania `/nmh`).
 
 ### 4.1 Matica stavov (orientačná)
 
@@ -145,17 +169,17 @@ Riadky = typické **systémové situácie**; stĺpce = čo má host nastaviť vo
 
 ### 4.2 Odporúčaný postup integrácie (fáza 1 → 2)
 
-Cieľ: **žiadny big bang**; prvý PR len presun vizuálu, správanie identické s `/nmh`.
+Postup: prvý PR = presun vizuálu a logiky panelu; správanie zhodné s `/nmh`.
 
-1. **Potvrdiť Sekciu 1** (scope, single scroll, umiestnenie modulu) — krátky komentár alebo meeting zápis.
+1. **Potvrdiť Sekciu 1** (scope, single scroll, umiestnenie modulu) — zápis z groomingu alebo komentár v úlohe.
 2. **Extrahovať JSX pravého panelu** z `EagleCMS.tsx` do napr. `EditorialCopilotPanel.tsx` v `src/features/editorial-copilot/`: vstupy = aktuálne lokálne state handlery ostávajú v rodičovi, panel dostane props zhodné s `EditorialCopilotPanelViewModel` + `EditorialCopilotPanelCallbacks` (alebo tenší alias, kým sa typy zliaju 1:1).
-3. **Parita s blueprintom:** kde blueprint intentionalne zjednodušuje (SEO applied recap), buď **donesť parity z Eagle** do modulu, alebo **výslovne** označiť rozdiel v PR popise — aby QA vedelo porovnať.
-4. **Playground** ostáva referenčný pre dizajn a PM; regresné testy FE môžu porovnávať `/nmh` vs blueprint len tam, kde je zhoda zámom.
+3. **Parita s blueprintom:** kde blueprint zámerne zjednodušuje (napr. SEO applied recap), doplniť paritu z Eagle do modulu alebo rozdiel explicitne uviesť v PR (podklad pre QA).
+4. **`/nmh/copilot-blueprint`:** referencia na kontrakt a fixture scenáre; automatické testy porovnávajú s `/nmh` len tam, kde je so blueprintom zámerná zhoda.
 5. **Fáza 2:** napojiť callbacks na skutočné API/Core podľa vášho kontraktu (mimo tohto dokumentu); doplniť telemetriu podľa potreby.
 
 ### 4.3 Súvislosť s fixtures
 
-Každý riadok v tabuľke **5.2** je zámerne jeden **rez** cez VM — pri rozšírení produktových stavov pridajte fixture + jeden riadok sem, aby zostala dohoda jedna ku jednej.
+Pri rozšírení produktových stavov: nový riadok v **5.2** + nový riadok v matici **4.1** + prípadná úprava callback tabuľky (Sekcia 3).
 
 ---
 
@@ -200,9 +224,11 @@ Playground na route nahradzuje prvý beh Storybooku; po dohode s FE možno prida
 
 ---
 
-## Sekcia 6 — Kontakt a ďalší krok
+## Sekcia 6 — Ďalší krok
 
-**Ďalší krok:** Meeting alebo komentár k **Sekcii 1** (checklist + otázky 1.5) a **schválenie postupu 4.2** (prvý extrakt PR). Sekcie 3–5 sú v kóde; **Core/API payloady** (Confluence/Jira) doplníme, keď budú k dispozícii — nie sú podmienkou pre čistý FE extrakt z `EagleCMS`.
+1. Validácia **Sekcie 1** (odpovede na **1.5**, schválenie **1.6**).
+2. Schválenie postupu **4.2** (prvý extrakt PR).
+3. Doplnenie Core/API payloadov podľa Jira/Confluence po dodaní podkladu — mimo kritickej cesty prvého FE extraktu.
 
 ---
 
@@ -219,7 +245,7 @@ Playground na route nahradzuje prvý beh Storybooku; po dohode s FE možno prida
 ### Postup (prvá stránka v spáci)
 
 1. Otvor space **NMH** → **Create** (Blank page).
-2. **Title (navrhovaný):** `Editorial Copilot — pravý panel: handoff pre vývoj (v0.4)`
+2. **Title (navrhovaný):** `Editorial Copilot — pravý panel: handoff pre vývoj (v0.5)`
 3. **Obsah:** skopíruj celý dokument od nadpisu `# Editorial Copilot` vyššie až po vetu *„nie je záväzný backlog…“* (bez tejto prílohy — alebo ju pridaj ako sekciu „Interné: ako publikovať“, podľa uváženia).
 4. **Markdown v Confluence Cloud:** podľa verzie editora buď priame vloženie, alebo **/** → *Markdown* → vloženie; ak tabuľky nesedia, skopíruj ich ručne z náhľadu v IDE alebo ako HTML export z nástroja, ktorý tí používajú.
 5. **Odkaz na strategiu:** relatívny odkaz `Editorial_Copilot_Strategic_Direction_NHM.md` v Confluence nereflektuje repo — doplň buď odkaz na GitHub/raw súbor, alebo duplicitný Confluence dokument so strategickým smerom.
