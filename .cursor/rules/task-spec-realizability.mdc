@@ -1,9 +1,15 @@
 ---
-description: Tasky a špecifikácie musia byť realizovateľné bez omáčok; výnimka len explicitná analýza s DATA GAP.
+description: Tasky a špecifikácie musia byť realizovateľné bez omáčok; výnimka len explicitná analýza s DATA GAP; Product vs Dev zodpovednosti.
 alwaysApply: true
 ---
 
 # Tasky a špecifikácie – realizovateľnosť
+
+## Product vs Dev zodpovednosti
+
+- **Produkt (príp. architektúra / tech lead):** rozhodnutia o **nástroji a smere** – napr. konkrétna NLP knižnica a model, stratégia fallbacku pri výpadku externej vrstvy, či sa preferuje **reuse existujúcej infra** (iný epic / pipeline) namiesto duplicity. Hodnotenie „či je X vhodné“ pre biznis a stack patrí sem – nie do roly „dev si vyberie počas sprintu“.
+- **Dev task:** implementácia podľa **už daného** stacku a AC; grooming zameraný na odhad, rozhraní a testy – nie na opätovné otváranie produktového výberu nástroja, ak nie je ticket výslovne spike/analýza.
+- Ak má dev legitímnu technickú blokádu (napr. služba neexistuje, API chýba), výstupom je **explicitný follow-up** na produkt/architektúru, nie tichá zmena rozhodnutia.
 
 - **Predvolene:** task má byť **jasne realizovateľný devom** – úzky scope, zrozumiteľné AC/DoD, čo sa mení v systéme a ako sa overí hotové. Žiadne rozvláčne „preskúmajme možnosti“ bez rozhodnutia alebo vlastnej práce produktu/architektúry.
 - **Žiadne omáčky:** krátky popis; neduplikovať medzi „Zadanie“ a „AC“ ten istý zmysel; žiadne vágnosti typu „optimalizovať“ bez merateľného kritéria.

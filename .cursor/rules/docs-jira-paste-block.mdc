@@ -1,0 +1,19 @@
+---
+description: Funkčné špecifikácie v docs majú na konci skrátený blok na skopírovanie do Jira.
+globs: docs/**/*.md
+alwaysApply: false
+---
+
+# Dokumentácia – blok na Jira (paste)
+
+Pri **väčších funkčných špecifikáciách** v `docs/` (feature, epic podklad, grooming-ready návrh), ktoré majú ísť aj do backlogu:
+
+1. Na **koniec** dokumentu (po hlavnom návrhu, závislostiach, závere) pridaj sekciu **`## Blok na Jira (paste)`** (alebo rovnocenný názov v slovenčine s rovnakým významom).
+2. V bloku stručne:
+   - **Úvod a cieľ** – problém + čo sa má dosiahnuť (pár viet).
+   - **Zadanie (strovo)** – odrážky: scope, stack ak je daný, fallbacky, čo sa explicitne nemení.
+   - **Akceptačné kritériá / DoD** – číslovaný alebo odrážkový checklist bez duplicity s dlhým telom dokumentu vyššie.
+3. Na začiatku bloku jedna veta, že **detailný podklad** je v tom istom súbore vyššie (alebo relatívna cesta k súboru).
+4. Jira text má zostať **krátky a realizovateľný** – pozri tiež `task-spec-realizability.mdc`.
+
+Nepovinné pre jednoriadkové poznámky, README bez backlogu alebo čisto analytické dokumenty bez implementačného ticketu.
