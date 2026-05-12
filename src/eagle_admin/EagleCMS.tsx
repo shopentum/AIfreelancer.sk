@@ -74,7 +74,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import {
-  fixClaimWithAI,
+  proposeClaimFix,
   type Claim,
   type ArticleAudit,
   type SeoAuditKey,
@@ -383,6 +383,8 @@ const EagleCMS_Split: React.FC = () => {
   const [isValidating, setIsValidating] = useState(false);
   const [audit, setAudit] = useState<ArticleAudit | null>(null);
   const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null);
+  const selectedClaimIdRef = useRef<string | null>(selectedClaimId);
+  selectedClaimIdRef.current = selectedClaimId;
   const [activeAuditTab, setActiveAuditTab] = useState<'trust' | 'linguistic' | 'seo'>('trust');
   const [auditError, setAuditError] = useState<string | null>(null);
   const [rightPanelMode, setRightPanelMode] = useState<'settings' | 'ai'>('settings');
@@ -407,6 +409,12 @@ const EagleCMS_Split: React.FC = () => {
   } | null>(null);
   /** Nález čakajúci na potvrdenie ručnej úpravy. */
   const [pendingManualEdit, setPendingManualEdit] = useState<string | null>(null);
+  /** AI návrh na úsek článku (Dôvera / Štýl) — zobrazený pred zápisom do obsahu. */
+  const [claimAiProposal, setClaimAiProposal] = useState<{
+    claimId: string;
+    proposedText: string;
+  } | null>(null);
+  const [claimAiProposalLoading, setClaimAiProposalLoading] = useState(false);
   /** SEO kľúče, ktoré redaktor vedome ignoroval (namiesto aplikovania návrhu). */
   const [ignoredSeoKeys, setIgnoredSeoKeys] = useState<Set<string>>(new Set());
 
@@ -481,6 +489,11 @@ const EagleCMS_Split: React.FC = () => {
   const [modalTagLabels, setModalTagLabels] = useState<Map<string, string>>(new Map());
   /** Tagy trvalo zmazané zo zoznamu v modali (X button) */
   const [modalDeletedTagIds, setModalDeletedTagIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    setClaimAiProposal(null);
+    setClaimAiProposalLoading(false);
+  }, [selectedClaimId]);
 
   const pushArticleSnapshot = useCallback(() => {
     setArticleHistory((h) => {
@@ -578,7 +591,7 @@ const EagleCMS_Split: React.FC = () => {
         timeToFixUnder5SecondsRate:
           aiFixes.length > 0 ? under5 / aiFixes.length : null,
         timeToFixDefinition:
-          "Milliseconds from first claim card open (or audit completion if never opened) until click on AI fix.",
+          "Milliseconds from first claim card open (or audit completion if never opened) until click on Použiť návrh (after preview).",
         linkSuggestions: {
           accepted: linksAccepted,
           rejected: linksRejected,
@@ -615,6 +628,8 @@ const EagleCMS_Split: React.FC = () => {
       setSeoChangeLog([]);
       setResolvedClaims([]);
       setArticleHistory([]);
+      setClaimAiProposal(null);
+      setClaimAiProposalLoading(false);
       if (undoFlashClearRef.current !== null) {
         clearTimeout(undoFlashClearRef.current);
         undoFlashClearRef.current = null;
@@ -786,6 +801,8 @@ const EagleCMS_Split: React.FC = () => {
     setLinkActions(new Map());
     setRemovedTagIds(new Set());
     setTagsCommitted(false);
+    setClaimAiProposal(null);
+    setClaimAiProposalLoading(false);
     if (undoFlashClearRef.current !== null) {
       clearTimeout(undoFlashClearRef.current);
       undoFlashClearRef.current = null;
@@ -912,7 +929,7 @@ const EagleCMS_Split: React.FC = () => {
     ta.style.height = `${ta.scrollHeight}px`;
   }, [content]);
 
-  const handleFixWithAI = async (claim: Claim) => {
+  const handleRequestClaimAiProposal = async (claim: Claim) => {
     if (collaborationLockDemo) return;
     if (simulateIntelligenceApiFailure) {
       setSidebarAiBanner(
@@ -921,16 +938,58 @@ const EagleCMS_Split: React.FC = () => {
       return;
     }
     const idx = content.indexOf(claim.text);
-    if (idx === -1) return;
-    const fixClickAt = Date.now();
+    if (idx === -1) {
+      setSidebarAiBanner(
+        "Úsek nálezu sa v článku nenašiel – možno bol už upravený. Skontrolujte text alebo spustite kontrolu znova.",
+      );
+      return;
+    }
+    setSidebarAiBanner(null);
+    setClaimAiProposal(null);
+    setClaimAiProposalLoading(true);
+    try {
+      const proposedText = await proposeClaimFix(claim.text, content);
+      if (collaborationLockDemo) return;
+      if (simulateIntelligenceApiFailure) {
+        setSidebarAiBanner(
+          "AI funkcie sú dočasne nedostupné. Môžete pokračovať v manuálnej editácii článku v editore.",
+        );
+        return;
+      }
+      if (selectedClaimIdRef.current !== claim.id) return;
+      setClaimAiProposal({
+        claimId: claim.id,
+        proposedText,
+      });
+    } finally {
+      setClaimAiProposalLoading(false);
+    }
+  };
+
+  const handleApplyClaimAiProposal = (claim: Claim) => {
+    if (collaborationLockDemo) return;
+    if (!claimAiProposal || claimAiProposal.claimId !== claim.id) return;
+    if (simulateIntelligenceApiFailure) {
+      setSidebarAiBanner(
+        "AI funkcie sú dočasne nedostupné. Môžete pokračovať v manuálnej editácii článku v editore.",
+      );
+      return;
+    }
+    const fixedText = claimAiProposal.proposedText;
+    const idx = content.indexOf(claim.text);
+    if (idx === -1) {
+      setSidebarAiBanner(
+        "Úsek nálezu sa v článku nenašiel – návrh nie je možné aplikovať. Upravte text ručne alebo spustite kontrolu znova.",
+      );
+      return;
+    }
+    const applyAt = Date.now();
     const seenAt =
       claimFirstSeenRef.current[claim.id] ??
       auditCompletedAtRef.current ??
-      fixClickAt;
-    const timeToFixMs = fixClickAt - seenAt;
-    const fixedText = await fixClaimWithAI(claim.text, content);
-    if (collaborationLockDemo) return;
-    if (simulateIntelligenceApiFailure) return;
+      applyAt;
+    const timeToFixMs = applyAt - seenAt;
+
     pushArticleSnapshot();
     const newContent =
       content.slice(0, idx) + fixedText + content.slice(idx + claim.text.length);
@@ -981,6 +1040,8 @@ const EagleCMS_Split: React.FC = () => {
         linguisticClaims: audit.linguisticClaims?.filter((c) => c.id !== claim.id),
       });
     }
+    setClaimAiProposal(null);
+    setPendingManualEdit(null);
     if (selectedClaimId === claim.id) setSelectedClaimId(null);
   };
 
@@ -992,6 +1053,7 @@ const EagleCMS_Split: React.FC = () => {
       )
         ? "linguistic"
         : "trust";
+      setClaimAiProposal(null);
       setResolvedClaims((prev) => [
         ...prev,
         {
@@ -1023,6 +1085,7 @@ const EagleCMS_Split: React.FC = () => {
   const handleConfirmManualEdit = useCallback(
     (claim: Claim) => {
       if (collaborationLockDemo) return;
+      setClaimAiProposal(null);
       const tab: "trust" | "linguistic" = (audit?.linguisticClaims ?? []).some(
         (c) => c.id === claim.id,
       )
@@ -3169,56 +3232,182 @@ const EagleCMS_Split: React.FC = () => {
                                         <p className="text-sm font-medium leading-snug text-gray-700">
                                           {claim.recommendedAction}
                                         </p>
-                                        <div className="grid grid-cols-1 gap-2 pt-2">
-                                          <button
-                                            type="button"
-                                            disabled={collaborationLockDemo}
-                                            onClick={() => handleFixWithAI(claim)}
-                                            className={cn(
-                                              "flex w-full items-center justify-center rounded-xl py-3 text-xs font-bold shadow-lg transition-all",
-                                              collaborationLockDemo
-                                                ? "cursor-not-allowed bg-gray-200 text-gray-500 shadow-none"
-                                                : "bg-purple-600 text-white shadow-purple-100 hover:bg-purple-700",
-                                            )}
-                                          >
-                                            <Sparkles size={14} className="mr-2" />
-                                            Opraviť pomocou AI
-                                          </button>
-                                          {pendingManualEdit === claim.id ? (
+
+                                        {claimAiProposal?.claimId === claim.id ? (
+                                          <>
+                                            <div className="space-y-2 pt-1">
+                                              <p className="text-[10px] font-black uppercase tracking-widest text-purple-600">
+                                                Navrhovaná úprava
+                                              </p>
+                                              <div className="grid gap-3 sm:grid-cols-2">
+                                                <div className="rounded-xl border border-gray-200 bg-white p-3">
+                                                  <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                                    Pôvodný úsek
+                                                  </p>
+                                                  <p className="text-sm leading-relaxed text-gray-800">
+                                                    {claim.text}
+                                                  </p>
+                                                </div>
+                                                <div className="rounded-xl border border-purple-200 bg-purple-50/50 p-3">
+                                                  <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-purple-700">
+                                                    Návrh
+                                                  </p>
+                                                  <p className="text-sm leading-relaxed text-gray-900">
+                                                    {claimAiProposal.proposedText}
+                                                  </p>
+                                                </div>
+                                              </div>
+                                            </div>
+                                            <div className="grid grid-cols-1 gap-2 pt-2">
+                                              <button
+                                                type="button"
+                                                disabled={collaborationLockDemo}
+                                                onClick={() =>
+                                                  handleApplyClaimAiProposal(claim)
+                                                }
+                                                className={cn(
+                                                  "flex w-full items-center justify-center rounded-xl py-3 text-xs font-bold shadow-lg transition-all",
+                                                  collaborationLockDemo
+                                                    ? "cursor-not-allowed bg-gray-200 text-gray-500 shadow-none"
+                                                    : "bg-purple-600 text-white shadow-purple-100 hover:bg-purple-700",
+                                                )}
+                                              >
+                                                <CheckCircle2
+                                                  size={14}
+                                                  className="mr-2"
+                                                />{" "}
+                                                Použiť návrh
+                                              </button>
+                                              {pendingManualEdit === claim.id ? (
+                                                <button
+                                                  type="button"
+                                                  onClick={() =>
+                                                    handleConfirmManualEdit(claim)
+                                                  }
+                                                  className="flex w-full items-center justify-center rounded-xl border border-emerald-400 bg-emerald-50 py-3 text-xs font-bold text-emerald-800 transition-all hover:bg-emerald-100"
+                                                >
+                                                  <CheckCircle2
+                                                    size={14}
+                                                    className="mr-2"
+                                                  />{" "}
+                                                  Potvrdiť opravu
+                                                </button>
+                                              ) : (
+                                                <button
+                                                  type="button"
+                                                  onClick={() => {
+                                                    setClaimAiProposal(null);
+                                                    setPendingManualEdit(claim.id);
+                                                    handleClaimClick(claim);
+                                                    editorRef.current?.focus();
+                                                  }}
+                                                  className="flex w-full items-center justify-center rounded-xl border border-gray-200 bg-white py-3 text-xs font-bold text-gray-700 transition-all hover:bg-gray-50"
+                                                >
+                                                  <Edit3 size={14} className="mr-2" />{" "}
+                                                  Upraviť ručne
+                                                </button>
+                                              )}
+                                              <button
+                                                type="button"
+                                                disabled={collaborationLockDemo}
+                                                onClick={() =>
+                                                  handleIgnoreClaim(claim)
+                                                }
+                                                className={cn(
+                                                  "flex w-full items-center justify-center rounded-xl border py-2.5 text-xs font-bold transition-all",
+                                                  collaborationLockDemo
+                                                    ? "cursor-not-allowed border-gray-100 bg-gray-50 text-gray-400"
+                                                    : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700",
+                                                )}
+                                              >
+                                                <X size={13} className="mr-2" />{" "}
+                                                Ignorovať
+                                              </button>
+                                            </div>
+                                          </>
+                                        ) : (
+                                          <div className="grid grid-cols-1 gap-2 pt-2">
                                             <button
                                               type="button"
-                                              onClick={() => handleConfirmManualEdit(claim)}
-                                              className="flex w-full items-center justify-center rounded-xl border border-emerald-400 bg-emerald-50 py-3 text-xs font-bold text-emerald-800 transition-all hover:bg-emerald-100"
+                                              disabled={
+                                                collaborationLockDemo ||
+                                                claimAiProposalLoading
+                                              }
+                                              onClick={() =>
+                                                handleRequestClaimAiProposal(claim)
+                                              }
+                                              className={cn(
+                                                "flex w-full items-center justify-center rounded-xl py-3 text-xs font-bold shadow-lg transition-all",
+                                                collaborationLockDemo ||
+                                                  claimAiProposalLoading
+                                                  ? "cursor-not-allowed bg-gray-200 text-gray-500 shadow-none"
+                                                  : "bg-purple-600 text-white shadow-purple-100 hover:bg-purple-700",
+                                              )}
                                             >
-                                              <CheckCircle2 size={14} className="mr-2" /> Potvrdiť opravu
+                                              {claimAiProposalLoading ? (
+                                                <>
+                                                  <RefreshCw
+                                                    size={14}
+                                                    className="mr-2 animate-spin"
+                                                  />
+                                                  Pripravujem návrh…
+                                                </>
+                                              ) : (
+                                                <>
+                                                  <Sparkles
+                                                    size={14}
+                                                    className="mr-2"
+                                                  />
+                                                  Vyžiadať návrh od AI
+                                                </>
+                                              )}
                                             </button>
-                                          ) : (
+                                            {pendingManualEdit === claim.id ? (
+                                              <button
+                                                type="button"
+                                                onClick={() =>
+                                                  handleConfirmManualEdit(claim)
+                                                }
+                                                className="flex w-full items-center justify-center rounded-xl border border-emerald-400 bg-emerald-50 py-3 text-xs font-bold text-emerald-800 transition-all hover:bg-emerald-100"
+                                              >
+                                                <CheckCircle2
+                                                  size={14}
+                                                  className="mr-2"
+                                                />{" "}
+                                                Potvrdiť opravu
+                                              </button>
+                                            ) : (
+                                              <button
+                                                type="button"
+                                                onClick={() => {
+                                                  setPendingManualEdit(claim.id);
+                                                  handleClaimClick(claim);
+                                                  editorRef.current?.focus();
+                                                }}
+                                                className="flex w-full items-center justify-center rounded-xl border border-gray-200 bg-white py-3 text-xs font-bold text-gray-700 transition-all hover:bg-gray-50"
+                                              >
+                                                <Edit3 size={14} className="mr-2" />{" "}
+                                                Upraviť ručne
+                                              </button>
+                                            )}
                                             <button
                                               type="button"
-                                              onClick={() => {
-                                                setPendingManualEdit(claim.id);
-                                                handleClaimClick(claim);
-                                                editorRef.current?.focus();
-                                              }}
-                                              className="flex w-full items-center justify-center rounded-xl border border-gray-200 bg-white py-3 text-xs font-bold text-gray-700 transition-all hover:bg-gray-50"
+                                              disabled={collaborationLockDemo}
+                                              onClick={() =>
+                                                handleIgnoreClaim(claim)
+                                              }
+                                              className={cn(
+                                                "flex w-full items-center justify-center rounded-xl border py-2.5 text-xs font-bold transition-all",
+                                                collaborationLockDemo
+                                                  ? "cursor-not-allowed border-gray-100 bg-gray-50 text-gray-400"
+                                                  : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700",
+                                              )}
                                             >
-                                              <Edit3 size={14} className="mr-2" /> Upraviť ručne
+                                              <X size={13} className="mr-2" />{" "}
+                                              Ignorovať
                                             </button>
-                                          )}
-                                          <button
-                                            type="button"
-                                            disabled={collaborationLockDemo}
-                                            onClick={() => handleIgnoreClaim(claim)}
-                                            className={cn(
-                                              "flex w-full items-center justify-center rounded-xl border py-2.5 text-xs font-bold transition-all",
-                                              collaborationLockDemo
-                                                ? "cursor-not-allowed border-gray-100 bg-gray-50 text-gray-400"
-                                                : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700",
-                                            )}
-                                          >
-                                            <X size={13} className="mr-2" /> Ignorovať
-                                          </button>
-                                        </div>
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                   );

@@ -74,9 +74,9 @@ export async function analyzeArticleHolistic(
 
 /**
  * Simulates targeted LLM rewrite for usability testing (no external API).
- * Returns plain editorial text — no debug prefixes in the article body.
+ * Returns **only** suggested replacement text — UI applies after editor confirms (HITL).
  */
-export async function fixClaimWithAI(
+export async function proposeClaimFix(
   claimText: string,
   _fullArticle: string,
 ): Promise<string> {
