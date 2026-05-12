@@ -3091,7 +3091,7 @@ const EagleCMS_Split: React.FC = () => {
                         {audit && assistantPriorities.length > 0 ? (
                           <div className="shrink-0 border-b border-gray-100 bg-gradient-to-b from-purple-50/40 via-white to-white px-3 py-3">
                             <p className="mb-2 text-[11px] font-black uppercase tracking-[0.12em] text-gray-700">
-                              Odporúčaná pozornosť
+                              Odporúčané
                             </p>
                             <ul className="flex flex-col gap-2">
                               {assistantPriorities.map((p, idx) => (
@@ -4038,7 +4038,7 @@ const EagleCMS_Split: React.FC = () => {
                                       </p>
                                       <p className="mt-1.5 text-[11px] leading-relaxed text-gray-600">
                                         Schvaľovanie a úpravy sú výhradne v modálnom sprievodcovi — tu je iba súhrn stavu a
-                                        odkaz na ten istý workflow ako v hornej pozornosti.
+                                        odkaz na ten istý workflow ako vyššie v časti Odporúčané.
                                       </p>
                                       <ul className="mt-2 space-y-0.5 text-[11px] text-gray-500">
                                         <li>
