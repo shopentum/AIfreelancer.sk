@@ -3645,22 +3645,52 @@ const EagleCMS_Split: React.FC = () => {
                                   );
                                 }
 
-                                                                if (seoItem && seoKey) {
+                                if (seoItem && seoKey) {
                                   const logEntry = [...seoChangeLog]
                                     .reverse()
                                     .find((e) => e.key === seoKey);
                                   const showDiff =
                                     seoItem.status === "pass" && Boolean(logEntry);
+                                  const seoApplied = seoChangeLog.some(
+                                    (e) => e.key === seoKey,
+                                  );
+                                  const hasSuggestion = Boolean(
+                                    seoItem.suggestion?.trim(),
+                                  );
+                                  const canAct =
+                                    hasSuggestion &&
+                                    !seoApplied &&
+                                    !ignoredSeoKeys.has(seoKey);
 
                                   return (
                                     <div className="space-y-6">
-                                      <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-4">
-                                        <p className="text-sm font-semibold text-gray-900">
+                                      <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-4 ring-1 ring-gray-100/80">
+                                        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-400">
+                                          Nález kontrol
+                                        </p>
+                                        <p className="mt-2 text-sm font-semibold leading-snug text-gray-900">
                                           {seoItem.message}
                                         </p>
                                       </div>
+
+                                      {hasSuggestion && !seoApplied ? (
+                                        <div className="space-y-2">
+                                          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                            AI návrh (náhrada textu)
+                                          </p>
+                                          <div className="rounded-2xl border border-purple-200/90 bg-purple-50/70 p-4 shadow-sm ring-1 ring-purple-100/70">
+                                            <p className="text-sm font-medium leading-relaxed text-gray-900">
+                                              {seoItem.suggestion}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      ) : null}
+
                                       {showDiff && logEntry && (
                                         <div className="space-y-3">
+                                          <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                            Rekapitulácia po použití
+                                          </p>
                                           <p className="text-[11px] font-medium text-gray-600">
                                             Upravil(a) {logEntry.actorName} ·{" "}
                                             {formatRelativeAudit(logEntry.appliedAt)}
@@ -3691,38 +3721,54 @@ const EagleCMS_Split: React.FC = () => {
                                           </div>
                                         </div>
                                       )}
-                                      {seoItem.suggestion ? (
-                                        <div className="space-y-3">
-                                          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                                            AI návrh
+
+                                      {canAct ? (
+                                        <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm ring-1 ring-slate-100/80">
+                                          <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                                            Ďalší krok
                                           </p>
-                                          <div className="rounded-2xl border border-gray-200 bg-purple-50/60 p-4">
-                                            <p className="text-sm font-medium leading-relaxed text-gray-900">
-                                              {seoItem.suggestion}
-                                            </p>
-                                            <button
-                                              type="button"
-                                              disabled={collaborationLockDemo}
-                                              className={cn(
-                                                "mt-4 w-full rounded-lg py-2 text-xs font-bold transition-all",
-                                                collaborationLockDemo
-                                                  ? "cursor-not-allowed bg-gray-200 text-gray-500"
-                                                  : "bg-purple-600 text-white hover:bg-purple-700",
-                                              )}
-                                              onClick={() => {
-                                                applySeoSuggestion(seoKey);
-                                              }}
-                                            >
-                                              Použiť návrh
-                                            </button>
-                                          </div>
+                                          <button
+                                            type="button"
+                                            disabled={collaborationLockDemo}
+                                            className={cn(
+                                              "flex w-full items-center justify-center gap-2 rounded-xl py-3 text-xs font-bold shadow-md transition-all",
+                                              collaborationLockDemo
+                                                ? "cursor-not-allowed bg-gray-200 text-gray-500"
+                                                : "bg-purple-600 text-white hover:bg-purple-700",
+                                            )}
+                                            onClick={() => {
+                                              applySeoSuggestion(seoKey);
+                                            }}
+                                          >
+                                            <CheckCircle2 size={14} aria-hidden /> Použiť návrh
+                                          </button>
+                                          <button
+                                            type="button"
+                                            disabled={collaborationLockDemo}
+                                            onClick={() =>
+                                              handleIgnoreSeoSuggestion(seoKey)
+                                            }
+                                            className={cn(
+                                              "flex w-full items-center justify-center rounded-xl border py-2.5 text-xs font-bold transition-all",
+                                              collaborationLockDemo
+                                                ? "cursor-not-allowed border-gray-100 bg-gray-50 text-gray-400"
+                                                : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:text-gray-800",
+                                            )}
+                                          >
+                                            <X size={13} className="mr-2" aria-hidden /> Ignorovať nález
+                                          </button>
                                         </div>
                                       ) : null}
-                                      {!ignoredSeoKeys.has(seoKey) && !seoChangeLog.some((e) => e.key === seoKey) && (
+
+                                      {!hasSuggestion &&
+                                      !ignoredSeoKeys.has(seoKey) &&
+                                      !seoApplied ? (
                                         <button
                                           type="button"
                                           disabled={collaborationLockDemo}
-                                          onClick={() => handleIgnoreSeoSuggestion(seoKey)}
+                                          onClick={() =>
+                                            handleIgnoreSeoSuggestion(seoKey)
+                                          }
                                           className={cn(
                                             "flex w-full items-center justify-center rounded-xl border py-2.5 text-xs font-bold transition-all",
                                             collaborationLockDemo
@@ -3732,7 +3778,7 @@ const EagleCMS_Split: React.FC = () => {
                                         >
                                           <X size={13} className="mr-2" /> Ignorovať
                                         </button>
-                                      )}
+                                      ) : null}
                                     </div>
                                   );
                                 }
