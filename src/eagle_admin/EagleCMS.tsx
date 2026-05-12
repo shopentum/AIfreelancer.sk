@@ -2399,7 +2399,7 @@ const EagleCMS_Split: React.FC = () => {
           </div>
         ) : null}
 
-        {/* Editor: vertikálny scroll na <main>; Editorial Copilot má vlastný scroll pri max. výške. */}
+        {/* Editor: jeden vertikálny scroll na <main>, pravý Copilot panel bez vlastného overflow. */}
         <main
           ref={editorMainScrollRef}
           onScroll={() => {
@@ -3094,7 +3094,7 @@ const EagleCMS_Split: React.FC = () => {
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      className="flex max-h-[60vh] flex-col overflow-x-hidden overflow-y-auto rounded-2xl border border-gray-200 bg-white shadow-sm"
+                      className="flex flex-col rounded-2xl border border-gray-200 bg-white shadow-sm"
                     >
                         <div
                           className={cn(
