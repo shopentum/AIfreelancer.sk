@@ -1552,7 +1552,7 @@ const EagleCMS_Split: React.FC = () => {
     });
 
     const medium = claimsSorted.find((c) => c.risk === "medium");
-    if (medium && out.length < 4 && medium.id !== high?.id) {
+    if (medium && out.length < 5 && medium.id !== high?.id) {
       out.push({
         kind: "warn",
         title: medium.reason,
@@ -1564,7 +1564,7 @@ const EagleCMS_Split: React.FC = () => {
       });
     }
     const ling = [...(audit.linguisticClaims ?? [])].sort(sortClaimsByRisk)[0];
-    if (ling && out.length < 4) {
+    if (ling && out.length < 5) {
       out.push({
         kind: "warn",
         title: ling.reason,
@@ -1578,7 +1578,7 @@ const EagleCMS_Split: React.FC = () => {
     const seoFail = Object.entries(audit.seoAudit).find(
       ([k, v]) => v.status !== "pass" && !ignoredSeoKeys.has(k),
     );
-    if (seoFail && out.length < 4) {
+    if (seoFail && out.length < 5) {
       const [k, v] = seoFail;
       const sk = k as SeoAuditKey;
       out.push({
@@ -1591,7 +1591,19 @@ const EagleCMS_Split: React.FC = () => {
         },
       });
     }
-    return out.slice(0, 4);
+    if (out.length < 5) {
+      out.push({
+        kind: "opportunity",
+        title: "Automaticky zvýrazniť kľúčové slová boldom",
+        subtitle:
+          "SEO · odporúčanie pre čitateľnosť hlavného kľúčového slova v tele článku",
+        onActivate: () => {
+          setActiveAuditTab("seo");
+          setSelectedClaimId(null);
+        },
+      });
+    }
+    return out.slice(0, 5);
   }, [
     audit,
     ignoredSeoKeys,
@@ -2917,11 +2929,11 @@ const EagleCMS_Split: React.FC = () => {
                         </div>
 
                         {audit && assistantPriorities.length > 0 ? (
-                          <div className="shrink-0 border-b border-gray-100 bg-gradient-to-b from-purple-50/50 via-white to-white px-4 py-4">
-                            <p className="mb-3 text-xs font-black uppercase tracking-[0.14em] text-gray-700">
+                          <div className="shrink-0 border-b border-gray-100 bg-gradient-to-b from-purple-50/40 via-white to-white px-3 py-3">
+                            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.12em] text-gray-700">
                               Odporúčaná pozornosť
                             </p>
-                            <ul className="flex flex-col gap-3">
+                            <ul className="flex flex-col gap-2">
                               {assistantPriorities.map((p, idx) => (
                                 <li
                                   key={`ap-${idx}-${p.kind}-${p.title.slice(0, 32)}`}
@@ -2930,39 +2942,41 @@ const EagleCMS_Split: React.FC = () => {
                                     type="button"
                                     onClick={p.onActivate}
                                     className={cn(
-                                      "group w-full rounded-xl border text-left transition-colors",
-                                      "border-gray-100 bg-white/90 px-3.5 py-3.5 shadow-sm hover:bg-purple-50/40 hover:border-purple-100",
+                                      "group w-full rounded-lg border text-left transition-colors",
+                                      "border-gray-100 bg-white px-2.5 py-2 hover:bg-purple-50/35 hover:border-purple-100/90",
                                       p.kind === "block" &&
-                                        "ring-1 ring-rose-100/80",
+                                        "ring-1 ring-rose-100/70",
                                       p.kind === "warn" &&
-                                        "ring-1 ring-amber-100/80",
-                                      p.kind === "info" && "ring-1 ring-gray-100/80",
+                                        "ring-1 ring-amber-100/70",
+                                      p.kind === "info" && "ring-1 ring-gray-100/70",
+                                      p.kind === "opportunity" &&
+                                        "ring-1 ring-emerald-100/70",
                                     )}
                                   >
-                                    <div className="flex gap-2.5">
-                                      <span className="mt-0.5 shrink-0 tabular-nums text-xs font-bold text-gray-400">
+                                    <div className="flex gap-2">
+                                      <span className="mt-0.5 shrink-0 tabular-nums text-[11px] font-bold text-gray-400">
                                         {idx + 1}.
                                       </span>
-                                      <div className="min-w-0 flex-1 space-y-2">
+                                      <div className="min-w-0 flex-1 space-y-1">
                                         <div className="flex items-start justify-between gap-2">
-                                          <span className="text-sm font-bold leading-snug text-gray-900">
+                                          <span className="text-[12px] font-bold leading-snug text-gray-900">
                                             {p.title}
                                           </span>
                                           <ChevronRight
-                                            size={16}
+                                            size={14}
                                             className="mt-0.5 shrink-0 text-gray-300 transition-colors group-hover:text-purple-600"
                                             aria-hidden
                                           />
                                         </div>
-                                        <p className="text-xs leading-relaxed text-gray-600">
+                                        <p className="text-[11px] leading-snug text-gray-600">
                                           {p.subtitle}
                                         </p>
-                                        {(p.kind === "block" ||
-                                          p.kind === "warn") ? (
+                                        {p.kind === "block" ||
+                                        p.kind === "warn" ? (
                                           <div className="flex justify-end pt-0.5">
                                             <span
                                               className={cn(
-                                                "inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide",
+                                                "inline-flex rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wide",
                                                 p.kind === "block"
                                                   ? "bg-rose-100 text-rose-800 ring-1 ring-rose-200/80"
                                                   : "bg-amber-100 text-amber-900 ring-1 ring-amber-200/80",
@@ -2971,6 +2985,12 @@ const EagleCMS_Split: React.FC = () => {
                                               {p.kind === "block"
                                                 ? "Blokuje"
                                                 : "Upozornenie"}
+                                            </span>
+                                          </div>
+                                        ) : p.kind === "opportunity" ? (
+                                          <div className="flex justify-end pt-0.5">
+                                            <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-emerald-900 ring-1 ring-emerald-200/80">
+                                              Odporúčanie
                                             </span>
                                           </div>
                                         ) : null}
