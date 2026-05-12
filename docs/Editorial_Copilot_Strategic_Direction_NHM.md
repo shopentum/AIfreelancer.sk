@@ -4,7 +4,7 @@
 > **Účel:** zjednotiť narratívu „kam ideme“ a ukázať, že veľkú časť hodnoty prinesie **zoradenie a orchestrácia už rozbehnutých schopností** okolo článku, nie nový AI model ako taký.  
 > **Forma prezentácie:** **Plný prototyp editora** s pravým panelom asistenta je dostupný na ceste **`/nmh`** v locale routingu (napr. `/sk/nmh`) - rovnaký modul ako workflow s prijatím / odmietnutím návrhov.
 
-Dátum: 2026-05-07
+Dátum: 2026-05-08 (úprava: MVP rámec — article state, lifecycle odporúčania, runtime vs publish)
 
 ---
 
@@ -62,6 +62,37 @@ Nižšie uvedené oblasti **nenahrádzame** - MVP ich **prepája v jednom spriev
 | Zdieľaný merací rámec AI features | jednotná väzba usage logov na článok v zmysle Article message a editorial identity |
 
 Širší strategický rámec Article Performance / MDIE zostáva nadväznosťou na úrovni vízie produktu.
+
+---
+
+## MVP rámec — tri doplnenia (scope MVP)
+
+Nasledujúce tri body **nezväčšujú zámer na novú architektúru**; upresňujú rámec pre vývoj a stakeholder alignment.
+
+### A. Article state (jednotná identita článku)
+
+Editorial Copilot pracuje nad **jednotnou identitou článku (article state)**, ktorá agreguje signály z viacerých modulov editora (SEO, dôvera, štýl, tagy, linkbuilding, využitie AI prostriedkov, workflow stav podľa dohody s Core).
+
+Pravý panel **nie je samostatný AI nástroj**, ale **orchestrujúca vrstva nad stavom článku**: zoraďuje pozornosť a akcie redaktora a nemá zakladať paralelnú „druhú pravdu“ mimo zdieľaného stavu článku v CMS.
+
+### B. Životný cyklus odporúčania (návrh → rozhodnutie → záznam)
+
+Každý návrh zobrazený v paneli predstavuje **explicitný decision point** redaktora.
+
+MVP vyžaduje, aby systém vedel evidovať aspoň tieto výsledky rozhodnutia (v zmysle jednotného logovacieho kontraktu s Core):
+
+- prijatie návrhu,
+- odmietnutie,
+- ignorovanie,
+- manuálna úprava namiesto priameho prijatia návrhu.
+
+**Účel:** umožniť neskoršie vyhodnocovanie adopcie odporúčaní a ich dopadu **bez** budovania plného recommendation enginu v prvej vlne — stačí jednoznačný priebeh **návrh → rozhodnutie → záznam**.
+
+### C. Runtime vs publikačný výsledok (náznak smeru)
+
+**MVP** sa primárne zameriava na **runtime podporu rozhodovania** počas práce redaktora v editore (čo riešiť teraz, v akom poradí, s akým výsledkom akcie v danom okamihu).
+
+**Dlhodobý smer** (mimo záväzného rozsahu prvého MVP): prepojiť rozhodnutia a interakcie zaznamenané v editore s **výkonom článku po publikovaní**, tam kde existuje merateľná analytická väzba na editorial identitu — bez predpokladu plnej validačnej ani prediktívnej vrstvy už v MVP.
 
 ---
 
