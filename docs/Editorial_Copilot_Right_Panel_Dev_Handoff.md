@@ -1,8 +1,8 @@
 # Editorial Copilot — pravý panel: podklad pre vývoj (handoff)
 
-**Verzia dokumentu:** 0.1 (návrh)  
-**Stav:** *Prvá sekcia je pripravená na validáciu s vývojom; ďalšie sekcie sú rámcové — doplníme po feedbacku.*  
-**Súvislosť:** produktový smer je v [`Editorial_Copilot_Strategic_Direction_NHM.md`](./Editorial_Copilot_Strategic_Direction_NHM.md). Technický zdroj prototypu: Next route **`/nmh`** (locale napr. `/sk/nmh`), komponent `EagleCMS.tsx`.
+**Verzia dokumentu:** 0.2  
+**Stav:** *Sekcia 1 ostáva na validáciu; v module `src/features/editorial-copilot/` je prvý izolovaný FE blueprint + playground.*  
+**Súvislosť:** produktový smer je v [`Editorial_Copilot_Strategic_Direction_NHM.md`](./Editorial_Copilot_Strategic_Direction_NHM.md). Technický zdroj prototypu: Next route **`/[locale]/nmh`** (napr. `/sk/nmh`), komponent `EagleCMS.tsx`. Izolovaný mock panelu: **`/[locale]/nmh/copilot-blueprint`**.
 
 ---
 
@@ -75,35 +75,36 @@ Prosím odpovedzte / zakázníčte na grooming:
 
 ---
 
-## Sekcia 2 — View-model a props *(rámcovo — po validácii §1)*
+## Sekcia 2 — View-model a props *(kanonický tvar v `types.ts`)*
 
-**Účel:** Jedna tabuľka „čo panel číta“ vs „čo panel dostane už dopočítané“.  
+**Účel:** Jedna tabuľka „čo panel číta“ vs „čo panel dostane už dopočítané“.
 
-**Obsah neskôr:**
+**Implementovaný kanon:** rozhranie **`EditorialCopilotPanelViewModel`** v `src/features/editorial-copilot/types.ts` (pole ako `audit`, `isValidating`, `displayedScore`, `findingsProgress`, `activeAuditTab`, `selectedFindingId`, `assistantPriorities`, `claimAiProposal*`, `resolvedClaimDetail`, `seoAppliedKeys`, `ignoredSeoKeys`, `collaborationLocked`, `articleUndoDepth`, voliteľné `fixtureLabel` len pre demo).
 
-- Odporúčaný **„CopilotPanelProps“**: napr. `audit`, `isValidating`, `selectedFindingId`, `activeTab`, `assistantPriorities` (už dnes odvodené v prototyp),
-- Čo ostane interné vs čo musí dodť host.
-
-*(Nezadávame presné TS typy, kým nie je schválená Sekcia 1.)*
+Po schválení Sekcie 1 môžeme doplniť stĺpec „kto dopočítava“ (host vs panel) a úzky subset polí pre produkciu, ak bude iný ako celý view-model.
 
 ---
 
-## Sekcia 3 — Callback kontrakt *(rámcovo — po validácii §1)*
+## Sekcia 3 — Callback kontrakt *(implementované v blueprinte)*
 
-**Účel:** Zoznam `onXyz` udalostí s významom pre telemetriu a API.
+**Účel:** Zoznam `onXyz` udalostí s významom pre telemetriu a API. V TypeScripte sú to presne polia `EditorialCopilotPanelCallbacks` v `src/features/editorial-copilot/types.ts`.
 
-**Predbežný smer (ne záväzný checklist na rozšírenie):**
+| Callback | Signatúra (skrátene) | Účel |
+|----------|---------------------|------|
+| `onValidate` | `()` | Spustenie auditu / validácie. |
+| `onSelectFinding` | `(id: string)` | Výber nálezu alebo SEO kľúča (`title`, `seoTitle`, …). |
+| `onClearFindingSelection` | `()` | Návrat zo detailu na zoznam. |
+| `onAuditTabChange` | `(tab: CopilotAuditTab)` | Prepínač Dôvera / Štýl / SEO. |
+| `onRequestClaimAiProposal` | `(claimId: string)` | Vyžiadať AI návrh pre trust/štýl nález. |
+| `onApplyClaimAiProposal` | `(claimId: string)` | Použiť návrh v článku (host). |
+| `onIgnoreClaim` | `(claimId: string)` | Ignorovať nález. |
+| `onApplySeoSuggestion` | `(key: SeoAuditKey)` | Použiť SEO návrh. |
+| `onIgnoreSeoSuggestion` | `(key: SeoAuditKey)` | Ignorovať SEO položku. |
+| `onPriorityActivate` | `(rowKey: string)` | Klik z riadku Odporúčané. |
+| `onOpenTagsLinksWizard` | `()` | Otvoriť sprievodcu tagov / odkazov (iba hook). |
+| `onUndoArticleSnapshot` | `()` | Undo poslednej zmeny článku z panela. |
 
-- Validácia / audit (`onValidate` alebo ekvivalent)
-- Výber nálezu / SEO kľúča (`onSelectFinding`)
-- Zatvorenie detailu (`onClearSelection`)
-- Aplikácia AI návrhu na nález (`onApplyClaimSuggestion`)
-- Ignorovanie nálezu (`onIgnoreClaim` / SEO variant)
-- Aplikácia SEO návrhu (`onApplySeoSuggestion`)
-- Otvorenie sprievodcu tagov / odkazov (`onOpenTagsLinksWizard`)
-- Undo článku (ak má zostať dostupný z panelu) (`onUndoArticleSnapshot`)
-
-Presná podpisovka a payload — podľa vašej konvencie (REST, tRPC, server actions).
+Payload na strane Core/API ostáva na vývoj — blueprint volá len tieto funkcie bez sieťovej logiky.
 
 ---
 
@@ -115,20 +116,50 @@ Parametre stavov doplníme po zhode na Sekciách 1–3.
 
 ---
 
-## Sekcia 5 — Mock, fixtures, dokumentácia v Storybooku *(rámcovo)*
+## Sekcia 5 — Mock, fixtures, playground *(implementovaný prvý rez)*
 
-**Účel:** Ako dizajn/produkt drží **referenčné scenáre** bez napojenia na backend.
+**Účel:** Držať **referenčné scenáre** bez napojenia na backend a bez celého `EagleCMS`.
 
-- Fixtures ako malé JSON/TS objekty (scenár „3 nálezy“, „SEO warning“, „všetko vyriešené“).
-- Storybook story na riadok: jedna story = jeden fixture.
+### 5.1 Kde je kód
 
-Implementácia až po odsúhlasení boundary.
+| Súbor | Úloha |
+|------|--------|
+| `src/features/editorial-copilot/types.ts` | `EditorialCopilotPanelViewModel`, `EditorialCopilotPanelCallbacks`, `CopilotAuditTab`, pomôcky (`isCopilotSeoKey`, `findClaimById`), `noopCopilotCallbacks`. Typy auditu čerpajú z `ArticleAudit`, `Claim`, `SeoAuditKey` v `@/eagle_admin/geminiService`. |
+| `src/features/editorial-copilot/fixtures.ts` | `DEMO_ARTICLE_AUDIT`, `getEditorialCopilotFixture(id)`, `EDITORIAL_COPILOT_FIXTURE_IDS`. |
+| `src/features/editorial-copilot/EditorialCopilotPanelBlueprint.tsx` | Presentational blueprint pravého panelu (readiness, Odporúčané, záložky, zoznam/detail, základné CTA). Nie je pixel-parita s celým `EagleCMS` — cieľ je kontrakt + hlavné stavy. |
+| `src/features/editorial-copilot/CopilotBlueprintPlayground.tsx` | Client: výber fixture, panel + `console.info` na všetky callbacks (`[CopilotBlueprint]`). |
+| `src/features/editorial-copilot/index.ts` | Re-exporty pre hostiteľa. |
+| `src/app/[locale]/nmh/copilot-blueprint/page.tsx` | Next stránka (`noindex`): renderuje playground. |
+
+### 5.2 Tabuľka fixtures (`EditorialCopilotFixtureId`)
+
+| ID | Čo ilustruje |
+|----|----------------|
+| `empty_before_audit` | Pred prvou validáciou, prázdny panel. |
+| `validating` | Loading validácie. |
+| `trust_list` | Záložka Dôvera — zoznam nálezov + Odporúčané. |
+| `trust_detail_with_proposal` | Detail nálezu + AI návrh textu. |
+| `trust_detail_resolved` | Detail vyriešeného nálezu (HITL rekapitulácia). |
+| `seo_tab_list` | Záložka SEO — zoznam položiek. |
+| `seo_detail_suggestion` | SEO detail s návrhom (štítok `title`). |
+| `seo_detail_applied` | Ten istý kľúč po aplikácii (`seoAppliedKeys` obsahuje `title`; audit upravený helperom). |
+| `sidebar_banner_only` | Horný banner (simulácia nedostupnosti služby). |
+
+### 5.3 Čo blueprint zatiaľ **nezahŕňa** (oproti `EagleCMS`)
+
+- Plný SEO „applied“ diff / recap ako v plnom prototyp.
+- Všetky animácie a okrajové stavy kolaborácie mimo základného `collaborationLocked`.
+- Akýkoľvek fetch, persistencia, synchronizácia s ľavým editorom — host musí mapovať skutočný stav na `EditorialCopilotPanelViewModel`.
+
+### 5.4 Storybook / Ladle
+
+Playground na route nahradzuje prvý beh Storybooku; po dohode s FE možno pridať stories, ktoré volajú ten istý `getEditorialCopilotFixture`.
 
 ---
 
 ## Sekcia 6 — Kontakt a ďalší krok
 
-**Ďalší krok:** Meeting alebo komentár k **Sekcii 1** (checklist + otázky 1.5). Po tom doplníme Sekcie 2–4 konkrétnymi tabuľkami pripravenými na implementáciu.
+**Ďalší krok:** Meeting alebo komentár k **Sekcii 1** (checklist + otázky 1.5). Sekcia 3 a playground sú zviazané s kódom v `src/features/editorial-copilot/`; Sekcia 4 (stavová matica) a doplnenie Core/API kontextu (Confluence/Jira — zajtra) ešte čakajú na produkt a backend alignment.
 
 ---
 
@@ -145,7 +176,7 @@ Implementácia až po odsúhlasení boundary.
 ### Postup (prvá stránka v spáci)
 
 1. Otvor space **NMH** → **Create** (Blank page).
-2. **Title (navrhovaný):** `Editorial Copilot — pravý panel: handoff pre vývoj (v0.1)`
+2. **Title (navrhovaný):** `Editorial Copilot — pravý panel: handoff pre vývoj (v0.2)`
 3. **Obsah:** skopíruj celý dokument od nadpisu `# Editorial Copilot` vyššie až po vetu *„nie je záväzný backlog…“* (bez tejto prílohy — alebo ju pridaj ako sekciu „Interné: ako publikovať“, podľa uváženia).
 4. **Markdown v Confluence Cloud:** podľa verzie editora buď priame vloženie, alebo **/** → *Markdown* → vloženie; ak tabuľky nesedia, skopíruj ich ručne z náhľadu v IDE alebo ako HTML export z nástroja, ktorý tí používajú.
 5. **Odkaz na strategiu:** relatívny odkaz `Editorial_Copilot_Strategic_Direction_NHM.md` v Confluence nereflektuje repo — doplň buď odkaz na GitHub/raw súbor, alebo duplicitný Confluence dokument so strategickým smerom.
