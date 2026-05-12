@@ -1201,20 +1201,6 @@ const EagleCMS_Split: React.FC = () => {
     [audit, collaborationLockDemo],
   );
 
-  const handleTagSetCommit = useCallback(() => {
-    if (!audit) return;
-    const remaining = (audit.tagSuggestions ?? []).filter(t => !removedTagIds.has(t.id));
-    setTagsCommitted(true);
-    setAudit({ ...audit, readinessScore: nextReadinessBump(audit.readinessScore) });
-    studyLogRef.current.push({
-      type: "tags_committed",
-      at: Date.now(),
-      tags: remaining.map(t => ({ id: t.id, label: t.label, url: t.url })),
-      removedCount: (audit.tagSuggestions ?? []).length - remaining.length,
-      suggestion_source: "ai",
-    });
-  }, [audit, removedTagIds]);
-
   const handleTagRemove = useCallback((tag: TagSuggestion) => {
     setRemovedTagIds(prev => new Set(prev).add(tag.id));
     studyLogRef.current.push({
@@ -1447,6 +1433,22 @@ const EagleCMS_Split: React.FC = () => {
     modalScrollToLinksRef.current = true;
     setShowTagModal(true);
   }, [prepareEditModal]);
+
+  /** Potvrdenie tagov z SEO panela — zarovnané s modalovým krokom A → rovno otvorí krok B (prelinkovania). */
+  const handleTagSetCommit = useCallback(() => {
+    if (!audit) return;
+    const remaining = (audit.tagSuggestions ?? []).filter((t) => !removedTagIds.has(t.id));
+    setTagsCommitted(true);
+    setAudit({ ...audit, readinessScore: nextReadinessBump(audit.readinessScore) });
+    studyLogRef.current.push({
+      type: "tags_committed",
+      at: Date.now(),
+      tags: remaining.map((t) => ({ id: t.id, label: t.label, url: t.url })),
+      removedCount: (audit.tagSuggestions ?? []).length - remaining.length,
+      suggestion_source: "ai",
+    });
+    openLinksModal();
+  }, [audit, removedTagIds, openLinksModal]);
 
   const applySeoSuggestion = useCallback(
     (key: SeoAuditKey) => {
@@ -3278,25 +3280,23 @@ const EagleCMS_Split: React.FC = () => {
                               setSelectedClaimId(null);
                             }}
                             className={cn(
-                              "relative flex flex-1 flex-col items-center justify-center gap-1 rounded-t-lg px-2 pb-3 pt-3 outline-none transition-colors",
+                              "group relative flex flex-1 flex-col items-center justify-center gap-1 rounded-t-lg px-2 pb-3 pt-3 outline-none transition-colors",
                               activeAuditTab === tab.id
-                                ? "z-[1] bg-white text-purple-700 shadow-[0_-2px_12px_rgba(15,23,42,0.06)] ring-1 ring-slate-300/70 ring-b-white"
+                                ? "z-[1] bg-white text-purple-700 shadow-md"
                                 : "text-slate-500 hover:bg-slate-300/45 hover:text-slate-800",
                             )}
                           >
-                            {activeAuditTab === tab.id ? (
-                              <span
-                                className="pointer-events-none absolute left-2 right-2 top-0 h-[3px] rounded-full bg-purple-600"
-                                aria-hidden
-                              />
-                            ) : null}
-                            <tab.icon size={20} className="relative shrink-0" />
-                            <span className="relative text-[9px] font-black uppercase tracking-widest">
+                            <span
+                              className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] origin-center scale-x-95 rounded-sm bg-purple-600 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100"
+                              aria-hidden
+                            />
+                            <tab.icon size={20} className="relative z-[1] shrink-0" />
+                            <span className="relative z-[1] text-[9px] font-black uppercase tracking-widest">
                               {tab.label}
                             </span>
                             {tab.count > 0 && (
                               <span className={cn(
-                                "absolute top-2 right-3 flex h-4 w-4 items-center justify-center rounded-full border-2 text-[8px] font-black text-white",
+                                "absolute top-2 right-3 z-[1] flex h-4 w-4 items-center justify-center rounded-full border-2 text-[8px] font-black text-white",
                                 activeAuditTab === tab.id
                                   ? "border-white bg-red-500"
                                   : "border-slate-200 bg-red-500",
@@ -4045,11 +4045,21 @@ const EagleCMS_Split: React.FC = () => {
                               {activeAuditTab === 'seo' && audit?.tagSuggestions && audit.tagSuggestions.length > 0 && (
                                 <div className="mt-4">
                                   <div className="flex items-center justify-between pb-2">
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-[11px] font-black uppercase tracking-wide text-gray-500">Navrhované tagy</span>
-                                      <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold text-violet-700">
-                                        {audit.tagSuggestions.filter(t => !removedTagIds.has(t.id)).length} tagov
-                                      </span>
+                                    <div className="flex flex-col gap-0.5">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-[11px] font-black uppercase tracking-wide text-gray-500">
+                                          Navrhované tagy
+                                        </span>
+                                        <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold text-violet-700">
+                                          {audit.tagSuggestions.filter((t) => !removedTagIds.has(t.id)).length} tagov
+                                        </span>
+                                      </div>
+                                      {!tagsCommitted && (
+                                        <p className="text-[10px] leading-snug text-gray-500">
+                                          Po potvrdení sa otvorí ten istý sprievodca ako z Copilotu — krok s internými
+                                          odkazmi.
+                                        </p>
+                                      )}
                                     </div>
                                     {!tagsCommitted && (() => {
                                       const remaining = audit.tagSuggestions.filter(t => !removedTagIds.has(t.id));
