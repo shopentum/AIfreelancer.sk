@@ -1,16 +1,17 @@
 # Editorial Copilot — pravý panel: podklad pre vývoj (handoff)
 
-**Verzia dokumentu:** 0.2  
-**Stav:** *Sekcia 1 ostáva na validáciu; v module `src/features/editorial-copilot/` je prvý izolovaný FE blueprint + playground.*  
+**Verzia dokumentu:** 0.3  
+**Stav:** *Sekcia 1 ostáva na validáciu; Sekcie 3 a 5 sú previazané s kódom; Sekcia 4 je doplnená stavovou maticou a odporúčaným postupom integrácie (fáza 1–2).*  
 **Súvislosť:** produktový smer je v [`Editorial_Copilot_Strategic_Direction_NHM.md`](./Editorial_Copilot_Strategic_Direction_NHM.md). Technický zdroj prototypu: Next route **`/[locale]/nmh`** (napr. `/sk/nmh`), komponent `EagleCMS.tsx`. Izolovaný mock panelu: **`/[locale]/nmh/copilot-blueprint`**.
 
 ---
 
 ## Ako s týmto dokumentom pracovať
 
-1. **Teraz:** Prosím potvrďte alebo doplníte **Sekciu 1** (rozsah a integračná hranica). Bez nej nemá zmysel rozpisovať presný props/API kontrakt.
-2. **Potom:** Doplníme Sekcie 2–4 konkrétne (Typescriptové tvary, stavová matica, odporúčaný postup mock vs napojenie).
-3. **Mimo scope:** Celý zvyšok EAGLE editora (ľavý stĺpec, formulár článku, modal tagov ako celok) zostáva mimo tohto handoffu, ak nie je explicitne spomenuté.
+1. **Teraz:** Prosím potvrďte alebo doplníte **Sekciu 1** (rozsah a integračná hranica). Bez nej nemá zmysel uzamykať backendové payloady pri callbackoch.
+2. **Už hotové v druhom reze:** Kanonický view-model a callbacks (Sekcie 2–3), fixtures + playground (Sekcia 5), **stavová matica a postup integrácie** (Sekcia 4).
+3. **Ešte závislé od Core/API:** Presné payloady a chybové kódy pri `onValidate` / apply / ignore — doplníme po vašom podklade z Jira/Confluence (nie je blokér pre prvý FE extrakt).
+4. **Mimo scope:** Celý zvyšok EAGLE editora (ľavý stĺpec, formulár článku, modal tagov ako celok) zostáva mimo tohto handoffu, ak nie je explicitne spomenuté.
 
 ---
 
@@ -70,8 +71,8 @@ Prosím odpovedzte / zakázníčte na grooming:
 ### 1.6 Definition of Done — „fáza 0“ (po vašej validácii Sekcie 1)
 
 - [ ] Písomne potvrdený **IN/OUT scope** (odsek 1.2–1.3).
-- [ ] Jedna stránková **škica callbacks** (kto čo volá pri Validate / Apply / Ignore / výbere záložky) — doplníme ako Sekciu 3.
-- [ ] Rozhodnutie **kam extrahovať** JSX pravého panelu prvým PR bez zmeny správania.
+- [x] Jedna stránková **škica callbacks** — hotová ako **Sekcia 3** + typ `EditorialCopilotPanelCallbacks` v repozitári.
+- [ ] Rozhodnutie **kam extrahovať** JSX pravého panelu prvým PR bez zmeny správania (predbežný návrh: `src/features/editorial-copilot/` + postup v Sekcii 4.2).
 
 ---
 
@@ -108,11 +109,40 @@ Payload na strane Core/API ostáva na vývoj — blueprint volá len tieto funkc
 
 ---
 
-## Sekcia 4 — Stavová matica *(rámcovo)*
+## Sekcia 4 — Stavová matica a postup integrácie
 
-**Účel:** Matica „stav systému × čo panel ukáže“ (loading, error, prázdny audit, lock kolaborácie, …).
+**Účel:** Zjednotiť očakávania medzi produktom a FE: **ktoré kombinácie view-modelu** znamenajú čo v UI, a **v akom poradí** bezpečne ťahať JSX z `EagleCMS.tsx` bez redesignu.
 
-Parametre stavov doplníme po zhode na Sekciách 1–3.
+### 4.1 Matica stavov (orientačná)
+
+Riadky = typické **systémové situácie**; stĺpce = čo má host nastaviť vo **`EditorialCopilotPanelViewModel`** a čo používateľ vidí. Niektoré polia sú ortogonálne (napr. banner + audit).
+
+| Situácia | Typické polia VM | Viditeľné správanie panelu (high-level) |
+|----------|------------------|----------------------------------------|
+| Pred prvou validáciou | `audit: null`, `isValidating: false`, `findingsProgress: null` | Výzva spustiť validáciu; žiadny zoznam nálezov. |
+| Validácia prebieha | `isValidating: true`, `audit` často `null` alebo starý | Indikátor loadingu; CTA validácie disabled alebo „prebieha“. |
+| Audit načítaný, zoznam | `audit` vyplnený, `selectedFindingId: null` | Záložky + zoznam nálezov / SEO položiek; readiness podľa `displayedScore` / progress. |
+| Detail nálezu (trust / štýl) | `selectedFindingId` = ID claimu, `resolvedClaimDetail` podľa potreby | Detail karty; ak je návrh → `claimAiProposal`; ak vyriešené → `resolvedClaimDetail`. |
+| Detail SEO | `activeAuditTab: "seo"`, `selectedFindingId` ∈ SEO kľúče | SEO detail; po aplikácii môže `seoAppliedKeys` obsahovať kľúč. |
+| Banner výpadku / nedostupnosti | `sidebarBanner` text | Horná hláška; zvyšok panelu môže byť partial alebo read-only podľa dohody. |
+| Kolaboračný zámok | `collaborationLocked: true` | Akcie meniace článok / audit **disabled** v blueprinte; copy od hosta (prototyp má vlastný text). |
+| Undo dostupné | `articleUndoDepth > 0` | Tlačidlo undo enabled; host interpretuje hĺbku zásobníka. |
+
+**Chybový stav auditu** (`auditError` v prototyp `EagleCMS`) zatiaľ **nie je** samostatné pole vo view-modeli — host môže mapovať chybu na `sidebarBanner` alebo rozšíriť typ po dohode (malý doplnok).
+
+### 4.2 Odporúčaný postup integrácie (fáza 1 → 2)
+
+Cieľ: **žiadny big bang**; prvý PR len presun vizuálu, správanie identické s `/nmh`.
+
+1. **Potvrdiť Sekciu 1** (scope, single scroll, umiestnenie modulu) — krátky komentár alebo meeting zápis.
+2. **Extrahovať JSX pravého panelu** z `EagleCMS.tsx` do napr. `EditorialCopilotPanel.tsx` v `src/features/editorial-copilot/`: vstupy = aktuálne lokálne state handlery ostávajú v rodičovi, panel dostane props zhodné s `EditorialCopilotPanelViewModel` + `EditorialCopilotPanelCallbacks` (alebo tenší alias, kým sa typy zliaju 1:1).
+3. **Parita s blueprintom:** kde blueprint intentionalne zjednodušuje (SEO applied recap), buď **donesť parity z Eagle** do modulu, alebo **výslovne** označiť rozdiel v PR popise — aby QA vedelo porovnať.
+4. **Playground** ostáva referenčný pre dizajn a PM; regresné testy FE môžu porovnávať `/nmh` vs blueprint len tam, kde je zhoda zámom.
+5. **Fáza 2:** napojiť callbacks na skutočné API/Core podľa vášho kontraktu (mimo tohto dokumentu); doplniť telemetriu podľa potreby.
+
+### 4.3 Súvislosť s fixtures
+
+Každý riadok v tabuľke **5.2** je zámerne jeden **rez** cez VM — pri rozšírení produktových stavov pridajte fixture + jeden riadok sem, aby zostala dohoda jedna ku jednej.
 
 ---
 
@@ -159,7 +189,7 @@ Playground na route nahradzuje prvý beh Storybooku; po dohode s FE možno prida
 
 ## Sekcia 6 — Kontakt a ďalší krok
 
-**Ďalší krok:** Meeting alebo komentár k **Sekcii 1** (checklist + otázky 1.5). Sekcia 3 a playground sú zviazané s kódom v `src/features/editorial-copilot/`; Sekcia 4 (stavová matica) a doplnenie Core/API kontextu (Confluence/Jira — zajtra) ešte čakajú na produkt a backend alignment.
+**Ďalší krok:** Meeting alebo komentár k **Sekcii 1** (checklist + otázky 1.5) a **schválenie postupu 4.2** (prvý extrakt PR). Sekcie 3–5 sú v kóde; **Core/API payloady** (Confluence/Jira) doplníme, keď budú k dispozícii — nie sú podmienkou pre čistý FE extrakt z `EagleCMS`.
 
 ---
 
@@ -176,7 +206,7 @@ Playground na route nahradzuje prvý beh Storybooku; po dohode s FE možno prida
 ### Postup (prvá stránka v spáci)
 
 1. Otvor space **NMH** → **Create** (Blank page).
-2. **Title (navrhovaný):** `Editorial Copilot — pravý panel: handoff pre vývoj (v0.2)`
+2. **Title (navrhovaný):** `Editorial Copilot — pravý panel: handoff pre vývoj (v0.3)`
 3. **Obsah:** skopíruj celý dokument od nadpisu `# Editorial Copilot` vyššie až po vetu *„nie je záväzný backlog…“* (bez tejto prílohy — alebo ju pridaj ako sekciu „Interné: ako publikovať“, podľa uváženia).
 4. **Markdown v Confluence Cloud:** podľa verzie editora buď priame vloženie, alebo **/** → *Markdown* → vloženie; ak tabuľky nesedia, skopíruj ich ručne z náhľadu v IDE alebo ako HTML export z nástroja, ktorý tí používajú.
 5. **Odkaz na strategiu:** relatívny odkaz `Editorial_Copilot_Strategic_Direction_NHM.md` v Confluence nereflektuje repo — doplň buď odkaz na GitHub/raw súbor, alebo duplicitný Confluence dokument so strategickým smerom.
