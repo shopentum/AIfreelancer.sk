@@ -1,8 +1,21 @@
 # Editorial Copilot — pravý panel: podklad pre vývoj (handoff)
 
-**Verzia dokumentu:** 0.3  
-**Stav:** *Sekcia 1 ostáva na validáciu; Sekcie 3 a 5 sú previazané s kódom; Sekcia 4 je doplnená stavovou maticou a odporúčaným postupom integrácie (fáza 1–2).*  
-**Súvislosť:** produktový smer je v [`Editorial_Copilot_Strategic_Direction_NHM.md`](./Editorial_Copilot_Strategic_Direction_NHM.md). Technický zdroj prototypu: Next route **`/[locale]/nmh`** (napr. `/sk/nmh`), komponent `EagleCMS.tsx`. Izolovaný mock panelu: **`/[locale]/nmh/copilot-blueprint`**.
+**Verzia dokumentu:** 0.4  
+**Stav:** *Sekcia 1 ostáva na validáciu; Sekcie 3 a 5 sú previazané s kódom; Sekcia 4 je doplnená stavovou maticou a odporúčaným postupom integrácie (fáza 1–2). Tento dokument explicitne ramuje zdroj pravdy (Eagle) vs cieľový modul.*  
+**Súvislosť:** produktový smer je v [`Editorial_Copilot_Strategic_Direction_NHM.md`](./Editorial_Copilot_Strategic_Direction_NHM.md). Technický zdroj prototypu: Next route **`/[locale]/nmh`** (napr. `/sk/nmh`), komponent `EagleCMS.tsx`. Izolovaný kontrakt + náhľad scenárov: **`/[locale]/nmh/copilot-blueprint`**.
+
+---
+
+## Framing pre vývoj (zdroj pravdy vs modul)
+
+Tento handoff má vývoju jednoznačne povedať, **čo je dnes kanon** a **kam smerujeme**, aby nedošlo k dvojitému výkladu medzi prototypom a modulom.
+
+- **`EagleCMS.tsx` na `/nmh`** je **zatiaľ zdroj pravdy** pre **kompletný vizuál a reálne správanie** pravého Copilot panelu (vrátane hrán, ktoré blueprint ešte nekopíruje 1:1).
+- **`src/features/editorial-copilot/`** je **pripravený izolovaný balík** pre budúci modul: **typy**, **callbacks**, **fixtures**, **blueprint** a **playground**.
+- **Blueprint a playground** panel z Eagle **zatiaľ nenahrádzajú**; slúžia ako **referenčný kontrakt** a **review / demo priestor** bez potreby spúšťať celý editor.
+- **Cieľ ďalšej fázy** je **extrahovať ten istý JSX a logiku** pravého panelu z `EagleCMS.tsx` do modulu tak, aby **Eagle ostal host / kontajner** a **panel žil samostatne** s **rovnakým správaním** ako dnes na `/nmh`, nad už pripravenou vrstvou kontraktu a fixtures.
+
+**Zhrnutie pre sync:** dnes je kanon **Eagle**; cieľový stav je **izolovaný modul** s **rovnakým správaním** ako Eagle + **už pripravený contract / fixtures layer**.
 
 ---
 
@@ -61,7 +74,7 @@ Pripraviť **jednu jasnú UI vrstvu** pre **pravý panel „Editorial Copilot“
 
 ### 1.5 Otázky na vývoj (na prvý sync)
 
-Prosím odpovedzte / zakázníčte na grooming:
+Otázky na grooming / prvý technický sync:
 
 1. **Kde má žiť modul?** (`src/features/editorial-copilot/`, `packages/ui-editorial-copilot`, …)
 2. **Storybook / Ladle:** má zmysel hneď, alebo až po prvej extrakcii súboru?
@@ -206,7 +219,7 @@ Playground na route nahradzuje prvý beh Storybooku; po dohode s FE možno prida
 ### Postup (prvá stránka v spáci)
 
 1. Otvor space **NMH** → **Create** (Blank page).
-2. **Title (navrhovaný):** `Editorial Copilot — pravý panel: handoff pre vývoj (v0.3)`
+2. **Title (navrhovaný):** `Editorial Copilot — pravý panel: handoff pre vývoj (v0.4)`
 3. **Obsah:** skopíruj celý dokument od nadpisu `# Editorial Copilot` vyššie až po vetu *„nie je záväzný backlog…“* (bez tejto prílohy — alebo ju pridaj ako sekciu „Interné: ako publikovať“, podľa uváženia).
 4. **Markdown v Confluence Cloud:** podľa verzie editora buď priame vloženie, alebo **/** → *Markdown* → vloženie; ak tabuľky nesedia, skopíruj ich ručne z náhľadu v IDE alebo ako HTML export z nástroja, ktorý tí používajú.
 5. **Odkaz na strategiu:** relatívny odkaz `Editorial_Copilot_Strategic_Direction_NHM.md` v Confluence nereflektuje repo — doplň buď odkaz na GitHub/raw súbor, alebo duplicitný Confluence dokument so strategickým smerom.
