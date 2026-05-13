@@ -1,8 +1,8 @@
 # AI reporting — framing pre DataHub (usage ↔ performance)
 
-**Účel dokumentu:** Dať DataHub tímu **pokoj, jasnosť a implementovateľnosť**. Nie strategickú víziu ani architektúru celého AI reportingu NMH.
+**Účel dokumentu:** Zjednotiť jazyk, scope a analytické očakávania medzi produktom a DataHub tímom. Definovať zrozumiteľný analytický framing a minimálny data request pre prepájanie existujúcej AI usage vrstvy s dostupnými performance signálmi.
 
-**Súvislosť:** Produktové zadanie [**CMSB-1810**](./task+kontext+gpt.md) (ROI / Adoption reporting). Tento súbor **zužuje jazyk a očakávania** tak, aby z neho šiel spraviť krátky **data request** bez miešania s „impact“ narratívou.
+**Súvislosť:** Produktové zadanie [CMSB-1810] (ROI / Adoption reporting). Tento dokument spresňuje jazyk, scope a dátové očakávania tak, aby z neho bolo možné pripraviť krátky a implementovateľný data request pre DataHub.
 
 ---
 
@@ -19,16 +19,20 @@ To **nie je** definícia „finálneho AI reporting frameworku“ pre NMH. To je
 
 ## 2. Slovník — zámerne nie „impact“
 
-| Namiesto (vyhýbať sa ako hlavnému rámcu) | Používať |
-|----------------------------------------|----------|
-| impact (v zmysle „AI dopad“, biznis attribution) | **performance signals**, **deskriptívne porovnanie**, **enrichment** |
+Nevnímať primárne ako:
+jednotný AI impact / ROI reporting
+Preferovaný rámec: **performance signals, deskriptívne porovnanie, performance enrichment**
 
-**Prečo:** slovo *impact* u analytikov často spúšľa očakávanie **causal inference**, **attribution** a **ROI istoty**. To **nie je** cieľ tohto kroku.
+Cieľom aktuálneho kroku nie je definovať jednotný AI impact alebo attribution framework naprieč všetkými AI features.
 
-**Čo chceme:**
+Fokus je na:
 
-- **Deskriptívne porovnanie** v rámci **rovnakej eligible bázy** pre daný nástroj (pozri §4–5), nie globálny zmiešaný web — tam, kde sú k dispozícii **performance signály** (views, CTR, engagement, revenue kde je definované — podľa toho, čo DH skutočne vie dodať).  
-- **Enrichment:** pridanie dostupných performance polí k riadku článku (alebo agregátu podľa dohodnutého **grain**), nie výklad príčinnosti.
+prepájaní existujúcej AI usage vrstvy s dostupnými performance signálmi,
+deskriptívnom porovnávaní v rámci rovnakej eligible bázy,
+a vytvorení stabilného reporting datasetu nad dostupnými dátami.
+
+**Čo potrebujeme:**
+**Deskriptívne porovnanie** v rámci **rovnakej eligible bázy** pre daný nástroj (pozri §4–6), nie globálny zmiešaný web - tam, kde sú k dispozícii **performance signály** (views, CTR, engagement, revenue kde je definované - podľa toho, čo DH skutočne vie dodať). **Enrichment:** pridanie dostupných performance polí k riadku článku (alebo agregátu podľa dohodnutého **grain**), nie výklad príčinnosti.
 
 ---
 
@@ -36,16 +40,15 @@ To **nie je** definícia „finálneho AI reporting frameworku“ pre NMH. To je
 
 **Kľúčové pomenovanie pre enterprise alignment:**
 
-- **Usage analytics** (správanie v CMS, nástroje, adopcia) **≠** **performance analytics** (správanie obsahu po publikácii podľa web metrík).  
-- **Obidve vrstvy** sa dajú **prepájať article-centric joinom** (napr. kanonický document / article identifikátor podľa dohody Core + DH).
-
-Performance vrstva je **samostatná, jasne definovaná** časť požiadavky — nie zmiešanie do jedného zmätočného „AI impact“ pojmu.
+- **Usage analytics** (správanie v CMS, nástroje, adopcia) ≠ **performance analytics** (správanie obsahu po publikácii podľa web metrík).  
+- Usage a performance vrstva sa prepájajú cez existujúci spoločný **ArticleDocumentId / article_id.**
+Performance vrstva je **samostatná, jasne definovaná** časť požiadavky - nie zmiešanie do jedného zmätočného „AI impact“ pojmu.
 
 ---
 
 ## 4. Eligible sample a CAP per AI feature
 
-Pre **adopciu** aj pre **deskriptívne porovnanie performance signálov** je potrebné **per AI feature** definovať **eligible sample** (niekedy označovaný ako **CAP / použiteľná báza**): množina článkov (alebo publikačných jednotiek), kde bola daná feature **reálne použiteľná** podľa produktovo‑analytických pravidiel (typ článku, povaha, zdroj, výnimky ako kvíz / PR — podľa [**CMSB-1810**](./task+kontext+gpt.md)).
+Pre **adopciu** aj pre **deskriptívne porovnanie performance signálov** je potrebné **per AI feature** definovať **eligible sample** (označovaný ako **CAP / použiteľná báza**): množina článkov (alebo publikačných jednotiek), kde bola daná feature **reálne použiteľná** podľa produktovo‑analytických pravidiel (typ článku, povaha, zdroj, výnimky ako kvíz / PR - podľa **CMSB-1810**).
 
 **Bez toho nie je možné korektne:**
 
@@ -73,7 +76,39 @@ Ak niektorý porovnávací rez nie je v prvom kole dostupný, **neznamená to st
 
 ---
 
-## 6. Performance vrstva môže byť nekompletná
+## 6. Baseline, čas a komparačná logika
+
+**Legitímna otázka DataHubu:** ako sa má správať „baseline“ mesiac oproti mesiacu oproti aktuálnym dátam — či existuje jedna statická baseline.
+
+**Zámer tohto dokumentu:** problém **úplne nemusiť** vyriešiť jednou večnou metodikou; stačí ho **správne zarámovať**.
+
+Pri adopcii AI sa systém **prirodzene mení v čase** (rollouty feature, používatelia, workflow, obsah, sezónnosť, traffic). Preto „baseline z januára“ nemusí byť analyticky relevantná v júli — a to je **normálne**. Pokus o **jednu univerzálnu baseline pre všetko** je často analytický pas.
+
+**Deskriptívne porovnania sú:**
+
+- **časovo viazané** (explicitné reportovacie obdobie alebo okno),
+- **feature-specific**,
+- **závislé od aktuálne definovanej eligible bázy** (§4).
+
+**Management reporting ≠ vedecký experiment.** Baseline nemusí byť „dokonalá“; musí byť **transparentná**, **konzistentná v rámci daného reporting rez** a **interpretovateľná** pre čitateľa výstupu.
+
+**Praktické typy rezov** (nie všetky naraz; výber podľa nástroja a otázky):
+
+| Typ | Popis | Poznámka |
+|-----|--------|-----------|
+| **Within eligible, same period** | V jednom období (napr. mesiac): eligible články **s** použitím feature vs eligible **bez** použitia. | Najbezpečnejší **MVP** prístup k deskriptívnemu porovnaniu performance. |
+| **Before / after rollout** | Obdobie pred vs po zavedení / rozšírení feature. | Užitočné selektívne; vyššie riziko zmien trafficu, sezónnosti, redakcie — treba explicitný popis v dokumentácii datasetu. |
+| **Adoption trend** | Rast adopcie, penetrácie, „zrelosti“ autorov **bez** performance baseline. | Baseline výkonu často netreba; stačí časová série usage/adoption. |
+
+**Čo nepotrebujeme fixovať navždy:** jednu baseline metodiku pre všetky AI features.
+
+**Čo potrebujeme:** pre každý reporting rez **transparentne označiť comparison logic** (kto je v eligible, aké obdobie, used vs not-used alebo iný dohodnutý rez) a **držať ju konzistentne** pri opakovaných exportoch, kým sa metodika zámerne nezmení.
+
+**Komparačné bázy môžu byť feature-specific a časovo viazané; cieľom aktuálneho kroku nie je definovať univerzálny causal baseline model pre všetky AI features.**
+
+---
+
+## 7. Performance vrstva môže byť nekompletná
 
 **Explicitne:**
 
@@ -84,7 +119,7 @@ Metriky môžu byť **feature-specific**; nie je povinné mať jednotný rámec 
 
 ---
 
-## 7. Shape > completeness
+## 8. Shape > completeness
 
 **Priorita:**
 
@@ -96,12 +131,13 @@ Metriky môžu byť **feature-specific**; nie je povinné mať jednotný rámec 
 
 ---
 
-## 8. Disciplína scope (čo do tohto kroku nepatrí)
+## 9. Disciplína scope (čo do tohto kroku nepatrí)
 
 Do tohto **bridge** kroku **nepatri**:
 
 - záväzný **causal** záver „AI zvýšila X o Y %“,  
-- garantované **ROI** ani jednotný „impact framework“ pre všetky features,  
+- garantované **ROI** ani jednotný „impact framework“ pre všetky features,
+- **jedna univerzálna baseline / komparačná metodika** viazaná na všetky AI features navždy (pozri §6 — stačí transparentný rez per výstup),
 - návrh **finálneho** dlhodobého AI BI pre celú redakciu.
 
 Patrí sem:
@@ -111,6 +147,6 @@ Patrí sem:
 
 ---
 
-## 9. Ďalší krok (pre DHUB)
+## 10. Ďalší krok (pre DHUB)
 
-Skrátený **data request** v jazyku analytiky: grain, join kľúče, **eligible sample / CAP definícia per feature** (inclusion / exclusion v analytickom zápise), zdroje pre usage vrstvu, zdroje pre performance signály, definícia **deskriptívnej komparačnej bázy** (used vs not-used within eligible, prípadné časové okná), povinné vs voliteľné polia, periodicita exportu. Detailné KPI reporting UX zostáva v zadaní [**CMSB-1810**](./task+kontext+gpt.md); **tento framing** fixuje očakávania a tlak na implementáciu.
+Skrátený **data request** v jazyku analytiky: grain, join kľúče, **eligible sample / CAP definícia per feature** (inclusion / exclusion v analytickom zápise), zdroje pre usage vrstvu, zdroje pre performance signály, definícia **deskriptívnej komparačnej bázy** (used vs not-used within eligible, prípadné časové okná), **explicitný popis comparison logic / baseline rez** pre daný výstup (pozri §6), povinné vs voliteľné polia, periodicita exportu. Detailné KPI reporting UX zostáva v zadaní [**CMSB-1810**](./task+kontext+gpt.md); **tento framing** fixuje očakávania a tlak na implementáciu.
