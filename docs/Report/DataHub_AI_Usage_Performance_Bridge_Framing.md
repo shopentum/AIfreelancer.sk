@@ -27,7 +27,7 @@ To **nie je** definícia „finálneho AI reporting frameworku“ pre NMH. To je
 
 **Čo chceme:**
 
-- **Deskriptívne porovnanie** napr. článkov / kohort s dostupnými AI usage značkami vs bez nich — tam, kde sú k dispozícii rovnaké **performance signály** (views, CTR, engagement, revenue kde je definované — podľa toho, čo DH skutočne vie dodať).  
+- **Deskriptívne porovnanie** v rámci **rovnakej eligible bázy** pre daný nástroj (pozri §4–5), nie globálny zmiešaný web — tam, kde sú k dispozícii **performance signály** (views, CTR, engagement, revenue kde je definované — podľa toho, čo DH skutočne vie dodať).  
 - **Enrichment:** pridanie dostupných performance polí k riadku článku (alebo agregátu podľa dohodnutého **grain**), nie výklad príčinnosti.
 
 ---
@@ -43,7 +43,37 @@ Performance vrstva je **samostatná, jasne definovaná** časť požiadavky — 
 
 ---
 
-## 4. Performance vrstva môže byť nekompletná
+## 4. Eligible sample a CAP per AI feature
+
+Pre **adopciu** aj pre **deskriptívne porovnanie performance signálov** je potrebné **per AI feature** definovať **eligible sample** (niekedy označovaný ako **CAP / použiteľná báza**): množina článkov (alebo publikačných jednotiek), kde bola daná feature **reálne použiteľná** podľa produktovo‑analytických pravidiel (typ článku, povaha, zdroj, výnimky ako kvíz / PR — podľa tasku v [`task+kontext+gpt.md`](./task+kontext+gpt.md)).
+
+**Bez toho nie je možné korektne:**
+
+- počítať adoption ako použité / eligible, ani  
+- robiť **deskriptívne** porovnanie performance iba na zmysluplnej kohortnej báze.
+
+Porovnávajú sa teda články **vnútri rovnakej eligible definície** pre daný nástroj, nie „všetky články na webe“ zmiešané s článkami, kde nástroj vôbec nemohol platiť.
+
+---
+
+## 5. Čo momentálne riešime ako dáta a čo s čím porovnávame
+
+**Čo máme / čo buduje DH v prvom kroku:**
+
+- **Súčasná usage vrstva:** dostupné logy / article‑centric značky použitia AI nástrojov v CMS (podľa vášho kanonického zdroja pravdy).  
+- **Performance signály:** to, čo DH alebo prepojená web analytika **už vie** priradiť k článku (grain ostáva článok alebo dohodnutý agregát).
+
+**Komparačná logika (deskriptívna, nie causal):**
+
+- Základ je **eligible výber pre daný feature** (pozri §4).  
+- Typické porovnanie v rámci tej istej eligible bázy: články **s použitím** danej feature vs články **bez použitia**, ale **oboje iba tam, kde bola feature použiteľná** — alebo iný rozumný rez definovaný v **metric dictionary** (napr. rovnaký typ obsahu, rovnaké časové okno po publishi).  
+- Presný operačný tvar (jedna tabuľka vs dva výrezy vs flagové stĺpce) je súčasťou krátkeho **data requestu**; tento dokument len stanovuje **pravidlo**: *eligible definuje bázu pre adopciu aj pre deskriptívne performance zarovnanie.*
+
+Ak niektorý porovnávací rez nie je v prvom kole dostupný, **neznamená to stopnutie datasetu** — zmysel má stále článkový riadok s usage + dostupnými performance poľami a transparentnou medzerou v komparačnej dimenzii.
+
+---
+
+## 6. Performance vrstva môže byť nekompletná
 
 **Explicitne:**
 
@@ -54,7 +84,7 @@ Metriky môžu byť **feature-specific**; nie je povinné mať jednotný rámec 
 
 ---
 
-## 5. Shape > completeness
+## 7. Shape > completeness
 
 **Priorita:**
 
@@ -66,7 +96,7 @@ Metriky môžu byť **feature-specific**; nie je povinné mať jednotný rámec 
 
 ---
 
-## 6. Disciplína scope (čo do tohto kroku nepatrí)
+## 8. Disciplína scope (čo do tohto kroku nepatrí)
 
 Do tohto **bridge** kroku **nepatri**:
 
@@ -81,6 +111,6 @@ Patrí sem:
 
 ---
 
-## 7. Ďalší krok (pre DHUB)
+## 9. Ďalší krok (pre DHUB)
 
-Skrátený **data request** v jazyku analytiky: grain, join kľúče, zdroje pre usage vrstvu, zdroje pre performance signály, povinné vs voliteľné polia, periodicita exportu. Detailné KPI reporting UX zostáva v produktovom tasku; **tento framing** fixuje očakávania a tlak na implementáciu.
+Skrátený **data request** v jazyku analytiky: grain, join kľúče, **eligible sample / CAP definícia per feature** (inclusion / exclusion v analytickom zápise), zdroje pre usage vrstvu, zdroje pre performance signály, definícia **deskriptívnej komparačnej bázy** (used vs not-used within eligible, prípadné časové okná), povinné vs voliteľné polia, periodicita exportu. Detailné KPI reporting UX zostáva v produktovom tasku; **tento framing** fixuje očakávania a tlak na implementáciu.
