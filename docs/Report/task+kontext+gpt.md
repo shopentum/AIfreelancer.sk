@@ -1,4 +1,4 @@
-JIRA TASK 
+**CMSB-1810** — úprava AI reportingu (interný podklad + kontext)
 
 **Framing pre DataHub** (usage vs performance signály, shape > completeness, bez „impact“ tlaku): pozri [`DataHub_AI_Usage_Performance_Bridge_Framing.md`](./DataHub_AI_Usage_Performance_Bridge_Framing.md).
 

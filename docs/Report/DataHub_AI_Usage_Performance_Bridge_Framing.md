@@ -2,7 +2,7 @@
 
 **Účel dokumentu:** Dať DataHub tímu **pokoj, jasnosť a implementovateľnosť**. Nie strategickú víziu ani architektúru celého AI reportingu NMH.
 
-**Súvislosť:** Produktové zadanie a kontext v [`task+kontext+gpt.md`](./task+kontext+gpt.md) (JIRA — ROI / Adoption). Tento súbor **zužuje jazyk a očakávania** tak, aby z neho šiel spraviť krátky **data request** bez miešania s „impact“ narratívou.
+**Súvislosť:** Produktové zadanie [**CMSB-1810**](./task+kontext+gpt.md) (ROI / Adoption reporting). Tento súbor **zužuje jazyk a očakávania** tak, aby z neho šiel spraviť krátky **data request** bez miešania s „impact“ narratívou.
 
 ---
 
@@ -45,7 +45,7 @@ Performance vrstva je **samostatná, jasne definovaná** časť požiadavky — 
 
 ## 4. Eligible sample a CAP per AI feature
 
-Pre **adopciu** aj pre **deskriptívne porovnanie performance signálov** je potrebné **per AI feature** definovať **eligible sample** (niekedy označovaný ako **CAP / použiteľná báza**): množina článkov (alebo publikačných jednotiek), kde bola daná feature **reálne použiteľná** podľa produktovo‑analytických pravidiel (typ článku, povaha, zdroj, výnimky ako kvíz / PR — podľa tasku v [`task+kontext+gpt.md`](./task+kontext+gpt.md)).
+Pre **adopciu** aj pre **deskriptívne porovnanie performance signálov** je potrebné **per AI feature** definovať **eligible sample** (niekedy označovaný ako **CAP / použiteľná báza**): množina článkov (alebo publikačných jednotiek), kde bola daná feature **reálne použiteľná** podľa produktovo‑analytických pravidiel (typ článku, povaha, zdroj, výnimky ako kvíz / PR — podľa [**CMSB-1810**](./task+kontext+gpt.md)).
 
 **Bez toho nie je možné korektne:**
 
@@ -113,4 +113,4 @@ Patrí sem:
 
 ## 9. Ďalší krok (pre DHUB)
 
-Skrátený **data request** v jazyku analytiky: grain, join kľúče, **eligible sample / CAP definícia per feature** (inclusion / exclusion v analytickom zápise), zdroje pre usage vrstvu, zdroje pre performance signály, definícia **deskriptívnej komparačnej bázy** (used vs not-used within eligible, prípadné časové okná), povinné vs voliteľné polia, periodicita exportu. Detailné KPI reporting UX zostáva v produktovom tasku; **tento framing** fixuje očakávania a tlak na implementáciu.
+Skrátený **data request** v jazyku analytiky: grain, join kľúče, **eligible sample / CAP definícia per feature** (inclusion / exclusion v analytickom zápise), zdroje pre usage vrstvu, zdroje pre performance signály, definícia **deskriptívnej komparačnej bázy** (used vs not-used within eligible, prípadné časové okná), povinné vs voliteľné polia, periodicita exportu. Detailné KPI reporting UX zostáva v zadaní [**CMSB-1810**](./task+kontext+gpt.md); **tento framing** fixuje očakávania a tlak na implementáciu.
