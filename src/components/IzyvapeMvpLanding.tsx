@@ -6,12 +6,26 @@ import { useTranslations } from "next-intl";
 import {
   ChevronDown,
   Layers,
-  Target,
-  ShieldCheck,
   TrendingDown,
   Package,
   Clock,
   ArrowRight,
+  Activity,
+  Target,
+  ShoppingBag,
+  Landmark,
+  BarChart3,
+  Plug,
+  ListTodo,
+  ClipboardList,
+  UserCircle,
+  FileSpreadsheet,
+  Terminal,
+  LayoutGrid,
+  Network,
+  Github,
+  Database,
+  Zap,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 
@@ -38,28 +52,162 @@ function AccordionSection({
   );
 }
 
-export default function IzyvapeMvpLanding() {
+/** Tok dát v štýle Shopentum case study – vstupy / jadro / výstupy ako úlohy */
+function IzyvapeDataFlowDiagram() {
   const t = useTranslations("IzyvapeMvp");
 
-  const promiseCards = [
+  const inputs = [
+    { icon: ShoppingBag, label: t("diagram.inputs.i1"), color: "text-blue-400" },
+    { icon: Landmark, label: t("diagram.inputs.i2"), color: "text-blue-500" },
+    { icon: BarChart3, label: t("diagram.inputs.i3"), color: "text-fuchsia-500" },
+    { icon: Plug, label: t("diagram.inputs.i4"), color: "text-blue-400" },
+  ] as const;
+
+  const outputs = [
+    { icon: ListTodo, label: t("diagram.outputs.i1"), color: "text-purple-400" },
+    { icon: ClipboardList, label: t("diagram.outputs.i2"), color: "text-blue-400" },
+    { icon: UserCircle, label: t("diagram.outputs.i3"), color: "text-emerald-400" },
+    { icon: FileSpreadsheet, label: t("diagram.outputs.i4"), color: "text-amber-400" },
+  ] as const;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 36 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.12, duration: 0.75 }}
+      className="relative w-full max-w-7xl mx-auto"
+    >
+      <div className="text-center mb-14 md:mb-20 space-y-4 px-2">
+        <h2 className="text-2xl md:text-4xl lg:text-5xl font-sora font-black tracking-tighter text-white leading-tight">
+          {t("diagram.title")}
+        </h2>
+        <p className="max-w-3xl mx-auto text-slate-400 text-base md:text-lg leading-relaxed">
+          {t("diagram.lead")}
+        </p>
+      </div>
+
+      <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        <div className="hidden lg:block absolute inset-0 pointer-events-none opacity-60 z-0">
+          <style>{`
+            @keyframes izyvape-dash-flow {
+              to { stroke-dashoffset: -20; }
+            }
+            .izyvape-animate-dash {
+              animation: izyvape-dash-flow 1.5s linear infinite;
+            }
+          `}</style>
+          <svg className="w-full h-full overflow-visible" viewBox="0 0 1200 600" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="izyvape-line-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="rgba(59,130,246,0)" />
+                <stop offset="50%" stopColor="rgba(59,130,246,0.55)" />
+                <stop offset="100%" stopColor="rgba(59,130,246,0)" />
+              </linearGradient>
+            </defs>
+            <path d="M 280 120 L 380 160" stroke="url(#izyvape-line-grad)" fill="none" strokeWidth="2" strokeDasharray="6 6" className="izyvape-animate-dash" />
+            <path d="M 280 240 L 380 260" stroke="url(#izyvape-line-grad)" fill="none" strokeWidth="2" strokeDasharray="6 6" className="izyvape-animate-dash" />
+            <path d="M 280 360 L 380 340" stroke="url(#izyvape-line-grad)" fill="none" strokeWidth="2" strokeDasharray="6 6" className="izyvape-animate-dash" />
+            <path d="M 280 480 L 380 440" stroke="url(#izyvape-line-grad)" fill="none" strokeWidth="2" strokeDasharray="6 6" className="izyvape-animate-dash" />
+            <path d="M 820 160 L 920 120" stroke="url(#izyvape-line-grad)" fill="none" strokeWidth="2" strokeDasharray="6 6" className="izyvape-animate-dash" />
+            <path d="M 820 260 L 920 240" stroke="url(#izyvape-line-grad)" fill="none" strokeWidth="2" strokeDasharray="6 6" className="izyvape-animate-dash" />
+            <path d="M 820 340 L 920 360" stroke="url(#izyvape-line-grad)" fill="none" strokeWidth="2" strokeDasharray="6 6" className="izyvape-animate-dash" />
+            <path d="M 820 440 L 920 480" stroke="url(#izyvape-line-grad)" fill="none" strokeWidth="2" strokeDasharray="6 6" className="izyvape-animate-dash" />
+          </svg>
+        </div>
+
+        <div className="lg:col-span-3 flex flex-col justify-center space-y-4">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-6 text-center lg:text-left">
+            {t("diagram.inputsTitle")}
+          </p>
+          {inputs.map((item, i) => (
+            <div
+              key={i}
+              className="flex items-center space-x-4 p-5 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-md group hover:border-purple-500/50 transition-all shadow-lg shadow-black/20"
+            >
+              <div
+                className={`w-12 h-12 rounded-xl bg-black/60 flex items-center justify-center ${item.color} border border-white/5`}
+              >
+                <item.icon size={24} />
+              </div>
+              <span className="text-xs font-black tracking-widest text-left">{item.label}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="lg:col-span-6 flex justify-center py-12 lg:py-0">
+          <div className="relative w-full max-w-md rounded-[4rem] bg-gradient-to-b from-white/10 to-transparent border border-white/20 p-10 flex flex-col items-center justify-center text-center space-y-8 overflow-hidden shadow-[0_0_150px_rgba(59,130,246,0.22)]">
+            <div className="absolute inset-0 bg-blue-500/15 blur-[120px] rounded-full" />
+
+            <div className="relative w-24 h-24 rounded-3xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center p-4 shadow-xl shadow-blue-500/20">
+              <Layers size={40} className="text-blue-400" strokeWidth={1.25} />
+            </div>
+
+            <div className="space-y-3 relative">
+              <h3 className="text-3xl md:text-5xl font-sora font-black tracking-tighter uppercase">{t("diagram.engineBrand")}</h3>
+              <p className="text-[10px] font-black uppercase tracking-[0.45em] text-blue-400">{t("diagram.engineLabel")}</p>
+            </div>
+
+            <p className="text-base text-slate-300 leading-relaxed font-medium relative">{t("diagram.engineLead")}</p>
+          </div>
+        </div>
+
+        <div className="lg:col-span-3 flex flex-col justify-center space-y-4">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-6 text-center lg:text-right">
+            {t("diagram.outputsTitle")}
+          </p>
+          {outputs.map((item, i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between p-5 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-md group hover:border-blue-500/50 transition-all shadow-lg shadow-black/20"
+            >
+              <span className="text-xs font-black tracking-widest text-left lg:text-right lg:order-2">{item.label}</span>
+              <div
+                className={`w-12 h-12 rounded-xl bg-black/60 flex items-center justify-center ${item.color} border border-white/5 lg:order-1`}
+              >
+                <item.icon size={24} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+export default function IzyvapeMvpLanding() {
+  const t = useTranslations("IzyvapeMvp");
+  const tAgency = useTranslations("Agency");
+
+  const essenceSteps = [
     {
-      icon: Layers,
-      title: t("cards.c1.title"),
-      body: t("cards.c1.body"),
+      icon: Activity,
+      title: t("essence.s1.title"),
+      body: t("essence.s1.body"),
       accent: "text-blue-400",
     },
     {
-      icon: Target,
-      title: t("cards.c2.title"),
-      body: t("cards.c2.body"),
+      icon: Layers,
+      title: t("essence.s2.title"),
+      body: t("essence.s2.body"),
       accent: "text-purple-400",
     },
     {
-      icon: ShieldCheck,
-      title: t("cards.c3.title"),
-      body: t("cards.c3.body"),
+      icon: ListTodo,
+      title: t("essence.s3.title"),
+      body: t("essence.s3.body"),
       accent: "text-emerald-400",
     },
+  ] as const;
+
+  const snapshotBullets = [t("snapshot.b1"), t("snapshot.b2"), t("snapshot.b3"), t("snapshot.b4")];
+
+  const stackItems = [
+    { name: "Cursor", icon: Terminal, desc: tAgency("stack.cursor"), color: "text-sky-400" },
+    { name: "Claude", icon: LayoutGrid, desc: tAgency("stack.builder"), color: "text-blue-500" },
+    { name: "API First", icon: Network, desc: tAgency("stack.api"), color: "text-purple-500" },
+    { name: "Github", icon: Github, desc: tAgency("stack.github"), color: "text-slate-200" },
+    { name: "Supabase", icon: Database, desc: tAgency("stack.supabase"), color: "text-emerald-500" },
+    { name: "Vercel", icon: Zap, desc: tAgency("stack.vercel"), color: "text-white" },
   ] as const;
 
   const flows = [
@@ -86,57 +234,44 @@ export default function IzyvapeMvpLanding() {
     },
   ] as const;
 
-  const layers = [
-    { title: t("acc.arch.l1t"), desc: t("acc.arch.l1d") },
-    { title: t("acc.arch.l2t"), desc: t("acc.arch.l2d") },
-    { title: t("acc.arch.l3t"), desc: t("acc.arch.l3d") },
-    { title: t("acc.arch.l4t"), desc: t("acc.arch.l4d") },
-    { title: t("acc.arch.l5t"), desc: t("acc.arch.l5d") },
-  ];
-
   const govItems = [t("acc.gov.i1"), t("acc.gov.i2"), t("acc.gov.i3"), t("acc.gov.i4"), t("acc.gov.i5")];
-  const scopeItems = [t("acc.scope.i1"), t("acc.scope.i2"), t("acc.scope.i3"), t("acc.scope.i4"), t("acc.scope.i5"), t("acc.scope.i6")];
+  const scopeItems = [
+    t("acc.scope.i1"),
+    t("acc.scope.i2"),
+    t("acc.scope.i3"),
+    t("acc.scope.i4"),
+    t("acc.scope.i5"),
+    t("acc.scope.i6"),
+  ];
   const metricItems = [t("acc.metrics.i1"), t("acc.metrics.i2"), t("acc.metrics.i3"), t("acc.metrics.i4")];
   const depItems = [t("acc.deps.i1"), t("acc.deps.i2"), t("acc.deps.i3"), t("acc.deps.i4")];
 
   return (
     <div className="min-h-screen bg-[#030303] text-white font-inter selection:bg-blue-500/30 overflow-x-hidden">
-      <section className="relative pt-36 pb-16 md:pt-40 md:pb-24 px-6 overflow-hidden">
+      {/* Hero – krátka podstata */}
+      <section className="relative pt-36 pb-12 md:pt-40 md:pb-16 px-6 overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none">
           <div className="absolute top-[-10%] right-[-10%] w-[42%] h-[42%] bg-purple-600/18 rounded-full blur-[120px] animate-pulse" />
           <div className="absolute bottom-[5%] left-[-12%] w-[34%] h-[34%] bg-blue-600/12 rounded-full blur-[100px]" />
         </div>
 
-        <div className="max-w-5xl mx-auto relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.75 }}
-            className="space-y-10 text-center"
-          >
+        <div className="max-w-5xl mx-auto relative z-10 text-center space-y-8">
+          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }}>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-purple-400">
               <Layers size={12} />
               <span>{t("eyebrow")}</span>
             </div>
 
-            <h1 className="text-4xl md:text-[3.75rem] font-sora font-black tracking-tighter leading-[1.06] text-white">
+            <h1 className="mt-8 text-4xl md:text-[3.5rem] font-sora font-black tracking-tighter leading-[1.06] text-white">
               {t("heroTitlePrefix")}{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400">
                 {t("heroTitleAccent")}
               </span>
             </h1>
 
-            <p className="max-w-3xl mx-auto text-lg md:text-xl text-slate-400 font-medium leading-relaxed">
-              {t("heroLead")}
-            </p>
+            <p className="mt-6 max-w-3xl mx-auto text-lg md:text-xl text-slate-400 font-medium leading-relaxed">{t("heroLead")}</p>
 
-            <div className="max-w-2xl mx-auto rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-5 text-left">
-              <p className="text-base md:text-lg text-slate-200 font-medium leading-relaxed italic border-l-2 border-purple-500/70 pl-4">
-                {t("heroQuote")}
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/kontakt"
                 className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all shadow-lg shadow-white/5"
@@ -155,35 +290,107 @@ export default function IzyvapeMvpLanding() {
         </div>
       </section>
 
-      {/* Tri páky */}
-      <section className="relative px-6 pb-20">
+      {/* 1. Diagram toku – ako Shopentum */}
+      <section className="relative pb-20 md:pb-28 px-6 border-t border-white/5 pt-16 md:pt-20 bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.06)_0%,transparent_65%)]">
+        <IzyvapeDataFlowDiagram />
+      </section>
+
+      {/* 2. Čo presne budujeme */}
+      <section className="relative px-6 pb-24 border-t border-white/5 pt-16 bg-white/[0.02]">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14 space-y-3">
-            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">{t("promiseEyebrow")}</p>
-            <h2 className="text-2xl md:text-4xl font-sora font-black tracking-tight text-white">{t("promiseTitle")}</h2>
+          <div className="text-center mb-12 space-y-4">
+            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-500">{t("essence.eyebrow")}</p>
+            <h2 className="text-2xl md:text-4xl font-sora font-black tracking-tight text-white">{t("essence.title")}</h2>
+            <p className="max-w-3xl mx-auto text-slate-400 leading-relaxed">{t("essence.lead")}</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {promiseCards.map((card, idx) => (
+            {essenceSteps.map((step, idx) => (
               <motion.div
-                key={card.title}
-                initial={{ opacity: 0, y: 16 }}
+                key={step.title}
+                initial={{ opacity: 0, y: 14 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.08 }}
-                className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 hover:border-white/15 transition-colors"
+                transition={{ duration: 0.45, delay: idx * 0.07 }}
+                className="rounded-2xl border border-white/10 bg-[#070708] p-6 hover:border-white/15 transition-colors"
               >
-                <card.icon className={`w-10 h-10 mb-4 ${card.accent}`} strokeWidth={1.25} />
-                <h3 className="text-lg font-sora font-bold text-white mb-3">{card.title}</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">{card.body}</p>
+                <step.icon className={`w-10 h-10 mb-4 ${step.accent}`} strokeWidth={1.25} />
+                <h3 className="text-lg font-sora font-bold text-white mb-3">{step.title}</h3>
+                <p className="text-sm text-slate-400 leading-relaxed">{step.body}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Tri flow */}
-      <section className="relative px-6 pb-24 border-t border-white/5 pt-20 bg-gradient-to-b from-transparent to-purple-950/20">
+      {/* 3. Snapshot – časové úseky */}
+      <section className="relative px-6 pb-24 pt-4">
+        <div className="max-w-5xl mx-auto rounded-[2rem] border border-white/10 bg-gradient-to-br from-blue-950/40 via-[#070708] to-purple-950/25 p-8 md:p-12 space-y-8">
+          <div className="space-y-3 text-center md:text-left">
+            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-blue-400">{t("snapshot.eyebrow")}</p>
+            <h2 className="text-2xl md:text-3xl font-sora font-black text-white">{t("snapshot.title")}</h2>
+            <p className="text-slate-400 leading-relaxed max-w-3xl">{t("snapshot.lead")}</p>
+          </div>
+          <ul className="grid gap-4 md:grid-cols-2">
+            {snapshotBullets.map((line) => (
+              <li
+                key={line}
+                className="flex gap-3 items-start text-sm text-slate-300 leading-relaxed border border-white/5 rounded-xl bg-white/[0.03] p-4"
+              >
+                <Target className="w-5 h-5 shrink-0 text-purple-400 mt-0.5" strokeWidth={1.5} />
+                <span>{line}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* 4. Stack – zhoda s Agency */}
+      <section className="relative px-6 pb-24 border-t border-white/5 pt-16 bg-black/30">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="text-center space-y-4">
+            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-blue-500">{tAgency("stackEyebrow")}</p>
+            <h2 className="text-2xl md:text-4xl font-sora font-black tracking-tighter uppercase">{tAgency("stackTitle")}</h2>
+            <p className="max-w-2xl mx-auto text-sm text-slate-500">{t("stackFootnote")}</p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 md:gap-8">
+            {stackItems.map((tech, i) => (
+              <motion.div
+                key={tech.name}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.06 }}
+                className="p-6 md:p-8 rounded-3xl bg-white/5 border border-white/10 flex flex-col items-center text-center space-y-5 hover:bg-white/[0.07] transition-all"
+              >
+                <div
+                  className={`w-12 h-12 md:w-14 md:h-14 bg-white/5 rounded-2xl flex items-center justify-center ${tech.color} border border-white/5`}
+                >
+                  <tech.icon size={24} className="md:w-7 md:h-7" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-xs font-black uppercase tracking-widest text-white">{tech.name}</h4>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight">{tech.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="flex justify-center pt-2">
+            <Link
+              href="/agency"
+              className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors inline-flex items-center gap-2"
+            >
+              {t("stackLinkLabel")}
+              <ArrowRight size={12} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. MVP príklady use case */}
+      <section className="relative px-6 pb-24 border-t border-white/5 pt-16 bg-gradient-to-b from-transparent to-purple-950/15">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14 space-y-3">
             <p className="text-[10px] font-black uppercase tracking-[0.25em] text-purple-400">{t("flowsEyebrow")}</p>
@@ -195,13 +402,15 @@ export default function IzyvapeMvpLanding() {
             {flows.map((flow, idx) => (
               <motion.div
                 key={flow.title}
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 14 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.06 }}
+                transition={{ duration: 0.45, delay: idx * 0.05 }}
                 className="rounded-2xl border border-white/10 bg-[#070708] p-6 flex flex-col"
               >
-                <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest w-fit mb-4 ${flow.chip}`}>
+                <div
+                  className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest w-fit mb-4 ${flow.chip}`}
+                >
                   <flow.icon size={12} />
                   {t("flows.badge")}
                 </div>
@@ -216,26 +425,14 @@ export default function IzyvapeMvpLanding() {
         </div>
       </section>
 
-      {/* Accordions */}
-      <section id="podrobnosti" className="relative px-6 pb-28 scroll-mt-28">
+      {/* 6. Accordions */}
+      <section id="podrobnosti" className="relative px-6 pb-28 scroll-mt-28 border-t border-white/5 pt-16">
         <div className="max-w-3xl mx-auto space-y-6">
           <div className="text-center mb-10 space-y-2">
             <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">{t("accordionEyebrow")}</p>
             <h2 className="text-xl md:text-2xl font-sora font-black text-white">{t("accordionTitle")}</h2>
             <p className="text-sm text-slate-500">{t("accordionLead")}</p>
           </div>
-
-          <AccordionSection title={t("acc.arch.title")}>
-            <p>{t("acc.arch.intro")}</p>
-            <ul className="space-y-4 pt-2">
-              {layers.map((layer) => (
-                <li key={layer.title} className="border-l border-purple-500/40 pl-4">
-                  <span className="text-white font-semibold block">{layer.title}</span>
-                  <span className="text-slate-400">{layer.desc}</span>
-                </li>
-              ))}
-            </ul>
-          </AccordionSection>
 
           <AccordionSection title={t("acc.gov.title")}>
             <ul className="list-disc pl-5 space-y-2 marker:text-purple-400">
@@ -277,7 +474,7 @@ export default function IzyvapeMvpLanding() {
         </div>
       </section>
 
-      {/* Closing CTA */}
+      {/* CTA */}
       <section className="relative px-6 pb-32">
         <div className="max-w-4xl mx-auto rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-transparent px-8 py-14 text-center space-y-6">
           <p className="text-[10px] font-black uppercase tracking-[0.25em] text-blue-400">{t("closingEyebrow")}</p>

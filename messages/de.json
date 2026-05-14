@@ -452,107 +452,125 @@
     "eyebrow": "Decision Intelligence · E-Commerce MVP",
     "heroTitlePrefix": "Stock Decision Support Layer",
     "heroTitleAccent": "für IZYVAPE",
-    "heroLead": "Eine Operational-Clarity-Schicht über WooCommerce, Money S, Metorik und B2B-API. Kein weiteres Dashboard und kein AI-Spielzeug – täglich priorisierte Entscheidungen zu Bestand und Verfügbarkeit.",
-    "heroQuote": "Ein Dashboard zeigt Zahlen. Decision Support zeigt, was zuerst anliegt – mit einer Geschichte, die Sie im Meeting verteidigen können.",
+    "heroLead": "Wir bauen eine Schicht, die bestehende Systeme per API verbindet, Bestandssignale auswertet und wiederkehrend konkrete empfohlene Aufgaben für das Team erzeugt – kein weiteres Dashboard und kein Chat-Only-Produkt.",
     "primaryCta": "Kurzes Gespräch vereinbaren",
-    "secondaryCta": "Technische Details unten",
-    "promiseEyebrow": "Was die Führung gewinnt",
-    "promiseTitle": "Hebel, die für CEOs zählen",
-    "cards": {
-      "c1": {
-        "title": "Eine Wahrheit zum Produkt",
-        "body": "Kanonisches Produktmodell und tägliche immutable Snapshots. Trends, Ausreißer und Audit ohne Ratesparen über Export-Chaos."
+    "secondaryCta": "Mehr Details unten",
+    "diagram": {
+      "title": "Verbundene Daten und APIs mit Entscheidungsoutput",
+      "lead": "Dasselbe Muster wie bei Decision Intelligence über Marketing: mehrere Quellen, eine Normalisierung und Auswertung, Outputs die sich als Arbeit einplanen lassen.",
+      "inputsTitle": "QUELLEN & APIs",
+      "inputs": {
+        "i1": "WOOCOMMERCE",
+        "i2": "MONEY S",
+        "i3": "METORIK",
+        "i4": "B2B API"
       },
-      "c2": {
-        "title": "Priorität statt Grafik",
-        "body": "Jeder Befund: was passiert, warum es zählt, empfohlene Aktion, Confidence und Owner – eine operative Queue, keine Deko."
-      },
-      "c3": {
-        "title": "Menschen entscheiden zuletzt",
-        "body": "Keine autonomen Bestands-, Preis- oder Kampagnenänderungen. KI schlägt vor und priorisiert – Sie genehmigen und führen in den Quellsystemen aus."
+      "engineBrand": "IZYVAPE",
+      "engineLabel": "Stock Decision Support",
+      "engineLead": "Normalisiert das Produkt über Systeme hinweg, hält Zeit-Snapshots ein, erzeugt Befunde (Risiken und Chancen) und macht daraus priorisierte operative Empfehlungen.",
+      "outputsTitle": "OUTPUT = AUFGABEN",
+      "outputs": {
+        "i1": "Priorisierte Aufgabenliste",
+        "i2": "Empfohlene Aktion und Konfidenz",
+        "i3": "Schweregrad und Owner-Vorschlag",
+        "i4": "Führungs-Kurzüberblick (kritische Punkte)"
       }
     },
-    "flowsEyebrow": "MVP-Umfang",
-    "flowsTitle": "Drei Kernflows – nicht mehr",
-    "flowsLead": "Bewusst eng gefasst: schnelle Validierung gegen Lager- und Sales-Realität.",
+    "essence": {
+      "eyebrow": "Was wir liefern",
+      "title": "Vom System-Connectivity bis zu operativen Aufgaben",
+      "lead": "Ein gemeinsames Produktmodell, wiederkehrende Daten-Snapshots und eine Decision-Schicht. Das Ergebnis ist nicht nur ein Diagramm, sondern eine klare Reihe nächster Schritte.",
+      "s1": {
+        "title": "Daten- und API-Anbindung",
+        "body": "Lesend aus den Systemen, die Sie bereits nutzen. Eine kanonische Produktidentität über WooCommerce, Money S, Metorik und B2B-Schnittstellen – ohne den Stack neu zu bauen."
+      },
+      "s2": {
+        "title": "Decision-Schicht über Zeit",
+        "body": "Regeln und Befunde auf historischen Snapshots: Stockout-Risiko, gebundenes Kapital, Ausreißer. Menschen entscheiden und führen in den Originaltools aus."
+      },
+      "s3": {
+        "title": "Aufgaben statt Widgets",
+        "body": "Jeder Befund wird zur Aufgabe: was passiert, warum es zählt, vorgeschlagener nächster Schritt und Priorität. Keine autonomen Bestands- oder Preisänderungen aus dieser Schicht."
+      }
+    },
+    "snapshot": {
+      "eyebrow": "Zeit-Snapshots",
+      "title": "Snapshots zum Vergleich von Zeitfenstern",
+      "lead": "Live-Betrieb und ein unveränderlicher Schnitt zu einem Zeitpunkt sind verschiedene Konzepte. Snapshots ermöglichen Vergleiche gestern, letzte Woche oder beliebige Intervalle – statt einer Momentzahl ohne Kontext.",
+      "b1": "Tag-zu-Tag und Woche-zu-Woche mit derselben Berechnungslogik.",
+      "b2": "Abweichungen und Ausreißer im gewählten Fenster erkennen.",
+      "b3": "Nachvollziehbarkeit: Befund mit Zustand zum Zeitpunkt und Regelversion verknüpfen.",
+      "b4": "Grundlage für Trends und Saisonalität ohne Kontextverlust."
+    },
+    "stackFootnote": "Derselbe Delivery-Stack wie bei anderen Produktionssystemen auf dieser Website.",
+    "stackLinkLabel": "Mehr zum Ansatz auf der Agency-Seite",
+    "flowsEyebrow": "MVP-Logikbeispiele",
+    "flowsTitle": "Drei Bereiche im ersten Scope",
+    "flowsLead": "Eng gefasst für schnelle Validierung gegen Lager- und Vertriebsrealität; Erweiterung nach Datenstabilität.",
     "flows": {
-      "badge": "Core-Flow",
+      "badge": "Use case",
       "questionLabel": "Frage",
-      "outputLabel": "Output fürs Team",
+      "outputLabel": "Was das Team bekommt",
       "f1": {
         "title": "Stockout-Risiko",
-        "question": "Was geht mit höchster Wahrscheinlichkeit aus, bevor Sie nachlegen?",
-        "output": "Dringlichkeit, Tage-Schätzung, Confidence und konkreter nächster Schritt (inkl. Reservierungen und Velocity, wenn Daten da sind)."
+        "question": "Was geht mit höchster Wahrscheinlichkeit aus, bevor Nachschub da ist?",
+        "output": "Dringlichkeit, Horizont-Schätzung, Konfidenz und ein konkreter nächster Schritt aus den vorliegenden Signalen."
       },
       "f2": {
         "title": "Dead Stock / Overstock",
-        "question": "Welche SKUs binden Kapital oder bewegen sich kaum?",
-        "output": "Priorisierte Kandidaten für Ausverkauf, Promo oder Bundling – mit Bestandswert und Bewegungs-Benchmark."
+        "question": "Welche Artikel binden Kapital oder bewegen sich kaum?",
+        "output": "Gerankte Kandidaten für Ausverkauf, Promo oder andere Maßnahmen – mit Bestandswert und Bewegung."
       },
       "f3": {
         "title": "Ablauf-Risiko",
-        "question": "Was läuft ab, bevor es verkauft ist?",
-        "output": "Zeitliche Dringlichkeit und operative Priorität – nur bei verlässlichen MHD-/Expiry-Daten; sonst DATA GAP."
+        "question": "Was könnte ablaufen, bevor es verkauft ist?",
+        "output": "Zeitpriorität und empfohlene Handlung – nur mit verlässlichen Ablaufdaten; sonst explizites DATA GAP."
       }
     },
-    "accordionEyebrow": "Technik",
-    "accordionTitle": "Detail für Workshop oder CTO",
-    "accordionLead": "Nur ausklappen, was Sie brauchen – für den ersten CEO-Durchlauf reicht der obere Teil.",
+    "accordionEyebrow": "Erweiterter Kontext",
+    "accordionTitle": "Governance, Grenzen, Abhängigkeiten",
+    "accordionLead": "Optionale Tiefe nach dem Hauptstrang der Seite.",
     "acc": {
-      "arch": {
-        "title": "MVP-Architektur (fünf Schichten)",
-        "intro": "Vom Auslesen bestehender Systeme bis zur Entscheidungsdarstellung – ohne Commerce-Stack neu zu erfinden.",
-        "l1t": "1 · Data ingestion",
-        "l1d": "Minimale Anbindungen: WooCommerce, Money S, Metorik, B2B-API – final in Discovery.",
-        "l2t": "2 · Normalization",
-        "l2d": "Kanonisches Produktmodell mit stabilen Schlüsseln (SKU, Barcode, Source-Mapping). Schluss mit Cross-System-Chaos.",
-        "l3t": "3 · Snapshot-Schicht",
-        "l3d": "Täglicher immutable Snapshot: Trends, Tag-zu-Tag, Audit und Basis für Anomalien.",
-        "l4t": "4 · Findings engine",
-        "l4d": "Critical / Important / Opportunities – Regeln und Schwellen versioniert (jede Flagge ist erklärbar).",
-        "l5t": "5 · Decision layer",
-        "l5d": "Darstellung: Issue → Why → Recommended action → Confidence → Owner → Priority."
-      },
       "gov": {
-        "title": "Governance und DNA",
-        "i1": "KI schlägt vor, Menschen entscheiden – keine versteckte autonome Ausführung.",
-        "i2": "DATA GAP statt Halluzination: fehlende Inputs werden explizit.",
-        "i3": "Deskriptive Intelligenz zuerst – Prognosen und Agenten erst bei stabilen Daten.",
-        "i4": "Form vor Vollständigkeit – stabiler wiederkehrender Datensatz schlägt perfekte, aber kaputte Joins.",
-        "i5": "Kein Hype – keine „AI Employee“-Story und keine ungeprüften ROI-Märchen."
+        "title": "Governance und Grundsätze",
+        "i1": "Das System schlägt vor und priorisiert; Menschen führen in den bestehenden Tools aus.",
+        "i2": "Fehlende Daten werden nicht geschönt – explizites DATA GAP.",
+        "i3": "Zuerst deskriptive und vergleichende Logik; stärkere Prognose und Automatisierung bei stabilen Daten.",
+        "i4": "Stabile Snapshot-Struktur und Wiederholbarkeit vor der Forderung nach vollständigen Feldern.",
+        "i5": "Kein irreführender Hype – messbare Befunde und verteidigbare Regeln."
       },
       "scope": {
-        "title": "Was das MVP bewusst nicht ist",
-        "i1": "Eigenständiger AI-Chat als Kernprodukt.",
-        "i2": "Autonomes Pricing oder Kampagnen-Orchestrierung ohne explizite Freigabe.",
-        "i3": "Marketing-Intelligence im ersten Lieferumfang – Phase 2 nach Vertrauen ins Stock-Pillar.",
-        "i4": "Enterprise „predict everything“ Plattform.",
-        "i5": "Schreiben von Bestand oder Preisen direkt aus dieser MVP-Schicht.",
-        "i6": "Magisches LLM ohne nachvollziehbare Regeln und Snapshots."
+        "title": "Außerhalb des ersten MVP",
+        "i1": "Ein Konversations-Bot als Hauptwert des Produkts.",
+        "i2": "Autonome Preis-, Kampagnen- oder Bestandsänderungen ohne Freigabe.",
+        "i3": "Volle Marketing-Intelligence im selben Lieferumfang wie Bestand – später geplant.",
+        "i4": "Universelle Predictive-Everything-Plattform.",
+        "i5": "Write-back zu WooCommerce oder ERP in Phase eins.",
+        "i6": "Undurchsichtige LLM-Outputs ohne Regel- und Snapshot-Fuß."
       },
       "metrics": {
-        "title": "Woran wir Erfolg messen",
-        "i1": "Konkrete Anzahl SKU mit Stockout-Risiko im Fenster – gegen Realität prüfbar.",
-        "i2": "Dead-Stock-Liste abstimmbar mit Inventur oder genehmigter Stichprobe.",
-        "i3": "Ein-Pager für Leadership: Critical Issues und was diese Woche Handlung braucht.",
-        "i4": "Team-Adoption – nicht Vanity-Usage, sondern schnellere bessere operative Entscheidungen."
+        "title": "Validierung",
+        "i1": "Zahlen und Listen abgeglichen mit Stichproben-SKU-Review.",
+        "i2": "Dead-Stock-Output konsistent mit Inventur oder genehmigtem Teilset.",
+        "i3": "Kurzfassung für die Führung: kritische Punkte und nötige Aktionen diese Woche.",
+        "i4": "Ob Aufgaben aus dem Produkt Entscheidungen wirklich voranbringen – nicht Rohklickzahlen."
       },
       "deps": {
         "title": "Abhängigkeiten und Discovery",
-        "i1": "API-Zugang und Klärung der „source of truth“ für Bestand.",
-        "i2": "Business-Regeln: Lieferzeiten, Owner, Reservierungsdefinition.",
-        "i3": "Kurze Discovery vor verbindlicher Roadmap – sonst nur Grobschätzung.",
-        "i4": "Enge Abstimmung mit externem Entwickler beim Anbinden bestehender Systeme."
+        "i1": "API-Zugang und Einigung auf die Quelle der Wahrheit für Bestand.",
+        "i2": "Business-Parameter: Lieferzeiten, Verantwortliche, Bedeutung von Reservierungen.",
+        "i3": "Kurze Discovery vor verbindlichem Zeitplan.",
+        "i4": "Abstimmung mit Ihrem Entwickler beim Anbinden der Services."
       },
       "phase2": {
-        "title": "Phase 2 (Ausblick)",
-        "body": "Marketing-Intelligence – Kanal-Pushes, saisonale Chancen, erweiterte Alerts – erst wenn Stock-Intelligence live läuft und Vertrauen hat."
+        "title": "Phase 2 (indikativ)",
+        "body": "Marketing-Signale, reicheres Alerting und weitere Use Cases, wenn die Bestands-Decision-Schicht stabil läuft und Vertrauen hat."
       }
     },
     "docFootnote": "Vollständiges Markdown (MVP-Spezifikation + Jira-Block) im Projekt-Repo oder auf Anfrage.",
     "closingEyebrow": "Nächster Schritt",
-    "closingTitle": "Vom Deck zur Lieferung",
-    "closingLead": "Kurze Discovery, dann konkreter Plan für Ingest, erste Snapshots und Findings v1 – ohne Ihren Commerce-Stack umzubauen.",
+    "closingTitle": "Vom Konzept zum konkreten Plan",
+    "closingLead": "Kurze Discovery, dann verbindlicher Plan für Ingest, erste Snapshots und Findings v1 – ohne den gesamten Commerce-Stack umzubauen.",
     "closingCta": "Intro-Call planen"
   },
   "Navbar": {
