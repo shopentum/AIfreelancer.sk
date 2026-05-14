@@ -1,6 +1,6 @@
 # AI reporting — framing pre DataHub (usage ↔ performance)
 
-**Status dokumentu:** **Interný** (produkt / analytika). **S DHUB sa táto téma vôbec neprepája** — ani slovkom, ani odkazom v rámci **DHUB-3138** (Penta). Komunikácia s DataHubom pri Pent dodaní je výhradne podľa [`DHUB-3138_Penta_Data_Delivery.md`](./DHUB-3138_Penta_Data_Delivery.md). Samostatný **nasledujúci** DH ticket / diskusia (recurring dataset usage ↔ performance nad rámec Pent podkladov) je iná práca a **nie je** závislá od tohto dokumentu z pohľadu DH.
+**Status dokumentu:** **Interný** (produkt / analytika). **S DHUB sa táto téma vôbec neprepája** — ani slovkom, ani odkazom v rámci **DHUB-3138** ani jeho **Penta subtasku**. Komunikácia s DataHubom pri Pent dodaní je výhradne podľa [`DHUB-3138_Penta_Data_Delivery.md`](./DHUB-3138_Penta_Data_Delivery.md). Samostatný **nasledujúci** DH ticket / diskusia (recurring dataset usage ↔ performance nad rámec Pent podkladov) je iná práca a **nie je** závislá od tohto dokumentu z pohľadu DH.
 
 **Účel dokumentu:** Zjednotiť jazyk, scope a analytické očakávania **vnútorne** pri príprave ďalšieho kroku po Pent: stabilné prepojenie AI usage s performance signálmi.
 
