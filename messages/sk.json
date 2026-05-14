@@ -448,6 +448,113 @@
       "button": "Konzultovať AI stratégiu"
     }
   },
+  "IzyvapeMvp": {
+    "eyebrow": "Decision Intelligence · E-commerce MVP",
+    "heroTitlePrefix": "Stock Decision Support Layer",
+    "heroTitleAccent": "pre IZYVAPE",
+    "heroLead": "Jedna vrstva operational clarity nad WooCommerce, Money S, Metorik a B2B API. Nie ďalší dashboard ani AI demo – každý deň prioritizované rozhodnutia okolo skladu a dostupnosti.",
+    "heroQuote": "Dashboard ukazuje čísla. Decision Support ukazuje, čo riešiť prvé – s históriou, ktorú viete obhájiť pri stole.",
+    "primaryCta": "Dohodnúť krátky call",
+    "secondaryCta": "Technické podrobnosti nižšie",
+    "promiseEyebrow": "Čo z toho má vedenie",
+    "promiseTitle": "Tri páky, ktoré drží CEO v hlave",
+    "cards": {
+      "c1": {
+        "title": "Jedna pravda o produkte",
+        "body": "Kanonický produktový model a denné immutable snapshoty. Trendy, výnimky a audit bez hádanía nad rozbitými exportmi."
+      },
+      "c2": {
+        "title": "Priorita namiesto grafov",
+        "body": "Každý nález: čo sa deje, prečo to má zmysel, odporúčaná akcia, confidence a vlastník. Nie „pekný panel“, ale operational queue."
+      },
+      "c3": {
+        "title": "Človek má posledné slovo",
+        "body": "Žiadna autonómna zmena skladu, cien ani kampaní. AI navrhuje a prioritizuje – vy schvaľujete a vykonávate vo svojich systémoch."
+      }
+    },
+    "flowsEyebrow": "MVP scope",
+    "flowsTitle": "Tri core toky – nič navyše",
+    "flowsLead": "Úmyselne úzky záber: výsledok sa rýchlo overí voči realite skladu a predaja.",
+    "flows": {
+      "badge": "Core flow",
+      "questionLabel": "Otázka",
+      "outputLabel": "Výstup pre tím",
+      "f1": {
+        "title": "Stockout risk",
+        "question": "Čo sa s najväčšou pravdepodobnosťou vypredá skôr, než stihnete doplniť?",
+        "output": "Urgentnosť, odhad dní, confidence a konkrétny návrh ďalšieho kroku (vrátane rezervácií a velocity, ak sú v dátach)."
+      },
+      "f2": {
+        "title": "Dead stock / Overstock",
+        "question": "Ktoré SKU viažu kapitál alebo nepohnú mesiacmi?",
+        "output": "Prioritizovaní kandidáti na výpredaj, promo alebo bundling – s hodnotou zásoby a benchmarkom pohybu."
+      },
+      "f3": {
+        "title": "Expiration risk",
+        "question": "Čo expiruje skôr, než sa to rozpredá?",
+        "output": "Časová urgentnosť a odporúčaná operatívna priorita – ak sú spoľahlivé expiračné vstupy; inak ostáva ako DATA GAP."
+      }
+    },
+    "accordionEyebrow": "Pod kapotou",
+    "accordionTitle": "Detail pre workshop alebo CTO",
+    "accordionLead": "Rozbaľte len čo potrebujete – zvyšok nechajte CEO na prvý screening vyššie.",
+    "acc": {
+      "arch": {
+        "title": "Architektúra MVP (päť vrstiev)",
+        "intro": "Od čítania existujúcich systémov po prezentáciu rozhodnutí – bez zbytočného rebuildu.",
+        "l1t": "1 · Data ingestion",
+        "l1d": "Minimálne napojenia: WooCommerce, Money S, Metorik, B2B API – podľa discovery.",
+        "l2t": "2 · Normalization",
+        "l2d": "Kanonický produktový model so stabilnými kľúčmi (SKU, barcode, mapovanie zdrojov). Koniec chaosu medzi systémami.",
+        "l3t": "3 · Snapshot layer",
+        "l3d": "Každý deň immutable rez: trendy, porovnanie deň oproti dňu, audit a základ pre anomaly detection.",
+        "l4t": "4 · Findings engine",
+        "l4d": "Critical / Important / Opportunities – pravidlá a prahy sú verzovateľné (vieš povedať „prečo to systém flagol“).",
+        "l5t": "5 · Decision layer",
+        "l5d": "Prezentácia: Issue → Why → Recommended action → Confidence → Owner → Priority."
+      },
+      "gov": {
+        "title": "Governance a DNA projektu",
+        "i1": "AI navrhuje, človek rozhoduje – žiadna skrytá autonómna exekúcia.",
+        "i2": "DATA GAP namiesto halucinácie: ak vstup chýba, systém to povie otvorene.",
+        "i3": "Deskriptívna inteligencia prv – predikcie a agentné orchestrácie až po stabilných dátach.",
+        "i4": "Tvar dát (`shape`) pred dokonalou úplnosťou – stabilný recurring dataset má väčšiu hodnotu než „100 % ale rozbité joiny“.",
+        "i5": "Žiadny hype wording – žiadny „AI employee“ ani neoverené ROI rozprávky pre board."
+      },
+      "scope": {
+        "title": "Čo MVP zámerne nie je",
+        "i1": "Samostatný AI chat ako hlavný produkt.",
+        "i2": "Autonómny pricing alebo orchestrácia kampaní bez explicitného schválenia človekom.",
+        "i3": "Marketing intelligence ako súčasť prvého záväzku – príde vo fáze 2 po fungujúcom stock pilieri.",
+        "i4": "Enterprise „predict everything“ platforma.",
+        "i5": "Zapisovanie stocku alebo cien priamo z MVP vrstvy.",
+        "i6": "Magické LLM bez trasovateľných pravidiel a snapshotov."
+      },
+      "metrics": {
+        "title": "Ako vieme, že to funguje",
+        "i1": "Konkrétny počet SKU zaradených do stockout rizika za definované okno – kontrolovateľné voči realite.",
+        "i2": "Dead stock zoznam zarovnateľný s inventúrou alebo vzorkou schválenou klientom.",
+        "i3": "Jednostranové vedenie digest: počet critical issues a čo vyžaduje akciu tento týždeň.",
+        "i4": "Adopcia tímu – nie „usage vanity“, ale či robíme lepšie rozhodnutia rýchlejšie."
+      },
+      "deps": {
+        "title": "Závislosti a discovery",
+        "i1": "Prístupy k API a identifikácia „zdroja pravdy“ pre stock medzi systémami.",
+        "i2": "Business pravidlá: lead time dodávateľa, vlastníci procesov, definícia rezervácií.",
+        "i3": "Krátka discovery fáza pred záväzným harmonogramom – bez nej len hrubý odhad.",
+        "i4": "Úzka spolupráca externého vývojára klienta pri napojení na existujúci stack."
+      },
+      "phase2": {
+        "title": "Fáza 2 (náhľad)",
+        "body": "Marketing intelligence – čo podporiť v kanáloch, sezónne príležitosti, rozšírený alerting – vždy až po tom, čo stock intelligence beží v praxi a má dôveru tímu."
+      }
+    },
+    "docFootnote": "Kompletný markdown podklad (špecifikácia MVP + blok na Jira) je v repozitári projektu alebo ho doplním na vyžiadanie.",
+    "closingEyebrow": "Ďalší krok",
+    "closingTitle": "Ak chcete ísť od slidov k dodávke",
+    "closingLead": "Krátka discovery, potom záväzný plán ingestov, prvého snapshotu a findings v1. Bez preskladania vášho ecommerce stacku.",
+    "closingCta": "Naplánovať úvodný call"
+  },
   "Navbar": {
     "links": {
       "about": "About",

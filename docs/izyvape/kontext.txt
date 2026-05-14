@@ -1,0 +1,586 @@
+Stock Decision Support = ideálny MVP
+
+Prečo je to alfa omega:
+
+okamžitý business dopad,
+denná potreba,
+vysoká frekvencia používania,
+relatívne jasné datasety,
+nízke AI riziko,
+vysoká validovateľnosť,
+veľmi dobrý foundation layer pre ďalšie intelligence use-case.
+
+A hlavne:
+
+Toto nie je “AI demo”.
+Toto je:
+operational decision system.
+
+To je obrovský rozdiel.
+
+Ja by som ten návrh architektúry framingoval TAKTO
+
+Nie:
+„AI systém pre ecommerce“.
+
+Ale:
+
+IZYVAPE Stock Decision Support Layer
+
+Praktická decision vrstva nad:
+
+skladom,
+dostupnosťou,
+predajom,
+pohybom produktov,
+expiraciou,
+prioritizáciou zásob.
+Čo je silné na tomto MVP
+1. Všetci tomu rozumejú okamžite
+
+CEO:
+
+chápe sklad.
+
+Marketing:
+
+chápe produkty na promo.
+
+Logistika:
+
+chápe dostupnosť.
+
+Eshop:
+
+chápe vypredanie.
+
+To je veľmi dôležité.
+
+2. Dá sa veľmi rýchlo validovať
+
+Napríklad:
+
+„Systém zachytil 14 produktov s vysokým rizikom stockoutu počas 7 dní.“
+
+To je:
+
+merateľné,
+pochopiteľné,
+auditovateľné.
+3. Nevyžaduje dokonalé AI
+
+Toto je kritické.
+
+90 % hodnoty:
+
+prioritization,
+interpretation,
+anomaly detection,
+operational visibility.
+
+Nie LLM magic.
+
+To je správny enterprise smer.
+
+Ja by som MVP definoval extrémne striktne
+MVP GOAL
+
+„Pomôcť tímu robiť lepšie rozhodnutia okolo skladu a dostupnosti produktov.“
+
+Nie viac.
+
+Nie:
+
+content AI,
+autonomous pricing,
+campaign orchestration,
+predictive enterprise engine.
+
+To príde neskôr.
+
+Odporúčaná MVP architektúra
+1. DATA INGESTION LAYER
+
+Napojenia:
+
+WooCommerce
+Money S
+Metorik
+B2B API
+
+Minimum.
+
+Nie viac.
+
+2. NORMALIZATION LAYER
+
+Tu vzniká:
+canonical product model.
+
+Napr.:
+
+Product
+- product_id
+- sku
+- barcode
+- source_ids
+- category
+- supplier
+- margin
+- stock
+- reserved_stock
+- sales_velocity
+- expiration_date
+- last_sale_at
+- availability_status
+- source_confidence
+
+Toto je extrémne dôležité.
+
+Bez canonical vrstvy vznikne chaos.
+
+3. SNAPSHOT LAYER
+
+Kľúčové.
+
+Každý deň:
+
+immutable snapshot.
+
+Prečo?
+
+Lebo:
+
+trendy,
+forecasting,
+comparison,
+anomaly detection,
+auditability.
+
+Toto je AI WORKS DNA.
+A veľmi správne ju prenášaš.
+
+4. FINDINGS ENGINE
+
+Tu vzniká hodnota.
+
+Nie AI chat.
+
+Ale:
+
+Findings
+Critical
+stockout risk
+negative stock anomaly
+expiration risk
+Important
+slow movers
+dead stock
+overstock
+Opportunities
+high margin low visibility
+promo candidates
+seasonal opportunities
+5. DECISION LAYER
+
+Nie autonómia.
+
+Ale:
+
+Issue
+→ Why it matters
+→ Recommended action
+→ Confidence
+→ Owner
+→ Priority
+
+Toto je obrovský rozdiel oproti dashboardu.
+
+Najdôležitejší architektonický moment
+“Dashboard” ≠ “Decision Support”
+
+Dashboard:
+
+ukazuje dáta.
+
+Decision Support:
+
+interpretuje priority.
+
+To je presne tvoja sila.
+
+Toto by som dal ako CORE MVP flows
+
+Max 3.
+
+FLOW 1 - Stockout Risk
+
+„Produkty ktoré sa pravdepodobne vypredajú.“
+
+Inputs:
+
+sales velocity
+stock
+reservations
+supplier lead time
+
+Output:
+
+urgency
+estimated days left
+confidence
+FLOW 2 - Dead Stock / Overstock
+
+„Produkty ktoré viažu kapitál.“
+
+Inputs:
+
+days without sale
+stock value
+category benchmark
+sales trend
+
+Output:
+
+liquidation candidates
+promo candidates
+FLOW 3 - Expiration Risk
+
+Ak majú expirácie:
+toto je obrovská hodnota.
+
+Output:
+
+urgency
+recommended action
+operational priority
+Až POTOM
+
+ďalšia vrstva:
+
+Marketing intelligence
+čo pushovať,
+čo boostovať,
+čo dať na homepage,
+čo promovať.
+
+Ale až keď:
+
+stock intelligence funguje.
+Toto je podľa mňa extrémne dôležitý framing
+
+Nepredávaš:
+AI.
+
+Predávaš:
+
+“Operational clarity”
+
+To je enterprise jazyk.
+
+A omnoho dôveryhodnejší.
+
+Veľmi silný strategický moment pre teba
+
+Toto už nie je:
+„spravím vám AI appku“.
+
+Toto je:
+
+“Navrhujem vám nový spôsob práce s ecommerce dátami.”
+
+To je úplne iný level positioning-u.
+
+A úprimne:
+veľmi dobre sedí na tvoju current trajektóriu z:
+
+AI WORKS,
+NMH,
+governance,
+operational intelligence,
+usage vs impact,
+recurring dataset thinking,
+decision framing.
+
+Toto už začína byť:
+reálny Decision Intelligence consulting layer.
+
+
+# OMEGA PROTOCOL - IZYVAPE AI DECISION LAYER (MASTER CONTEXT LOCK)
+
+## Kontext
+
+Pracujeme na novom AI / decision intelligence projekte pre IZYVAPE.
+
+Firma:
+
+* ecommerce firma,
+* WooCommerce stack,
+* menší tím (~10 ľudí),
+* viacero existujúcich systémov a API,
+* externý programátor,
+* cieľ nie je „AI hračka“, ale praktická decision vrstva nad reálnym ecommerce fungovaním.
+
+Projekt NESMIE byť chápaný ako:
+
+* chatbot,
+* generický AI agent,
+* autonómny AI systém,
+* hype AI experiment.
+
+Projekt MUSÍ byť chápaný ako:
+
+* practical ecommerce decision layer,
+* operational intelligence system,
+* workflow + data intelligence vrstva,
+* recommendation / prioritization systém nad reálnymi dátami.
+
+---
+
+# IDENTITA SYSTÉMU
+
+## Core princíp
+
+AI navrhuje, človek rozhoduje.
+
+Systém:
+
+* odporúča,
+* prioritizuje,
+* interpretuje,
+* upozorňuje,
+* sumarizuje,
+* identifikuje riziká a príležitosti.
+
+Systém:
+
+* NESMIE autonómne vykonávať rozhodnutia,
+* NESMIE meniť sklad,
+* NESMIE meniť ceny,
+* NESMIE spúšťať kampane,
+* NESMIE robiť autonómne ecommerce akcie bez explicitného schválenia človekom.
+
+---
+
+# ARCHITEKTÚRNY SMER
+
+## Nezačíname agentom
+
+Nezačíname:
+
+* vlastným AI agentom,
+* autonómnym orchestration systémom,
+* custom memory agentom,
+* „AI employee“ konceptom.
+
+Prvý krok:
+
+* stabilná dátová vrstva,
+* decision layer,
+* reporting,
+* operational intelligence,
+* workflow recommendations.
+
+Agentic vrstva môže vzniknúť neskôr až po:
+
+* stabilizácii dát,
+* validácii use-case,
+* reálnej prevádzke,
+* overení decision kvality.
+
+---
+
+# PRIORITNÉ USE CASES (MVP)
+
+## Sklad / inventory intelligence
+
+* produkty s rizikom vypredania,
+* produkty bez pohybu,
+* dead stock,
+* nadmerné zásoby,
+* produkty vhodné na výpredaj,
+* produkty s blížiacou sa expiraciou,
+* skladové anomálie,
+* out-of-stock forecasting.
+
+## Marketing intelligence
+
+* produkty vhodné na promo,
+* produkty vhodné na Meta/Google push,
+* produkty s potenciálom scale,
+* produkty s traffic bez konverzie,
+* produkty s vysokou maržou a nízkou viditeľnosťou,
+* seasonal opportunities.
+
+## Operational intelligence
+
+* prioritizácia denných úloh,
+* alerting,
+* operational digest,
+* exceptions monitoring,
+* anomaly detection,
+* trend detection.
+
+---
+
+# TECH STACK REALITA
+
+Existujúce systémy:
+
+* WooCommerce,
+* Money S,
+* Metorik,
+* B2B systém,
+* API integrácie,
+* Google Workspace,
+* marketing platformy.
+
+Princíp:
+
+* API-first,
+* reuse existujúcich systémov,
+* žiadny zbytočný rebuild.
+
+---
+
+# ARCHITEKTÚRNE PRINCÍPY
+
+## 1. Runtime ≠ Snapshot
+
+Aktuálny stav systému ≠ historický záznam.
+
+## 2. Usage ≠ Impact
+
+Použitie systému ≠ reálny business dopad.
+
+## 3. Truth Layer
+
+Systém musí mať:
+
+* stabilný source of truth,
+* jasné entity,
+* konzistentné join keys,
+* auditovateľné rozhodovanie.
+
+## 4. DATA GAP
+
+Pri chýbajúcich dátach:
+
+* explicitný DATA GAP,
+* žiadne hádanie,
+* žiadna fake istota.
+
+## 5. Descriptive first
+
+Najprv:
+
+* interpretácia,
+* monitoring,
+* prioritizácia,
+* operational visibility.
+
+Až neskôr:
+
+* predikcie,
+* automatizácia,
+* agentic behavior.
+
+## 6. Shape > Completeness
+
+Dôležitejší je:
+
+* stabilný dataset,
+* konzistentná štruktúra,
+* opakovateľnosť,
+  než „dokonalé dáta“.
+
+---
+
+# ZÁKAZ HYPE
+
+Nepoužívať framing:
+
+* AI employee,
+* autonomous AI company,
+* self-running ecommerce,
+* fully autonomous agents,
+* AGI wording,
+* fake ROI claims.
+
+Nevytvárať:
+
+* pseudo-causal tvrdenia,
+* neoverené business dopady,
+* marketingové AI rozprávky.
+
+---
+
+# OČAKÁVANÝ ŠTÝL ODPOVEDÍ
+
+Odpovede majú byť:
+
+* pragmatické,
+* architektonické,
+* enterprise-ready,
+* realistické,
+* implementovateľné,
+* decision-oriented.
+
+Preferovať:
+
+* workflow,
+* scope control,
+* prioritizáciu,
+* phased rollout,
+* MVP thinking,
+* low-risk architecture.
+
+Nepreferovať:
+
+* hype,
+* maximalizmus,
+* overengineering,
+* „spravme všetko AI“.
+
+---
+
+# AKTUÁLNY CIEĽ
+
+Pripraviť:
+
+* základný architektonický smer,
+* decision/use-case mapu,
+* MVP roadmap,
+* data flow,
+* entity model,
+* operational intelligence koncept,
+* prvé realistické implementačné kroky.
+
+Nie:
+
+* finálny AI systém,
+* komplexný agent framework,
+* enterprise orchestration platformu.
+
+---
+
+# DÔLEŽITÉ
+
+Projekt má byť:
+
+* prakticky použiteľný,
+* rýchlo validovateľný,
+* postavený nad reálnymi dátami,
+* testovateľný v reálnej ecommerce prevádzke,
+* použiteľný ako základ budúcej širšej ecommerce intelligence platformy.
+
+AI WORKS a skúsenosti z NMH:
+
+* governance,
+* usage vs impact separation,
+* CAP/eligible logika,
+* reporting trustworthiness,
+* decision framing,
+* recurring dataset thinking,
+* operational intelligence,
+  majú byť použité ako architektonický základ projektu.

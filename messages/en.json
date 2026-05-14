@@ -448,6 +448,113 @@
       "button": "Discuss AI strategy"
     }
   },
+  "IzyvapeMvp": {
+    "eyebrow": "Decision intelligence · E-commerce MVP",
+    "heroTitlePrefix": "Stock Decision Support Layer",
+    "heroTitleAccent": "for IZYVAPE",
+    "heroLead": "One operational clarity layer across WooCommerce, Money S, Metorik and your B2B API. Not another dashboard or AI toy – prioritized inventory and availability decisions every day.",
+    "heroQuote": "A dashboard shows numbers. Decision support shows what to tackle first – with history you can defend in the room.",
+    "primaryCta": "Book a short call",
+    "secondaryCta": "Technical details below",
+    "promiseEyebrow": "What leadership gets",
+    "promiseTitle": "Three levers CEOs actually care about",
+    "cards": {
+      "c1": {
+        "title": "A single source of product truth",
+        "body": "A canonical product model plus immutable daily snapshots. Trends, exceptions and audits without guessing across broken exports."
+      },
+      "c2": {
+        "title": "Priorities, not prettier charts",
+        "body": "Every finding: what is happening, why it matters, recommended action, confidence and owner. An operational queue, not wallpaper."
+      },
+      "c3": {
+        "title": "Humans stay in control",
+        "body": "No autonomous stock, pricing or campaign changes. AI proposes and ranks – your team approves and executes in source systems."
+      }
+    },
+    "flowsEyebrow": "MVP scope",
+    "flowsTitle": "Three core flows – nothing extra",
+    "flowsLead": "Deliberately narrow: fast validation against real warehouse and sales reality.",
+    "flows": {
+      "badge": "Core flow",
+      "questionLabel": "Question",
+      "outputLabel": "Team output",
+      "f1": {
+        "title": "Stockout risk",
+        "question": "What is most likely to sell through before you can replenish?",
+        "output": "Urgency, estimated days, confidence and a concrete next step (including reservations and velocity when data exists)."
+      },
+      "f2": {
+        "title": "Dead stock / Overstock",
+        "question": "Which SKUs trap capital or barely move?",
+        "output": "Ranked markdown, promo or bundle candidates – with inventory value and movement benchmarks."
+      },
+      "f3": {
+        "title": "Expiration risk",
+        "question": "What expires before it clears?",
+        "output": "Time urgency and operational priority – only with trustworthy expiry signals; otherwise flagged as DATA GAP."
+      }
+    },
+    "accordionEyebrow": "Under the hood",
+    "accordionTitle": "Detail for workshop or CTO",
+    "accordionLead": "Expand only what you need – leadership can stop after the hero sections.",
+    "acc": {
+      "arch": {
+        "title": "MVP architecture (five layers)",
+        "intro": "From reading existing systems to presenting decisions – without rebuilding your commerce stack.",
+        "l1t": "1 · Data ingestion",
+        "l1d": "Minimal connectors: WooCommerce, Money S, Metorik, B2B API – finalized in discovery.",
+        "l2t": "2 · Normalization",
+        "l2d": "Canonical product model with stable keys (SKU, barcode, source mapping). End the cross-system chaos.",
+        "l3t": "3 · Snapshot layer",
+        "l3d": "Daily immutable snapshot: trends, day-over-day comparison, audit trail and anomaly-ready history.",
+        "l4t": "4 · Findings engine",
+        "l4d": "Critical / Important / Opportunities – rules and thresholds are versioned (you can explain every flag).",
+        "l5t": "5 · Decision layer",
+        "l5d": "Presentation: Issue → Why → Recommended action → Confidence → Owner → Priority."
+      },
+      "gov": {
+        "title": "Governance and project DNA",
+        "i1": "AI proposes, humans decide – no hidden autonomous execution.",
+        "i2": "DATA GAP instead of hallucination: missing inputs are explicit.",
+        "i3": "Descriptive intelligence first – forecasting and agents only after stable data.",
+        "i4": "Shape beats completeness – a stable recurring dataset beats perfect-but-broken joins.",
+        "i5": "No hype – no „AI employee“ claims or unverified ROI fairy tales."
+      },
+      "scope": {
+        "title": "What the MVP deliberately excludes",
+        "i1": "A standalone AI chat as the core product.",
+        "i2": "Autonomous pricing or campaign orchestration without explicit human approval.",
+        "i3": "Marketing intelligence in the first commitment – phase 2 after stock intelligence earns trust.",
+        "i4": "Enterprise „predict everything“ platforms.",
+        "i5": "Writing stock or prices directly from this MVP layer.",
+        "i6": "Opaque LLM magic without traceable rules and snapshots."
+      },
+      "metrics": {
+        "title": "How we know it works",
+        "i1": "Concrete SKU count flagged for stockout risk in a defined window – sanity-checked against reality.",
+        "i2": "Dead-stock lists reconcilable with inventory or an approved sample.",
+        "i3": "One-page executive digest: critical issue count and what needs action this week.",
+        "i4": "Team adoption – not vanity usage, but faster better operational decisions."
+      },
+      "deps": {
+        "title": "Dependencies and discovery",
+        "i1": "API access and identifying the operational source of truth for stock.",
+        "i2": "Business rules: supplier lead times, process owners, reservation definitions.",
+        "i3": "Short discovery before a binding roadmap – otherwise only a rough estimate.",
+        "i4": "Close alignment with your external developer when wiring existing systems."
+      },
+      "phase2": {
+        "title": "Phase 2 (preview)",
+        "body": "Marketing intelligence – channel boosts, seasonal plays, richer alerting – only after stock intelligence runs in production and earns trust."
+      }
+    },
+    "docFootnote": "Full markdown spec (MVP + Jira-ready block) lives in the project repo or I can send it on request.",
+    "closingEyebrow": "Next step",
+    "closingTitle": "From slides to delivery",
+    "closingLead": "Short discovery, then a concrete plan for ingestion, first snapshots and findings v1 – without reorganizing your ecommerce stack.",
+    "closingCta": "Schedule intro call"
+  },
   "Navbar": {
     "links": {
       "about": "About",
