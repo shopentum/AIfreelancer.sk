@@ -1,8 +1,15 @@
-# DHUB-3138 — jednorazové dodanie dát pred Pentou
+# DHUB-3138 — Pent dodanie (Jira štruktúra)
 
-**Účel:** Text pripravený na **Jira task DHUB-3138** (bez Confluence špecifikácie).
+**Účel:** Text do Jiry **bez Confluence**.
 
-**Komunikácia s DataHubom:** Celý scope Pent dodania je **v tomto jednom tickete** (**DHUB-3138**). **Neprepájať** túto úlohu s **žiadnou** nasledujúcou internou analytickou témou (prepojenie CMS usage s web performance datasetom) — tá pôjde **samostatne voči DH** až po Pent; do DHUB-3138 nevkladáme odkazy na interné repo dokumenty ani dvojitý rámec „najprv široký framing“.
+**Štruktúra:**
+
+| Úroveň | Čo to je |
+|--------|-----------|
+| **DHUB-3138** | **Hlavný task** (parent) — drží zodpovednosť za celé Pent zadanie voči DataHubu. |
+| **Sub-task pod DHUB-3138** | **Náš návrh** — detailný scope, metodika, moduly, acceptance (copy-paste nižšie). |
+
+**Komunikácia s DH:** Parent ostáva kontajner; konkrétna práca a kritériá sú v subtasku. **Neprepájať** s neskoršou samostatnou DH témou (recurring prepojenie CMS usage ↔ web performance dataset) — tá príde až po Pent vo vlastnom tickete.
 
 ---
 
@@ -20,19 +27,41 @@
 
 ---
 
-## Copy-paste: Summary (Jira pole Summary)
+## Copy-paste — Parent: **DHUB-3138** (hlavný task)
+
+### Summary (pole Summary na DHUB-3138)
 
 ```
-Penta — DHUB-3138: adopcia AI (CAP/eligible) + performance enrichment pre vybraných 5 modulov
+Penta — DataHub: podklady AI reporting (adopcia + performance pre vybrané moduly)
+```
+
+### Description (pole Description na DHUB-3138)
+
+```
+Kontajner: jednorazové dodanie reportingových podkladov pre Pentu (DataHub).
+
+Detailný scope, technická metodika a acceptance sú v priradenom subtasku (návrh produkt / NMH).
 ```
 
 ---
 
-## Copy-paste: Description (Jira pole Description)
+## Copy-paste — **Sub-task** (dieťa pod DHUB-3138)
+
+*V Jire pri vytváraní subtasku nastaviť **Parent link** na **DHUB-3138**.*
+
+### Summary (pole Summary na subtasku)
 
 ```
-=== Kontext a rozsah ticketu ===
-Jednorazové dodanie podkladov pre management reporting (Penta). Všetky požiadavky sú obsiahnuté v tomto tickete (DHUB-3138); ide o existujúce zdroje a súčasný AI reporting, rozšírený o nižšie uvedenú metodiku tam, kde je technicky realizovateľné v krátkom čase.
+[Penta] AI reporting — adopcia (CAP/eligible) + performance enrichment (5 modulov)
+```
+
+### Description (pole Description na subtasku)
+
+```
+Parent: DHUB-3138.
+
+=== Kontext a rozsah ===
+Jednorazové dodanie podkladov pre management reporting (Penta). Nižšie je implementačný návrh pre parent DHUB-3138: existujúce zdroje a súčasný AI reporting, rozšírený o uvedenú metodiku tam, kde je technicky realizovateľné v krátkom čase.
 
 === Časť A — Usage / adopcia (všetky AI nástroje v súčasnom reportingu) ===
 Grain a zdroje:
@@ -72,9 +101,9 @@ Baseline / čas:
 Neúplnosť dát:
 • Nie všetky performance metriky musia byť pre všetkých päť modulov dostupné; priorita: stabilná štruktúra výstupu a čitateľné označenie medzier.
 
-=== Mimo rozsahu tohto ticketu ===
+=== Mimo rozsahu tohto subtasku ===
 • Causal závery, garantované ROI, jednotný impact framework pre všetky AI features.
-• Samostatný projekt na recurring „dataset prepojenia oboch vrstiev“ nad rámec Pent podkladov — ten bude predmetom ďalšej dohody (samostatný DH ticket).
+• Samostatný projekt na recurring „dataset prepojenia oboch vrstiev“ nad rámec Pent podkladov — predmet ďalšej dohody (budúci DH ticket).
 
 === Deliverable ===
 • Dohodnutý formát (tabuľka / export / úprava dashboardu) + grafy pre Pentu podľa potreby produktu.
@@ -86,4 +115,4 @@ Neúplnosť dát:
 
 ---
 
-*Interný súbor v repo; text vyššie je určený na priame skopírovanie do **DHUB-3138**. Produktové CMS backlog referencie (napr. širší AI reporting) zostávajú mimo Jiry — jediný operatívny kontajner pre Pent dodanie je **DHUB-3138**.*
+*Interný súbor v repo: **DHUB-3138** = parent; dlhý text = **subtask**. Produktové CMS backlog referencie zostávajú mimo Jiry.*
