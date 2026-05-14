@@ -14,13 +14,13 @@ IZYVAPE potrebuje **jednu vrstvu operational clarity** nad existujúcimi systém
 
 **MVP produkt:** **Stock Decision Support Layer** - systém, ktorý denne zjednotí dáta do kanonického modelu, uchováva **immutable denné snapshoty**, vyhodnocuje **nálezy** (riziká a príležitosti okolo zásob) a prezentuje **prioritizované odporúčania akcií**. Človek rozhoduje a vykonáva zmeny v zdrojových systémoch - MVP **nemení** sklad, ceny ani kampane automaticky.
 
-**Prečo práve to ako prvé:** okamžite pochopiteľný biznis dopad, vysoká denná frekvencia použitia, relatívne jasné vstupy, nízke „magické AI“ riziko, dobrá auditovateľnosť a silný základ pre neskoršiu marketing alebo širšiu ecommerce intelligence.
+**Prečo práve to ako prvé:** okamžite pochopiteľný biznis dopad, vysoká denná frekvencia použitia, relatívne jasné vstupy, nízke „magické AI“ riziko, dobrá auditovateľnosť a silný základ pre neskoršiu marketing alebo širšiu intelligence okolo predaja a zásob (omnichannel).
 
 ---
 
 ## 2. Problém a výsledok
 
-**Problém:** Rozhodnutia o zásobách, dostupnosti a kapitalizácii zásob sú rozptýlené medzi viacerými nástrojmi. Chýba stabilná **jednotná pravda o produkte**, **historická porovnateľnosť** (trendy, výnimky) a **spoločný jazyk priority** medzi CEO, marketingom, logistikou a eshopom.
+**Problém:** Rozhodnutia o zásobách, dostupnosti a kapitalizácii zásob sú rozptýlené medzi viacerými nástrojmi. Chýba stabilná **jednotná pravda o produkte**, **historická porovnateľnosť** (trendy, výnimky) a **spoločný jazyk priority** medzi vedením, prevádzkami, logistikou a online kanálom.
 
 **Výsledok MVP:** Tím dostáva každý deň (alebo podľa dohody) **zoznam prioritizovaných issues** typu stockout risk, dead stock, overstock, expirácia - s **odôvodnením, odporúčanou akciou, confidence a vlastníkom**. Vedenie vie povedať či systém „niečo chytil“ a či sa to dá spočítať - nie či „AI niečo cíti“.
 
@@ -29,7 +29,7 @@ IZYVAPE potrebuje **jednu vrstvu operational clarity** nad existujúcimi systém
 ## 3. Positioning - čo predávame
 
 | Framing | Poznámka |
-| Predávame | **Operational clarity** a **decision support** nad ecommerce dátami |
+| Predávame | **Operational clarity** a **decision support** nad prevádzkovými a predajnými dátami (omnichannel) |
 | Nepredávame | Generický „AI systém“, chatbot ako jadro, autonómneho „AI zamestnanca“ |
 
 **Kľúčový rozdiel:** Dashboard ukazuje dáta. **Decision Support** interpretuje priority a navrhuje ďalší krok. MVP je **operational decision system**, nie prezentácia grafov.
@@ -66,7 +66,7 @@ Generovanie **nálezov** v kategóriách (príklad):
 Pravidlá a prahy sú **verzovateľné** (aspoň konceptuálne v MVP - aby bolo jasné „podľa čoho“ systém flaguje).
 
 **5.5 Decision layer (presentácia)**  
-Pre každý nález minimálne: **Issue → Why it matters → Recommended action → Confidence → Owner → Priority**. Žiadna autonómna exekúcia v ecommerce ani ERP napojení v MVP.
+Pre každý nález minimálne: **Issue → Why it matters → Recommended action → Confidence → Owner → Priority**. Žiadna autonómna exekúcia v predajných systémoch ani ERP napojení v MVP.
 
 ---
 
@@ -134,4 +134,4 @@ Po stabilizácii dát a dôvere v stock nálezy: marketing intelligence (čo pod
 
 ## Záver
 
-Tento MVP je zámerne úzky: **stock a dostupnosť ako najčastejšie a najlacnejšie validovateľné rozhodovanie v ecommerce**. Ak CEO schváli smer „decision layer nie dashboard“, projekt má jasný narativ, kontrolovateľné riziko a priestor na rozumnú laterálnu expanziu bez prepísania architektúry.
+Tento MVP je zámerne úzky: **stock a dostupnosť ako najčastejšie a najlacnejšie validovateľné rozhodovanie v omnichannel maloobchode** (prevádzky aj online). Ak CEO schváli smer „decision layer nie dashboard“, projekt má jasný narativ, kontrolovateľné riziko a priestor na rozumnú laterálnu expanziu bez prepísania architektúry.

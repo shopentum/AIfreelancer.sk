@@ -449,7 +449,7 @@
     }
   },
   "IzyvapeMvp": {
-    "eyebrow": "Decision Intelligence · E-commerce MVP",
+    "eyebrow": "Decision Intelligence · Omnichannel maloobchod MVP",
     "heroTitlePrefix": "Stock Decision Support Layer",
     "heroTitleAccent": "pre IZYVAPE",
     "heroLead": "Budujeme vrstvu, ktorá cez API prepojí existujúce systémy, vyhodnotí signály o zásobách a pravidelne vygeneruje konkrétne odporúčané úlohy pre tím. Nie ďalší dashboard ani samoúčelný AI chat.",
@@ -457,7 +457,7 @@
     "secondaryCta": "Ďalší detail nižšie",
     "diagram": {
       "title": "Prepojenie dát a API s rozhodovacím výstupom",
-      "lead": "Rovnaký princíp ako pri decision vrstve nad marketingom: viac zdrojov, jedna normalizácia a vyhodnotenie, výstup vo forme, ktorú tím zaradí medzi úlohy.",
+      "lead": "Ten istý princíp ako pri decision vrstve nad viacerými biznis signálmi: viac zdrojov, jedna normalizácia a vyhodnotenie, výstup vo forme úloh pre tím.",
       "inputsTitle": "ZDROJE A API",
       "inputs": {
         "i1": "WOOCOMMERCE",
@@ -570,7 +570,7 @@
     "docFootnote": "Kompletný markdown podklad (špecifikácia MVP + blok na Jira) je v repozitári projektu alebo ho doplním na vyžiadanie.",
     "closingEyebrow": "Ďalší krok",
     "closingTitle": "Od konceptu k konkrétnemu plánu",
-    "closingLead": "Krátka discovery, potom záväzný plán ingestov, prvých snapshotov a logiky nálezov v1 – bez reorganizácie celého ecommerce stacku.",
+    "closingLead": "Krátka discovery, potom záväzný plán ingestov, prvých snapshotov a logiky nálezov v1 – bez reorganizácie celého vášho systémového stacku.",
     "closingCta": "Naplánovať úvodný call"
   },
   "Navbar": {

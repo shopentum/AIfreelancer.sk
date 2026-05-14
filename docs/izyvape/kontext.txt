@@ -21,7 +21,7 @@ To je obrovský rozdiel.
 Ja by som ten návrh architektúry framingoval TAKTO
 
 Nie:
-„AI systém pre ecommerce“.
+„AI systém len pre čisto online predaj.“
 
 Ale:
 
@@ -287,7 +287,7 @@ Toto už nie je:
 
 Toto je:
 
-“Navrhujem vám nový spôsob práce s ecommerce dátami.”
+“Navrhujem vám nový spôsob práce s prevádzkovými a predajnými dátami (omnichannel).”
 
 To je úplne iný level positioning-u.
 
@@ -314,12 +314,12 @@ Pracujeme na novom AI / decision intelligence projekte pre IZYVAPE.
 
 Firma:
 
-* ecommerce firma,
+* maloobchodná firma (predaj hlavne cez prevádzky + ďalšie kanály vrátane online),
 * WooCommerce stack,
 * menší tím (~10 ľudí),
 * viacero existujúcich systémov a API,
 * externý programátor,
-* cieľ nie je „AI hračka“, ale praktická decision vrstva nad reálnym ecommerce fungovaním.
+* cieľ nie je „AI hračka“, ale praktická decision vrstva nad reálnym maloobchodným fungovaním (prevádzky, B2B, online),
 
 Projekt NESMIE byť chápaný ako:
 
@@ -330,7 +330,7 @@ Projekt NESMIE byť chápaný ako:
 
 Projekt MUSÍ byť chápaný ako:
 
-* practical ecommerce decision layer,
+* practical omnichannel retail decision layer,
 * operational intelligence system,
 * workflow + data intelligence vrstva,
 * recommendation / prioritization systém nad reálnymi dátami.
@@ -358,7 +358,7 @@ Systém:
 * NESMIE meniť sklad,
 * NESMIE meniť ceny,
 * NESMIE spúšťať kampane,
-* NESMIE robiť autonómne ecommerce akcie bez explicitného schválenia človekom.
+* NESMIE robiť autonómne obchodné ani prevádzkové akcie bez explicitného schválenia človekom.
 
 ---
 
@@ -502,7 +502,7 @@ Nepoužívať framing:
 
 * AI employee,
 * autonomous AI company,
-* self-running ecommerce,
+* self-running maloobchod bez ľudskej kontroly,
 * fully autonomous agents,
 * AGI wording,
 * fake ROI claims.
@@ -571,8 +571,8 @@ Projekt má byť:
 * prakticky použiteľný,
 * rýchlo validovateľný,
 * postavený nad reálnymi dátami,
-* testovateľný v reálnej ecommerce prevádzke,
-* použiteľný ako základ budúcej širšej ecommerce intelligence platformy.
+* testovateľný v reálnej prevádzke maloobchodu,
+* použiteľný ako základ budúcej širšej intelligence platformy okolo predaja a zásob.
 
 AI WORKS a skúsenosti z NMH:
 

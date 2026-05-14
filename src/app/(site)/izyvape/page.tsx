@@ -7,7 +7,7 @@ const path = "/izyvape";
 export const metadata: Metadata = {
   title: "IZYVAPE · Stock Decision Support MVP | Decision Intelligence",
   description:
-    "Návrh praktickej decision vrstvy nad skladom a dostupnosťou pre ecommerce (WooCommerce, Money S, Metorik). Operational clarity namiesto AI demo – Stock Decision Support Layer.",
+    "Návrh decision vrstvy nad skladom a dostupnosťou pre omnichannel maloobchod (prevádzky + online; WooCommerce, Money S, Metorik). Operational clarity namiesto AI demo – Stock Decision Support Layer.",
   alternates: { canonical: `${siteUrl}${path}` },
   openGraph: {
     title: "IZYVAPE · Stock Decision Support Layer (MVP) | aifreelancer.sk",
@@ -22,9 +22,9 @@ export const metadata: Metadata = {
       "Decision support pre sklad a dostupnosť – nie ďalší dashboard. Architektúra, tri core flow, governance.",
   },
   keywords: [
-    "decision intelligence ecommerce",
-    "stock decision support",
-    "WooCommerce inventory intelligence",
+    "decision intelligence maloobchod",
+    "stock decision support omnichannel",
+    "inventory intelligence prevádzky",
     "operational clarity MVP",
     "IZYVAPE",
   ],

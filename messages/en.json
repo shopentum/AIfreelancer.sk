@@ -449,7 +449,7 @@
     }
   },
   "IzyvapeMvp": {
-    "eyebrow": "Decision intelligence · E-commerce MVP",
+    "eyebrow": "Decision intelligence · Omnichannel retail MVP",
     "heroTitlePrefix": "Stock Decision Support Layer",
     "heroTitleAccent": "for IZYVAPE",
     "heroLead": "We build a layer that connects your existing systems via APIs, evaluates inventory signals and produces concrete recommended tasks for the team on a recurring basis. Not another dashboard or a chat bolt-on.",
@@ -457,7 +457,7 @@
     "secondaryCta": "More detail below",
     "diagram": {
       "title": "Connected data and APIs with a decision outcome",
-      "lead": "Same pattern as decision intelligence over marketing signals: multiple sources, one normalization and evaluation step, outputs your team can schedule as work.",
+      "lead": "Same pattern as multi-source decision intelligence: multiple inputs, one normalization and evaluation step, outputs your team can schedule as work.",
       "inputsTitle": "SOURCES & APIs",
       "inputs": {
         "i1": "WOOCOMMERCE",
@@ -570,7 +570,7 @@
     "docFootnote": "Full markdown spec (MVP + Jira-ready block) lives in the project repo or I can send it on request.",
     "closingEyebrow": "Next step",
     "closingTitle": "From concept to a concrete plan",
-    "closingLead": "Short discovery, then a binding plan for ingestion, first snapshots and findings v1 – without reorganizing the entire ecommerce stack.",
+    "closingLead": "Short discovery, then a binding plan for ingestion, first snapshots and findings v1 – without reorganizing your entire systems stack.",
     "closingCta": "Schedule intro call"
   },
   "Navbar": {

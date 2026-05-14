@@ -449,7 +449,7 @@
     }
   },
   "IzyvapeMvp": {
-    "eyebrow": "Decision Intelligence · E-Commerce MVP",
+    "eyebrow": "Decision Intelligence · Omnichannel-Einzelhandel MVP",
     "heroTitlePrefix": "Stock Decision Support Layer",
     "heroTitleAccent": "für IZYVAPE",
     "heroLead": "Wir bauen eine Schicht, die bestehende Systeme per API verbindet, Bestandssignale auswertet und wiederkehrend konkrete empfohlene Aufgaben für das Team erzeugt – kein weiteres Dashboard und kein Chat-Only-Produkt.",
@@ -457,7 +457,7 @@
     "secondaryCta": "Mehr Details unten",
     "diagram": {
       "title": "Verbundene Daten und APIs mit Entscheidungsoutput",
-      "lead": "Dasselbe Muster wie bei Decision Intelligence über Marketing: mehrere Quellen, eine Normalisierung und Auswertung, Outputs die sich als Arbeit einplanen lassen.",
+      "lead": "Dasselbe Muster wie bei Multi-Signal-Decision-Intelligence: mehrere Quellen, eine Normalisierung und Auswertung, Outputs die sich als Arbeit einplanen lassen.",
       "inputsTitle": "QUELLEN & APIs",
       "inputs": {
         "i1": "WOOCOMMERCE",
@@ -570,7 +570,7 @@
     "docFootnote": "Vollständiges Markdown (MVP-Spezifikation + Jira-Block) im Projekt-Repo oder auf Anfrage.",
     "closingEyebrow": "Nächster Schritt",
     "closingTitle": "Vom Konzept zum konkreten Plan",
-    "closingLead": "Kurze Discovery, dann verbindlicher Plan für Ingest, erste Snapshots und Findings v1 – ohne den gesamten Commerce-Stack umzubauen.",
+    "closingLead": "Kurze Discovery, dann verbindlicher Plan für Ingest, erste Snapshots und Findings v1 – ohne Ihren gesamten System-Stack neu zu organisieren.",
     "closingCta": "Intro-Call planen"
   },
   "Navbar": {
