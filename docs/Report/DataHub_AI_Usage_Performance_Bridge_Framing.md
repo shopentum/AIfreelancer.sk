@@ -160,4 +160,4 @@ Detailný KPI reporting UX ostáva súčasťou **CMSB-1810**.
 
 ## Príloha (interné)
 
-**Copy-paste pre Jiru (Penta):** výhradne **[`DHUB-3138_Penta_Data_Delivery.md`](./DHUB-3138_Penta_Data_Delivery.md)** — parent **DHUB-3138** + detail v **subtasku**. Tento framing súbor do DH komunikácie **nevkladať**.
+**Copy-paste pre Jiru (Penta):** výhradne **[`DHUB-3138_Penta_Data_Delivery.md`](./DHUB-3138_Penta_Data_Delivery.md)** — parent **DHUB-3138** + **krátky** subtask (iba delivery). Rozšírený návrh po Pent („upratovanie“): **[`DataHub_AI_Reporting_Phase2_PostPenta.md`](./DataHub_AI_Reporting_Phase2_PostPenta.md)** — interné, nie pre DH pri Pent. **Tento framing súbor ani Phase 2 súbor do komunikácie s DH pri Pent neposielať.**
