@@ -1,10 +1,10 @@
 # AI reporting — framing pre DataHub (usage ↔ performance)
 
-**Status dokumentu:** **Interný** (produkt / vlastná koordinácia). **Neprepájať** s operatívnym ticketom **DHUB-3138** — DataHub o tomto dokumente **vedieť nemusí**; do DHUB-3138 **nevkladať** odkazy na tento súbor ani tému „bridge“, komparácie kohort, baseline ani rozšírený analytický rámec (riziko zdržania pred Pentou). Jednorazové zadanie pre DH je výhradne v [`DHUB-3138_Penta_Data_Delivery.md`](./DHUB-3138_Penta_Data_Delivery.md).
+**Status dokumentu:** **Interný** (produkt / analytika). **S DHUB sa táto téma vôbec neprepája** — ani slovkom, ani odkazom v rámci **DHUB-3138** (Penta). Komunikácia s DataHubom pri Pent dodaní je výhradne podľa [`DHUB-3138_Penta_Data_Delivery.md`](./DHUB-3138_Penta_Data_Delivery.md). Samostatný **nasledujúci** DH ticket / diskusia (recurring dataset usage ↔ performance nad rámec Pent podkladov) je iná práca a **nie je** závislá od tohto dokumentu z pohľadu DH.
 
-**Účel dokumentu:** Zjednotiť jazyk, scope a analytické očakávania **vnútorne** (po Pent / recurring vrstva): prepojenie AI usage s performance signálmi, bez náhrady za produktové CMS zadanie.
+**Účel dokumentu:** Zjednotiť jazyk, scope a analytické očakávania **vnútorne** pri príprave ďalšieho kroku po Pent: stabilné prepojenie AI usage s performance signálmi.
 
-**Súvislosť:** Produktové zadanie **CMSB-1810** (ROI / Adoption). Operatívne dodanie dát pred Pentou: **DHUB-3138** — pozri samostatný súbor vyššie (bez témy bridge).
+**Súvislosť:** Produktové zadanie **CMSB-1810** (ROI / Adoption — širší kontext v repo). Pent operatíva: **DHUB-3138** — samostatný súbor vyššie; **netýka sa** obsahu tohto framing dokumentu z pohľadu DH komunikácie.
 
 ---
 
@@ -160,4 +160,4 @@ Detailný KPI reporting UX ostáva súčasťou **CMSB-1810**.
 
 ## Príloha (interné)
 
-**Operatívny copy-paste pre Jira:** výhradne súbor **[`DHUB-3138_Penta_Data_Delivery.md`](./DHUB-3138_Penta_Data_Delivery.md)** — bez odkazov na tento bridge dokument a bez témy komparácií pre DataHub.
+**Copy-paste pre Jira (Penta):** výhradne **[`DHUB-3138_Penta_Data_Delivery.md`](./DHUB-3138_Penta_Data_Delivery.md)**. Tento framing súbor do DH komunikácie **nevkladať**.
