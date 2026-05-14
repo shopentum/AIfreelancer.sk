@@ -270,22 +270,6 @@ export default function IzyvapeMvpLanding() {
             </h1>
 
             <p className="mt-6 max-w-3xl mx-auto text-lg md:text-xl text-slate-400 font-medium leading-relaxed">{t("heroLead")}</p>
-
-            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                href="/kontakt"
-                className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all shadow-lg shadow-white/5"
-              >
-                {t("primaryCta")}
-                <ArrowRight size={14} />
-              </Link>
-              <a
-                href="#podrobnosti"
-                className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors py-3"
-              >
-                {t("secondaryCta")}
-              </a>
-            </div>
           </motion.div>
         </div>
       </section>
@@ -345,51 +329,7 @@ export default function IzyvapeMvpLanding() {
         </div>
       </section>
 
-      {/* 4. Stack – zhoda s Agency */}
-      <section className="relative px-6 pb-24 border-t border-white/5 pt-16 bg-black/30">
-        <div className="max-w-7xl mx-auto space-y-12">
-          <div className="text-center space-y-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-blue-500">{tAgency("stackEyebrow")}</p>
-            <h2 className="text-2xl md:text-4xl font-sora font-black tracking-tighter uppercase">{tAgency("stackTitle")}</h2>
-            <p className="max-w-2xl mx-auto text-sm text-slate-500">{t("stackFootnote")}</p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 md:gap-8">
-            {stackItems.map((tech, i) => (
-              <motion.div
-                key={tech.name}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.06 }}
-                className="p-6 md:p-8 rounded-3xl bg-white/5 border border-white/10 flex flex-col items-center text-center space-y-5 hover:bg-white/[0.07] transition-all"
-              >
-                <div
-                  className={`w-12 h-12 md:w-14 md:h-14 bg-white/5 rounded-2xl flex items-center justify-center ${tech.color} border border-white/5`}
-                >
-                  <tech.icon size={24} className="md:w-7 md:h-7" />
-                </div>
-                <div className="space-y-1">
-                  <h4 className="text-xs font-black uppercase tracking-widest text-white">{tech.name}</h4>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight">{tech.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="flex justify-center pt-2">
-            <Link
-              href="/agency"
-              className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors inline-flex items-center gap-2"
-            >
-              {t("stackLinkLabel")}
-              <ArrowRight size={12} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. MVP príklady use case */}
+      {/* 4. MVP príklady use case */}
       <section className="relative px-6 pb-24 border-t border-white/5 pt-16 bg-gradient-to-b from-transparent to-purple-950/15">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14 space-y-3">
@@ -425,8 +365,8 @@ export default function IzyvapeMvpLanding() {
         </div>
       </section>
 
-      {/* 6. Accordions */}
-      <section id="podrobnosti" className="relative px-6 pb-28 scroll-mt-28 border-t border-white/5 pt-16">
+      {/* 5. Accordions */}
+      <section id="podrobnosti" className="relative px-6 pb-24 scroll-mt-28 border-t border-white/5 pt-16">
         <div className="max-w-3xl mx-auto space-y-6">
           <div className="text-center mb-10 space-y-2">
             <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">{t("accordionEyebrow")}</p>
@@ -474,19 +414,47 @@ export default function IzyvapeMvpLanding() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="relative px-6 pb-32">
-        <div className="max-w-4xl mx-auto rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-transparent px-8 py-14 text-center space-y-6">
-          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-blue-400">{t("closingEyebrow")}</p>
-          <h2 className="text-2xl md:text-3xl font-sora font-black text-white">{t("closingTitle")}</h2>
-          <p className="text-slate-400 max-w-xl mx-auto leading-relaxed">{t("closingLead")}</p>
-          <Link
-            href="/kontakt"
-            className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-blue-400 transition-colors"
-          >
-            {t("closingCta")}
-            <ArrowRight size={14} />
-          </Link>
+      {/* 6. Stack – úplne dole (rovnaký blok ako Agency) */}
+      <section className="relative px-6 pb-28 md:pb-32 border-t border-white/5 pt-16 bg-black/30">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="text-center space-y-4">
+            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-blue-500">{tAgency("stackEyebrow")}</p>
+            <h2 className="text-2xl md:text-4xl font-sora font-black tracking-tighter uppercase">{tAgency("stackTitle")}</h2>
+            <p className="max-w-2xl mx-auto text-sm text-slate-500">{t("stackFootnote")}</p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 md:gap-8">
+            {stackItems.map((tech, i) => (
+              <motion.div
+                key={tech.name}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.06 }}
+                className="p-6 md:p-8 rounded-3xl bg-white/5 border border-white/10 flex flex-col items-center text-center space-y-5 hover:bg-white/[0.07] transition-all"
+              >
+                <div
+                  className={`w-12 h-12 md:w-14 md:h-14 bg-white/5 rounded-2xl flex items-center justify-center ${tech.color} border border-white/5`}
+                >
+                  <tech.icon size={24} className="md:w-7 md:h-7" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-xs font-black uppercase tracking-widest text-white">{tech.name}</h4>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight">{tech.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="flex justify-center pt-2">
+            <Link
+              href="/agency"
+              className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors inline-flex items-center gap-2"
+            >
+              {t("stackLinkLabel")}
+              <ArrowRight size={12} />
+            </Link>
+          </div>
         </div>
       </section>
     </div>
