@@ -9,9 +9,9 @@
 | **DHUB-3138** | **Hlavný task** (parent) — drží zodpovednosť za Pent zadanie voči DataHubu. |
 | **Sub-task pod DHUB-3138** | **Krátky návrh dodania** — čo dodať, ktoré moduly, aké dáta, CAP podľa existujúcich pravidiel. |
 
-**Teraz delivery, potom metodika:** Rozšírený operačný návrh (grain, komparačné rezy, baseline dokumentácia, rozlíšenie usage vs web metrík) je **iba interný** v [`DataHub_AI_Reporting_Phase2_PostPenta.md`](./DataHub_AI_Reporting_Phase2_PostPenta.md) — **nie** do Pent subtasku.
+**Teraz delivery, potom metodika:** rozšírený návrh po Pent je interné v [`DataHub_AI_Reporting_Phase2_PostPenta.md`](./DataHub_AI_Reporting_Phase2_PostPenta.md). Pent subtask doň **nenarážať** voči DH.
 
-**Komunikácia s DH:** Neprepájať Pent úlohu s neskorším recurring „prepojením“ datasetov — samostatný ticket po Pent.
+**Komunikácia s DH:** Pent úlohu neprepájať s neskorším recurring prepojením datasetov — vlastný ticket po Pent.
 
 ---
 
@@ -27,7 +27,12 @@
 | **Video subtitles Generator** |
 | **Audio Transcript** |
 
-**Performance dáta (orientačne):** čo už viete priradiť k **článku** alebo k **použitiu feature** z web analytiky / DH — napr. views, engagement, CTR, revenue (podľa dostupnosti). Chýbajúce pole **nie je blokér**.
+**Performance dáta (orientačne):** čo už viete priradiť k **článku** alebo k **použitiu feature** z web analytiky / DH — napr. views, engagement, CTR, revenue (podľa dostupnosti).
+
+**Neúplnosť metrik (explicitne):**
+
+- Nie všetky AI features musia mať v tomto kole dostupné performance metriky.
+- Chýbajúce metriky nie sú blokér pre vznik ani dodanie výstupu (tabuľka / export / úprava dashboardu).
 
 ---
 
@@ -66,21 +71,27 @@ Parent: DHUB-3138.
 
 Jednorazové podklady pre Pentu. Cieľ: existujúce zdroje, tabuľky/grafy — bez otvárania novej metodickej agendy v tomto ticketi.
 
+Mimo scope tohto ticketu: vyhodnotenie / interpretácia dát (čo čísla „znamenajú“ pre biznis) — to bude riešiť CMS tím; DH dodáva výstupy podľa dohody.
+
 1) Adopcia — všetky AI nástroje v súčasnom AI reportinge
 • Tabuľky a grafy ako doteraz (periodicita / dashboard podľa zvyku DH).
-• CAP / eligible: dodržať existujúce pravidlá AI reportingu pre jednotlivé nástroje; základnú adoption metriku nemeníme.
+• Spájanie na článok cez kanonický identifikátor: ArticleDocumentId / article_id (alebo ekvivalent, ktorý používate ako zdroj pravdy).
+• CAP / eligible: dodržať existujúce pravidlá AI reportingu pre jednotlivé nástroje. Pri adopčných podieloch a „baseline“ menovateľoch nejde o počet všetkých článkov na webe, ale o bázu tam, kde bola daná AI funkcia pre daný typ obsahu reálne dostupná / použiteľná (podľa tých istých eligible pravidiel). Číslo má odrážať túto realitu, nie umelo nafúknutý celkový počet článkov.
 
 2) Performance polia — len týchto 5 modulov
 • Tag Generator
 • Poll Generator
-• Related articles auto-suggestion
+• Related articles (auto-suggestion)
 • Video subtitles Generator
 • Audio Transcript
-• K výstupu priradiť dostupné web / DH performance údaje na úrovni článku (alebo tak, ako viete spočítať pri použití feature) — čo konkrétne (views, CTR, engagement, …) podľa vašej náleznosti. Ak niečo pre modul nie je, vynechať alebo krátko označiť medzeru.
+• K výstupu priradiť dostupné web / DH performance údaje na úrovni článku cez rovnaký článkový kľúč ako vyššie (ArticleDocumentId / article_id), alebo tak, ako viete spočítať pri použití feature — konkrétne polia (views, CTR, engagement, …) podľa dostupnosti.
+
+• Nie všetky AI features musia mať dostupné performance metriky v tomto kole.
+• Chýbajúce metriky nie sú blokér pre vznik ani dodanie výstupu.
 
 Deliverable: dohodnutý formát (tabuľka / export / úprava dashboardu) + grafy pre Pentu podľa potreby produktu.
 
-Acceptance: NMH potvrdí dodanie bodu 1 podľa existujúcich CAP pravidiel a bodu 2 pre uvedených päť modulov v dohodnutom rozsahu.
+Acceptance: NMH potvrdí dodanie bodu 1 podľa existujúcich CAP pravidiel a bodu 2 pre uvedených päť modulov v dohodnutom rozsahu; vyhodnotenie dát ostáva na CMS tíme.
 ```
 
 ---
