@@ -1,6 +1,8 @@
 **CMSB-1810** — úprava AI reportingu (interný podklad + kontext)
 
-**Framing pre DataHub** (usage vs performance signály, shape > completeness, bez „impact“ tlaku): pozri [`DataHub_AI_Usage_Performance_Bridge_Framing.md`](./DataHub_AI_Usage_Performance_Bridge_Framing.md).
+**Operatívne zadanie pre DataHub pred Pentou (task DHUB-3138):** copy-paste text v [`DHUB-3138_Penta_Data_Delivery.md`](./DHUB-3138_Penta_Data_Delivery.md) — **bez** témy bridge / komparácii pre DH.
+
+**Interný framing (po Pent / recurring):** [`DataHub_AI_Usage_Performance_Bridge_Framing.md`](./DataHub_AI_Usage_Performance_Bridge_Framing.md) — **neprepájať** s DHUB-3138.
 
 # **Uprava AI Reportingu**
 
