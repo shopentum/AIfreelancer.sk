@@ -1,6 +1,6 @@
 **CMSB-1810** — úprava AI reportingu (interný podklad + kontext)
 
-**Operatívne zadanie pre DataHub pred Pentou:** **[`DHUB-3138_Penta_Data_Delivery.md`](./DHUB-3138_Penta_Data_Delivery.md)** — parent **DHUB-3138** + krátky Pent **subtask**. Po Pent („upratovanie“, metodika): **[`DataHub_AI_Reporting_Phase2_PostPenta.md`](./DataHub_AI_Reporting_Phase2_PostPenta.md)** (interné). **Neväzovať** na framing dokument nižšie z pohľadu DH pri Pent.
+**Operatívne zadanie pre DataHub pred Pentou:** finálne znenie **sub-tasku** pod DHUB-3138 — [`DHUB-3138_Penta_Data_Delivery.md`](./DHUB-3138_Penta_Data_Delivery.md). Po Pent (metodika): [`DataHub_AI_Reporting_Phase2_PostPenta.md`](./DataHub_AI_Reporting_Phase2_PostPenta.md) (interné). **Neväzovať** na framing dokument nižšie z pohľadu DH pri Pent.
 
 **Interný framing usage ↔ performance:** [`DataHub_AI_Usage_Performance_Bridge_Framing.md`](./DataHub_AI_Usage_Performance_Bridge_Framing.md) — **žiadna väzba na DHUB-3138 / Pent subtask**.
 
