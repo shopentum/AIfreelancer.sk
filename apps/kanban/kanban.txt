@@ -1,0 +1,148 @@
+Build a simple personal task board MVP.
+
+Context:
+This is NOT a Jira replacement. Jira remains the project/source-of-truth layer.
+This app is my personal execution layer for daily work across projects.
+
+Goal:
+Create an ultra-lightweight Kanban-style web app for personal task execution with minimal friction.
+
+Core principles:
+- Brutally simple
+- Fast task capture
+- No enterprise complexity
+- No assignees, story points, sprints, epics, permissions, comments, notifications
+- State-first workflow
+- Designed for personal productivity and context switching
+
+Projects:
+The app should support multiple projects, for example:
+- Shopentum
+- NMH
+- AIWORKS
+- Finance
+- Personal
+
+Default view:
+A dashboard showing tasks from all projects together.
+
+Project filter:
+At the top, add a horizontal scrollable project selector:
+- All
+- Shopentum
+- NMH
+- AIWORKS
+- Finance
+- Personal
+
+Kanban columns:
+- Ready
+- In Progress
+- Ready to Review
+- Done
+
+Selected MVP features:
+
+1. Brain Dump Inbox
+Add a fast capture input at the top.
+Behavior:
+- User types a task title
+- Pressing Enter creates a new task
+- Default state: Ready
+- Default project: Inbox or currently selected project
+- No modal required
+- Task can be edited later
+
+4. Quick Timer Overlay
+Each task should support simple time tracking:
+- Start
+- Pause
+- Stop
+- Display total tracked time on the task card
+
+Behavior:
+- When a task is moved to In Progress, ask the user whether to start the timer
+- If moved to Ready to Review, pause the timer automatically
+- If moved to Done, stop the timer automatically
+- Manual timer control should always be possible
+
+6. Dead-simple Notes
+Each task should have a simple notes field:
+- Markdown-style textarea is enough
+- No rich editor
+- Notes are optional
+- Notes should be editable in a task detail drawer or modal
+
+7. Activity Timeline
+Each task should keep a simple activity log:
+- Created
+- Moved between states
+- Timer started
+- Timer paused
+- Timer stopped
+- Notes updated
+- Project changed
+- Marked done
+
+The timeline should be visible inside the task detail view.
+
+Task model:
+Each task should include:
+- id
+- title
+- project
+- status
+- notes
+- createdAt
+- updatedAt
+- totalTrackedSeconds
+- timerStartedAt
+- isTimerRunning
+- activityLog[]
+
+UI requirements:
+- Clean Jira-like Kanban board
+- Minimal form fields
+- Drag and drop between columns
+- Project filter at top
+- Brain dump input always visible
+- Task cards should show:
+  - title
+  - project badge
+  - tracked time
+  - timer status
+- Clicking a task opens detail drawer/modal with:
+  - title
+  - project
+  - status
+  - notes
+  - timer controls
+  - activity timeline
+
+Technical preference:
+Use a simple modern stack suitable for quick MVP.
+If using Next.js, keep the architecture clean and simple.
+Use local storage first unless database setup is already available.
+Design it so Supabase can be added later.
+
+Important:
+Do not over-engineer.
+Do not add authentication yet.
+Do not add team features.
+Do not add AI features yet.
+This is a personal execution MVP.
+
+--------------------------------–
+
+Každá appka má vlastný priečinok s vlastným package.json (vlastný npm install, vlastný npm run build).
+
+V koreni monorepa (voliteľné ale praktické): README.md s mapou apps/* a ktorá appka ide na akú doménu.
+
+V každom projekte na Verceli: Settings → General → Root Directory = cesta k appke, napr. apps/nova-app (presne tam, kde je package.json tej appky).
+
+V projekte aifreelancer sme s DB (supabase) asi este nerobili, ale vseobecne v iných projektoch fungujeme na supabase. Bude potrebne preverit ci fungujeme, alebo musím nieco doladit v ramci nastaveni. 
+
+Dizajn aplikácie má vychádzať z webu (tmavy Enterprise styl, farebne akcenty, farby kanban: ready - modrá, in profress - orange, Review - fialova, Done - green.
+
+Potrebujem k appke pristup cez 2 pc - teda neviem ci to vieme riesit cez local storage
+
