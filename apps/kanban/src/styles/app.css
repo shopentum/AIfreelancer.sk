@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@layer components {
+  .kanban-eyebrow {
+    @apply mb-2 text-[10px] font-bold uppercase tracking-[0.35em] text-indigo-400;
+  }
+
+  .kanban-h1 {
+    @apply text-3xl font-bold tracking-tight text-white;
+  }
+
+  .kanban-muted {
+    @apply text-sm leading-relaxed text-slate-400;
+  }
+
+  .kanban-label {
+    @apply mb-1.5 block text-[11px] font-bold uppercase tracking-widest text-slate-500;
+  }
+
+  .kanban-input {
+    @apply w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none placeholder:text-slate-600 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30;
+  }
+
+  .kanban-btn-primary {
+    @apply rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-indigo-600/25 transition-colors hover:bg-indigo-500;
+  }
+
+  .kanban-panel {
+    @apply rounded-2xl border border-white/10 bg-white/5 p-4 shadow-xl shadow-black/20 backdrop-blur-sm md:p-5;
+  }
+
+  .kanban-card {
+    @apply rounded-xl border border-white/10 bg-slate-900/80 p-3 shadow-md shadow-black/20 transition-shadow hover:border-white/15 hover:shadow-lg;
+  }
+}
+
+@layer utilities {
+  .scrollbar-kanban::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scrollbar-kanban::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-white/10;
+  }
+}
