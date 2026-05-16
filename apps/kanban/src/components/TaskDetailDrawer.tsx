@@ -219,12 +219,12 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
               />
             </div>
             <div className="space-y-2">
-              <p className={labelClass}>Summary (kanban)</p>
+              <p className={labelClass}>Kde som skončil</p>
               <input
                 type="text"
                 value={task.summary}
                 onChange={(e) => setTaskSummary(task.id, e.target.value)}
-                placeholder="Krátky text na karte…"
+                placeholder="Posledný vyriešený bod, krátko…"
                 className={inputClass}
               />
             </div>

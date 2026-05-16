@@ -61,11 +61,10 @@ export function formatSkShortDate(iso: string): string {
   }).format(d);
 }
 
-/** Card headline: summary on board, fallback to title. */
-export function getTaskCardLabel(task: { summary: string; title: string }): string {
-  const s = task.summary.trim();
-  if (s) return s;
-  return task.title;
+/** Primary label in lists (strip, archive) — task title only. */
+export function getTaskCardLabel(task: { title: string }): string {
+  const trimmed = task.title.trim();
+  return trimmed || "Bez názvu";
 }
 
 export function getDisplayTrackedSeconds(

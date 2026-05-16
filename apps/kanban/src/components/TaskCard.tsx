@@ -98,14 +98,27 @@ export function TaskCard({ task, index, columnStatus }: TaskCardProps) {
               )}
             </div>
 
-            <h3
-              className={cn(
-                "line-clamp-2 pr-4 text-sm font-bold leading-snug",
-                t(isDark, "text-slate-800", "text-slate-100"),
+            <div className="space-y-1 pr-4">
+              <h3
+                className={cn(
+                  "line-clamp-2 text-sm font-bold leading-snug",
+                  t(isDark, "text-slate-800", "text-slate-100"),
+                )}
+              >
+                {getTaskCardLabel(task)}
+              </h3>
+              {task.summary.trim() && (
+                <p
+                  className={cn(
+                    "truncate text-[11px] leading-snug",
+                    t(isDark, "text-slate-500", "text-slate-500"),
+                  )}
+                  title={task.summary.trim()}
+                >
+                  {task.summary.trim()}
+                </p>
               )}
-            >
-              {getTaskCardLabel(task)}
-            </h3>
+            </div>
 
             <div
               className={cn(
