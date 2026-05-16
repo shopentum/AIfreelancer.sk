@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Braces, Check, X } from "lucide-react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useKanban, type ProjectFilter } from "@/hooks/useKanbanStore";
@@ -40,7 +41,6 @@ export function KanbanExportPopover() {
   const [includeDone, setIncludeDone] = useState(true);
   const [includeArchive, setIncludeArchive] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
 
   const today = todayBratislavaDateKey();
 
@@ -54,23 +54,14 @@ export function KanbanExportPopover() {
 
   useEffect(() => {
     if (!open) return;
-    function onPointerDown(e: MouseEvent) {
-      const target = e.target as Node;
-      if (
-        panelRef.current?.contains(target) ||
-        triggerRef.current?.contains(target)
-      ) {
-        return;
-      }
-      setOpen(false);
-    }
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") setOpen(false);
     }
-    document.addEventListener("mousedown", onPointerDown);
     document.addEventListener("keydown", onKey);
     return () => {
-      document.removeEventListener("mousedown", onPointerDown);
+      document.body.style.overflow = prev;
       document.removeEventListener("keydown", onKey);
     };
   }, [open]);
@@ -137,78 +128,58 @@ export function KanbanExportPopover() {
     ),
   );
 
-  const triggerLabel = copied
-    ? "JSON skopírované"
-    : failed
-      ? "Kopírovanie zlyhalo"
-      : "Export JSON pre report / chat";
+  const triggerLabel = open
+    ? "Zavrieť export reportu"
+    : copied
+      ? "JSON skopírované"
+      : failed
+        ? "Kopírovanie zlyhalo"
+        : "Otvoriť export reportu (nie kopírovať hneď)";
 
-  return (
-    <div className="relative">
-      <button
-        ref={triggerRef}
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        title={triggerLabel}
-        aria-label={triggerLabel}
-        aria-expanded={open}
-        className={cn(
-          "flex h-10 w-10 items-center justify-center rounded-xl border transition-all",
-          open || copied
-            ? t(
-                isDark,
-                "border-indigo-200 bg-indigo-50 text-indigo-600",
-                "border-indigo-500/40 bg-indigo-500/15 text-indigo-300",
-              )
-            : failed
-              ? t(
-                  isDark,
-                  "border-red-200 bg-red-50 text-red-600",
-                  "border-red-500/30 bg-red-500/10 text-red-400",
-                )
-              : t(
-                  isDark,
-                  "border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900",
-                  "border-slate-700 bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white",
-                ),
-        )}
-      >
-        {copied ? (
-          <Check size={20} strokeWidth={2.5} aria-hidden />
-        ) : (
-          <Braces size={20} strokeWidth={2} aria-hidden />
-        )}
-      </button>
-
-      {open && (
+  const dialog =
+    open &&
+    createPortal(
+      <div className="fixed inset-0 z-[200] flex items-end justify-center p-4 sm:items-center">
+        <button
+          type="button"
+          className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+          aria-label="Zavrieť"
+          onClick={() => setOpen(false)}
+        />
         <div
           ref={panelRef}
           role="dialog"
-          aria-label="Nastavenia exportu JSON"
+          aria-modal="true"
+          aria-label="Export reportu JSON"
           className={cn(
-            "absolute right-0 top-full z-50 mt-2 w-[min(100vw-2rem,340px)] rounded-2xl border p-4 shadow-xl",
+            "relative z-[201] max-h-[min(90dvh,640px)] w-full max-w-md overflow-y-auto rounded-2xl border p-5 shadow-2xl",
             t(isDark, "border-slate-200 bg-white", "border-slate-700 bg-slate-900"),
           )}
         >
-          <div className="mb-3 flex items-start justify-between gap-2">
-            <p
-              className={cn(
-                "text-xs font-bold uppercase tracking-widest",
-                t(isDark, "text-slate-900", "text-white"),
-              )}
-            >
-              Export reportu
-            </p>
+          <div className="mb-4 flex items-start justify-between gap-2">
+            <div>
+              <p
+                className={cn(
+                  "text-sm font-bold uppercase tracking-widest",
+                  t(isDark, "text-slate-900", "text-white"),
+                )}
+              >
+                Export reportu
+              </p>
+              <p className={cn("mt-1 text-xs", t(isDark, "text-slate-500", "text-slate-400"))}>
+                Nastav obdobie a checkboxy, potom Kopírovať JSON.
+              </p>
+            </div>
             <button
               type="button"
               onClick={() => setOpen(false)}
               className={cn(
-                "rounded-lg p-1",
+                "rounded-lg p-1.5",
                 t(isDark, "text-slate-400 hover:bg-slate-100", "text-slate-500 hover:bg-slate-800"),
               )}
               aria-label="Zavrieť"
             >
-              <X size={16} />
+              <X size={18} />
             </button>
           </div>
 
@@ -221,9 +192,6 @@ export function KanbanExportPopover() {
               )}
             >
               {projectLabel}
-            </p>
-            <p className={cn("mt-1 text-[10px]", t(isDark, "text-slate-400", "text-slate-500"))}>
-              Podľa pill filtra v lište
             </p>
           </div>
 
@@ -297,7 +265,7 @@ export function KanbanExportPopover() {
             </div>
           </div>
 
-          <div className="mb-4 space-y-2">
+          <div className="mb-4 space-y-2 rounded-xl border p-3">
             <label
               className={cn(
                 "flex cursor-pointer items-center gap-2 text-sm",
@@ -308,9 +276,8 @@ export function KanbanExportPopover() {
                 type="checkbox"
                 checked={includeDone}
                 onChange={(e) => setIncludeDone(e.target.checked)}
-                className="rounded border-slate-300"
               />
-              <span>includeDone — Done na boarde</span>
+              <span>includeDone — úlohy Done na boarde</span>
             </label>
             <label
               className={cn(
@@ -322,9 +289,8 @@ export function KanbanExportPopover() {
                 type="checkbox"
                 checked={includeArchive}
                 onChange={(e) => setIncludeArchive(e.target.checked)}
-                className="rounded border-slate-300"
               />
-              <span>includeArchive — archív</span>
+              <span>includeArchive — položky z archívu</span>
             </label>
           </div>
 
@@ -332,7 +298,7 @@ export function KanbanExportPopover() {
             type="button"
             onClick={() => void handleCopy()}
             className={cn(
-              "w-full rounded-xl py-2.5 text-xs font-bold uppercase tracking-widest transition-all",
+              "w-full rounded-xl py-3 text-xs font-bold uppercase tracking-widest transition-all",
               t(
                 isDark,
                 "bg-slate-900 text-white hover:bg-slate-800",
@@ -343,7 +309,46 @@ export function KanbanExportPopover() {
             Kopírovať JSON
           </button>
         </div>
-      )}
-    </div>
+      </div>,
+      document.body,
+    );
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        title={triggerLabel}
+        aria-label={triggerLabel}
+        aria-haspopup="dialog"
+        className={cn(
+          "flex h-10 w-10 items-center justify-center rounded-xl border transition-all",
+          open || copied
+            ? t(
+                isDark,
+                "border-indigo-200 bg-indigo-50 text-indigo-600",
+                "border-indigo-500/40 bg-indigo-500/15 text-indigo-300",
+              )
+            : failed
+              ? t(
+                  isDark,
+                  "border-red-200 bg-red-50 text-red-600",
+                  "border-red-500/30 bg-red-500/10 text-red-400",
+                )
+              : t(
+                  isDark,
+                  "border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900",
+                  "border-slate-700 bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white",
+                ),
+        )}
+      >
+        {copied ? (
+          <Check size={20} strokeWidth={2.5} aria-hidden />
+        ) : (
+          <Braces size={20} strokeWidth={2} aria-hidden />
+        )}
+      </button>
+      {dialog}
+    </>
   );
 }
