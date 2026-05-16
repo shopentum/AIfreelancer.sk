@@ -1,6 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AppNav } from "@/components/AppNav";
 import { PROJECTS, getProjectLabel } from "@/config/projects";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { formatDuration, formatSkDateTime, getDisplayTrackedSeconds } from "@/lib/formatters";
 import {
   addCalendarDaysBratislava,
@@ -8,7 +10,7 @@ import {
   isoToBratislavaDateKey,
   todayBratislavaDateKey,
 } from "@/lib/archiveDateFilter";
-import { taskRepository } from "@/repositories/localStorageTaskRepository";
+import { taskRepository } from "@/repositories";
 import type { ArchivedTask, ArchivesByProject } from "@/types/task";
 
 function flattenArchives(archives: ArchivesByProject): ArchivedTask[] {
@@ -18,13 +20,27 @@ function flattenArchives(archives: ArchivesByProject): ArchivedTask[] {
 type ProjectArchiveFilter = "all" | string;
 
 export function ArchivePage() {
+  usePageTitle("Archív");
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [archives] = useState<ArchivesByProject>(() =>
     taskRepository.loadArchives(),
   );
-  const [projectFilter, setProjectFilter] =
-    useState<ProjectArchiveFilter>("all");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [projectFilter, setProjectFilter] = useState<ProjectArchiveFilter>(
+    () => searchParams.get("project") || "all",
+  );
+  const [dateFrom, setDateFrom] = useState(
+    () => searchParams.get("from") ?? "",
+  );
+  const [dateTo, setDateTo] = useState(() => searchParams.get("to") ?? "");
+
+  useEffect(() => {
+    const next = new URLSearchParams();
+    if (projectFilter !== "all") next.set("project", projectFilter);
+    if (dateFrom) next.set("from", dateFrom);
+    if (dateTo) next.set("to", dateTo);
+    setSearchParams(next, { replace: true });
+  }, [projectFilter, dateFrom, dateTo, setSearchParams]);
 
   const allItems = useMemo(
     () =>

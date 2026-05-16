@@ -33,8 +33,9 @@ Zdroj pravdy: [`SPEC_IMPLEMENTATION.md`](./SPEC_IMPLEMENTATION.md)
 - [x] Sumár vyfiltrovaného času + počet položiek
 - [x] `react-router-dom`, navigácia Board / Archív, `vercel.json` rewrite pre SPA
 
-## Fáza 4 - Nasadenie a rozšírenia
+## Fáza 4 - Nasadenie a rozšírenia (hotová)
 
-- README / Vercel root `apps/kanban` (čiastočne hotové)
-- Supabase `TaskRepository` implementácia (voliteľne skeleton)
-- Drobný polish UX
+- [x] Root `README.md` - mapa `apps/*` a domény
+- [x] `apps/kanban/README.md`, `.env.example`, `docs/SUPABASE_MIGRATION.md`
+- [x] `createTaskRepository` + `SupabaseTaskRepository` skeleton + `taskMapper`
+- [x] UX: titulky stránok, badge úložiska v navigácii, hint pri stĺpci Done, URL query pre filtre archívu

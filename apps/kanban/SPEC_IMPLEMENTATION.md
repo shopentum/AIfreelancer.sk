@@ -322,4 +322,4 @@ Verziovanie kľúčov (`_v1`) uľahči migrácie schémy storage.
 6. [ ] Activity log — append pri akciách + trim  
 7. [ ] Bootstrap flush Done → archív per projekt + persistencia archívu  
 8. [ ] Archive panel/stránka (zoznam položiek, filter projektu, filter dátumu, sumár vyfiltrovaného času)  
-9. [ ] Abstrakcia repozitára pripravená na Supabase  
+9. [x] Abstrakcia repozitára pripravená na Supabase (`createTaskRepository`, skeleton, mapper)  

@@ -19,7 +19,7 @@ import {
   updateTaskProject,
   updateTaskTitle,
 } from "@/domain/taskService";
-import { taskRepository } from "@/repositories/localStorageTaskRepository";
+import { taskRepository } from "@/repositories";
 import type { Task, TaskStatus } from "@/types/task";
 
 export type ProjectFilter = "all" | string;

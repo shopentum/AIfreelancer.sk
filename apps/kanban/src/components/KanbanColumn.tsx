@@ -42,6 +42,11 @@ export function KanbanColumn({ column, tasks }: KanbanColumnProps) {
           {column.title}
         </h2>
         <p className="mt-0.5 text-[11px] text-slate-500">{tasks.length} úloh</p>
+        {column.status === "Done" && (
+          <p className="mt-1 text-[10px] leading-snug text-slate-600">
+            Pri obnovení stránky presun do archívu.
+          </p>
+        )}
       </header>
       <div
         className={cn(

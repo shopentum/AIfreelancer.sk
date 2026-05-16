@@ -1,8 +1,13 @@
 import type { TaskRepository } from "@/repositories/TaskRepository";
 import type { ArchivesByProject, Task } from "@/types/task";
 
-const ACTIVE_KEY = "kanban_active_tasks_v1";
-const ARCHIVES_KEY = "kanban_archives_v1";
+export const STORAGE_KEYS = {
+  active: "kanban_active_tasks_v1",
+  archives: "kanban_archives_v1",
+} as const;
+
+const ACTIVE_KEY = STORAGE_KEYS.active;
+const ARCHIVES_KEY = STORAGE_KEYS.archives;
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
@@ -56,5 +61,3 @@ export class LocalStorageTaskRepository implements TaskRepository {
     localStorage.setItem(ARCHIVES_KEY, JSON.stringify(archives));
   }
 }
-
-export const taskRepository = new LocalStorageTaskRepository();

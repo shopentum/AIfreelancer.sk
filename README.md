@@ -1,5 +1,15 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Apps v monorepe
+
+| App | Priečinok | Produkcia / poznámka |
+|-----|-----------|----------------------|
+| Hlavný web | `/` (root) | [aifreelancer.sk](https://aifreelancer.sk) - `npm run dev` port 3000 |
+| Kanban Dashboard | `apps/kanban` | [kanban.aifreelancer.sk](https://kanban.aifreelancer.sk) - Vercel Root Directory: `apps/kanban` |
+| OMEGA Cashflow | `omega-cashflow` | samostatná Vite appka v repozitári |
+
+Detail Kanban: [`apps/kanban/README.md`](apps/kanban/README.md)
+
 ## Getting Started
 
 First, run the development server:

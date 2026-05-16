@@ -3,8 +3,11 @@ import { AppNav } from "@/components/AppNav";
 import { KanbanBoard } from "@/components/KanbanBoard";
 import { ProjectFilter } from "@/components/ProjectFilter";
 import { TaskDetailModal } from "@/components/TaskDetailModal";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export function BoardPage() {
+  usePageTitle("Kanban Dashboard");
+
   return (
     <>
       <div className="mx-auto max-w-[1600px] px-4 py-8 md:px-8">
