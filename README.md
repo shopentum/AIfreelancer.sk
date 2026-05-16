@@ -1,35 +1,12 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Apps v monorepe
+## System registry
 
-| App | Kód | Produkcia |
-|-----|-----|-----------|
-| **Hlavný web (Next.js)** | koreň repa | `www.aifreelancer.sk` — `/izyvape`, `/eagle-admin`, … |
-| **Kanban (Vite)** | `apps/kanban` | `kanban.aifreelancer.sk` |
-| **Cashflow (Vite)** | repo **`shopentum/cashflow`** (mimo monorepa) | `cashflow-omega` → https://cashflow.aifreelancer.sk |
+Všetky appky, domény, Vercel projekty a štruktúra repa: **[`SYSTEM_REGISTRY.md`](SYSTEM_REGISTRY.md)** (povinné čítať pred novým deployom).
 
-`/cashflow` na hlavnom webe len presmeruje na subdoménu. Detail Kanban: [`apps/kanban/README.md`](apps/kanban/README.md)
-
-### Vercel — repozitár `shopentum/AIfreelancer.sk`
-
-**Nechaj napojené len 2 projekty** (ostatné z dashboardu zmaž alebo **Settings → Git → Disconnect**):
-
-| Vercel projekt | Root Directory | Doména |
-|----------------|----------------|--------|
-| Hlavný web (**jeden!**) | `.` (prázdne) | `www.aifreelancer.sk` |
-| `kanban_app` | `apps/kanban` | `kanban.aifreelancer.sk` |
-
-**Cashflow — nechaj (iné repo):**
-
-| Vercel projekt | Git repo | Doména |
-|----------------|----------|--------|
-| **`cashflow-omega`** | `shopentum/cashflow` | `cashflow.aifreelancer.sk` |
-
-Over, že `cashflow.aifreelancer.sk` je **iba** v projekte `cashflow-omega` (Settings → Domains). Ak ju má ešte projekt `cashflow`, odstráň ju tam.
-
-**Nevytváraj** Vercel projekt pre `eagle-cms`, `izyvape` — sú v Next.js (`src/app/…`).
-
-**Zmaž / odpoj** duplicity hlavného webu: `a-ifreelancer-sk-hfyh`, `a-ifreelancer-sk-3j5k`, `eagle-cms` (ak importujú `AIfreelancer.sk`).
+- **`/apps`** — samostatné SPA (`kanban`; `cashflow` = odkaz na externý repo)
+- **`/src/app`** — routy hlavného webu (dokumentácia: `src/routes/`)
+- **`/src/features`**, **`/src/modules`** — konvencie pre featury a interné moduly
 
 ## Getting Started
 

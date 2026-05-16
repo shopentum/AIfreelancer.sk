@@ -1,0 +1,21 @@
+---
+description: Centrálny register appiek, Vercel a monorepo — žiadne duplicitné deploye
+alwaysApply: true
+---
+
+# System Registry Governance
+
+Pred zmenou deploy, novej appky alebo priečinka `apps/*` / duplicitného `package.json`:
+
+1. Prečítaj a aktualizuj **`SYSTEM_REGISTRY.md`** (app, root, domain, deployment model, owner, production state).
+2. **Jedna appka = jeden Vercel projekt = jedna produkčná doména** (výnimka: explicitný `redirect` v registri).
+3. **Monorepo `AIfreelancer.sk`:**
+   - Povolené Vercel projekty: `a-ifreelancer-sk` (Root `.`), `kanban_app` (Root `apps/kanban`).
+   - Cashflow: len repo `shopentum/cashflow`, projekt `cashflow-omega` — **nekopíruj** cashflow do `omega-cashflow/` ani `src/cashflow/`.
+4. **Nepridávaj** druhý Vercel import toho istého repa pre hlavný web (`a-ifreelancer-sk-*`, `eagle-cms`, …).
+5. **Site moduly** (Eagle, NMH, IZYVAPE stránky) patria do `src/app` + `src/modules` / `src/features` — nie do `apps/` a nie ako samostatný Vercel projekt.
+6. Nová SPA v monorepe: `apps/<id>/` + záznam v registri + `apps/<id>/APP.md` + `ignoreCommand` ak treba upraviť `scripts/vercel-should-build-main.sh`.
+7. Externá appka: `apps/<id>/README.md` (pointer only) + vlastný Git repo — **žiadny** plný kód v monorepe.
+8. Referenčný / demo kód, ktorý nie je produkcia: nedávaj do `**/*.tsx` pod root `include` bez `tsconfig` exclude alebo ho daj mimo build cesty (`apps/*/docs/` bez produkčných importov).
+
+Ak používateľ žiada nový deploy alebo Vercel projekt, najprv over súlad s registrom; pri konflikte navrhni úpravu registra, nie tichú duplicitu.
