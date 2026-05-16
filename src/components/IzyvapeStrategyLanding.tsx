@@ -1,7 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import {
   Layers,
@@ -60,7 +59,7 @@ function PhaseBadge({ phase }: { phase: PhaseId }) {
   const visual = PHASE_VISUAL[phase];
 
   return (
-    <div
+    <motion.div
       className={`inline-flex flex-col items-end gap-1 px-3.5 py-2 rounded-xl border ${visual.badge}`}
     >
       <span className="flex items-center gap-2">
@@ -72,7 +71,7 @@ function PhaseBadge({ phase }: { phase: PhaseId }) {
       <span className="text-[9px] font-semibold uppercase tracking-widest text-slate-500/90 leading-none">
         {t(`phases.${phase}.hint`)}
       </span>
-    </div>
+    </motion.div>
   );
 }
 
@@ -80,7 +79,7 @@ function PhaseLegend() {
   const t = useTranslations("IzyvapeStrategy");
 
   return (
-    <div className="mb-14 space-y-4">
+    <motion.div className="mb-14 space-y-4">
       <p className="text-center text-[10px] font-black uppercase tracking-[0.28em] text-slate-500">
         {t("phaseLegendTitle")}
       </p>
@@ -88,8 +87,8 @@ function PhaseLegend() {
         {PHASE_ORDER.map((phase, index) => {
           const visual = PHASE_VISUAL[phase];
           return (
-            <div key={phase} className="flex items-center gap-2 sm:contents">
-              <div
+            <motion.div key={phase} className="flex items-center gap-2 sm:contents">
+              <motion.div
                 className={`flex-1 min-w-0 rounded-2xl border px-4 py-3 text-center sm:text-left ${visual.legendActive}`}
               >
                 <p className="flex items-center justify-center sm:justify-start gap-2">
@@ -99,7 +98,7 @@ function PhaseLegend() {
                   </span>
                 </p>
                 <p className="mt-1.5 text-[10px] text-slate-500 leading-snug">{t(`phases.${phase}.legend`)}</p>
-              </div>
+              </motion.div>
               {index < PHASE_ORDER.length - 1 ? (
                 <ChevronRight
                   size={16}
@@ -107,11 +106,11 @@ function PhaseLegend() {
                   aria-hidden
                 />
               ) : null}
-            </div>
+            </motion.div>
           );
         })}
       </motion.div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -142,14 +141,12 @@ const CARD_ICON_COLOR = {
   c6: "text-slate-300",
 } as const;
 
-/** Sticky offset per card — larger index = lower on screen = visible stack overlap */
-const STICKY_TOP_REM = 5.25;
-const STICKY_STEP_REM = 0.85;
-
-/** Scroll runway + negative overlap pull the deck together on scroll */
-const CARD_SCROLL_MIN_H = "72vh";
-const CARD_STACK_PULL_VH = 48;
-const LAST_CARD_SCROLL_MIN_H = "32vh";
+/** Deck stack: card N covers ~90% of card N-1; ~10% header strip of each previous card stays visible */
+const CARD_VH = 70;
+const PEEK_VH = CARD_VH * 0.1;
+const STICKY_BASE_REM = 5.5;
+const SCROLL_RUNWAY_VH = 92;
+const LAST_RUNWAY_VH = 48;
 
 function StackingDirectionCard({
   cardKey,
@@ -161,118 +158,102 @@ function StackingDirectionCard({
   total: number;
 }) {
   const t = useTranslations("IzyvapeStrategy");
-  const ref = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "start start"],
-  });
-
-  const scale = useTransform(scrollYProgress, [0, 0.85, 1], [0.92, 0.98, 1]);
-  const opacity = useTransform(scrollYProgress, [0, 0.25, 1], [0.65, 1, 1]);
   const isLast = index === total - 1;
 
   const Icon = CARD_ICONS[cardKey];
-  const stickyTop = `calc(${STICKY_TOP_REM}rem + ${index * STICKY_STEP_REM}rem)`;
+  const stickyTop = `calc(${STICKY_BASE_REM}rem + ${index * PEEK_VH}vh)`;
+  const stackPull = index > 0 ? `calc(-${CARD_VH - PEEK_VH}vh)` : undefined;
   const examples = t(`cards.${cardKey}.examples`).split("|").filter(Boolean);
   const phase = CARD_PHASE[cardKey];
   const phaseVisual = PHASE_VISUAL[phase];
+  const subtitle = t(`cards.${cardKey}.subtitle`);
 
   return (
     <article
-      ref={ref}
       className="relative"
       style={{
         zIndex: index + 1,
-        minHeight: isLast ? LAST_CARD_SCROLL_MIN_H : CARD_SCROLL_MIN_H,
-        marginTop: index > 0 ? `-${CARD_STACK_PULL_VH}vh` : undefined,
+        minHeight: isLast ? `${LAST_RUNWAY_VH}vh` : `${SCROLL_RUNWAY_VH}vh`,
+        marginTop: stackPull,
       }}
     >
       <motion.div
-        style={{
-          position: "sticky",
-          top: stickyTop,
-          scale,
-          opacity,
-          zIndex: index + 1,
-        }}
-        className="will-change-[transform,opacity]"
+        style={{ position: "sticky", top: stickyTop, zIndex: index + 1 }}
+        className="will-change-transform"
       >
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-5%" }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className={`relative min-h-[min(52vh,560px)] rounded-[2rem] border bg-gradient-to-br ${CARD_ACCENTS[cardKey]} bg-[#080809] p-8 md:p-12 flex flex-col overflow-hidden ring-1 ring-white/[0.06]`}
+          viewport={{ once: true, margin: "-4%" }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          className={`relative flex flex-col rounded-[2rem] border bg-gradient-to-br ${CARD_ACCENTS[cardKey]} bg-[#080809] overflow-hidden ring-1 ring-white/[0.07]`}
           style={{
-            boxShadow: `0 -${18 + index * 6}px ${48 + index * 12}px rgba(0,0,0,${0.42 + index * 0.04})`,
+            height: "min(70vh, 680px)",
+            boxShadow: `0 ${12 + index * 4}px ${36 + index * 10}px rgba(0,0,0,${0.45 + index * 0.05})`,
           }}
         >
-          <div
+          <motion.div
             className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${phaseVisual.stripe}`}
             aria-hidden
           />
-          <motion.div
-            className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
-            aria-hidden
-          />
 
-          <motion.div className="flex flex-wrap items-start justify-between gap-4 mb-8">
-            <motion.div className="flex items-center gap-4">
+          <header
+            className="shrink-0 flex items-center justify-between gap-2 px-5 md:px-7 border-b border-white/10 bg-[#080809] backdrop-blur-md overflow-hidden"
+            style={{ height: `${PEEK_VH}vh`, minHeight: `${PEEK_VH}vh` }}
+          >
+            <motion.div className="flex items-center gap-2.5 min-w-0 flex-1 py-2">
               <motion.div
-                className={`w-14 h-14 rounded-2xl bg-black/50 border border-white/10 flex items-center justify-center ${CARD_ICON_COLOR[cardKey]}`}
+                className={`w-9 h-9 md:w-10 md:h-10 shrink-0 rounded-lg bg-black/50 border border-white/10 flex items-center justify-center ${CARD_ICON_COLOR[cardKey]}`}
               >
-                <Icon size={28} strokeWidth={1.25} />
+                <Icon size={20} strokeWidth={1.25} />
               </motion.div>
-              <motion.div>
-                <motion.p className="text-[10px] font-black uppercase tracking-[0.35em] text-slate-500">
+              <motion.div className="min-w-0">
+                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500">
                   {t("cardIndex", { current: index + 1, total })}
-                </motion.p>
-                <motion.h3 className="text-xl md:text-2xl font-sora font-black text-white tracking-tight">
+                </p>
+                <h3 className="text-[13px] md:text-sm font-sora font-black text-white tracking-tight leading-snug line-clamp-2">
                   {t(`cards.${cardKey}.title`)}
-                </motion.h3>
+                </h3>
               </motion.div>
             </motion.div>
-            <PhaseBadge phase={phase} />
+            <motion.div className="shrink-0 scale-[0.86] origin-center py-1.5 pr-1">
+              <PhaseBadge phase={phase} />
+            </motion.div>
+          </header>
+
+          <motion.div className="flex-1 min-h-0 overflow-hidden px-5 pb-6 pt-4 md:px-8 md:pb-7 md:pt-5 flex flex-col">
+            {subtitle ? <p className="text-sm text-slate-500 mb-4 shrink-0">{subtitle}</p> : null}
+
+            <motion.div className="grid md:grid-cols-2 gap-5 md:gap-7 flex-1 min-h-0">
+              <motion.div className="space-y-2">
+                <p className="text-[10px] font-black uppercase tracking-[0.28em] text-rose-400/90">
+                  {t("labelProblem")}
+                </p>
+                <p className="text-sm md:text-[15px] text-slate-300 leading-relaxed">{t(`cards.${cardKey}.problem`)}</p>
+              </motion.div>
+              <motion.div className="space-y-2">
+                <p className="text-[10px] font-black uppercase tracking-[0.28em] text-emerald-400/90">
+                  {t("labelProposal")}
+                </p>
+                <p className="text-sm md:text-[15px] text-slate-300 leading-relaxed">{t(`cards.${cardKey}.proposal`)}</p>
+              </motion.div>
+            </motion.div>
+
+            {examples.length > 0 ? (
+              <motion.div className="mt-4 pt-4 border-t border-white/10 shrink-0">
+                <p className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-500 mb-2">
+                  {t("labelExamples")}
+                </p>
+                <ul className="grid sm:grid-cols-2 gap-1.5">
+                  {examples.map((item) => (
+                    <li key={item} className="text-xs md:text-sm text-slate-400 pl-3 border-l border-white/10 leading-snug">
+                      {item.trim()}
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            ) : null}
           </motion.div>
-
-          {t(`cards.${cardKey}.subtitle`) ? (
-            <motion.p className="text-sm text-slate-500 mb-8 -mt-4 md:pl-[4.5rem]">
-              {t(`cards.${cardKey}.subtitle`)}
-            </motion.p>
-          ) : null}
-
-          <motion.div className="grid md:grid-cols-2 gap-8 flex-1">
-            <motion.div className="space-y-3">
-              <motion.p className="text-[10px] font-black uppercase tracking-[0.28em] text-rose-400/90">
-                {t("labelProblem")}
-              </motion.p>
-              <motion.p className="text-slate-300 leading-relaxed">{t(`cards.${cardKey}.problem`)}</motion.p>
-            </motion.div>
-            <motion.div className="space-y-3">
-              <motion.p className="text-[10px] font-black uppercase tracking-[0.28em] text-emerald-400/90">
-                {t("labelProposal")}
-              </motion.p>
-              <motion.p className="text-slate-300 leading-relaxed">{t(`cards.${cardKey}.proposal`)}</motion.p>
-            </motion.div>
-          </motion.div>
-
-          {examples.length > 0 ? (
-            <motion.div className="mt-8 pt-8 border-t border-white/10">
-              <motion.p className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-500 mb-4">
-                {t("labelExamples")}
-              </motion.p>
-              <motion.ul className="grid sm:grid-cols-2 gap-2">
-                {examples.map((item) => (
-                  <motion.li
-                    key={item}
-                    className="text-sm text-slate-400 pl-4 border-l border-white/10 leading-snug"
-                  >
-                    {item.trim()}
-                  </motion.li>
-                ))}
-              </motion.ul>
-            </motion.div>
-          ) : null}
         </motion.div>
       </motion.div>
     </article>
@@ -283,7 +264,7 @@ export default function IzyvapeStrategyLanding() {
   const t = useTranslations("IzyvapeStrategy");
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white font-inter selection:bg-blue-500/30 overflow-x-hidden">
+    <motion.div className="min-h-screen bg-[#030303] text-white font-inter selection:bg-blue-500/30 overflow-x-hidden">
       <section className="relative pt-36 pb-16 md:pt-40 md:pb-20 px-6 overflow-hidden">
         <motion.div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none">
           <motion.div className="absolute top-[-10%] right-[-10%] w-[42%] h-[42%] bg-purple-600/18 rounded-full blur-[120px] animate-pulse" />
@@ -333,7 +314,7 @@ export default function IzyvapeStrategyLanding() {
       </section>
 
       <section className="relative px-6 pb-12 md:pb-16">
-        <div className="max-w-4xl mx-auto">
+        <motion.div className="max-w-4xl mx-auto">
           <PhaseLegend />
           <motion.div className="relative">
             {CARD_KEYS.map((key, index) => (
@@ -361,7 +342,6 @@ export default function IzyvapeStrategyLanding() {
           <motion.p className="text-sm text-slate-500 leading-relaxed">{t("closingPrinciple")}</motion.p>
         </motion.div>
       </section>
-    </div>
+    </motion.div>
   );
 }
-
