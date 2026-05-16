@@ -9,7 +9,7 @@ import {
 } from "react";
 import { DEFAULT_PROJECT_ID } from "@/config/defaultProjects";
 import { useProjects } from "@/hooks/useProjects";
-import { flushDoneToArchive } from "@/domain/archiveFlush";
+import { bootstrapActiveTasksWithDoneFlush } from "@/domain/doneArchiveSchedule";
 import {
   applyTaskStatusUpdate,
   createTask,
@@ -65,11 +65,9 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<Task[]>(() => {
     const rawActive = taskRepository.loadActiveTasks();
     const archives = taskRepository.loadArchives();
-    const { active, archives: nextArchives } = flushDoneToArchive(
-      rawActive,
-      archives,
-    );
-    if (active.length !== rawActive.length) {
+    const { active, archives: nextArchives, didFlush } =
+      bootstrapActiveTasksWithDoneFlush(rawActive, archives);
+    if (didFlush) {
       taskRepository.saveActiveTasks(active);
       taskRepository.saveArchives(nextArchives);
     }

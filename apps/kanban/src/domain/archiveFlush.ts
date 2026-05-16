@@ -3,7 +3,7 @@ import type { ArchivedTask, ArchivesByProject, Task } from "@/types/task";
 
 /**
  * Presun úloh so statusom Done z aktívneho poľa do archívu (per project).
- * Volá sa pri bootstrap aplikácie (napr. po reload).
+ * Volá sa z {@link bootstrapActiveTasksWithDoneFlush} pri prvom načítaní po polnoci.
  */
 export function flushDoneToArchive(
   activeTasks: Task[],
