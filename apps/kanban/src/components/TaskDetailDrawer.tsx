@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Clock, Square, Trash2, X } from "lucide-react";
+import { ChevronDown, Clock, Square, Trash2, X } from "lucide-react";
 import { KANBAN_COLUMNS } from "@/config/columns";
 import { getProjectBadgeClass } from "@/config/projectStyle";
 import { useKanban } from "@/hooks/useKanbanStore";
@@ -62,6 +62,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
   } = useKanban();
 
   const [notesDraft, setNotesDraft] = useState(() => task.notes);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const notesDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -119,9 +120,13 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
     t(isDark, "text-slate-400", "text-slate-600"),
   );
 
-  const fieldClass = cn(
-    "w-full border-none bg-transparent p-0 outline-none transition-colors focus:ring-0",
-    t(isDark, "text-slate-900 placeholder-slate-400", "text-white placeholder-slate-700"),
+  const inputClass = cn(
+    "w-full rounded-2xl border px-4 py-3 text-sm font-medium outline-none transition-all",
+    t(
+      isDark,
+      "border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:border-slate-300 focus:bg-white",
+      "border-slate-700 bg-slate-800 text-white placeholder-slate-600 focus:border-indigo-500",
+    ),
   );
 
   const selectClass = cn(
@@ -193,14 +198,17 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
             Detail úlohy
           </h2>
 
-          <div className="space-y-8">
+          <div className="space-y-6">
             <div className="space-y-2">
               <p className={labelClass}>Názov</p>
-              <textarea
+              <input
+                type="text"
                 value={task.title}
                 onChange={(e) => setTaskTitle(task.id, e.target.value)}
-                rows={2}
-                className={cn(fieldClass, "resize-none text-2xl font-black tracking-tight md:text-4xl")}
+                className={cn(
+                  inputClass,
+                  "text-xl font-bold tracking-tight md:text-2xl",
+                )}
               />
             </div>
             <div className="space-y-2">
@@ -210,7 +218,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
                 value={task.summary}
                 onChange={(e) => setTaskSummary(task.id, e.target.value)}
                 placeholder="Krátky text na karte…"
-                className={cn(fieldClass, "text-lg font-bold")}
+                className={inputClass}
               />
             </div>
           </div>
@@ -352,16 +360,68 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
             </div>
           </div>
 
-          <div className="space-y-8 pb-8">
-            <p className={labelClass}>História úlohy</p>
-            <div className="relative space-y-8">
+          <div className="pb-8">
+            <button
+              type="button"
+              onClick={() => setHistoryOpen((o) => !o)}
+              className={cn(
+                "flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-colors",
+                t(
+                  isDark,
+                  "border-slate-200 bg-slate-50 hover:bg-slate-100",
+                  "border-slate-800 bg-slate-800/40 hover:bg-slate-800/70",
+                ),
+              )}
+              aria-expanded={historyOpen}
+            >
+              <span className={labelClass}>História úlohy</span>
+              <span className="flex items-center gap-2">
+                <span
+                  className={cn(
+                    "text-xs font-bold tabular-nums",
+                    t(isDark, "text-slate-500", "text-slate-400"),
+                  )}
+                >
+                  {sortedLog.length}
+                </span>
+                <ChevronDown
+                  size={18}
+                  className={cn(
+                    "transition-transform",
+                    historyOpen && "rotate-180",
+                    t(isDark, "text-slate-400", "text-slate-500"),
+                  )}
+                />
+              </span>
+            </button>
+
+            <AnimatePresence initial={false}>
+              {historyOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <div className="relative mt-4 space-y-8 px-1">
               <div
                 className={cn(
                   "absolute top-2 bottom-2 left-5 w-px",
                   t(isDark, "bg-slate-100", "bg-slate-800"),
                 )}
               />
-              {sortedLog.map((log, i) => (
+                    {sortedLog.length === 0 ? (
+                      <p
+                        className={cn(
+                          "py-4 text-center text-sm",
+                          t(isDark, "text-slate-400", "text-slate-500"),
+                        )}
+                      >
+                        Žiadne záznamy.
+                      </p>
+                    ) : (
+                      sortedLog.map((log, i) => (
                 <div key={log.id} className="relative pl-14">
                   <div
                     className={cn(
@@ -393,8 +453,12 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
                     </p>
                   </div>
                 </div>
-              ))}
-            </div>
+                      ))
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 

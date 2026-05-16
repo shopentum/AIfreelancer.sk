@@ -63,3 +63,20 @@ export function getProjectBadgeClass(
   const pair = map[projectId] ?? map.index;
   return t(isDark, pair[0], pair[1]);
 }
+
+/** Left accent stripe on task cards. */
+export function getProjectStripeClass(
+  projectId: string,
+  isDark: boolean,
+): string {
+  const map: Record<string, [string, string]> = {
+    index: ["bg-slate-400", "bg-slate-500"],
+    shopentum: ["bg-indigo-500", "bg-indigo-500"],
+    nmh: ["bg-blue-500", "bg-blue-500"],
+    aiworks: ["bg-purple-500", "bg-purple-500"],
+    finance: ["bg-emerald-500", "bg-emerald-500"],
+    personal: ["bg-amber-500", "bg-amber-500"],
+  };
+  const pair = map[projectId] ?? map.index;
+  return t(isDark, pair[0], pair[1]);
+}

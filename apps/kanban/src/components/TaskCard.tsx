@@ -1,7 +1,7 @@
 import type { MouseEvent } from "react";
 import { Draggable } from "@hello-pangea/dnd";
 import { Clock, Pause, Play, Square, Timer } from "lucide-react";
-import { getProjectBadgeClass, getProjectIcon } from "@/config/projectStyle";
+import { getProjectBadgeClass, getProjectStripeClass } from "@/config/projectStyle";
 import { useProjects } from "@/hooks/useProjects";
 import { useKanban } from "@/hooks/useKanbanStore";
 import { useLiveTrackedSeconds } from "@/hooks/useLiveTrackedSeconds";
@@ -43,7 +43,7 @@ export function TaskCard({ task, index }: TaskCardProps) {
           {...provided.dragHandleProps}
           onClick={() => openTaskDetail(task.id)}
           className={cn(
-            "group relative cursor-grab select-none overflow-hidden rounded-[1.5rem] border p-5 shadow-sm transition-all active:cursor-grabbing",
+            "group relative cursor-grab select-none overflow-hidden rounded-[1.5rem] border py-5 pl-4 pr-5 shadow-sm transition-all active:cursor-grabbing",
             t(
               isDark,
               "border-slate-200 bg-white text-slate-900 shadow-slate-200/50 hover:-translate-y-0.5 hover:shadow-xl",
@@ -57,11 +57,15 @@ export function TaskCard({ task, index }: TaskCardProps) {
               ),
           )}
         >
-          <div className="pointer-events-none absolute right-0 top-0 p-4 opacity-[0.05]">
-            {getProjectIcon(task.project, 48)}
-          </div>
+          <div
+            className={cn(
+              "absolute top-4 bottom-4 left-0 w-1 rounded-full",
+              getProjectStripeClass(task.project, isDark),
+            )}
+            aria-hidden
+          />
 
-          <div className="space-y-4">
+          <div className="space-y-4 pl-1">
             <div className="flex items-start justify-between gap-4">
               <div
                 className={cn(
