@@ -2,13 +2,31 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Apps v monorepe
 
-| App | Priečinok | Produkcia / poznámka |
-|-----|-----------|----------------------|
-| Hlavný web | `/` (root) | [aifreelancer.sk](https://aifreelancer.sk) - `npm run dev` port 3000 |
-| Kanban Dashboard | `apps/kanban` | [kanban.aifreelancer.sk](https://kanban.aifreelancer.sk) - Vercel Root Directory: `apps/kanban` |
-| OMEGA Cashflow | `omega-cashflow` | samostatná Vite appka v repozitári |
+| App | Priečinok | `package.json` | Produkcia |
+|-----|-----------|----------------|-----------|
+| **Hlavný web (Next.js)** | `/` (root) | root | `www.aifreelancer.sk` — routes `/izyvape`, `/cashflow`, `/eagle-admin`, … |
+| **Kanban (Vite SPA)** | `apps/kanban` | `apps/kanban/package.json` | `kanban.aifreelancer.sk` |
+| **OMEGA Cashflow (Vite)** | `omega-cashflow` | `omega-cashflow/package.json` | voliteľne `cashflow.aifreelancer.sk` — duplicitne aj `/cashflow` v Next.js (`src/cashflow/`) |
 
 Detail Kanban: [`apps/kanban/README.md`](apps/kanban/README.md)
+
+### Vercel — jeden Git repo, viac projektov (poriadok)
+
+**Problém:** Každý import toho istého repa spúšťa deploy na všetky napojené projekty. Duplicitné projekty s rovnakým Root Directory = chaos (doména na jednom, úspešný build na druhom).
+
+**Maj len tieto 3 produkčné projekty** (ostatné odpoj Git alebo zmaž):
+
+| Vercel projekt | Root Directory | `vercel.json` | Doména |
+|----------------|----------------|---------------|--------|
+| Hlavný web (jeden!) | `.` (prázdne) | `/vercel.json` — `ignoreCommand` preskočí build pri commitoch len do `apps/kanban` alebo `omega-cashflow` | `www.aifreelancer.sk`, `aifreelancer.sk` |
+| Kanban | `apps/kanban` | `apps/kanban/vercel.json` — build len pri zmene `apps/kanban/**` | `kanban.aifreelancer.sk` |
+| Cashflow (voliteľný) | `omega-cashflow` | `omega-cashflow/vercel.json` — build len pri zmene `omega-cashflow/**` | `cashflow.aifreelancer.sk` ak používaš subdoménu |
+
+**Nevytváraj** samostatný Vercel projekt pre: `eagle-cms`, `nmh`, `izyvape` — to sú stránky v Next.js (`src/app/…`), nie samostatné appky.
+
+**Zmaž / odpoj Git** na duplicitách typu `a-ifreelancer-sk-hfyh`, `a-ifreelancer-sk-3j5k` — nech ostane **jeden** hlavný projekt s doménou.
+
+**Overenie po deployi:** Settings → Domains (kde je `www`) → Deployments → Production commit = `main` + build zelený → napr. `/izyvape-strategy` musí existovať.
 
 ## Getting Started
 
