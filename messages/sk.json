@@ -586,6 +586,24 @@
     "labelProposal": "Návrh",
     "labelExamples": "Príklady nálezov alebo schopností",
     "cardIndex": "Smer {current} / {total}",
+    "phaseLegendTitle": "Postupnosť rolloutu",
+    "phases": {
+      "mvp2": {
+        "label": "MVP 2",
+        "hint": "Obchod · kanály · marža",
+        "legend": "Commerce, B2B kanály a profitabilita"
+      },
+      "mvp3": {
+        "label": "MVP 3",
+        "hint": "Digesty · publishing",
+        "legend": "Role digesty a podpora publikovania"
+      },
+      "future": {
+        "label": "Future",
+        "hint": "Po stabilizácii dát",
+        "legend": "Predikcia a forecasting"
+      }
+    },
     "cards": {
       "c1": {
         "title": "Commerce Intelligence Layer",
@@ -630,7 +648,7 @@
       "c6": {
         "title": "Predictive & Forecasting Layer",
         "subtitle": "Demand, sezónnosť, replenishment",
-        "tag": "Až po stabilizácii dát",
+        "tag": "",
         "problem": "Predikcia bez dôveryhodných snapshotov a overených operational flow vedie k falošnej istote. Vyžaduje kvalitné historické rezy a stabilný dataset.",
         "proposal": "Až po fungujúcej decision vrstve: demand forecasting, sezónne modelovanie, replenishment planning a trend prediction s jasnou väzbou na minulé nálezy.",
         "examples": "demand forecasting|sezónne modelovanie|replenishment planning|trend prediction"

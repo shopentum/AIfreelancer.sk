@@ -586,6 +586,24 @@
     "labelProposal": "Proposal",
     "labelExamples": "Example findings or capabilities",
     "cardIndex": "Direction {current} / {total}",
+    "phaseLegendTitle": "Rollout sequence",
+    "phases": {
+      "mvp2": {
+        "label": "MVP 2",
+        "hint": "Commerce · channels · margin",
+        "legend": "Commerce, B2B channels and profitability"
+      },
+      "mvp3": {
+        "label": "MVP 3",
+        "hint": "Digests · publishing",
+        "legend": "Role digests and publishing assistance"
+      },
+      "future": {
+        "label": "Future",
+        "hint": "After data stabilizes",
+        "legend": "Prediction and forecasting"
+      }
+    },
     "cards": {
       "c1": {
         "title": "Commerce Intelligence Layer",
@@ -630,7 +648,7 @@
       "c6": {
         "title": "Predictive & Forecasting Layer",
         "subtitle": "Demand, seasonality, replenishment",
-        "tag": "After data stabilizes",
+        "tag": "",
         "problem": "Prediction without trustworthy snapshots and validated operational flows creates false confidence.",
         "proposal": "After the decision layer is trusted: demand forecasting, seasonal modelling, replenishment planning and trend prediction linked to historical findings.",
         "examples": "demand forecasting|seasonal modelling|replenishment planning|trend prediction"

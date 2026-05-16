@@ -586,6 +586,24 @@
     "labelProposal": "Vorschlag",
     "labelExamples": "Beispiel-Befunde oder Fähigkeiten",
     "cardIndex": "Richtung {current} / {total}",
+    "phaseLegendTitle": "Rollout-Reihenfolge",
+    "phases": {
+      "mvp2": {
+        "label": "MVP 2",
+        "hint": "Commerce · Kanäle · Marge",
+        "legend": "Commerce, B2B-Kanäle und Profitabilität"
+      },
+      "mvp3": {
+        "label": "MVP 3",
+        "hint": "Digests · Publishing",
+        "legend": "Rollen-Digests und Publishing-Unterstützung"
+      },
+      "future": {
+        "label": "Future",
+        "hint": "Nach Datenstabilisierung",
+        "legend": "Prognose und Forecasting"
+      }
+    },
     "cards": {
       "c1": {
         "title": "Commerce Intelligence Layer",
@@ -630,7 +648,7 @@
       "c6": {
         "title": "Predictive & Forecasting Layer",
         "subtitle": "Nachfrage, Saison, Replenishment",
-        "tag": "Nach Datenstabilität",
+        "tag": "",
         "problem": "Prognose ohne verlässliche Snapshots und validierte Flows erzeugt falsche Sicherheit.",
         "proposal": "Erst nach vertrauenswürdiger Decision-Schicht: Demand Forecasting, Saisonmodell, Replenishment, Trendprognose.",
         "examples": "demand forecasting|Saisonmodell|replenishment planning|trend prediction"

@@ -12,10 +12,108 @@ import {
   Share2,
   LineChart,
   ArrowLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 
 const CARD_KEYS = ["c1", "c2", "c3", "c4", "c5", "c6"] as const;
+
+const CARD_PHASE = {
+  c1: "mvp2",
+  c2: "mvp2",
+  c3: "mvp2",
+  c4: "mvp3",
+  c5: "mvp3",
+  c6: "future",
+} as const;
+
+type PhaseId = (typeof CARD_PHASE)[keyof typeof CARD_PHASE];
+
+const PHASE_ORDER: PhaseId[] = ["mvp2", "mvp3", "future"];
+
+const PHASE_VISUAL: Record<
+  PhaseId,
+  { badge: string; dot: string; stripe: string; legendActive: string }
+> = {
+  mvp2: {
+    badge: "border-blue-500/35 bg-blue-500/10 text-blue-200 shadow-[0_0_28px_rgba(59,130,246,0.12)]",
+    dot: "bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)]",
+    stripe: "from-blue-500/80 via-blue-400/40 to-transparent",
+    legendActive: "border-blue-500/30 bg-blue-500/[0.08]",
+  },
+  mvp3: {
+    badge: "border-amber-500/35 bg-amber-500/10 text-amber-100 shadow-[0_0_28px_rgba(245,158,11,0.1)]",
+    dot: "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.75)]",
+    stripe: "from-amber-500/80 via-amber-400/40 to-transparent",
+    legendActive: "border-amber-500/30 bg-amber-500/[0.08]",
+  },
+  future: {
+    badge: "border-slate-500/40 bg-slate-500/10 text-slate-300 shadow-none",
+    dot: "bg-slate-400",
+    stripe: "from-slate-500/60 via-slate-500/25 to-transparent",
+    legendActive: "border-slate-500/35 bg-slate-500/[0.06]",
+  },
+};
+
+function PhaseBadge({ phase }: { phase: PhaseId }) {
+  const t = useTranslations("IzyvapeStrategy");
+  const visual = PHASE_VISUAL[phase];
+
+  return (
+    <div
+      className={`inline-flex flex-col items-end gap-1 px-3.5 py-2 rounded-xl border ${visual.badge}`}
+    >
+      <span className="flex items-center gap-2">
+        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${visual.dot}`} aria-hidden />
+        <span className="text-[11px] font-black uppercase tracking-[0.22em] leading-none">
+          {t(`phases.${phase}.label`)}
+        </span>
+      </span>
+      <span className="text-[9px] font-semibold uppercase tracking-widest text-slate-500/90 leading-none">
+        {t(`phases.${phase}.hint`)}
+      </span>
+    </div>
+  );
+}
+
+function PhaseLegend() {
+  const t = useTranslations("IzyvapeStrategy");
+
+  return (
+    <div className="mb-14 space-y-4">
+      <p className="text-center text-[10px] font-black uppercase tracking-[0.28em] text-slate-500">
+        {t("phaseLegendTitle")}
+      </p>
+      <motion.div className="flex flex-col sm:flex-row items-stretch justify-center gap-3 sm:gap-2 max-w-3xl mx-auto">
+        {PHASE_ORDER.map((phase, index) => {
+          const visual = PHASE_VISUAL[phase];
+          return (
+            <div key={phase} className="flex items-center gap-2 sm:contents">
+              <div
+                className={`flex-1 min-w-0 rounded-2xl border px-4 py-3 text-center sm:text-left ${visual.legendActive}`}
+              >
+                <p className="flex items-center justify-center sm:justify-start gap-2">
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${visual.dot}`} aria-hidden />
+                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white">
+                    {t(`phases.${phase}.label`)}
+                  </span>
+                </p>
+                <p className="mt-1.5 text-[10px] text-slate-500 leading-snug">{t(`phases.${phase}.legend`)}</p>
+              </div>
+              {index < PHASE_ORDER.length - 1 ? (
+                <ChevronRight
+                  size={16}
+                  className="text-slate-600 shrink-0 mx-auto sm:mx-0 rotate-90 sm:rotate-0"
+                  aria-hidden
+                />
+              ) : null}
+            </div>
+          );
+        })}
+      </motion.div>
+    </div>
+  );
+}
 
 const CARD_ICONS = {
   c1: TrendingUp,
@@ -66,7 +164,8 @@ function StackingDirectionCard({
   const Icon = CARD_ICONS[cardKey];
   const stickyTop = `calc(5.5rem + ${index * 1.35}rem)`;
   const examples = t(`cards.${cardKey}.examples`).split("|").filter(Boolean);
-  const tag = t(`cards.${cardKey}.tag`);
+  const phase = CARD_PHASE[cardKey];
+  const phaseVisual = PHASE_VISUAL[phase];
 
   return (
     <article
@@ -91,8 +190,12 @@ function StackingDirectionCard({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-8%" }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className={`relative min-h-[min(72vh,680px)] rounded-[2rem] border bg-gradient-to-br ${CARD_ACCENTS[cardKey]} bg-[#080809] p-8 md:p-12 flex flex-col shadow-[0_-20px_80px_rgba(0,0,0,0.45)]`}
+          className={`relative min-h-[min(72vh,680px)] rounded-[2rem] border bg-gradient-to-br ${CARD_ACCENTS[cardKey]} bg-[#080809] p-8 md:p-12 flex flex-col shadow-[0_-20px_80px_rgba(0,0,0,0.45)] overflow-hidden`}
         >
+          <div
+            className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${phaseVisual.stripe}`}
+            aria-hidden
+          />
           <motion.div
             className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
             aria-hidden
@@ -114,11 +217,7 @@ function StackingDirectionCard({
                 </motion.h3>
               </motion.div>
             </motion.div>
-            {tag.length > 0 ? (
-              <motion.span className="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border border-white/15 bg-white/5 text-slate-400">
-                {tag}
-              </motion.span>
-            ) : null}
+            <PhaseBadge phase={phase} />
           </motion.div>
 
           {t(`cards.${cardKey}.subtitle`) ? (
@@ -220,6 +319,7 @@ export default function IzyvapeStrategyLanding() {
 
       <section className="relative px-6 pb-32">
         <motion.div className="max-w-4xl mx-auto">
+          <PhaseLegend />
           {CARD_KEYS.map((key, index) => (
             <StackingDirectionCard key={key} cardKey={key} index={index} total={CARD_KEYS.length} />
           ))}
