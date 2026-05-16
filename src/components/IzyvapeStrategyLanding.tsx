@@ -158,15 +158,13 @@ function DirectionCard({
   const subtitle = t(`cards.${cardKey}.subtitle`);
 
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-8%" }}
-      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-      className="relative"
-    >
+    <article className="w-full block">
       <motion.div
-        className={`relative min-h-[min(72vh,680px)] rounded-[2rem] border bg-gradient-to-br ${CARD_ACCENTS[cardKey]} bg-[#080809] p-8 md:p-12 flex flex-col overflow-hidden shadow-[0_-20px_80px_rgba(0,0,0,0.45)]`}
+        initial={{ opacity: 0, y: 28 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        className={`relative w-full min-h-[min(72vh,680px)] rounded-[2rem] border bg-gradient-to-br ${CARD_ACCENTS[cardKey]} bg-[#080809] p-8 md:p-12 flex flex-col overflow-hidden shadow-[0_-20px_80px_rgba(0,0,0,0.45)]`}
       >
         <motion.div
           className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${phaseVisual.stripe}`}
@@ -233,7 +231,7 @@ function DirectionCard({
           </motion.div>
         ) : null}
       </motion.div>
-    </motion.article>
+    </article>
   );
 }
 
@@ -293,7 +291,7 @@ export default function IzyvapeStrategyLanding() {
       <section className="relative px-6 pb-12 md:pb-16">
         <div className="max-w-4xl mx-auto">
           <PhaseLegend />
-          <motion.div className="flex flex-col gap-6">
+          <motion.div className="flex w-full flex-col gap-8">
             {CARD_KEYS.map((key, index) => (
               <DirectionCard key={key} cardKey={key} index={index} total={CARD_KEYS.length} />
             ))}

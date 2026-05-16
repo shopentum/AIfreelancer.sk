@@ -581,7 +581,7 @@
     "backLink": "Back to Stock Decision Support MVP",
     "stackEyebrow": "Expansion architecture",
     "stackTitle": "Six layers on a shared data foundation",
-    "stackLead": "Cards stack as you scroll – each direction uses the same structure: name, problem, proposed value.",
+    "stackLead": "Six directions below – each card uses the same structure: name, problem, proposed value.",
     "labelProblem": "Problem / what it solves",
     "labelProposal": "Proposal",
     "labelExamples": "Example findings or capabilities",
