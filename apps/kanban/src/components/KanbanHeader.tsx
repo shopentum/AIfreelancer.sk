@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { CheckCircle2, ChevronDown, Plus } from "lucide-react";
+import { ChevronDown, Plus } from "lucide-react";
 import { DEFAULT_PROJECT_ID, PROJECTS } from "@/config/projects";
 import { useKanban } from "@/hooks/useKanbanStore";
 import { t, useTheme } from "@/hooks/useTheme";
@@ -34,7 +34,7 @@ export function KanbanHeader({
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 border-b px-4 py-4 backdrop-blur-md transition-colors duration-500 md:px-8",
+        "sticky top-0 z-30 border-b px-4 py-5 backdrop-blur-md transition-colors duration-500 md:px-8",
         t(
           isDark,
           "border-slate-200 bg-white/80",
@@ -42,35 +42,25 @@ export function KanbanHeader({
         ),
       )}
     >
-      <div className="mx-auto flex max-w-[1800px] flex-col justify-between gap-6 md:flex-row md:items-center">
-        <div className="flex shrink-0 items-center gap-4">
-          <div
+      <div className="mx-auto flex max-w-[1800px] flex-col gap-5">
+        <div className="shrink-0">
+          <h1 className="text-xl font-bold tracking-tight">{title}</h1>
+          <p
             className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-xl shadow-lg transition-colors",
-              t(isDark, "bg-slate-900 text-white", "bg-indigo-600 text-white"),
+              "mt-1 text-[10px] font-bold uppercase tracking-widest",
+              t(isDark, "text-slate-400", "text-slate-500"),
             )}
           >
-            <CheckCircle2 size={24} aria-hidden />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight">{title}</h1>
-            <p
-              className={cn(
-                "text-[10px] font-bold uppercase tracking-widest",
-                t(isDark, "text-slate-400", "text-slate-500"),
-              )}
-            >
-              {subtitle}
-            </p>
-          </div>
+            {subtitle}
+          </p>
         </div>
 
         {showBrainDump && (
           <form
             onSubmit={submit}
-            className="group relative flex max-w-2xl flex-1 items-center md:px-4"
+            className="group relative mx-auto flex w-full max-w-2xl items-center justify-center"
           >
-            <div className="relative">
+            <div className="relative shrink-0">
               <select
                 value={projectForNewTask}
                 onChange={(e) => setBrainProject(e.target.value)}
@@ -101,7 +91,7 @@ export function KanbanHeader({
               onChange={(e) => setTitleInput(e.target.value)}
               placeholder="Rýchly zápis: názov úlohy… (Enter = uložiť)"
               className={cn(
-                "flex-1 rounded-r-2xl border-none px-6 py-4 text-sm outline-none transition-all focus:ring-2",
+                "min-w-0 flex-1 rounded-r-2xl border-none px-6 py-4 text-sm outline-none transition-all focus:ring-2",
                 t(
                   isDark,
                   "bg-slate-100 text-slate-900 placeholder-slate-400 focus:ring-slate-900",

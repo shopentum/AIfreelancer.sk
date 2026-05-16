@@ -33,7 +33,9 @@ export function AppShell({
         showBrainDump={showBrainDump}
       />
       <ProjectToolbar />
-      <main className="mx-auto max-w-[1800px] px-4 pb-8 md:px-8">{children}</main>
+      <main className="mx-auto max-w-[1800px] px-4 pt-6 pb-8 md:px-8">
+        {children}
+      </main>
       <TaskDetailDrawer />
     </div>
   );

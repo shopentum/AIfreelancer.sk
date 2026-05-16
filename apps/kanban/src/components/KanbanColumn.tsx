@@ -88,17 +88,6 @@ export function KanbanColumn({ column, tasks }: KanbanColumnProps) {
           </div>
         )}
       </Droppable>
-
-      {column.status === "Done" && (
-        <p
-          className={cn(
-            "px-2 text-[10px] leading-snug",
-            t(isDark, "text-slate-400", "text-slate-600"),
-          )}
-        >
-          Pri obnovení stránky presun do archívu.
-        </p>
-      )}
     </section>
   );
 }

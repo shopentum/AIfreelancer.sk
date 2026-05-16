@@ -4,7 +4,6 @@ import { getProjectIcon } from "@/config/projectStyle";
 import { PROJECTS } from "@/config/projects";
 import { useKanban, type ProjectFilter } from "@/hooks/useKanbanStore";
 import { t, useTheme } from "@/hooks/useTheme";
-import { getTaskStorageMode } from "@/repositories";
 import { cn } from "@/lib/utils";
 
 const FILTER_OPTIONS: { id: ProjectFilter; label: string }[] = [
@@ -15,8 +14,6 @@ const FILTER_OPTIONS: { id: ProjectFilter; label: string }[] = [
 export function ProjectToolbar() {
   const { isDark, toggleTheme } = useTheme();
   const { projectFilter, setProjectFilter } = useKanban();
-  const storageMode = getTaskStorageMode();
-
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     cn(
       "flex items-center gap-2 rounded-lg px-3 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all",
@@ -123,24 +120,6 @@ export function ProjectToolbar() {
           >
             {isDark ? <Sun size={20} /> : <Moon size={20} />}
           </button>
-
-          <span
-            className={cn(
-              "hidden rounded-lg border px-2 py-1 text-[10px] font-semibold uppercase tracking-wider sm:inline",
-              t(
-                isDark,
-                "border-slate-200 text-slate-500",
-                "border-slate-700 text-slate-500",
-              ),
-            )}
-            title={
-              storageMode === "local"
-                ? "Dáta len v tomto prehliadači."
-                : "Supabase režim"
-            }
-          >
-            {storageMode === "local" ? "Local" : "Supabase"}
-          </span>
         </div>
       </div>
     </div>

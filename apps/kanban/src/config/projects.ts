@@ -7,8 +7,8 @@ export const PROJECTS: ProjectDefinition[] = [
   { id: "index", label: "Index" },
   { id: "shopentum", label: "Shopentum" },
   { id: "nmh", label: "NMH" },
-  { id: "aiworks", label: "AIWORKS" },
-  { id: "finance", label: "Finance" },
+  { id: "aiworks", label: "IZY VAPE" },
+  { id: "finance", label: "PRUSA FINANCE" },
   { id: "personal", label: "Personal" },
 ];
 
