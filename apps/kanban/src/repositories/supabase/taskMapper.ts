@@ -4,6 +4,7 @@ import type { ActivityEntry, ArchivedTask, Task, TaskStatus } from "@/types/task
 export interface TaskRow {
   id: string;
   title: string;
+  summary: string;
   project: string;
   status: TaskStatus;
   notes: string;
@@ -21,6 +22,7 @@ export function taskFromRow(row: TaskRow): Task | ArchivedTask {
   const base = {
     id: row.id,
     title: row.title,
+    summary: row.summary ?? "",
     project: row.project,
     status: row.status,
     notes: row.notes,
@@ -41,6 +43,7 @@ export function taskToRow(task: Task | ArchivedTask, userId?: string): TaskRow {
   return {
     id: task.id,
     title: task.title,
+    summary: task.summary,
     project: task.project,
     status: task.status,
     notes: task.notes,

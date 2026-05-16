@@ -18,7 +18,16 @@
   }
 
   .kanban-input {
-    @apply w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none placeholder:text-slate-600 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30;
+    @apply w-full rounded-xl border border-white/10 bg-slate-900/80 px-4 py-2.5 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30;
+  }
+
+  .kanban-select {
+    @apply w-full cursor-pointer appearance-none rounded-xl border border-white/10 bg-slate-900/80 px-4 py-2.5 text-sm text-slate-100 outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30;
+    color-scheme: dark;
+  }
+
+  .kanban-select option {
+    @apply bg-slate-900 text-slate-100;
   }
 
   .kanban-btn-primary {

@@ -17,6 +17,7 @@ import {
   timerStop,
   updateTaskNotes,
   updateTaskProject,
+  updateTaskSummary,
   updateTaskTitle,
 } from "@/domain/taskService";
 import { taskRepository } from "@/repositories";
@@ -29,7 +30,7 @@ interface KanbanContextValue {
   projectFilter: ProjectFilter;
   setProjectFilter: (filter: ProjectFilter) => void;
   visibleTasks: Task[];
-  addTask: (title: string, project?: string) => void;
+  addTask: (title: string, project?: string, summary?: string) => void;
   updateTaskStatus: (taskId: string, status: TaskStatus) => void;
   draggingTaskId: string | null;
   setDraggingTaskId: (id: string | null) => void;
@@ -37,6 +38,7 @@ interface KanbanContextValue {
   openTaskDetail: (taskId: string) => void;
   closeTaskDetail: () => void;
   setTaskTitle: (taskId: string, title: string) => void;
+  setTaskSummary: (taskId: string, summary: string) => void;
   setTaskProject: (taskId: string, projectId: string) => void;
   setTaskNotes: (taskId: string, notes: string) => void;
   startTimer: (taskId: string) => void;
@@ -95,14 +97,17 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
     return tasks.filter((t) => t.project === projectFilter);
   }, [tasks, projectFilter]);
 
-  const addTask = useCallback((title: string, project = DEFAULT_PROJECT_ID) => {
-    try {
-      const task = createTask(title, project);
-      setTasks((prev) => [task, ...prev]);
-    } catch {
-      /* empty title */
-    }
-  }, []);
+  const addTask = useCallback(
+    (title: string, project = DEFAULT_PROJECT_ID, summary = "") => {
+      try {
+        const task = createTask(title, project, summary);
+        setTasks((prev) => [task, ...prev]);
+      } catch {
+        /* empty title */
+      }
+    },
+    [],
+  );
 
   const updateTaskStatus = useCallback((taskId: string, status: TaskStatus) => {
     setTasks((prev) => applyTaskStatusUpdate(prev, taskId, status));
@@ -118,6 +123,12 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
 
   const setTaskTitle = useCallback((taskId: string, title: string) => {
     setTasks((prev) => mapTask(prev, taskId, (t) => updateTaskTitle(t, title)));
+  }, []);
+
+  const setTaskSummary = useCallback((taskId: string, summary: string) => {
+    setTasks((prev) =>
+      mapTask(prev, taskId, (t) => updateTaskSummary(t, summary)),
+    );
   }, []);
 
   const setTaskProject = useCallback((taskId: string, projectId: string) => {
@@ -156,6 +167,7 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
       openTaskDetail,
       closeTaskDetail,
       setTaskTitle,
+      setTaskSummary,
       setTaskProject,
       setTaskNotes,
       startTimer,
@@ -173,6 +185,7 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
       openTaskDetail,
       closeTaskDetail,
       setTaskTitle,
+      setTaskSummary,
       setTaskProject,
       setTaskNotes,
       startTimer,

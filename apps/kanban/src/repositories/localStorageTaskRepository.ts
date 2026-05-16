@@ -13,21 +13,51 @@ function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
+function normalizeTask(raw: Record<string, unknown>): Task | null {
+  if (typeof raw.id !== "string" || typeof raw.title !== "string") {
+    return null;
+  }
+  return {
+    id: raw.id,
+    title: raw.title,
+    summary: typeof raw.summary === "string" ? raw.summary : "",
+    project: typeof raw.project === "string" ? raw.project : "index",
+    status: (raw.status as Task["status"]) ?? "Ready",
+    notes: typeof raw.notes === "string" ? raw.notes : "",
+    createdAt: typeof raw.createdAt === "string" ? raw.createdAt : new Date().toISOString(),
+    updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : new Date().toISOString(),
+    totalTrackedSeconds:
+      typeof raw.totalTrackedSeconds === "number" ? raw.totalTrackedSeconds : 0,
+    timerStartedAt:
+      typeof raw.timerStartedAt === "string" ? raw.timerStartedAt : null,
+    isTimerRunning: Boolean(raw.isTimerRunning),
+    activityLog: Array.isArray(raw.activityLog) ? (raw.activityLog as Task["activityLog"]) : [],
+  };
+}
+
 function parseTasks(raw: unknown): Task[] {
   if (!Array.isArray(raw)) return [];
-  return raw.filter((t): t is Task => isRecord(t) && typeof t.id === "string");
+  return raw
+    .filter((t): t is Record<string, unknown> => isRecord(t))
+    .map(normalizeTask)
+    .filter((t): t is Task => t !== null);
 }
 
 function parseArchives(raw: unknown): ArchivesByProject {
   if (!isRecord(raw)) return {};
   const out: ArchivesByProject = {};
   for (const [key, value] of Object.entries(raw)) {
-    if (Array.isArray(value)) {
-      out[key] = value.filter(
-        (t): t is ArchivesByProject[string][number] =>
-          isRecord(t) && typeof t.id === "string",
-      );
-    }
+    if (!Array.isArray(value)) continue;
+    out[key] = value
+      .filter((t): t is Record<string, unknown> => isRecord(t))
+      .map((t) => {
+        const base = normalizeTask(t);
+        if (!base) return null;
+        const archivedAt =
+          typeof t.archivedAt === "string" ? t.archivedAt : new Date().toISOString();
+        return { ...base, archivedAt };
+      })
+      .filter((t): t is ArchivesByProject[string][number] => t !== null);
   }
   return out;
 }

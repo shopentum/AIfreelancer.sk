@@ -27,6 +27,8 @@ export interface ActivityEntry {
 export interface Task {
   id: string;
   title: string;
+  /** Short label shown on kanban cards. */
+  summary: string;
   project: string;
   status: TaskStatus;
   notes: string;

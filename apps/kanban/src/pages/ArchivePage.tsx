@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { AppNav } from "@/components/AppNav";
+import { PageHeader } from "@/components/PageHeader";
+import { getTaskCardLabel } from "@/lib/formatters";
 import { PROJECTS, getProjectLabel } from "@/config/projects";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { formatDuration, formatSkDateTime, getDisplayTrackedSeconds } from "@/lib/formatters";
@@ -75,16 +76,7 @@ export function ArchivePage() {
 
   return (
     <div className="mx-auto max-w-[1200px] px-4 py-8 md:px-8">
-      <AppNav />
-      <header className="mb-8">
-        <p className="kanban-eyebrow">Fakturácia a prehľad</p>
-        <h1 className="kanban-h1">Archív</h1>
-        <p className="kanban-muted mt-2 max-w-2xl">
-          Hotové úlohy presunuté pri ďalšom načítaní aplikácie. Filtruj podľa
-          projektu a dátumu archivácie; súčet času sa vzťahuje na zobrazené
-          položky.
-        </p>
-      </header>
+      <PageHeader title="Archív" />
 
       <div className="kanban-panel mb-6 space-y-4">
         <div className="flex flex-wrap gap-2">
@@ -141,7 +133,7 @@ export function ArchivePage() {
               onChange={(e) =>
                 setProjectFilter(e.target.value as ProjectArchiveFilter)
               }
-              className="kanban-input"
+              className="kanban-select"
             >
               <option value="all">Všetky</option>
               {PROJECTS.map((p) => (
@@ -195,6 +187,7 @@ export function ArchivePage() {
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="border-b border-white/10 bg-white/[0.03] text-[11px] font-bold uppercase tracking-wider text-slate-500">
             <tr>
+              <th className="px-4 py-3">Summary</th>
               <th className="px-4 py-3">Názov</th>
               <th className="px-4 py-3">Projekt</th>
               <th className="px-4 py-3">Čas</th>
@@ -205,7 +198,7 @@ export function ArchivePage() {
             {filtered.length === 0 ? (
               <tr>
                 <td
-                  colSpan={4}
+                  colSpan={5}
                   className="px-4 py-12 text-center text-slate-500"
                 >
                   Žiadne položky podľa filtra.
@@ -217,7 +210,10 @@ export function ArchivePage() {
                   key={t.id}
                   className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]"
                 >
-                  <td className="max-w-[280px] truncate px-4 py-3 font-medium text-white">
+                  <td className="max-w-[200px] truncate px-4 py-3 font-medium text-white">
+                    {getTaskCardLabel(t)}
+                  </td>
+                  <td className="max-w-[200px] truncate px-4 py-3 text-slate-400">
                     {t.title}
                   </td>
                   <td className="px-4 py-3 text-slate-400">

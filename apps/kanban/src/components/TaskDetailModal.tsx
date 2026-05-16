@@ -3,7 +3,12 @@ import { X } from "lucide-react";
 import { KANBAN_COLUMNS } from "@/config/columns";
 import { PROJECTS } from "@/config/projects";
 import { useKanban } from "@/hooks/useKanbanStore";
-import { formatDuration, formatSkDateTime, getDisplayTrackedSeconds } from "@/lib/formatters";
+import { useLiveTrackedSeconds } from "@/hooks/useLiveTrackedSeconds";
+import {
+  formatDuration,
+  formatDurationWithSeconds,
+  formatSkDateTime,
+} from "@/lib/formatters";
 import { getTimerUiState } from "@/lib/timerState";
 import { cn } from "@/lib/utils";
 import type { ActivityEntry, Task, TaskStatus } from "@/types/task";
@@ -67,6 +72,7 @@ function TaskDetailModalBody({ task, onClose }: TaskDetailModalBodyProps) {
   const {
     updateTaskStatus,
     setTaskTitle,
+    setTaskSummary,
     setTaskProject,
     setTaskNotes,
     startTimer,
@@ -92,7 +98,7 @@ function TaskDetailModalBody({ task, onClose }: TaskDetailModalBodyProps) {
   }, [onClose]);
 
   const timerState = getTimerUiState(task);
-  const displaySeconds = getDisplayTrackedSeconds(task);
+  const displaySeconds = useLiveTrackedSeconds(task);
 
   function scheduleNotesSave(value: string) {
     if (notesDebounceRef.current) clearTimeout(notesDebounceRef.current);
@@ -143,6 +149,20 @@ function TaskDetailModalBody({ task, onClose }: TaskDetailModalBodyProps) {
 
         <div className="space-y-4 overflow-y-auto px-5 py-4 scrollbar-kanban">
           <div>
+            <label htmlFor="detail-summary" className="kanban-label">
+              Summary (kanban)
+            </label>
+            <input
+              id="detail-summary"
+              type="text"
+              value={task.summary}
+              onChange={(e) => setTaskSummary(task.id, e.target.value)}
+              className="kanban-input"
+              placeholder="Krátky text na karte"
+            />
+          </div>
+
+          <div>
             <label htmlFor="detail-title" className="kanban-label">
               Názov
             </label>
@@ -163,7 +183,7 @@ function TaskDetailModalBody({ task, onClose }: TaskDetailModalBodyProps) {
               id="detail-project"
               value={task.project}
               onChange={(e) => setTaskProject(task.id, e.target.value)}
-              className="kanban-input"
+              className="kanban-select"
             >
               {PROJECTS.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -183,7 +203,7 @@ function TaskDetailModalBody({ task, onClose }: TaskDetailModalBodyProps) {
               onChange={(e) =>
                 updateTaskStatus(task.id, e.target.value as TaskStatus)
               }
-              className="kanban-input"
+              className="kanban-select"
             >
               {KANBAN_COLUMNS.map((col) => (
                 <option key={col.status} value={col.status}>
@@ -215,7 +235,9 @@ function TaskDetailModalBody({ task, onClose }: TaskDetailModalBodyProps) {
           <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
             <h3 className="kanban-label mb-2">Časovač</h3>
             <p className="mb-3 text-2xl font-semibold tabular-nums text-white">
-              {formatDuration(displaySeconds)}
+              {task.isTimerRunning
+                ? formatDurationWithSeconds(displaySeconds)
+                : formatDuration(displaySeconds)}
             </p>
             <p className="mb-3 text-xs text-slate-500">
               Stav:{" "}

@@ -39,6 +39,24 @@ export function formatDuration(totalSeconds: number): string {
   return `${m}m`;
 }
 
+/** With seconds - for live running timer on kanban (e.g. 1:04:32 or 4:32). */
+export function formatDurationWithSeconds(totalSeconds: number): string {
+  const s = Math.max(0, Math.floor(totalSeconds));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  if (h > 0) return `${h}:${pad(m)}:${pad(sec)}`;
+  return `${m}:${pad(sec)}`;
+}
+
+/** Card headline: summary on board, fallback to title. */
+export function getTaskCardLabel(task: { summary: string; title: string }): string {
+  const s = task.summary.trim();
+  if (s) return s;
+  return task.title;
+}
+
 export function getDisplayTrackedSeconds(
   task: {
     totalTrackedSeconds: number;

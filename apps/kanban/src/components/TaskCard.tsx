@@ -1,9 +1,13 @@
-import { useRef } from "react";
-import { Circle, Pause, Play } from "lucide-react";
+import type { KeyboardEvent, MouseEvent } from "react";
+import { GripVertical, Pause, Play, Square } from "lucide-react";
 import { getProjectLabel } from "@/config/projects";
 import { useKanban } from "@/hooks/useKanbanStore";
-import { formatDuration, getDisplayTrackedSeconds } from "@/lib/formatters";
-import { getTimerUiState } from "@/lib/timerState";
+import { useLiveTrackedSeconds } from "@/hooks/useLiveTrackedSeconds";
+import {
+  formatDuration,
+  formatDurationWithSeconds,
+  getTaskCardLabel,
+} from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import type { Task } from "@/types/task";
 
@@ -11,64 +15,120 @@ interface TaskCardProps {
   task: Task;
 }
 
-function TimerIcon({ state }: { state: ReturnType<typeof getTimerUiState> }) {
-  if (state === "running") {
-    return <Play className="h-3 w-3 fill-current text-emerald-400" aria-hidden />;
-  }
-  if (state === "paused") {
-    return <Pause className="h-3 w-3 text-amber-400" aria-hidden />;
-  }
-  return <Circle className="h-3 w-3 text-slate-600" aria-hidden />;
+function stopPropagation(e: MouseEvent | KeyboardEvent) {
+  e.stopPropagation();
 }
 
 export function TaskCard({ task }: TaskCardProps) {
-  const { setDraggingTaskId, draggingTaskId, openTaskDetail } = useKanban();
-  const skipClickRef = useRef(false);
-  const timerState = getTimerUiState(task);
-  const seconds = getDisplayTrackedSeconds(task);
+  const {
+    setDraggingTaskId,
+    draggingTaskId,
+    openTaskDetail,
+    startTimer,
+    pauseTimer,
+    stopTimer,
+  } = useKanban();
+
+  const seconds = useLiveTrackedSeconds(task);
+  const timeLabel = task.isTimerRunning
+    ? formatDurationWithSeconds(seconds)
+    : formatDuration(seconds);
 
   return (
     <article
-      draggable
-      onDragStart={(e) => {
-        skipClickRef.current = true;
-        e.dataTransfer.setData("text/task-id", task.id);
-        e.dataTransfer.effectAllowed = "move";
-        setDraggingTaskId(task.id);
-      }}
-      onDragEnd={() => {
-        setDraggingTaskId(null);
-        window.setTimeout(() => {
-          skipClickRef.current = false;
-        }, 0);
-      }}
-      onClick={() => {
-        if (skipClickRef.current) return;
-        openTaskDetail(task.id);
-      }}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          openTaskDetail(task.id);
-        }
-      }}
-      role="button"
-      tabIndex={0}
       className={cn(
-        "kanban-card cursor-grab active:cursor-grabbing select-none outline-none hover:ring-1 hover:ring-white/10 focus-visible:ring-2 focus-visible:ring-indigo-500/50",
-        draggingTaskId === task.id && "cursor-grabbing opacity-50 ring-1 ring-indigo-500/40",
+        "kanban-card flex gap-2 p-2",
+        draggingTaskId === task.id && "opacity-50 ring-1 ring-indigo-500/40",
       )}
     >
-      <h3 className="text-sm font-semibold leading-snug text-white">{task.title}</h3>
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-300">
-          {getProjectLabel(task.project)}
-        </span>
-        <span className="flex items-center gap-1 text-xs tabular-nums text-slate-400">
-          <TimerIcon state={timerState} />
-          {formatDuration(seconds)}
-        </span>
-        <span className="sr-only">Timer: {timerState}</span>
+      <button
+        type="button"
+        draggable
+        onDragStart={(e) => {
+          e.dataTransfer.setData("text/task-id", task.id);
+          e.dataTransfer.effectAllowed = "move";
+          setDraggingTaskId(task.id);
+        }}
+        onDragEnd={() => setDraggingTaskId(null)}
+        className="mt-0.5 shrink-0 cursor-grab touch-none rounded p-1 text-slate-600 hover:bg-white/5 hover:text-slate-400 active:cursor-grabbing"
+        aria-label="Presunúť kartu"
+        onClick={stopPropagation}
+      >
+        <GripVertical className="h-4 w-4" aria-hidden />
+      </button>
+
+      <div
+        role="button"
+        tabIndex={0}
+        className="min-w-0 flex-1 cursor-pointer rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/50"
+        onClick={() => openTaskDetail(task.id)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openTaskDetail(task.id);
+          }
+        }}
+      >
+        <p className="text-sm font-semibold leading-snug text-white">
+          {getTaskCardLabel(task)}
+        </p>
+
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-300">
+            {getProjectLabel(task.project)}
+          </span>
+          <span
+            className={cn(
+              "tabular-nums text-xs font-medium",
+              task.isTimerRunning
+                ? "text-emerald-400"
+                : task.status === "InProgress"
+                  ? "text-orange-400"
+                  : "text-slate-400",
+            )}
+          >
+            {timeLabel}
+          </span>
+        </div>
+
+        <div
+          className="mt-2 flex items-center gap-1"
+          onClick={stopPropagation}
+          onKeyDown={stopPropagation}
+        >
+          {task.isTimerRunning ? (
+            <button
+              type="button"
+              onClick={() => pauseTimer(task.id)}
+              className="rounded-md border border-white/10 bg-white/5 p-1 text-amber-400 hover:bg-white/10"
+              title="Pause"
+              aria-label="Pause"
+            >
+              <Pause className="h-3 w-3" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => startTimer(task.id)}
+              className="rounded-md border border-white/10 bg-white/5 p-1 text-emerald-400 hover:bg-white/10"
+              title="Start"
+              aria-label="Start"
+            >
+              <Play className="h-3 w-3 fill-current" />
+            </button>
+          )}
+          {task.isTimerRunning && (
+            <button
+              type="button"
+              onClick={() => stopTimer(task.id)}
+              className="rounded-md border border-white/10 bg-white/5 p-1 text-slate-400 hover:bg-white/10"
+              title="Stop"
+              aria-label="Stop"
+            >
+              <Square className="h-3 w-3 fill-current" />
+            </button>
+          )}
+        </div>
       </div>
     </article>
   );

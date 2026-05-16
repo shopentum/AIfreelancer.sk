@@ -38,7 +38,11 @@ export function mergeRunningSegmentIntoTotal(
   };
 }
 
-export function createTask(title: string, project: string = DEFAULT_PROJECT_ID): Task {
+export function createTask(
+  title: string,
+  project: string = DEFAULT_PROJECT_ID,
+  summary = "",
+): Task {
   const now = new Date().toISOString();
   const trimmed = title.trim();
   if (!trimmed) {
@@ -48,6 +52,7 @@ export function createTask(title: string, project: string = DEFAULT_PROJECT_ID):
   return {
     id: newId("task"),
     title: trimmed,
+    summary: summary.trim(),
     project,
     status: "Ready",
     notes: "",
@@ -109,6 +114,13 @@ export function updateTaskTitle(task: Task, title: string): Task {
   if (!trimmed || trimmed === task.title) return task;
   const now = new Date().toISOString();
   return { ...task, title: trimmed, updatedAt: now };
+}
+
+export function updateTaskSummary(task: Task, summary: string): Task {
+  const trimmed = summary.trim();
+  if (trimmed === task.summary) return task;
+  const now = new Date().toISOString();
+  return { ...task, summary: trimmed, updatedAt: now };
 }
 
 export function updateTaskProject(task: Task, projectId: string): Task {
