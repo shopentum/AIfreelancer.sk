@@ -5,7 +5,17 @@ import {
 import { isoToBratislavaDateKey } from "@/lib/archiveDateFilter";
 import type { ArchivedTask, ArchivesByProject, Task } from "@/types/task";
 
-export type KanbanContextView = "board" | "archive";
+export type KanbanContextView = "board" | "archive" | "report" | "task";
+
+/** Report scope — echoed in JSON for weekly/monthly client summaries. */
+export interface KanbanReportParams {
+  periodFrom: string | null;
+  periodTo: string | null;
+  project: string;
+  projectLabel: string;
+  includeDone: boolean;
+  includeArchive: boolean;
+}
 
 export interface KanbanContextFilter {
   project: string;
@@ -35,11 +45,35 @@ export interface KanbanContextTaskExport {
 export interface KanbanContextPayload {
   source: "kanban.aifreelancer.sk";
   exportedAt: string;
-  view: KanbanContextView;
+  view: "board" | "archive";
   filter: KanbanContextFilter;
   taskCount: number;
   tasks: KanbanContextTaskExport[];
 }
+
+export interface KanbanReportPayload {
+  source: "kanban.aifreelancer.sk";
+  exportedAt: string;
+  view: "report";
+  report: KanbanReportParams;
+  taskCount: number;
+  boardTasks: KanbanContextTaskExport[];
+  archiveTasks: KanbanContextTaskExport[];
+  /** board + archive merged (convenience for chat prompts). */
+  tasks: KanbanContextTaskExport[];
+}
+
+export interface KanbanSingleTaskPayload {
+  source: "kanban.aifreelancer.sk";
+  exportedAt: string;
+  view: "task";
+  task: KanbanContextTaskExport;
+}
+
+export type KanbanExportPayload =
+  | KanbanContextPayload
+  | KanbanReportPayload
+  | KanbanSingleTaskPayload;
 
 function mapTaskExport(
   task: Task,
@@ -74,25 +108,54 @@ function filterByProject<T extends { project: string }>(
   return items.filter((t) => t.project === projectFilter);
 }
 
-function filterArchived(
-  items: ArchivedTask[],
-  projectFilter: string,
-  dateFrom: string,
-  dateTo: string,
+function inPeriod(
+  dayKey: string,
+  periodFrom: string | null,
+  periodTo: string | null,
+): boolean {
+  if (!dayKey) return false;
+  if (periodFrom && dayKey < periodFrom) return false;
+  if (periodTo && dayKey > periodTo) return false;
+  return true;
+}
+
+function filterBoardForReport(
+  tasks: Task[],
+  report: KanbanReportParams,
+): Task[] {
+  let items = filterByProject(tasks, report.project);
+  if (!report.includeDone) {
+    items = items.filter((t) => t.status !== "Done");
+  }
+  if (report.periodFrom || report.periodTo) {
+    items = items.filter((t) =>
+      inPeriod(isoToBratislavaDateKey(t.updatedAt), report.periodFrom, report.periodTo),
+    );
+  }
+  return items;
+}
+
+function filterArchiveForReport(
+  archives: ArchivesByProject,
+  report: KanbanReportParams,
 ): ArchivedTask[] {
-  return items.filter((item) => {
-    if (projectFilter !== "all" && item.project !== projectFilter) {
-      return false;
-    }
-    const dayKey = isoToBratislavaDateKey(item.archivedAt);
-    if (dateFrom && dayKey < dateFrom) return false;
-    if (dateTo && dayKey > dateTo) return false;
-    return true;
-  });
+  const flat = Object.values(archives).flat();
+  return flat
+    .filter((item) => {
+      if (report.project !== "all" && item.project !== report.project) {
+        return false;
+      }
+      return inPeriod(
+        isoToBratislavaDateKey(item.archivedAt),
+        report.periodFrom,
+        report.periodTo,
+      );
+    })
+    .sort((a, b) => b.archivedAt.localeCompare(a.archivedAt));
 }
 
 function buildPayload(
-  view: KanbanContextView,
+  view: "board" | "archive",
   filter: KanbanContextFilter,
   tasks: KanbanContextTaskExport[],
 ): KanbanContextPayload {
@@ -127,10 +190,15 @@ export function buildArchiveKanbanContext(
 ): KanbanContextPayload {
   const projectLabel =
     projectFilter === "all" ? "Všetky projekty" : getLabel(projectFilter);
-  const flat = Object.values(archives).flat();
-  const filtered = filterArchived(flat, projectFilter, dateFrom, dateTo).sort(
-    (a, b) => b.archivedAt.localeCompare(a.archivedAt),
-  );
+  const report: KanbanReportParams = {
+    periodFrom: dateFrom || null,
+    periodTo: dateTo || null,
+    project: projectFilter,
+    projectLabel,
+    includeDone: true,
+    includeArchive: true,
+  };
+  const filtered = filterArchiveForReport(archives, report);
   const exported = filtered.map((t) =>
     mapTaskExport(t, getLabel, t.archivedAt),
   );
@@ -143,11 +211,34 @@ export function buildArchiveKanbanContext(
   return buildPayload("archive", filter, exported);
 }
 
-export interface KanbanSingleTaskPayload {
-  source: "kanban.aifreelancer.sk";
-  exportedAt: string;
-  view: "task";
-  task: KanbanContextTaskExport;
+export function buildReportKanbanContext(
+  activeTasks: Task[],
+  archives: ArchivesByProject,
+  report: KanbanReportParams,
+  getLabel: (projectId: string) => string,
+): KanbanReportPayload {
+  const boardExported = filterBoardForReport(activeTasks, report).map((t) =>
+    mapTaskExport(t, getLabel),
+  );
+
+  const archiveExported = report.includeArchive
+    ? filterArchiveForReport(archives, report).map((t) =>
+        mapTaskExport(t, getLabel, t.archivedAt),
+      )
+    : [];
+
+  const tasks = [...boardExported, ...archiveExported];
+
+  return {
+    source: "kanban.aifreelancer.sk",
+    exportedAt: new Date().toISOString(),
+    view: "report",
+    report,
+    taskCount: tasks.length,
+    boardTasks: boardExported,
+    archiveTasks: archiveExported,
+    tasks,
+  };
 }
 
 export function buildSingleTaskKanbanContext(
@@ -162,9 +253,7 @@ export function buildSingleTaskKanbanContext(
   };
 }
 
-export function serializeKanbanContext(
-  payload: KanbanContextPayload | KanbanSingleTaskPayload,
-): string {
+export function serializeKanbanContext(payload: KanbanExportPayload): string {
   return JSON.stringify(payload, null, 2);
 }
 
