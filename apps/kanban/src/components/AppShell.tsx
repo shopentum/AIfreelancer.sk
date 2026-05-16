@@ -27,10 +27,17 @@ export function AppShell({
       )}
     >
       <KanbanHeader title={title} showBrainDump={showBrainDump} />
-      <ProjectToolbar />
-      <main className="mx-auto flex min-h-0 w-full max-w-[1800px] flex-1 flex-col px-4 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:px-8 md:pt-6">
-        {children}
-      </main>
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 flex-col transition-colors duration-500",
+          t(isDark, "bg-slate-100", "bg-slate-900/35"),
+        )}
+      >
+        <ProjectToolbar />
+        <main className="mx-auto flex min-h-0 w-full max-w-[1800px] flex-1 flex-col px-4 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:px-8 md:pt-6">
+          {children}
+        </main>
+      </div>
       <TaskDetailDrawer />
       <ProjectSettingsModal />
     </div>

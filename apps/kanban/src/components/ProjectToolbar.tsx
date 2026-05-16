@@ -41,7 +41,7 @@ export function ProjectToolbar() {
     <div
       className={cn(
         "border-b transition-colors duration-500",
-        t(isDark, "border-slate-200 bg-white", "border-slate-800 bg-slate-900/50"),
+        t(isDark, "border-slate-200/80 bg-transparent", "border-slate-800/80 bg-transparent"),
       )}
     >
       <div className="mx-auto flex max-w-[1800px] flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:justify-between md:px-8">
