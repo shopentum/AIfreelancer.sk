@@ -1,4 +1,4 @@
-import { Archive, Layout, Moon, Settings, Sun } from "lucide-react";
+import { Archive, Inbox, Layout, Moon, Settings, Sun } from "lucide-react";
 import { KanbanExportPopover } from "@/components/KanbanExportPopover";
 import { NavLink, useLocation, useSearchParams } from "react-router-dom";
 import { getProjectIcon } from "@/config/projectStyle";
@@ -11,15 +11,16 @@ export function ProjectToolbar() {
   const { isDark, toggleTheme } = useTheme();
   const { pathname } = useLocation();
   const isArchive = pathname.startsWith("/archive");
+  const isBacklog = pathname.startsWith("/backlog");
   const [searchParams, setSearchParams] = useSearchParams();
   const { projectFilter, setProjectFilter } = useKanban();
-  const { activeProjects, filterProjects, openSettings } = useProjects();
+  const { boardProjects, filterProjects, openSettings } = useProjects();
 
   const archiveProjectFilter =
     (searchParams.get("project") || "all") as ProjectFilter;
   const activeFilter = isArchive ? archiveProjectFilter : projectFilter;
 
-  const projectList = isArchive ? filterProjects : activeProjects;
+  const projectList = isArchive ? filterProjects : boardProjects;
 
   function selectProject(id: ProjectFilter) {
     if (isArchive) {
@@ -62,52 +63,63 @@ export function ProjectToolbar() {
       )}
     >
       <div className="mx-auto flex max-w-[1800px] flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:justify-between md:px-8">
-        <div
-          className="scrollbar-kanban flex items-center gap-2 overflow-x-auto pb-1"
-          role="tablist"
-          aria-label="Filter projektu"
-        >
-          {filterOptions.map((opt, i) => (
-            <div key={opt.id} className="flex shrink-0 items-center gap-2">
-              {i === 1 && (
-                <div
+        {isBacklog ? (
+          <p
+            className={cn(
+              "text-xs font-bold uppercase tracking-widest",
+              t(isDark, "text-slate-600", "text-slate-400"),
+            )}
+          >
+            Inbox — položky mimo boardu
+          </p>
+        ) : (
+          <div
+            className="scrollbar-kanban flex items-center gap-2 overflow-x-auto pb-1"
+            role="tablist"
+            aria-label="Filter projektu"
+          >
+            {filterOptions.map((opt, i) => (
+              <div key={opt.id} className="flex shrink-0 items-center gap-2">
+                {i === 1 && (
+                  <div
+                    className={cn(
+                      "mx-2 h-4 w-px",
+                      t(isDark, "bg-slate-200", "bg-slate-800"),
+                    )}
+                  />
+                )}
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeFilter === opt.id}
+                  onClick={() => selectProject(opt.id)}
                   className={cn(
-                    "mx-2 h-4 w-px",
-                    t(isDark, "bg-slate-200", "bg-slate-800"),
+                    "flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs font-bold transition-all",
+                    activeFilter === opt.id
+                      ? t(
+                          isDark,
+                          "bg-slate-900 text-white shadow-lg",
+                          "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20",
+                        )
+                      : t(
+                          isDark,
+                          "text-slate-400 hover:bg-slate-50 hover:text-slate-900",
+                          "text-slate-500 hover:bg-slate-800 hover:text-slate-200",
+                        ),
+                    opt.inactive && "opacity-70",
                   )}
-                />
-              )}
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeFilter === opt.id}
-                onClick={() => selectProject(opt.id)}
-                className={cn(
-                  "flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs font-bold transition-all",
-                  activeFilter === opt.id
-                    ? t(
-                        isDark,
-                        "bg-slate-900 text-white shadow-lg",
-                        "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20",
-                      )
-                    : t(
-                        isDark,
-                        "text-slate-400 hover:bg-slate-50 hover:text-slate-900",
-                        "text-slate-500 hover:bg-slate-800 hover:text-slate-200",
-                      ),
-                  opt.inactive && "opacity-70",
-                )}
-              >
-                {opt.id !== "all" && (
-                  <span className="opacity-60">
-                    {getProjectIcon(opt.id, 14)}
-                  </span>
-                )}
-                <span>{opt.label}</span>
-              </button>
-            </div>
-          ))}
-        </div>
+                >
+                  {opt.id !== "all" && (
+                    <span className="opacity-60">
+                      {getProjectIcon(opt.id, 14)}
+                    </span>
+                  )}
+                  <span>{opt.label}</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="flex w-full shrink-0 items-center justify-between gap-2 sm:w-auto sm:justify-start">
           <div
@@ -119,6 +131,10 @@ export function ProjectToolbar() {
             <NavLink to="/" className={navLinkClass} end>
               <Layout size={12} aria-hidden />
               <span>Board</span>
+            </NavLink>
+            <NavLink to="/backlog" className={navLinkClass}>
+              <Inbox size={12} aria-hidden />
+              <span>Backlog</span>
             </NavLink>
             <NavLink to="/archive" className={navLinkClass}>
               <Archive size={12} aria-hidden />

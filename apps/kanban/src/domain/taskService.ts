@@ -1,4 +1,5 @@
 import { DEFAULT_PROJECT_ID } from "@/config/defaultProjects";
+import { isBacklogProjectId } from "@/lib/backlogProject";
 import { appendActivity } from "@/domain/activityLog";
 import { newId } from "@/lib/id";
 import { isValidDateKey } from "@/lib/plannedDate";
@@ -123,6 +124,20 @@ export function updateTaskSummary(task: Task, summary: string): Task {
   if (summary === task.summary) return task;
   const now = new Date().toISOString();
   return { ...task, summary, updatedAt: now };
+}
+
+/** Move inbox task onto the board: assign project + Ready column. */
+export function promoteBacklogTask(
+  task: Task,
+  targetProjectId: string,
+  fromLabel: string,
+  toLabel: string,
+): Task {
+  let working = task;
+  if (isBacklogProjectId(task.project)) {
+    working = updateTaskProject(task, targetProjectId, fromLabel, toLabel);
+  }
+  return updateTaskStatus(working, "Ready");
 }
 
 export function updateTaskProject(

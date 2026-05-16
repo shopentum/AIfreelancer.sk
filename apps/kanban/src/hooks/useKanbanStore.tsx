@@ -10,11 +10,13 @@ import {
 import { DEFAULT_PROJECT_ID } from "@/config/defaultProjects";
 import { useProjects } from "@/hooks/useProjects";
 import { bootstrapActiveTasksWithDoneFlush } from "@/domain/doneArchiveSchedule";
+import { runIndexToBacklogMigration, normalizeTasksOnLoad } from "@/domain/migrateIndexToBacklog";
 import {
   addTaskTrackedMinutes,
   applyTaskStatusUpdate,
   createTask,
   deleteTaskFromList,
+  promoteBacklogTask,
   timerPause,
   timerStart,
   timerStop,
@@ -25,6 +27,7 @@ import {
   updateTaskSummary,
   updateTaskTitle,
 } from "@/domain/taskService";
+import { filterBacklogTasks, filterBoardTasks } from "@/lib/backlogProject";
 import { taskRepository } from "@/repositories";
 import type { Task, TaskStatus } from "@/types/task";
 
@@ -35,7 +38,9 @@ interface KanbanContextValue {
   projectFilter: ProjectFilter;
   setProjectFilter: (filter: ProjectFilter) => void;
   visibleTasks: Task[];
+  backlogTasks: Task[];
   addTask: (title: string, project?: string) => void;
+  promoteToReady: (taskId: string, targetProjectId: string) => void;
   updateTaskStatus: (taskId: string, status: TaskStatus) => void;
   deleteTask: (taskId: string) => void;
   detailTaskId: string | null;
@@ -67,7 +72,8 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
   const { getLabel } = useProjects();
 
   const [tasks, setTasks] = useState<Task[]>(() => {
-    const rawActive = taskRepository.loadActiveTasks();
+    runIndexToBacklogMigration();
+    const rawActive = normalizeTasksOnLoad(taskRepository.loadActiveTasks());
     const archives = taskRepository.loadArchives();
     const { active, archives: nextArchives, didFlush } =
       bootstrapActiveTasksWithDoneFlush(rawActive, archives);
@@ -99,9 +105,18 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
   }, [tasks]);
 
   const visibleTasks = useMemo(() => {
-    if (projectFilter === "all") return tasks;
-    return tasks.filter((t) => t.project === projectFilter);
+    const board = filterBoardTasks(tasks);
+    if (projectFilter === "all") return board;
+    return board.filter((t) => t.project === projectFilter);
   }, [tasks, projectFilter]);
+
+  const backlogTasks = useMemo(
+    () =>
+      filterBacklogTasks(tasks).sort((a, b) =>
+        b.updatedAt.localeCompare(a.updatedAt),
+      ),
+    [tasks],
+  );
 
   const addTask = useCallback((title: string, project = DEFAULT_PROJECT_ID) => {
       try {
@@ -124,6 +139,22 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
       setDetailTaskId((id) => (id === taskId ? null : id));
     },
     [],
+  );
+
+  const promoteToReady = useCallback(
+    (taskId: string, targetProjectId: string) => {
+      setTasks((prev) =>
+        mapTask(prev, taskId, (t) =>
+          promoteBacklogTask(
+            t,
+            targetProjectId,
+            getLabel(t.project),
+            getLabel(targetProjectId),
+          ),
+        ),
+      );
+    },
+    [getLabel],
   );
 
   const openTaskDetail = useCallback((taskId: string) => {
@@ -201,7 +232,9 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
       projectFilter,
       setProjectFilter,
       visibleTasks,
+      backlogTasks,
       addTask,
+      promoteToReady,
       updateTaskStatus,
       deleteTask,
       detailTaskId,
@@ -222,7 +255,9 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
       tasks,
       projectFilter,
       visibleTasks,
+      backlogTasks,
       addTask,
+      promoteToReady,
       updateTaskStatus,
       deleteTask,
       detailTaskId,

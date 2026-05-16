@@ -3,6 +3,7 @@ import {
   getDisplayTrackedSeconds,
 } from "@/lib/formatters";
 import { isoToBratislavaDateKey } from "@/lib/archiveDateFilter";
+import { filterBoardTasks } from "@/lib/backlogProject";
 import type { ArchivedTask, ArchivesByProject, Task } from "@/types/task";
 
 export type KanbanContextView = "board" | "archive" | "report" | "task";
@@ -217,9 +218,10 @@ export function buildReportKanbanContext(
   report: KanbanReportParams,
   getLabel: (projectId: string) => string,
 ): KanbanReportPayload {
-  const boardExported = filterBoardForReport(activeTasks, report).map((t) =>
-    mapTaskExport(t, getLabel),
-  );
+  const boardExported = filterBoardForReport(
+    filterBoardTasks(activeTasks),
+    report,
+  ).map((t) => mapTaskExport(t, getLabel));
 
   const archiveExported = report.includeArchive
     ? filterArchiveForReport(archives, report).map((t) =>

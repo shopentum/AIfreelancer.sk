@@ -21,7 +21,7 @@ function normalizeTask(raw: Record<string, unknown>): Task | null {
     id: raw.id,
     title: raw.title,
     summary: typeof raw.summary === "string" ? raw.summary : "",
-    project: typeof raw.project === "string" ? raw.project : "index",
+    project: typeof raw.project === "string" ? raw.project : "backlog",
     status: (raw.status as Task["status"]) ?? "Ready",
     notes: typeof raw.notes === "string" ? raw.notes : "",
     aiSummary: typeof raw.aiSummary === "string" ? raw.aiSummary : "",

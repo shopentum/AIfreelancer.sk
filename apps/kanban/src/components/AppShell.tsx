@@ -10,12 +10,15 @@ interface AppShellProps {
   children: ReactNode;
   title?: string;
   showBrainDump?: boolean;
+  /** Locks brain-dump to this project (e.g. backlog inbox). */
+  brainDumpProjectId?: string;
 }
 
 export function AppShell({
   children,
   title,
   showBrainDump = false,
+  brainDumpProjectId,
 }: AppShellProps) {
   const { isDark } = useTheme();
 
@@ -26,7 +29,11 @@ export function AppShell({
         t(isDark, "bg-[#F8FAFC] text-slate-900", "bg-slate-950 text-white"),
       )}
     >
-      <KanbanHeader title={title} showBrainDump={showBrainDump} />
+      <KanbanHeader
+        title={title}
+        showBrainDump={showBrainDump}
+        fixedProjectId={brainDumpProjectId}
+      />
       <div
         className={cn(
           "flex min-h-0 flex-1 flex-col transition-colors duration-500",

@@ -12,6 +12,7 @@ import { t } from "@/hooks/useTheme";
 export function getProjectIcon(projectId: string, size = 14): ReactNode {
   const props = { size, "aria-hidden": true as const };
   switch (projectId) {
+    case "backlog":
     case "index":
       return <Inbox {...props} />;
     case "shopentum":
@@ -35,6 +36,10 @@ export function getProjectBadgeClass(
   isDark: boolean,
 ): string {
   const map: Record<string, [string, string]> = {
+    backlog: [
+      "bg-slate-100 text-slate-600 border-slate-200",
+      "bg-slate-800 text-slate-400 border-slate-700",
+    ],
     index: [
       "bg-slate-100 text-slate-600 border-slate-200",
       "bg-slate-800 text-slate-400 border-slate-700",
@@ -60,7 +65,7 @@ export function getProjectBadgeClass(
       "bg-amber-950/50 text-amber-400 border-amber-800",
     ],
   };
-  const pair = map[projectId] ?? map.index;
+  const pair = map[projectId] ?? map.backlog;
   return t(isDark, pair[0], pair[1]);
 }
 
@@ -70,6 +75,7 @@ export function getProjectStripeClass(
   isDark: boolean,
 ): string {
   const map: Record<string, [string, string]> = {
+    backlog: ["bg-slate-400", "bg-slate-500"],
     index: ["bg-slate-400", "bg-slate-500"],
     shopentum: ["bg-indigo-500", "bg-indigo-500"],
     nmh: ["bg-blue-500", "bg-blue-500"],
@@ -77,6 +83,6 @@ export function getProjectStripeClass(
     finance: ["bg-emerald-500", "bg-emerald-500"],
     personal: ["bg-amber-500", "bg-amber-500"],
   };
-  const pair = map[projectId] ?? map.index;
+  const pair = map[projectId] ?? map.backlog;
   return t(isDark, pair[0], pair[1]);
 }

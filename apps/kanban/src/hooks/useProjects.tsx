@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { BACKLOG_PROJECT_ID } from "@/config/defaultProjects";
 import {
   createProject,
   deactivateProject,
@@ -16,6 +17,7 @@ import {
   renameProject,
   seedProjects,
 } from "@/domain/projectService";
+import { runIndexToBacklogMigration } from "@/domain/migrateIndexToBacklog";
 import {
   loadProjectsFromStorage,
   saveProjectsToStorage,
@@ -26,6 +28,8 @@ import type { Project } from "@/types/project";
 interface ProjectsContextValue {
   projects: Project[];
   activeProjects: Project[];
+  /** Active projects on the kanban board (excludes backlog inbox). */
+  boardProjects: Project[];
   /** All projects for archive filter (active + inactive). */
   filterProjects: Project[];
   getLabel: (projectId: string) => string;
@@ -53,6 +57,7 @@ function sortProjects(a: Project, b: Project): number {
 
 export function ProjectsProvider({ children }: { children: ReactNode }) {
   const [projects, setProjects] = useState<Project[]>(() => {
+    runIndexToBacklogMigration();
     const stored = loadProjectsFromStorage();
     if (stored.length > 0) return stored;
     const seeded = seedProjects();
@@ -70,14 +75,28 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     [projects],
   );
 
-  const filterProjects = useMemo(() => [...projects].sort(sortProjects), [projects]);
+  const boardProjects = useMemo(
+    () =>
+      projects
+        .filter((p) => p.active && p.id !== BACKLOG_PROJECT_ID)
+        .sort(sortProjects),
+    [projects],
+  );
+
+  const filterProjects = useMemo(
+    () =>
+      [...projects]
+        .filter((p) => p.id !== BACKLOG_PROJECT_ID)
+        .sort(sortProjects),
+    [projects],
+  );
 
   const getLabel = useCallback(
     (projectId: string) => getProjectLabel(projectId, projects),
     [projects],
   );
 
-  const selectableProjects = activeProjects;
+  const selectableProjects = boardProjects;
 
   const projectsForTask = useCallback(
     (currentProjectId: string) => {
@@ -134,6 +153,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     () => ({
       projects,
       activeProjects,
+      boardProjects,
       filterProjects,
       getLabel,
       selectableProjects,
@@ -151,6 +171,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     [
       projects,
       activeProjects,
+      boardProjects,
       filterProjects,
       getLabel,
       selectableProjects,
