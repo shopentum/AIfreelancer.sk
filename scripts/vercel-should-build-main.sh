@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Vercel ignoreCommand: exit 0 = skip build, exit 1 = run build.
-# Skip when the commit only touches isolated apps (kanban, cashflow).
+# Skip when the commit only touches apps/kanban (separate Vercel project).
 
 CHANGED=$(git diff --name-only HEAD^ HEAD 2>/dev/null || true)
 
@@ -9,8 +9,8 @@ if [ -z "$CHANGED" ]; then
   exit 1
 fi
 
-# Any change outside isolated app folders → build main Next.js site.
-if echo "$CHANGED" | grep -qvE '^(apps/kanban|omega-cashflow)/'; then
+# Any change outside kanban → build main Next.js site.
+if echo "$CHANGED" | grep -qv '^apps/kanban/'; then
   exit 1
 fi
 

@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { CashflowShell } from "@/cashflow/components/CashflowShell";
+import { redirect } from "next/navigation";
+import { cashflowAppUrl } from "@/lib/cashflow";
 
 export const metadata: Metadata = {
   title: "Cashflow",
-  description: "OMEGA - osobný cashflow (lokálne dáta)",
+  description: "Presmerovanie na OMEGA cashflow aplikáciu.",
   robots: { index: false, follow: false },
 };
 
-export default function CashflowRootPage() {
-  return <CashflowShell />;
+export default function CashflowRedirectPage() {
+  redirect(cashflowAppUrl);
 }

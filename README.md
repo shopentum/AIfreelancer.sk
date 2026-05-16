@@ -2,15 +2,13 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Apps v monorepe
 
-| App | Priečinok | Produkcia |
-|-----|-----------|-----------|
-| **Hlavný web (Next.js)** | `/` (root) | `www.aifreelancer.sk` — `/izyvape`, `/eagle-admin`, … (voliteľne aj `/cashflow` v Next) |
+| App | Kód | Produkcia |
+|-----|-----|-----------|
+| **Hlavný web (Next.js)** | koreň repa | `www.aifreelancer.sk` — `/izyvape`, `/eagle-admin`, … |
 | **Kanban (Vite)** | `apps/kanban` | `kanban.aifreelancer.sk` |
-| **Cashflow (Vite)** | repo **`shopentum/cashflow`** | **`cashflow-omega`** → https://cashflow.aifreelancer.sk |
+| **Cashflow (Vite)** | repo **`shopentum/cashflow`** (mimo monorepa) | `cashflow-omega` → https://cashflow.aifreelancer.sk |
 
-Priečinok `omega-cashflow/` v tomto monorepe je len lokálna kópia — **nenasadzuj** z `AIfreelancer.sk`. Detail: [`omega-cashflow/README.md`](omega-cashflow/README.md)
-
-Detail Kanban: [`apps/kanban/README.md`](apps/kanban/README.md)
+`/cashflow` na hlavnom webe len presmeruje na subdoménu. Detail Kanban: [`apps/kanban/README.md`](apps/kanban/README.md)
 
 ### Vercel — repozitár `shopentum/AIfreelancer.sk`
 
@@ -21,14 +19,7 @@ Detail Kanban: [`apps/kanban/README.md`](apps/kanban/README.md)
 | Hlavný web (**jeden!**) | `.` (prázdne) | `www.aifreelancer.sk` |
 | `kanban_app` | `apps/kanban` | `kanban.aifreelancer.sk` |
 
-**Cashflow — z tohto repa nič:**
-
-| Projekt (zmazať / odpojiť) | Prečo |
-|----------------------------|--------|
-| `cashflow` (import `AIfreelancer.sk`) | Duplicita; doména patrí na `cashflow-omega` |
-| `omega-cashflow` (ak importuje monorepo) | Nepoužívať |
-
-**Cashflow — nechaj:**
+**Cashflow — nechaj (iné repo):**
 
 | Vercel projekt | Git repo | Doména |
 |----------------|----------|--------|

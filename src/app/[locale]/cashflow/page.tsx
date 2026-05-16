@@ -1,19 +1,13 @@
 import type { Metadata } from "next";
-import { setRequestLocale } from "next-intl/server";
-import { CashflowShell } from "@/cashflow/components/CashflowShell";
+import { redirect } from "next/navigation";
+import { cashflowAppUrl } from "@/lib/cashflow";
 
 export const metadata: Metadata = {
   title: "Cashflow",
-  description: "OMEGA - osobný cashflow (lokálne dáta)",
+  description: "Presmerovanie na OMEGA cashflow aplikáciu.",
   robots: { index: false, follow: false },
 };
 
-export default async function CashflowPage({
-  params,
-}: Readonly<{
-  params: Promise<{ locale: string }>;
-}>) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-  return <CashflowShell />;
+export default function CashflowLocaleRedirectPage() {
+  redirect(cashflowAppUrl);
 }
