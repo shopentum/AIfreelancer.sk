@@ -162,7 +162,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
         exit={{ x: "100%" }}
         transition={{ type: "spring", damping: 30, stiffness: 200 }}
         className={cn(
-          "fixed top-0 right-0 z-50 flex h-full w-full max-w-[min(720px,90vw)] flex-col shadow-[-40px_0_80px_rgba(0,0,0,0.3)] transition-colors duration-500",
+          "fixed inset-y-0 right-0 z-50 flex h-full w-full max-w-full flex-col shadow-[-40px_0_80px_rgba(0,0,0,0.3)] transition-colors duration-500 sm:max-w-[min(720px,90vw)]",
           t(isDark, "border-l border-slate-100 bg-white", "border-l border-slate-800 bg-slate-900"),
         )}
         role="dialog"
@@ -171,7 +171,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
       >
         <div
           className={cn(
-            "flex items-center justify-between border-b px-8 py-6 md:px-12 md:py-8",
+            "flex items-center justify-between border-b px-5 py-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-8 sm:py-6 md:px-12 md:py-8",
             t(isDark, "border-slate-100", "border-slate-800"),
           )}
         >
@@ -200,7 +200,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
           </button>
         </div>
 
-        <div className="scrollbar-kanban flex-1 space-y-10 overflow-y-auto px-8 py-8 md:px-16 md:py-12">
+        <div className="scrollbar-kanban flex-1 space-y-8 overflow-y-auto px-5 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:space-y-10 sm:px-8 sm:py-8 md:px-16 md:py-12">
           <h2 id="task-drawer-title" className="sr-only">
             Detail úlohy
           </h2>
@@ -532,7 +532,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
 
         <div
           className={cn(
-            "flex flex-wrap items-center justify-between gap-4 border-t px-8 py-6 md:px-12",
+            "flex flex-wrap items-center justify-between gap-4 border-t px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-8 sm:py-6 md:px-12",
             t(isDark, "border-slate-100 bg-slate-50/50", "border-slate-800 bg-slate-950/40"),
           )}
         >

@@ -92,7 +92,7 @@ export function ProjectToolbar() {
           ))}
         </div>
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex w-full shrink-0 items-center justify-between gap-2 sm:w-auto sm:justify-start">
           <div
             className={cn(
               "flex items-center rounded-xl border p-1 transition-colors",

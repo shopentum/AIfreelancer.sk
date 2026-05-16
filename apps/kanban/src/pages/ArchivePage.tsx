@@ -106,7 +106,7 @@ export function ArchivePage() {
     <AppShell title="Archív">
       <div
         className={cn(
-          "mb-6 space-y-4 rounded-2xl border p-5 shadow-sm",
+          "mb-6 space-y-4 rounded-2xl border p-4 shadow-sm sm:p-5",
           t(isDark, "border-slate-200 bg-white", "border-slate-800 bg-slate-900/50"),
         )}
       >

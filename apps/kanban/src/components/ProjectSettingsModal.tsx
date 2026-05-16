@@ -194,7 +194,7 @@ export function ProjectSettingsModal() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.96 }}
             className={cn(
-              "fixed top-1/2 left-1/2 z-50 flex max-h-[min(640px,90vh)] w-full max-w-lg -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border shadow-2xl",
+              "fixed top-1/2 left-1/2 z-50 flex max-h-[min(640px,calc(100dvh-2rem))] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border shadow-2xl",
               t(isDark, "border-slate-200 bg-white", "border-slate-800 bg-slate-900"),
             )}
           >

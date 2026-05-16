@@ -48,7 +48,7 @@ function TaskLinks({
             type="button"
             onClick={() => onOpen(task.id)}
             className={cn(
-              "max-w-[14rem] truncate text-left underline-offset-2 transition-colors hover:underline",
+              "max-w-[min(100%,12rem)] truncate text-left underline-offset-2 transition-colors hover:underline sm:max-w-[14rem]",
               t(isDark, "text-slate-700 hover:text-slate-900", "text-slate-300 hover:text-white"),
             )}
             title={getTaskCardLabel(task)}
@@ -78,7 +78,7 @@ export function PlannedDateStrip() {
   return (
     <div
       className={cn(
-        "mb-4 flex flex-wrap items-baseline gap-x-6 gap-y-1 rounded-2xl border px-4 py-2.5 text-xs",
+        "mb-3 flex flex-col gap-2 rounded-2xl border px-3 py-2.5 text-xs sm:mb-4 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-6 sm:gap-y-1 sm:px-4",
         t(
           isDark,
           "border-slate-200 bg-white/80 text-slate-600",

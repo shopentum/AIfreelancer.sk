@@ -38,7 +38,7 @@ export function KanbanBoard() {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="scrollbar-kanban flex h-[calc(100vh-200px)] min-h-[480px] gap-8 overflow-x-auto pb-4">
+      <div className="scrollbar-kanban flex min-h-0 flex-1 gap-4 overflow-x-auto pb-2 sm:gap-6 md:gap-8 md:pb-4">
         {KANBAN_COLUMNS.map((col) => (
           <KanbanColumn
             key={col.status}

@@ -31,7 +31,7 @@ export function KanbanHeader({ title, showBrainDump }: KanbanHeaderProps) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 border-b px-4 py-4 backdrop-blur-md transition-colors duration-500 md:px-8",
+        "sticky top-0 z-30 border-b px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md transition-colors duration-500 md:px-8 md:py-4",
         t(
           isDark,
           "border-slate-200 bg-white/80",
@@ -43,15 +43,15 @@ export function KanbanHeader({ title, showBrainDump }: KanbanHeaderProps) {
         {showBrainDump ? (
           <form
             onSubmit={submit}
-            className="group relative flex w-full max-w-3xl items-center"
+            className="group relative flex w-full max-w-3xl items-stretch"
           >
-            <div className="relative shrink-0">
+            <div className="relative w-[7.25rem] shrink-0 sm:w-auto">
               <select
                 value={projectForNewTask}
                 onChange={(e) => setBrainProject(e.target.value)}
                 disabled={projectFilter !== "all"}
                 className={cn(
-                  "cursor-pointer appearance-none rounded-l-2xl border-r py-3.5 pl-4 pr-10 text-xs font-bold outline-none transition-all md:py-4",
+                  "h-full w-full min-w-0 cursor-pointer appearance-none truncate rounded-l-2xl border-r py-3 pl-3 pr-8 text-[10px] font-bold outline-none transition-all sm:rounded-l-2xl sm:py-3.5 sm:pl-4 sm:pr-10 sm:text-xs md:py-4",
                   t(
                     isDark,
                     "border-slate-200 bg-slate-100 text-slate-500 group-focus-within:border-slate-300 focus:text-slate-900",
@@ -74,9 +74,9 @@ export function KanbanHeader({ title, showBrainDump }: KanbanHeaderProps) {
               type="text"
               value={titleInput}
               onChange={(e) => setTitleInput(e.target.value)}
-              placeholder="Rýchly zápis: názov úlohy… (Enter = uložiť)"
+              placeholder="Nová úloha…"
               className={cn(
-                "min-w-0 flex-1 rounded-r-2xl border-none px-5 py-3.5 text-sm outline-none transition-all focus:ring-2 md:px-6 md:py-4",
+                "min-w-0 flex-1 rounded-r-2xl border-none py-3 pl-4 pr-12 text-sm outline-none transition-all focus:ring-2 sm:px-5 sm:py-3.5 sm:pr-14 md:px-6 md:py-4",
                 t(
                   isDark,
                   "bg-slate-100 text-slate-900 placeholder-slate-400 focus:ring-slate-900",
@@ -85,10 +85,10 @@ export function KanbanHeader({ title, showBrainDump }: KanbanHeaderProps) {
               )}
               autoComplete="off"
             />
-            <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-2">
+            <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center gap-1 sm:right-3 sm:gap-2">
               <span
                 className={cn(
-                  "hidden rounded-lg border px-2 py-1 text-[10px] font-bold group-focus-within:block",
+                  "hidden rounded-lg border px-2 py-1 text-[10px] font-bold sm:group-focus-within:block",
                   t(
                     isDark,
                     "border-slate-200 bg-white text-slate-400",
@@ -101,7 +101,7 @@ export function KanbanHeader({ title, showBrainDump }: KanbanHeaderProps) {
               <button
                 type="submit"
                 className={cn(
-                  "rounded-xl p-2 shadow-lg transition-all",
+                  "pointer-events-auto rounded-xl p-2 shadow-lg transition-all",
                   t(
                     isDark,
                     "bg-slate-900 text-white shadow-slate-500/20 hover:bg-slate-800",

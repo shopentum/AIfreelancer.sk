@@ -18,7 +18,7 @@ export function KanbanColumn({ column, tasks }: KanbanColumnProps) {
 
   return (
     <section
-      className="flex min-w-[320px] flex-1 flex-col gap-3"
+      className="flex w-[86vw] max-w-[320px] shrink-0 flex-col gap-3 sm:w-auto sm:min-w-[300px] sm:max-w-none sm:flex-1"
       aria-label={column.title}
     >
       <div className="px-2">

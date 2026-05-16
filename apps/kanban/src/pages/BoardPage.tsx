@@ -8,8 +8,10 @@ export function BoardPage() {
 
   return (
     <AppShell showBrainDump>
-      <PlannedDateStrip />
-      <KanbanBoard />
+      <div className="flex min-h-0 flex-1 flex-col">
+        <PlannedDateStrip />
+        <KanbanBoard />
+      </div>
     </AppShell>
   );
 }

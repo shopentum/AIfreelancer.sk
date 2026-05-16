@@ -22,13 +22,13 @@ export function AppShell({
   return (
     <div
       className={cn(
-        "min-h-screen font-sans transition-colors duration-500",
+        "flex min-h-dvh flex-col font-sans transition-colors duration-500",
         t(isDark, "bg-[#F8FAFC] text-slate-900", "bg-slate-950 text-white"),
       )}
     >
       <KanbanHeader title={title} showBrainDump={showBrainDump} />
       <ProjectToolbar />
-      <main className="mx-auto max-w-[1800px] px-4 pt-6 pb-8 md:px-8">
+      <main className="mx-auto flex min-h-0 w-full max-w-[1800px] flex-1 flex-col px-4 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:px-8 md:pt-6">
         {children}
       </main>
       <TaskDetailDrawer />
