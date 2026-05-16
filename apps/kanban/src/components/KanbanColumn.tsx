@@ -3,7 +3,7 @@ import type { ColumnDefinition } from "@/config/columns";
 import { TaskCard } from "@/components/TaskCard";
 import { useKanban } from "@/hooks/useKanbanStore";
 import { cn } from "@/lib/utils";
-import type { Task, TaskStatus } from "@/types/task";
+import type { Task } from "@/types/task";
 
 interface KanbanColumnProps {
   column: ColumnDefinition;

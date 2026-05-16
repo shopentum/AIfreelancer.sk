@@ -1,6 +1,7 @@
 import { BrainDump } from "@/components/BrainDump";
 import { KanbanBoard } from "@/components/KanbanBoard";
 import { ProjectFilter } from "@/components/ProjectFilter";
+import { TaskDetailModal } from "@/components/TaskDetailModal";
 import { KanbanProvider } from "@/hooks/useKanbanStore";
 
 export function App() {
@@ -25,6 +26,7 @@ export function App() {
           <KanbanBoard />
         </div>
       </div>
+      <TaskDetailModal />
     </KanbanProvider>
   );
 }

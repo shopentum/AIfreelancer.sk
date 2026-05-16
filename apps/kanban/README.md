@@ -2,6 +2,11 @@
 
 Osobný execution board. Špecifikácia: [`SPEC_IMPLEMENTATION.md`](./SPEC_IMPLEMENTATION.md), fázy: [`PHASES.md`](./PHASES.md).
 
+## Produkcia
+
+- https://kanban.aifreelancer.sk/
+- Vercel preview: https://kanbanapp-sepia.vercel.app/
+
 ## Vývoj
 
 ```bash

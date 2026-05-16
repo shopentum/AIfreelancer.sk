@@ -144,7 +144,7 @@ Implementácia Start/Pause/Stop musí držať konzistenciu polí vyššie (napr.
 
 Edge cases na zhodu v implementácii:
 
-- Refresh počas behu: dopočítanie z `timerStartedAt` pri štarte UI alebo automatické pozastavenie - **vyberte jednu stratégiu** a zapisujte ju sem po implementácii (preferované: dopočítanie ak sú polia konzistentné).
+- Refresh počas behu: **dopočítanie na UI** - `getDisplayTrackedSeconds` pripočíta delta z `timerStartedAt` k `totalTrackedSeconds` pri renderi; persistovaný `totalTrackedSeconds` sa zvýši až pri Pause/Stop alebo pri presune do **Done** (vtedy sa behajúci segment pred zmenou statusu zlúči do `totalTrackedSeconds` a zapíše sa `timer_stopped`).
 
 ---
 

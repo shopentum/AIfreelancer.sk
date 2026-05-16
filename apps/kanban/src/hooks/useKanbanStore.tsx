@@ -11,6 +11,12 @@ import { DEFAULT_PROJECT_ID } from "@/config/projects";
 import {
   applyTaskStatusUpdate,
   createTask,
+  timerPause,
+  timerStart,
+  timerStop,
+  updateTaskNotes,
+  updateTaskProject,
+  updateTaskTitle,
 } from "@/domain/taskService";
 import { taskRepository } from "@/repositories/localStorageTaskRepository";
 import type { Task, TaskStatus } from "@/types/task";
@@ -26,9 +32,26 @@ interface KanbanContextValue {
   updateTaskStatus: (taskId: string, status: TaskStatus) => void;
   draggingTaskId: string | null;
   setDraggingTaskId: (id: string | null) => void;
+  detailTaskId: string | null;
+  openTaskDetail: (taskId: string) => void;
+  closeTaskDetail: () => void;
+  setTaskTitle: (taskId: string, title: string) => void;
+  setTaskProject: (taskId: string, projectId: string) => void;
+  setTaskNotes: (taskId: string, notes: string) => void;
+  startTimer: (taskId: string) => void;
+  pauseTimer: (taskId: string) => void;
+  stopTimer: (taskId: string) => void;
 }
 
 const KanbanContext = createContext<KanbanContextValue | null>(null);
+
+function mapTask(
+  tasks: Task[],
+  taskId: string,
+  fn: (t: Task) => Task,
+): Task[] {
+  return tasks.map((t) => (t.id === taskId ? fn(t) : t));
+}
 
 export function KanbanProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<Task[]>(() =>
@@ -36,6 +59,21 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
   );
   const [projectFilter, setProjectFilter] = useState<ProjectFilter>("all");
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
+  const [detailTaskId, setDetailTaskId] = useState<string | null>(null);
+  const [, setTimerTick] = useState(0);
+
+  const hasRunningTimer = useMemo(
+    () => tasks.some((t) => t.isTimerRunning),
+    [tasks],
+  );
+
+  useEffect(() => {
+    if (!hasRunningTimer) return;
+    const id = window.setInterval(() => {
+      setTimerTick((n) => n + 1);
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [hasRunningTimer]);
 
   useEffect(() => {
     taskRepository.saveActiveTasks(tasks);
@@ -59,6 +97,40 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
     setTasks((prev) => applyTaskStatusUpdate(prev, taskId, status));
   }, []);
 
+  const openTaskDetail = useCallback((taskId: string) => {
+    setDetailTaskId(taskId);
+  }, []);
+
+  const closeTaskDetail = useCallback(() => {
+    setDetailTaskId(null);
+  }, []);
+
+  const setTaskTitle = useCallback((taskId: string, title: string) => {
+    setTasks((prev) => mapTask(prev, taskId, (t) => updateTaskTitle(t, title)));
+  }, []);
+
+  const setTaskProject = useCallback((taskId: string, projectId: string) => {
+    setTasks((prev) =>
+      mapTask(prev, taskId, (t) => updateTaskProject(t, projectId)),
+    );
+  }, []);
+
+  const setTaskNotes = useCallback((taskId: string, notes: string) => {
+    setTasks((prev) => mapTask(prev, taskId, (t) => updateTaskNotes(t, notes)));
+  }, []);
+
+  const startTimer = useCallback((taskId: string) => {
+    setTasks((prev) => mapTask(prev, taskId, (t) => timerStart(t)));
+  }, []);
+
+  const pauseTimer = useCallback((taskId: string) => {
+    setTasks((prev) => mapTask(prev, taskId, (t) => timerPause(t)));
+  }, []);
+
+  const stopTimer = useCallback((taskId: string) => {
+    setTasks((prev) => mapTask(prev, taskId, (t) => timerStop(t)));
+  }, []);
+
   const value = useMemo(
     () => ({
       tasks,
@@ -69,6 +141,15 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
       updateTaskStatus,
       draggingTaskId,
       setDraggingTaskId,
+      detailTaskId,
+      openTaskDetail,
+      closeTaskDetail,
+      setTaskTitle,
+      setTaskProject,
+      setTaskNotes,
+      startTimer,
+      pauseTimer,
+      stopTimer,
     }),
     [
       tasks,
@@ -77,6 +158,15 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
       addTask,
       updateTaskStatus,
       draggingTaskId,
+      detailTaskId,
+      openTaskDetail,
+      closeTaskDetail,
+      setTaskTitle,
+      setTaskProject,
+      setTaskNotes,
+      startTimer,
+      pauseTimer,
+      stopTimer,
     ],
   );
 

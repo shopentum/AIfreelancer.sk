@@ -19,12 +19,12 @@ Zdroj pravdy: [`SPEC_IMPLEMENTATION.md`](./SPEC_IMPLEMENTATION.md)
 
 **Spustenie:** `cd apps/kanban && npm run dev` (port 5174)
 
-## Fáza 2 - Detail a časovač
+## Fáza 2 - Detail a časovač (hotová)
 
-- Modal (titul, projekt, status select, poznámky)
-- Start / Pause / Stop + live displej času
-- Activity log (timer, notes, project)
-- Refresh: dopočítanie z `timerStartedAt`
+- [x] Modal (titul, projekt, status select, poznámky)
+- [x] Start / Pause / Stop + live displej času
+- [x] Activity log (timer, notes, project)
+- [x] Refresh: dopočítanie z `timerStartedAt` (globálny tick + `getDisplayTrackedSeconds`; pri Done zlúčenie segmentu)
 
 ## Fáza 3 - Archív
 
