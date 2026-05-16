@@ -8,15 +8,13 @@ import { cn } from "@/lib/utils";
 
 interface AppShellProps {
   children: ReactNode;
-  title: string;
-  subtitle?: string;
+  title?: string;
   showBrainDump?: boolean;
 }
 
 export function AppShell({
   children,
   title,
-  subtitle = "Osobná execution vrstva",
   showBrainDump = false,
 }: AppShellProps) {
   const { isDark } = useTheme();
@@ -28,11 +26,7 @@ export function AppShell({
         t(isDark, "bg-[#F8FAFC] text-slate-900", "bg-slate-950 text-white"),
       )}
     >
-      <KanbanHeader
-        title={title}
-        subtitle={subtitle}
-        showBrainDump={showBrainDump}
-      />
+      <KanbanHeader title={title} showBrainDump={showBrainDump} />
       <ProjectToolbar />
       <main className="mx-auto max-w-[1800px] px-4 pt-6 pb-8 md:px-8">
         {children}

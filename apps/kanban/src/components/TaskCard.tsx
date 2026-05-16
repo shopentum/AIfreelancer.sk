@@ -1,7 +1,8 @@
 import type { MouseEvent } from "react";
 import { Draggable } from "@hello-pangea/dnd";
-import { Clock, Pause, Play, Square, Timer } from "lucide-react";
-import { getProjectBadgeClass, getProjectStripeClass } from "@/config/projectStyle";
+import { Clock, Pause, Play, Square } from "lucide-react";
+import { getColumnTheme } from "@/config/columnStyle";
+import { getProjectBadgeClass } from "@/config/projectStyle";
 import { useProjects } from "@/hooks/useProjects";
 import { useKanban } from "@/hooks/useKanbanStore";
 import { useLiveTrackedSeconds } from "@/hooks/useLiveTrackedSeconds";
@@ -13,19 +14,21 @@ import {
   getTaskCardLabel,
 } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
-import type { Task } from "@/types/task";
+import type { Task, TaskStatus } from "@/types/task";
 
 interface TaskCardProps {
   task: Task;
   index: number;
+  columnStatus: TaskStatus;
 }
 
 function stopPropagation(e: MouseEvent) {
   e.stopPropagation();
 }
 
-export function TaskCard({ task, index }: TaskCardProps) {
+export function TaskCard({ task, index, columnStatus }: TaskCardProps) {
   const { isDark } = useTheme();
+  const columnTheme = getColumnTheme(columnStatus, isDark);
   const { openTaskDetail, startTimer, pauseTimer, stopTimer } = useKanban();
   const { getLabel } = useProjects();
 
@@ -43,7 +46,7 @@ export function TaskCard({ task, index }: TaskCardProps) {
           {...provided.dragHandleProps}
           onClick={() => openTaskDetail(task.id)}
           className={cn(
-            "group relative cursor-grab select-none overflow-hidden rounded-[1.5rem] border py-5 pl-4 pr-5 shadow-sm transition-all active:cursor-grabbing",
+            "group relative cursor-grab select-none overflow-hidden rounded-[1.5rem] border p-5 shadow-sm transition-all active:cursor-grabbing",
             t(
               isDark,
               "border-slate-200 bg-white text-slate-900 shadow-slate-200/50 hover:-translate-y-0.5 hover:shadow-xl",
@@ -59,53 +62,25 @@ export function TaskCard({ task, index }: TaskCardProps) {
         >
           <div
             className={cn(
-              "absolute top-4 bottom-4 left-0 w-1 rounded-full",
-              getProjectStripeClass(task.project, isDark),
+              "absolute top-4 right-4 h-2 w-2 rounded-full",
+              columnTheme.dotClass,
             )}
             aria-hidden
           />
 
-          <div className="space-y-4 pl-1">
-            <div className="flex items-start justify-between gap-4">
-              <div
-                className={cn(
-                  "rounded-lg border px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.15em]",
-                  getProjectBadgeClass(task.project, isDark),
-                )}
-              >
-                {getLabel(task.project)}
-              </div>
-
-              <div
-                className={cn(
-                  "flex items-center gap-1.5 rounded-lg border px-2 py-1 transition-colors",
-                  task.isTimerRunning
-                    ? t(
-                        isDark,
-                        "border-emerald-200 bg-emerald-50 text-emerald-600",
-                        "border-emerald-800 bg-emerald-950/40 text-emerald-400",
-                      )
-                    : t(
-                        isDark,
-                        "border-slate-100 bg-slate-50 text-slate-400",
-                        "border-slate-800 bg-slate-800/50 text-slate-500",
-                      ),
-                )}
-              >
-                <Timer
-                  size={10}
-                  className={task.isTimerRunning ? "animate-pulse" : ""}
-                  aria-hidden
-                />
-                <span className="font-mono text-[10px] font-bold tabular-nums">
-                  {timeLabel}
-                </span>
-              </div>
+          <div className="space-y-4">
+            <div
+              className={cn(
+                "rounded-lg border px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.15em] w-fit max-w-[85%]",
+                getProjectBadgeClass(task.project, isDark),
+              )}
+            >
+              {getLabel(task.project)}
             </div>
 
             <h3
               className={cn(
-                "line-clamp-2 text-sm font-bold leading-snug",
+                "line-clamp-2 pr-4 text-sm font-bold leading-snug",
                 t(isDark, "text-slate-800", "text-slate-100"),
               )}
             >
@@ -114,7 +89,7 @@ export function TaskCard({ task, index }: TaskCardProps) {
 
             <div
               className={cn(
-                "flex items-center justify-between border-t pt-2 transition-colors",
+                "flex items-center justify-between gap-3 border-t pt-2 transition-colors",
                 t(isDark, "border-slate-50", "border-slate-800"),
               )}
             >
@@ -129,11 +104,21 @@ export function TaskCard({ task, index }: TaskCardProps) {
               </div>
 
               <div
-                className="flex items-center gap-1"
+                className="flex items-center gap-2"
                 onClick={stopPropagation}
                 onKeyDown={stopPropagation}
                 role="presentation"
               >
+                <span
+                  className={cn(
+                    "font-mono text-[10px] font-bold tabular-nums",
+                    task.isTimerRunning
+                      ? "text-emerald-500"
+                      : t(isDark, "text-slate-500", "text-slate-400"),
+                  )}
+                >
+                  {timeLabel}
+                </span>
                 {task.isTimerRunning ? (
                   <>
                     <button

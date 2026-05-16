@@ -103,7 +103,7 @@ export function ArchivePage() {
   );
 
   return (
-    <AppShell title="Archív" subtitle="Dokončené úlohy" showBrainDump={false}>
+    <AppShell title="Archív">
       <div
         className={cn(
           "mb-6 space-y-4 rounded-2xl border p-5 shadow-sm",

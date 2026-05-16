@@ -12,6 +12,7 @@ interface ColumnTheme {
   titleClass: string;
   iconClass: string;
   lineClass: string;
+  dotClass: string;
   countClass: string;
   dropBgClass: string;
 }
@@ -25,6 +26,7 @@ const COLUMN_THEMES: Record<
       titleClass: "text-blue-600",
       iconClass: "text-blue-500",
       lineClass: "bg-blue-500",
+      dotClass: "bg-blue-500",
       countClass: "border-blue-200 bg-blue-50 text-blue-600",
       dropBgClass: "bg-blue-50/80",
     },
@@ -32,6 +34,7 @@ const COLUMN_THEMES: Record<
       titleClass: "text-blue-400",
       iconClass: "text-blue-400",
       lineClass: "bg-blue-500",
+      dotClass: "bg-blue-500",
       countClass: "border-blue-800 bg-blue-950/40 text-blue-400",
       dropBgClass: "bg-blue-500/10",
     },
@@ -41,6 +44,7 @@ const COLUMN_THEMES: Record<
       titleClass: "text-orange-600",
       iconClass: "text-orange-500",
       lineClass: "bg-orange-500",
+      dotClass: "bg-orange-500",
       countClass: "border-orange-200 bg-orange-50 text-orange-600",
       dropBgClass: "bg-orange-50/80",
     },
@@ -48,6 +52,7 @@ const COLUMN_THEMES: Record<
       titleClass: "text-orange-400",
       iconClass: "text-orange-400",
       lineClass: "bg-orange-500",
+      dotClass: "bg-orange-500",
       countClass: "border-orange-800 bg-orange-950/40 text-orange-400",
       dropBgClass: "bg-orange-500/10",
     },
@@ -57,6 +62,7 @@ const COLUMN_THEMES: Record<
       titleClass: "text-violet-600",
       iconClass: "text-violet-500",
       lineClass: "bg-violet-500",
+      dotClass: "bg-violet-500",
       countClass: "border-violet-200 bg-violet-50 text-violet-600",
       dropBgClass: "bg-violet-50/80",
     },
@@ -64,6 +70,7 @@ const COLUMN_THEMES: Record<
       titleClass: "text-violet-400",
       iconClass: "text-violet-400",
       lineClass: "bg-violet-500",
+      dotClass: "bg-violet-500",
       countClass: "border-violet-800 bg-violet-950/40 text-violet-400",
       dropBgClass: "bg-violet-500/10",
     },
@@ -73,6 +80,7 @@ const COLUMN_THEMES: Record<
       titleClass: "text-emerald-600",
       iconClass: "text-emerald-500",
       lineClass: "bg-emerald-500",
+      dotClass: "bg-emerald-500",
       countClass: "border-emerald-200 bg-emerald-50 text-emerald-600",
       dropBgClass: "bg-emerald-50/80",
     },
@@ -80,6 +88,7 @@ const COLUMN_THEMES: Record<
       titleClass: "text-emerald-400",
       iconClass: "text-emerald-400",
       lineClass: "bg-emerald-500",
+      dotClass: "bg-emerald-500",
       countClass: "border-emerald-800 bg-emerald-950/40 text-emerald-400",
       dropBgClass: "bg-emerald-500/10",
     },

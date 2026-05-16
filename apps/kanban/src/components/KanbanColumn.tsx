@@ -29,7 +29,7 @@ export function KanbanColumn({ column, tasks }: KanbanColumnProps) {
             </span>
             <h2
               className={cn(
-                "text-sm font-black uppercase tracking-widest",
+                "text-sm font-medium uppercase tracking-widest",
                 theme.titleClass,
               )}
             >
@@ -37,7 +37,7 @@ export function KanbanColumn({ column, tasks }: KanbanColumnProps) {
             </h2>
             <span
               className={cn(
-                "rounded-full border px-2 py-0.5 text-[10px] font-black",
+                "rounded-full border px-2 py-0.5 text-[10px] font-medium",
                 theme.countClass,
               )}
             >
@@ -82,7 +82,12 @@ export function KanbanColumn({ column, tasks }: KanbanColumnProps) {
               </p>
             ) : (
               tasks.map((task, index) => (
-                <TaskCard key={task.id} task={task} index={index} />
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  index={index}
+                  columnStatus={column.status}
+                />
               ))
             )}
             {provided.placeholder}

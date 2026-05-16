@@ -6,7 +6,7 @@ export function BoardPage() {
   usePageTitle("Kanban Dashboard");
 
   return (
-    <AppShell title="Kanban Dashboard" showBrainDump>
+    <AppShell showBrainDump>
       <KanbanBoard />
     </AppShell>
   );
