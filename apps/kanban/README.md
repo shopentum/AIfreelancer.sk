@@ -24,6 +24,15 @@ npm run build
 npm run preview
 ```
 
+## Routy
+
+- `/` - Kanban board  
+- `/archive` - Archív (po reload sa Done úlohy presunú sem)
+
+Lokálne: `npm run preview` a otvor `/archive` priamo v prehliadači.
+
 ## Vercel
 
 Root Directory: `apps/kanban`
+
+V priečinku appky je `vercel.json` s rewrite na `index.html`, aby `/archive` fungovalo po deployi (SPA).

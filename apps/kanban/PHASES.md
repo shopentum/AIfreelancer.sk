@@ -26,13 +26,15 @@ Zdroj pravdy: [`SPEC_IMPLEMENTATION.md`](./SPEC_IMPLEMENTATION.md)
 - [x] Activity log (timer, notes, project)
 - [x] Refresh: dopočítanie z `timerStartedAt` (globálny tick + `getDisplayTrackedSeconds`; pri Done zlúčenie segmentu)
 
-## Fáza 3 - Archív
+## Fáza 3 - Archív (hotová)
 
-- `kanban_archives_v1`, bootstrap flush Done
-- Stránka `/archive`: zoznam, filter projektu + dátum, sumár času
+- [x] `kanban_archives_v1` + bootstrap flush Done pri štarte (`flushDoneToArchive`, finalizácia bežiaceho časovača)
+- [x] Stránka `/archive`: tabuľka, filter projektu, filter dátum (od-do, kalendár Europe/Bratislava), predvoľby Dnes / 7 dní / Tento mesiac
+- [x] Sumár vyfiltrovaného času + počet položiek
+- [x] `react-router-dom`, navigácia Board / Archív, `vercel.json` rewrite pre SPA
 
 ## Fáza 4 - Nasadenie a rozšírenia
 
-- README / Vercel root `apps/kanban`
+- README / Vercel root `apps/kanban` (čiastočne hotové)
 - Supabase `TaskRepository` implementácia (voliteľne skeleton)
 - Drobný polish UX

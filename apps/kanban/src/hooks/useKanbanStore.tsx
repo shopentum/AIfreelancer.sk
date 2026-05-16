@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { DEFAULT_PROJECT_ID } from "@/config/projects";
+import { flushDoneToArchive } from "@/domain/archiveFlush";
 import {
   applyTaskStatusUpdate,
   createTask,
@@ -54,9 +55,19 @@ function mapTask(
 }
 
 export function KanbanProvider({ children }: { children: ReactNode }) {
-  const [tasks, setTasks] = useState<Task[]>(() =>
-    taskRepository.loadActiveTasks(),
-  );
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    const rawActive = taskRepository.loadActiveTasks();
+    const archives = taskRepository.loadArchives();
+    const { active, archives: nextArchives } = flushDoneToArchive(
+      rawActive,
+      archives,
+    );
+    if (active.length !== rawActive.length) {
+      taskRepository.saveActiveTasks(active);
+      taskRepository.saveArchives(nextArchives);
+    }
+    return active;
+  });
   const [projectFilter, setProjectFilter] = useState<ProjectFilter>("all");
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
   const [detailTaskId, setDetailTaskId] = useState<string | null>(null);
