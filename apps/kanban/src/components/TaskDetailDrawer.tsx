@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, Clock, Square, Trash2, X } from "lucide-react";
 import { TaskDetailAiSummary } from "@/components/TaskDetailAiSummary";
+import { CopyTaskContextButton } from "@/components/CopyTaskContextButton";
 import { TaskManualTimeAdd } from "@/components/TaskManualTimeAdd";
 import { KANBAN_COLUMNS } from "@/config/columns";
 import { getProjectBadgeClass } from "@/config/projectStyle";
@@ -219,21 +220,24 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
           >
             {getLabel(task.project)}
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className={cn(
-              "flex h-12 w-12 items-center justify-center rounded-2xl transition-all",
-              t(
-                isDark,
-                "bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-900",
-                "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white",
-              ),
-            )}
-            aria-label="Zavrieť"
-          >
-            <X size={24} />
-          </button>
+          <div className="flex items-center gap-2">
+            <CopyTaskContextButton task={task} />
+            <button
+              type="button"
+              onClick={onClose}
+              className={cn(
+                "flex h-12 w-12 items-center justify-center rounded-2xl transition-all",
+                t(
+                  isDark,
+                  "bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-900",
+                  "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white",
+                ),
+              )}
+              aria-label="Zavrieť"
+            >
+              <X size={24} />
+            </button>
+          </div>
         </div>
 
         <div className="scrollbar-kanban flex-1 space-y-8 overflow-y-auto px-5 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:space-y-10 sm:px-8 sm:py-8 md:px-16 md:py-12">

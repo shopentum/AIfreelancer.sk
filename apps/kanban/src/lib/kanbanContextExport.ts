@@ -143,7 +143,28 @@ export function buildArchiveKanbanContext(
   return buildPayload("archive", filter, exported);
 }
 
-export function serializeKanbanContext(payload: KanbanContextPayload): string {
+export interface KanbanSingleTaskPayload {
+  source: "kanban.aifreelancer.sk";
+  exportedAt: string;
+  view: "task";
+  task: KanbanContextTaskExport;
+}
+
+export function buildSingleTaskKanbanContext(
+  task: Task,
+  getLabel: (projectId: string) => string,
+): KanbanSingleTaskPayload {
+  return {
+    source: "kanban.aifreelancer.sk",
+    exportedAt: new Date().toISOString(),
+    view: "task",
+    task: mapTaskExport(task, getLabel),
+  };
+}
+
+export function serializeKanbanContext(
+  payload: KanbanContextPayload | KanbanSingleTaskPayload,
+): string {
   return JSON.stringify(payload, null, 2);
 }
 

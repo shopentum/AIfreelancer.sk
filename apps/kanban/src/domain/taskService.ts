@@ -120,10 +120,9 @@ export function updateTaskTitle(task: Task, title: string): Task {
 }
 
 export function updateTaskSummary(task: Task, summary: string): Task {
-  const trimmed = summary.trim();
-  if (trimmed === task.summary) return task;
+  if (summary === task.summary) return task;
   const now = new Date().toISOString();
-  return { ...task, summary: trimmed, updatedAt: now };
+  return { ...task, summary, updatedAt: now };
 }
 
 export function updateTaskProject(
