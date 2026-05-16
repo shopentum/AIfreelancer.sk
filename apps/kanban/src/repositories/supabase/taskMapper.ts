@@ -8,6 +8,8 @@ export interface TaskRow {
   project: string;
   status: TaskStatus;
   notes: string;
+  ai_summary: string;
+  planned_date: string | null;
   created_at: string;
   updated_at: string;
   total_tracked_seconds: number;
@@ -26,6 +28,8 @@ export function taskFromRow(row: TaskRow): Task | ArchivedTask {
     project: row.project,
     status: row.status,
     notes: row.notes,
+    aiSummary: row.ai_summary ?? "",
+    plannedDate: row.planned_date ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     totalTrackedSeconds: row.total_tracked_seconds,
@@ -47,6 +51,8 @@ export function taskToRow(task: Task | ArchivedTask, userId?: string): TaskRow {
     project: task.project,
     status: task.status,
     notes: task.notes,
+    ai_summary: task.aiSummary,
+    planned_date: task.plannedDate,
     created_at: task.createdAt,
     updated_at: task.updatedAt,
     total_tracked_seconds: task.totalTrackedSeconds,

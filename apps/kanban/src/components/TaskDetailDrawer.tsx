@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, Clock, Square, Trash2, X } from "lucide-react";
+import { TaskDetailAiSummary } from "@/components/TaskDetailAiSummary";
 import { KANBAN_COLUMNS } from "@/config/columns";
 import { getProjectBadgeClass } from "@/config/projectStyle";
 import { useKanban } from "@/hooks/useKanbanStore";
@@ -39,6 +40,8 @@ function activityLabel(entry: ActivityEntry): string {
       return `Projekt: ${p.from ?? "?"} → ${p.to ?? "?"}`;
     case "planned_date_changed":
       return `Termín: ${p.from ?? "?"} → ${p.to ?? "?"}`;
+    case "ai_summary_updated":
+      return "AI summary upravené";
     case "marked_done":
       return "Označené ako hotové";
     default:
@@ -61,6 +64,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
     setTaskSummary,
     setTaskProject,
     setTaskNotes,
+    setTaskAiSummary,
     setTaskPlannedDate,
     startTimer,
     pauseTimer,
@@ -69,12 +73,16 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
   } = useKanban();
 
   const [notesDraft, setNotesDraft] = useState(() => task.notes);
+  const [aiSummaryDraft, setAiSummaryDraft] = useState(() => task.aiSummary);
+  const [aiSummaryOpen, setAiSummaryOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const notesDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const aiSummaryDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     return () => {
       if (notesDebounceRef.current) clearTimeout(notesDebounceRef.current);
+      if (aiSummaryDebounceRef.current) clearTimeout(aiSummaryDebounceRef.current);
     };
   }, []);
 
@@ -109,6 +117,30 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
     }
     if (notesDraft !== task.notes) setTaskNotes(task.id, notesDraft);
   }
+
+  function scheduleAiSummarySave(value: string) {
+    if (aiSummaryDebounceRef.current) clearTimeout(aiSummaryDebounceRef.current);
+    aiSummaryDebounceRef.current = setTimeout(() => {
+      aiSummaryDebounceRef.current = null;
+      setTaskAiSummary(task.id, value);
+    }, 500);
+  }
+
+  function flushAiSummarySave() {
+    if (aiSummaryDebounceRef.current) {
+      clearTimeout(aiSummaryDebounceRef.current);
+      aiSummaryDebounceRef.current = null;
+    }
+    if (aiSummaryDraft !== task.aiSummary) {
+      setTaskAiSummary(task.id, aiSummaryDraft);
+    }
+  }
+
+  const aiSummaryPreview = useMemo(() => {
+    const line = task.aiSummary.trim().replace(/\s+/g, " ");
+    if (!line) return "";
+    return line.length > 56 ? `${line.slice(0, 56)}…` : line;
+  }, [task.aiSummary]);
 
   function handleDelete() {
     if (
@@ -347,6 +379,18 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
               )}
             />
           </div>
+
+          <TaskDetailAiSummary
+            aiSummaryOpen={aiSummaryOpen}
+            setAiSummaryOpen={setAiSummaryOpen}
+            aiSummaryDraft={aiSummaryDraft}
+            setAiSummaryDraft={setAiSummaryDraft}
+            aiSummaryPreview={aiSummaryPreview}
+            scheduleAiSummarySave={scheduleAiSummarySave}
+            flushAiSummarySave={flushAiSummarySave}
+            labelClass={labelClass}
+            isDark={isDark}
+          />
 
           <div className="space-y-6">
             <p className={labelClass}>Časovač</p>

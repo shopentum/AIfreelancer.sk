@@ -16,6 +16,7 @@ export type ActivityType =
   | "notes_updated"
   | "project_changed"
   | "planned_date_changed"
+  | "ai_summary_updated"
   | "marked_done";
 
 export interface ActivityEntry {
@@ -33,6 +34,8 @@ export interface Task {
   project: string;
   status: TaskStatus;
   notes: string;
+  /** AI / decision-layer context; edited manually until generation exists. */
+  aiSummary: string;
   /** Calendar day YYYY-MM-DD (Europe/Bratislava), or null. */
   plannedDate: string | null;
   createdAt: string;

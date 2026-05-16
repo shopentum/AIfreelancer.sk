@@ -18,6 +18,7 @@ import {
   timerStart,
   timerStop,
   updateTaskNotes,
+  updateTaskAiSummary,
   updateTaskPlannedDate,
   updateTaskProject,
   updateTaskSummary,
@@ -43,6 +44,7 @@ interface KanbanContextValue {
   setTaskSummary: (taskId: string, summary: string) => void;
   setTaskProject: (taskId: string, projectId: string) => void;
   setTaskNotes: (taskId: string, notes: string) => void;
+  setTaskAiSummary: (taskId: string, aiSummary: string) => void;
   setTaskPlannedDate: (taskId: string, plannedDate: string | null) => void;
   startTimer: (taskId: string) => void;
   pauseTimer: (taskId: string) => void;
@@ -155,6 +157,12 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
     setTasks((prev) => mapTask(prev, taskId, (t) => updateTaskNotes(t, notes)));
   }, []);
 
+  const setTaskAiSummary = useCallback((taskId: string, aiSummary: string) => {
+    setTasks((prev) =>
+      mapTask(prev, taskId, (t) => updateTaskAiSummary(t, aiSummary)),
+    );
+  }, []);
+
   const setTaskPlannedDate = useCallback(
     (taskId: string, plannedDate: string | null) => {
       setTasks((prev) =>
@@ -192,6 +200,7 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
       setTaskSummary,
       setTaskProject,
       setTaskNotes,
+      setTaskAiSummary,
       setTaskPlannedDate,
       startTimer,
       pauseTimer,
@@ -211,6 +220,7 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
       setTaskSummary,
       setTaskProject,
       setTaskNotes,
+      setTaskAiSummary,
       setTaskPlannedDate,
       startTimer,
       pauseTimer,

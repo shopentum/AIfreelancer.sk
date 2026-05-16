@@ -57,6 +57,7 @@ export function createTask(
     project,
     status: "Ready",
     notes: "",
+    aiSummary: "",
     plannedDate: null,
     createdAt: now,
     updatedAt: now,
@@ -177,6 +178,18 @@ export function updateTaskNotes(task: Task, notes: string): Task {
   return {
     ...task,
     notes,
+    updatedAt: now,
+    activityLog: log,
+  };
+}
+
+export function updateTaskAiSummary(task: Task, aiSummary: string): Task {
+  if (aiSummary === task.aiSummary) return task;
+  const now = new Date().toISOString();
+  const log = appendActivity(task.activityLog, "ai_summary_updated");
+  return {
+    ...task,
+    aiSummary,
     updatedAt: now,
     activityLog: log,
   };
