@@ -193,6 +193,10 @@ Použiť vždy, keď chýba rozhodnutie alebo dáta:
 - Terminológia a mapovanie pojmov: [terminology.md](terminology.md)  
 - Príklady promptov a reasoning flows: [examples.md](examples.md)  
 
+## Súvisiaci skill (mimo NMH)
+
+Pre **nové MVP** (vlastné produkty, klienti) bez enterprise CMS/DataHub kontextu: **`greenfield-mvp-dna`** — rovnaká DNA (delivery → Phase 2, STOP, DATA GAP), generický scope.
+
 ## Rozšíriteľnosť
 
 Skill dopĺňaj **princípmi a heuristikami**, nie ticket ID ani dátumami. Projektové detaily (konkrétne moduly Pent kola, cesty v repo) patria do `docs/Report/` alebo taskov — skill odkazuje na **vzory**. Pri nových doménach (napr. ďalší vertical) pridaj sekciu do `terminology.md` a jeden example flow do `examples.md`.
