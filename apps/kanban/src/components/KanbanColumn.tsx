@@ -68,6 +68,7 @@ export function KanbanColumn({ column, tasks }: KanbanColumnProps) {
             {...provided.droppableProps}
             className={cn(
               "scrollbar-kanban flex-1 space-y-4 overflow-y-auto rounded-2xl p-2 pr-2 transition-colors",
+              isDark ? "bg-slate-900/55 ring-1 ring-slate-800/40" : "bg-slate-200/60",
               snapshot.isDraggingOver && theme.dropBgClass,
             )}
           >
