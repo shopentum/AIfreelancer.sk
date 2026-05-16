@@ -1,4 +1,5 @@
 import { Archive, Layout, Moon, Settings, Sun } from "lucide-react";
+import { CopyKanbanContextButton } from "@/components/CopyKanbanContextButton";
 import { NavLink, useLocation, useSearchParams } from "react-router-dom";
 import { getProjectIcon } from "@/config/projectStyle";
 import { useKanban, type ProjectFilter } from "@/hooks/useKanbanStore";
@@ -132,6 +133,8 @@ export function ProjectToolbar() {
             )}
             aria-hidden
           />
+
+          <CopyKanbanContextButton />
 
           <button
             type="button"
