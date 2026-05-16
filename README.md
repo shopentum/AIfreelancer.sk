@@ -2,31 +2,43 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Apps v monorepe
 
-| App | Priečinok | `package.json` | Produkcia |
-|-----|-----------|----------------|-----------|
-| **Hlavný web (Next.js)** | `/` (root) | root | `www.aifreelancer.sk` — routes `/izyvape`, `/cashflow`, `/eagle-admin`, … |
-| **Kanban (Vite SPA)** | `apps/kanban` | `apps/kanban/package.json` | `kanban.aifreelancer.sk` |
-| **OMEGA Cashflow (Vite)** | `omega-cashflow` | `omega-cashflow/package.json` | voliteľne `cashflow.aifreelancer.sk` — duplicitne aj `/cashflow` v Next.js (`src/cashflow/`) |
+| App | Priečinok | Produkcia |
+|-----|-----------|-----------|
+| **Hlavný web (Next.js)** | `/` (root) | `www.aifreelancer.sk` — `/izyvape`, `/eagle-admin`, … (voliteľne aj `/cashflow` v Next) |
+| **Kanban (Vite)** | `apps/kanban` | `kanban.aifreelancer.sk` |
+| **Cashflow (Vite)** | repo **`shopentum/cashflow`** | **`cashflow-omega`** → https://cashflow.aifreelancer.sk |
+
+Priečinok `omega-cashflow/` v tomto monorepe je len lokálna kópia — **nenasadzuj** z `AIfreelancer.sk`. Detail: [`omega-cashflow/README.md`](omega-cashflow/README.md)
 
 Detail Kanban: [`apps/kanban/README.md`](apps/kanban/README.md)
 
-### Vercel — jeden Git repo, viac projektov (poriadok)
+### Vercel — repozitár `shopentum/AIfreelancer.sk`
 
-**Problém:** Každý import toho istého repa spúšťa deploy na všetky napojené projekty. Duplicitné projekty s rovnakým Root Directory = chaos (doména na jednom, úspešný build na druhom).
+**Nechaj napojené len 2 projekty** (ostatné z dashboardu zmaž alebo **Settings → Git → Disconnect**):
 
-**Maj len tieto 3 produkčné projekty** (ostatné odpoj Git alebo zmaž):
+| Vercel projekt | Root Directory | Doména |
+|----------------|----------------|--------|
+| Hlavný web (**jeden!**) | `.` (prázdne) | `www.aifreelancer.sk` |
+| `kanban_app` | `apps/kanban` | `kanban.aifreelancer.sk` |
 
-| Vercel projekt | Root Directory | `vercel.json` | Doména |
-|----------------|----------------|---------------|--------|
-| Hlavný web (jeden!) | `.` (prázdne) | `/vercel.json` — `ignoreCommand` preskočí build pri commitoch len do `apps/kanban` alebo `omega-cashflow` | `www.aifreelancer.sk`, `aifreelancer.sk` |
-| Kanban | `apps/kanban` | `apps/kanban/vercel.json` — build len pri zmene `apps/kanban/**` | `kanban.aifreelancer.sk` |
-| Cashflow (voliteľný) | `omega-cashflow` | `omega-cashflow/vercel.json` — build len pri zmene `omega-cashflow/**` | `cashflow.aifreelancer.sk` ak používaš subdoménu |
+**Cashflow — z tohto repa nič:**
 
-**Nevytváraj** samostatný Vercel projekt pre: `eagle-cms`, `nmh`, `izyvape` — to sú stránky v Next.js (`src/app/…`), nie samostatné appky.
+| Projekt (zmazať / odpojiť) | Prečo |
+|----------------------------|--------|
+| `cashflow` (import `AIfreelancer.sk`) | Duplicita; doména patrí na `cashflow-omega` |
+| `omega-cashflow` (ak importuje monorepo) | Nepoužívať |
 
-**Zmaž / odpoj Git** na duplicitách typu `a-ifreelancer-sk-hfyh`, `a-ifreelancer-sk-3j5k` — nech ostane **jeden** hlavný projekt s doménou.
+**Cashflow — nechaj:**
 
-**Overenie po deployi:** Settings → Domains (kde je `www`) → Deployments → Production commit = `main` + build zelený → napr. `/izyvape-strategy` musí existovať.
+| Vercel projekt | Git repo | Doména |
+|----------------|----------|--------|
+| **`cashflow-omega`** | `shopentum/cashflow` | `cashflow.aifreelancer.sk` |
+
+Over, že `cashflow.aifreelancer.sk` je **iba** v projekte `cashflow-omega` (Settings → Domains). Ak ju má ešte projekt `cashflow`, odstráň ju tam.
+
+**Nevytváraj** Vercel projekt pre `eagle-cms`, `izyvape` — sú v Next.js (`src/app/…`).
+
+**Zmaž / odpoj** duplicity hlavného webu: `a-ifreelancer-sk-hfyh`, `a-ifreelancer-sk-3j5k`, `eagle-cms` (ak importujú `AIfreelancer.sk`).
 
 ## Getting Started
 
