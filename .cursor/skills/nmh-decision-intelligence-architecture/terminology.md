@@ -35,6 +35,7 @@ Jedna konzistentná slovná zásoba naprieč CMS, DH a produktom.
 | **Delivery** | Konkrétne dáta / UI / export pre termín — minimálna metodická záťaž |
 | **Phase 2 / upratovanie** | Metodika, recurring dataset, dokumentácia rezov po dodaní |
 | **DATA GAP** | Explicitne pomenovaná medzera v rozhodnutí alebo dátach |
+| **STOP CONDITIONS** | Heuristiky „zastav a zúž“ — deadline, delivery stakeholder, chýbajúci join key, nepripravená causal metodika |
 | **Parent / sub-task** | Epic kontajner vs implementačný / dodávkový detail |
 
 ## Editorial Copilot

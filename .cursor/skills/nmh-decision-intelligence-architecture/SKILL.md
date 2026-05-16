@@ -112,6 +112,26 @@ CMS usage / suggestion logs ──article_id──► článok ◄──article_
 - Čo musí fungovať pri výpadku jednej služby?  
 - Čo sa dá logovať už teraz (životný cyklus návrhu: navrhnuté → prijaté / odmietnuté / ignorované)?  
 
+## STOP CONDITIONS
+
+Ak platí aspoň jedna podmienka, **zastav** rozširovanie scope a framework language:
+
+| Ak… | Preferuj |
+|-----|----------|
+| **Deadline > metodická čistota** | Stable delivery; metodiku do Phase 2 |
+| **Stakeholder chce delivery, nie framework** | Krátky ticket / sub-task: čo dodať, moduly, kľúč, CAP, deliverable |
+| **Chýba join key** (`article_id` / ekvivalent) | **DATA GAP** + follow-up; nedesignovať reporting „cez to“ |
+| **Causal metodika nie je pripravená** | Performance **signály** a popisné zarovnanie; nie „AI impact X %“ |
+
+**V tomto režime:**
+
+- explicitný **DATA GAP** (čo nevieme, kto rozhodne, či blokuje)
+- **užší scope** (menej modulov, menej polí, jedna fáza)
+- **stable delivery** (existujúce zdroje, predvídateľná štruktúra výstupu)
+- **follow-up Phase 2** (recurring dataset, rezy, dokumentácia metodiky) — samostatný ticket / interný doc
+
+STOP nie je „nerobiť kvalitu“ — je to **ochrana pred nesprávnou vrstvou práce v nesprávnom čase**.
+
 ## Anti-patterns
 
 | Anti-pattern | Prečo je zlý | Náprava |
@@ -166,6 +186,7 @@ Použiť vždy, keď chýba rozhodnutie alebo dáta:
 - [ ] Sú vrstvy oddelené?  
 - [ ] Je interpretácia dát priradená správnej role?  
 - [ ] Chýbajúce metriky nie sú falošný blokér?  
+- [ ] Platí STOP CONDITION? Ak áno — užší delivery, nie viac frameworku?  
 
 ## Ďalšie zdroje v tomto skilli
 

@@ -14,7 +14,11 @@ Ktorú časť môže DH dostať teraz a čo nechať interné?
 
 ```
 Skontroluj tento Jira popis proti NMH architecture intelligence: 
-CAP, article_id, vrstvy, anti-patterns.
+CAP, article_id, vrstvy, STOP CONDITIONS, anti-patterns.
+```
+
+```
+Platí tu STOP CONDITION? Čo skrátiť na delivery a čo nechať Phase 2?
 ```
 
 ```
