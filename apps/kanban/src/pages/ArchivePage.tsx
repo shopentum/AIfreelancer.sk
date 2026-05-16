@@ -29,27 +29,32 @@ type ProjectArchiveFilter = "all" | string;
 export function ArchivePage() {
   usePageTitle("Archív");
   const { isDark } = useTheme();
-  const { filterProjects, getLabel } = useProjects();
+  const { getLabel } = useProjects();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [archives] = useState<ArchivesByProject>(() =>
     taskRepository.loadArchives(),
   );
-  const [projectFilter, setProjectFilter] = useState<ProjectArchiveFilter>(
-    () => searchParams.get("project") || "all",
-  );
+  const projectFilter = (searchParams.get("project") ||
+    "all") as ProjectArchiveFilter;
   const [dateFrom, setDateFrom] = useState(
     () => searchParams.get("from") ?? "",
   );
   const [dateTo, setDateTo] = useState(() => searchParams.get("to") ?? "");
 
   useEffect(() => {
-    const next = new URLSearchParams();
-    if (projectFilter !== "all") next.set("project", projectFilter);
-    if (dateFrom) next.set("from", dateFrom);
-    if (dateTo) next.set("to", dateTo);
-    setSearchParams(next, { replace: true });
-  }, [projectFilter, dateFrom, dateTo, setSearchParams]);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (dateFrom) next.set("from", dateFrom);
+        else next.delete("from");
+        if (dateTo) next.set("to", dateTo);
+        else next.delete("to");
+        return next;
+      },
+      { replace: true },
+    );
+  }, [dateFrom, dateTo, setSearchParams]);
 
   const allItems = useMemo(
     () =>
@@ -154,27 +159,6 @@ export function ArchivePage() {
         </div>
 
         <div className="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-end">
-          <div className="min-w-[160px] flex-1">
-            <label htmlFor="arch-project" className={labelClass}>
-              Projekt
-            </label>
-            <select
-              id="arch-project"
-              value={projectFilter}
-              onChange={(e) =>
-                setProjectFilter(e.target.value as ProjectArchiveFilter)
-              }
-              className={inputClass}
-            >
-              <option value="all">Všetky</option>
-              {filterProjects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.label}
-                  {!p.active ? " (neaktívny)" : ""}
-                </option>
-              ))}
-            </select>
-          </div>
           <div>
             <label htmlFor="arch-from" className={labelClass}>
               Archivované od

@@ -17,6 +17,7 @@ export type ActivityType =
   | "project_changed"
   | "planned_date_changed"
   | "ai_summary_updated"
+  | "time_added_manually"
   | "marked_done";
 
 export interface ActivityEntry {

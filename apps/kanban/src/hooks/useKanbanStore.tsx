@@ -11,6 +11,7 @@ import { DEFAULT_PROJECT_ID } from "@/config/defaultProjects";
 import { useProjects } from "@/hooks/useProjects";
 import { bootstrapActiveTasksWithDoneFlush } from "@/domain/doneArchiveSchedule";
 import {
+  addTaskTrackedMinutes,
   applyTaskStatusUpdate,
   createTask,
   deleteTaskFromList,
@@ -49,6 +50,7 @@ interface KanbanContextValue {
   startTimer: (taskId: string) => void;
   pauseTimer: (taskId: string) => void;
   stopTimer: (taskId: string) => void;
+  addTaskTrackedMinutes: (taskId: string, minutes: number) => void;
 }
 
 const KanbanContext = createContext<KanbanContextValue | null>(null);
@@ -184,6 +186,15 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
     setTasks((prev) => mapTask(prev, taskId, (t) => timerStop(t)));
   }, []);
 
+  const addTaskTrackedMinutesHandler = useCallback(
+    (taskId: string, minutes: number) => {
+      setTasks((prev) =>
+        mapTask(prev, taskId, (t) => addTaskTrackedMinutes(t, minutes)),
+      );
+    },
+    [],
+  );
+
   const value = useMemo(
     () => ({
       tasks,
@@ -205,6 +216,7 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
       startTimer,
       pauseTimer,
       stopTimer,
+      addTaskTrackedMinutes: addTaskTrackedMinutesHandler,
     }),
     [
       tasks,
@@ -225,6 +237,7 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
       startTimer,
       pauseTimer,
       stopTimer,
+      addTaskTrackedMinutesHandler,
     ],
   );
 

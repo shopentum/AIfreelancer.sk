@@ -220,6 +220,28 @@ export function timerPause(task: Task): Task {
   };
 }
 
+export function addTaskTrackedMinutes(task: Task, minutes: number): Task {
+  const wholeMinutes = Math.floor(minutes);
+  if (wholeMinutes <= 0 || !Number.isFinite(wholeMinutes)) return task;
+
+  const nowIso = new Date().toISOString();
+  let working: Task = task;
+  if (task.isTimerRunning) {
+    working = { ...task, ...mergeRunningSegmentIntoTotal(task) };
+  }
+
+  const log = appendActivity(working.activityLog, "time_added_manually", {
+    minutes: String(wholeMinutes),
+  });
+
+  return {
+    ...working,
+    totalTrackedSeconds: working.totalTrackedSeconds + wholeMinutes * 60,
+    updatedAt: nowIso,
+    activityLog: log,
+  };
+}
+
 export function timerStop(task: Task): Task {
   if (!task.isTimerRunning) return task;
   const nowMs = Date.now();

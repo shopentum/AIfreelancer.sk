@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, Clock, Square, Trash2, X } from "lucide-react";
 import { TaskDetailAiSummary } from "@/components/TaskDetailAiSummary";
+import { TaskManualTimeAdd } from "@/components/TaskManualTimeAdd";
 import { KANBAN_COLUMNS } from "@/config/columns";
 import { getProjectBadgeClass } from "@/config/projectStyle";
 import { useKanban } from "@/hooks/useKanbanStore";
@@ -42,6 +43,8 @@ function activityLabel(entry: ActivityEntry): string {
       return `Termín: ${p.from ?? "?"} → ${p.to ?? "?"}`;
     case "ai_summary_updated":
       return "AI summary upravené";
+    case "time_added_manually":
+      return `+${p.minutes ?? "?"} min ručne`;
     case "marked_done":
       return "Označené ako hotové";
     default:
@@ -69,6 +72,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
     startTimer,
     pauseTimer,
     stopTimer,
+    addTaskTrackedMinutes,
     deleteTask,
   } = useKanban();
 
@@ -469,6 +473,9 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
                   <Square size={16} className="fill-current" />
                 </button>
               </div>
+              <TaskManualTimeAdd
+                onAdd={(minutes) => addTaskTrackedMinutes(task.id, minutes)}
+              />
             </div>
           </div>
 

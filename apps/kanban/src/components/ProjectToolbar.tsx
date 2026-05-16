@@ -1,5 +1,5 @@
 import { Archive, Layout, Moon, Settings, Sun } from "lucide-react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useSearchParams } from "react-router-dom";
 import { getProjectIcon } from "@/config/projectStyle";
 import { useKanban, type ProjectFilter } from "@/hooks/useKanbanStore";
 import { useProjects } from "@/hooks/useProjects";
@@ -10,10 +10,26 @@ export function ProjectToolbar() {
   const { isDark, toggleTheme } = useTheme();
   const { pathname } = useLocation();
   const isArchive = pathname.startsWith("/archive");
+  const [searchParams, setSearchParams] = useSearchParams();
   const { projectFilter, setProjectFilter } = useKanban();
   const { activeProjects, filterProjects, openSettings } = useProjects();
 
+  const archiveProjectFilter =
+    (searchParams.get("project") || "all") as ProjectFilter;
+  const activeFilter = isArchive ? archiveProjectFilter : projectFilter;
+
   const projectList = isArchive ? filterProjects : activeProjects;
+
+  function selectProject(id: ProjectFilter) {
+    if (isArchive) {
+      const next = new URLSearchParams(searchParams);
+      if (id === "all") next.delete("project");
+      else next.set("project", id);
+      setSearchParams(next, { replace: true });
+      return;
+    }
+    setProjectFilter(id);
+  }
 
   const filterOptions: { id: ProjectFilter; label: string; inactive?: boolean }[] =
     [
@@ -63,11 +79,11 @@ export function ProjectToolbar() {
               <button
                 type="button"
                 role="tab"
-                aria-selected={projectFilter === opt.id}
-                onClick={() => setProjectFilter(opt.id)}
+                aria-selected={activeFilter === opt.id}
+                onClick={() => selectProject(opt.id)}
                 className={cn(
                   "flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs font-bold transition-all",
-                  projectFilter === opt.id
+                  activeFilter === opt.id
                     ? t(
                         isDark,
                         "bg-slate-900 text-white shadow-lg",
