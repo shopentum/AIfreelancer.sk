@@ -30,7 +30,7 @@ interface KanbanContextValue {
   projectFilter: ProjectFilter;
   setProjectFilter: (filter: ProjectFilter) => void;
   visibleTasks: Task[];
-  addTask: (title: string, project?: string, summary?: string) => void;
+  addTask: (title: string, project?: string) => void;
   updateTaskStatus: (taskId: string, status: TaskStatus) => void;
   draggingTaskId: string | null;
   setDraggingTaskId: (id: string | null) => void;
@@ -97,10 +97,9 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
     return tasks.filter((t) => t.project === projectFilter);
   }, [tasks, projectFilter]);
 
-  const addTask = useCallback(
-    (title: string, project = DEFAULT_PROJECT_ID, summary = "") => {
+  const addTask = useCallback((title: string, project = DEFAULT_PROJECT_ID) => {
       try {
-        const task = createTask(title, project, summary);
+        const task = createTask(title, project);
         setTasks((prev) => [task, ...prev]);
       } catch {
         /* empty title */

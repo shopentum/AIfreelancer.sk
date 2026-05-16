@@ -5,16 +5,14 @@ import { useKanban } from "@/hooks/useKanbanStore";
 export function BrainDump() {
   const { addTask } = useKanban();
   const [title, setTitle] = useState("");
-  const [summary, setSummary] = useState("");
   const [project, setProject] = useState(DEFAULT_PROJECT_ID);
 
   function submit(e?: FormEvent) {
     e?.preventDefault();
     const trimmedTitle = title.trim();
     if (!trimmedTitle) return;
-    addTask(trimmedTitle, project || DEFAULT_PROJECT_ID, summary.trim());
+    addTask(trimmedTitle, project || DEFAULT_PROJECT_ID);
     setTitle("");
-    setSummary("");
   }
 
   return (
@@ -22,21 +20,7 @@ export function BrainDump() {
       onSubmit={submit}
       className="kanban-panel flex flex-col gap-3 lg:flex-row lg:items-end"
     >
-      <div className="flex-1 min-w-[140px]">
-        <label htmlFor="brain-summary" className="kanban-label">
-          Summary (na karte)
-        </label>
-        <input
-          id="brain-summary"
-          type="text"
-          value={summary}
-          onChange={(e) => setSummary(e.target.value)}
-          placeholder="Krátky text na kanbane…"
-          className="kanban-input"
-          autoComplete="off"
-        />
-      </div>
-      <div className="flex-[1.5] min-w-[160px]">
+      <div className="min-w-[160px] flex-1">
         <label htmlFor="brain-dump" className="kanban-label">
           Názov úlohy
         </label>
