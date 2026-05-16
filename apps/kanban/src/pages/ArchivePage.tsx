@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Trash2 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
+import { deleteArchivedTask } from "@/domain/archiveService";
 import { getTaskCardLabel } from "@/lib/formatters";
 import { useProjects } from "@/hooks/useProjects";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -32,8 +34,26 @@ export function ArchivePage() {
   const { getLabel } = useProjects();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [archives] = useState<ArchivesByProject>(() =>
+  const [archives, setArchives] = useState<ArchivesByProject>(() =>
     taskRepository.loadArchives(),
+  );
+
+  const handleDeleteArchived = useCallback(
+    (taskId: string, label: string) => {
+      if (
+        !window.confirm(
+          `Odstrániť „${label}" z archívu natrvalo? Túto akciu nie je možné vrátiť.`,
+        )
+      ) {
+        return;
+      }
+      setArchives((prev) => {
+        const next = deleteArchivedTask(prev, taskId);
+        taskRepository.saveArchives(next);
+        return next;
+      });
+    },
+    [],
   );
   const projectFilter = (searchParams.get("project") ||
     "all") as ProjectArchiveFilter;
@@ -240,13 +260,16 @@ export function ArchivePage() {
               <th className="px-4 py-3">Projekt</th>
               <th className="px-4 py-3">Čas</th>
               <th className="px-4 py-3">Archivované</th>
+              <th className="w-12 px-2 py-3">
+                <span className="sr-only">Odstrániť</span>
+              </th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className={cn(
                     "px-4 py-12 text-center",
                     t(isDark, "text-slate-400", "text-slate-500"),
@@ -307,6 +330,28 @@ export function ArchivePage() {
                     )}
                   >
                     {formatSkDateTime(item.archivedAt)}
+                  </td>
+                  <td className="px-2 py-3 text-right">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleDeleteArchived(
+                          item.id,
+                          getTaskCardLabel(item),
+                        )
+                      }
+                      className={cn(
+                        "inline-flex h-9 w-9 items-center justify-center rounded-xl border transition-colors",
+                        t(
+                          isDark,
+                          "border-transparent text-slate-400 hover:border-red-200 hover:bg-red-50 hover:text-red-600",
+                          "border-transparent text-slate-500 hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400",
+                        ),
+                      )}
+                      aria-label={`Odstrániť ${getTaskCardLabel(item)} z archívu`}
+                    >
+                      <Trash2 size={16} aria-hidden />
+                    </button>
                   </td>
                 </tr>
               ))
