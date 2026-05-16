@@ -44,8 +44,17 @@ Viac: [`docs/SUPABASE_MIGRATION.md`](./docs/SUPABASE_MIGRATION.md)
 
 ## Vercel
 
-Root Directory: `apps/kanban`
+V projekte **kanban_app** (nie hlavný Next.js site):
 
-`vercel.json` - SPA rewrite pre `/archive`.
+| Nastavenie | Hodnota |
+|------------|---------|
+| Root Directory | `apps/kanban` |
+| Framework Preset | Vite (alebo Other — `vercel.json` to prepíše) |
+| Build Command | *(prázdne — berie z `vercel.json`)* |
+| Output Directory | `dist` — **nie** `apps/kanban/dist` |
+
+`vercel.json` — `outputDirectory: dist`, SPA rewrite pre `/archive` a `/backlog`.
+
+Ak vidíš *No Output Directory named dist*: Root Directory musí byť `apps/kanban`, Output Directory len `dist`.
 
 Premenné prostredia nastav v projekte Vercel (Production). Pre MVP stačí default bez env (local storage v prehliadači používateľa).
