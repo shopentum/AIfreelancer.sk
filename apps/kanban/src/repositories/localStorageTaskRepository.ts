@@ -24,6 +24,8 @@ function normalizeTask(raw: Record<string, unknown>): Task | null {
     project: typeof raw.project === "string" ? raw.project : "index",
     status: (raw.status as Task["status"]) ?? "Ready",
     notes: typeof raw.notes === "string" ? raw.notes : "",
+    plannedDate:
+      typeof raw.plannedDate === "string" ? raw.plannedDate : null,
     createdAt: typeof raw.createdAt === "string" ? raw.createdAt : new Date().toISOString(),
     updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : new Date().toISOString(),
     totalTrackedSeconds:

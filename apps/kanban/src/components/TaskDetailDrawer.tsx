@@ -12,6 +12,10 @@ import {
   formatDurationWithSeconds,
   formatSkDateTime,
 } from "@/lib/formatters";
+import {
+  getTodayKey,
+  getTomorrowKey,
+} from "@/lib/plannedDate";
 import { getTimerUiState } from "@/lib/timerState";
 import { cn } from "@/lib/utils";
 import type { ActivityEntry, Task, TaskStatus } from "@/types/task";
@@ -33,6 +37,8 @@ function activityLabel(entry: ActivityEntry): string {
       return "Poznámky upravené";
     case "project_changed":
       return `Projekt: ${p.from ?? "?"} → ${p.to ?? "?"}`;
+    case "planned_date_changed":
+      return `Termín: ${p.from ?? "?"} → ${p.to ?? "?"}`;
     case "marked_done":
       return "Označené ako hotové";
     default:
@@ -55,6 +61,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
     setTaskSummary,
     setTaskProject,
     setTaskNotes,
+    setTaskPlannedDate,
     startTimer,
     pauseTimer,
     stopTimer,
@@ -220,6 +227,67 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
                 placeholder="Krátky text na karte…"
                 className={inputClass}
               />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <p className={labelClass}>Plánovaný deň</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                type="date"
+                value={task.plannedDate ?? ""}
+                onChange={(e) =>
+                  setTaskPlannedDate(
+                    task.id,
+                    e.target.value ? e.target.value : null,
+                  )
+                }
+                className={cn(inputClass, "w-auto max-w-full")}
+              />
+              <button
+                type="button"
+                onClick={() => setTaskPlannedDate(task.id, getTodayKey())}
+                className={cn(
+                  "rounded-xl border px-3 py-2 text-[10px] font-bold uppercase tracking-widest transition-colors",
+                  t(
+                    isDark,
+                    "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
+                    "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20",
+                  ),
+                )}
+              >
+                Dnes
+              </button>
+              <button
+                type="button"
+                onClick={() => setTaskPlannedDate(task.id, getTomorrowKey())}
+                className={cn(
+                  "rounded-xl border px-3 py-2 text-[10px] font-bold uppercase tracking-widest transition-colors",
+                  t(
+                    isDark,
+                    "border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100",
+                    "border-sky-500/30 bg-sky-500/10 text-sky-400 hover:bg-sky-500/20",
+                  ),
+                )}
+              >
+                Zajtra
+              </button>
+              {task.plannedDate && (
+                <button
+                  type="button"
+                  onClick={() => setTaskPlannedDate(task.id, null)}
+                  className={cn(
+                    "rounded-xl border px-3 py-2 text-[10px] font-bold uppercase tracking-widest transition-colors",
+                    t(
+                      isDark,
+                      "border-slate-200 text-slate-500 hover:bg-slate-50",
+                      "border-slate-700 text-slate-500 hover:bg-slate-800",
+                    ),
+                  )}
+                >
+                  Odstrániť
+                </button>
+              )}
             </div>
           </div>
 

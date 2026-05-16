@@ -15,6 +15,7 @@ export type ActivityType =
   | "timer_stopped"
   | "notes_updated"
   | "project_changed"
+  | "planned_date_changed"
   | "marked_done";
 
 export interface ActivityEntry {
@@ -32,6 +33,8 @@ export interface Task {
   project: string;
   status: TaskStatus;
   notes: string;
+  /** Calendar day YYYY-MM-DD (Europe/Bratislava), or null. */
+  plannedDate: string | null;
   createdAt: string;
   updatedAt: string;
   totalTrackedSeconds: number;

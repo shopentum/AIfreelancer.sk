@@ -5,6 +5,7 @@ import {
 import { KANBAN_COLUMNS } from "@/config/columns";
 import { KanbanColumn } from "@/components/KanbanColumn";
 import { useKanban } from "@/hooks/useKanbanStore";
+import { sortTasksForColumn } from "@/lib/plannedDate";
 import type { TaskStatus } from "@/types/task";
 
 export function KanbanBoard() {
@@ -12,7 +13,9 @@ export function KanbanBoard() {
 
   const byStatus = KANBAN_COLUMNS.reduce(
     (acc, col) => {
-      acc[col.status] = visibleTasks.filter((t) => t.status === col.status);
+      acc[col.status] = sortTasksForColumn(
+        visibleTasks.filter((t) => t.status === col.status),
+      );
       return acc;
     },
     {} as Record<TaskStatus, typeof visibleTasks>,

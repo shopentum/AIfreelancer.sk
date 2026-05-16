@@ -1,6 +1,7 @@
 import { DEFAULT_PROJECT_ID } from "@/config/defaultProjects";
 import { appendActivity } from "@/domain/activityLog";
 import { newId } from "@/lib/id";
+import { isValidDateKey } from "@/lib/plannedDate";
 import type { Task, TaskStatus } from "@/types/task";
 
 const STATUS_LABELS: Record<TaskStatus, string> = {
@@ -56,6 +57,7 @@ export function createTask(
     project,
     status: "Ready",
     notes: "",
+    plannedDate: null,
     createdAt: now,
     updatedAt: now,
     totalTrackedSeconds: 0,
@@ -138,6 +140,31 @@ export function updateTaskProject(
   return {
     ...task,
     project: projectId,
+    updatedAt: now,
+    activityLog: log,
+  };
+}
+
+export function updateTaskPlannedDate(
+  task: Task,
+  plannedDate: string | null,
+): Task {
+  const next =
+    plannedDate === null || plannedDate === ""
+      ? null
+      : isValidDateKey(plannedDate)
+        ? plannedDate
+        : task.plannedDate;
+  if (next === task.plannedDate) return task;
+
+  const now = new Date().toISOString();
+  const log = appendActivity(task.activityLog, "planned_date_changed", {
+    from: task.plannedDate ?? "—",
+    to: next ?? "—",
+  });
+  return {
+    ...task,
+    plannedDate: next,
     updatedAt: now,
     activityLog: log,
   };

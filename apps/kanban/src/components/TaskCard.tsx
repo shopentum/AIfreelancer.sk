@@ -13,6 +13,10 @@ import {
   formatSkShortDate,
   getTaskCardLabel,
 } from "@/lib/formatters";
+import {
+  getPlannedBadgeClass,
+  getPlannedDateBadge,
+} from "@/lib/plannedDate";
 import { cn } from "@/lib/utils";
 import type { Task, TaskStatus } from "@/types/task";
 
@@ -36,6 +40,10 @@ export function TaskCard({ task, index, columnStatus }: TaskCardProps) {
   const timeLabel = task.isTimerRunning
     ? formatDurationWithSeconds(seconds)
     : formatDuration(seconds);
+
+  const plannedBadge = task.plannedDate
+    ? getPlannedDateBadge(task.plannedDate)
+    : null;
 
   return (
     <Draggable draggableId={task.id} index={index}>
@@ -69,13 +77,25 @@ export function TaskCard({ task, index, columnStatus }: TaskCardProps) {
           />
 
           <div className="space-y-4">
-            <div
-              className={cn(
-                "rounded-lg border px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.15em] w-fit max-w-[85%]",
-                getProjectBadgeClass(task.project, isDark),
+            <div className="flex flex-wrap items-center gap-1.5 pr-6">
+              <div
+                className={cn(
+                  "rounded-lg border px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.15em] w-fit max-w-[85%]",
+                  getProjectBadgeClass(task.project, isDark),
+                )}
+              >
+                {getLabel(task.project)}
+              </div>
+              {plannedBadge && (
+                <span
+                  className={cn(
+                    "rounded-lg border px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em]",
+                    getPlannedBadgeClass(plannedBadge.variant, isDark),
+                  )}
+                >
+                  {plannedBadge.label}
+                </span>
               )}
-            >
-              {getLabel(task.project)}
             </div>
 
             <h3
