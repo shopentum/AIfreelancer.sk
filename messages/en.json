@@ -453,8 +453,8 @@
     "heroTitlePrefix": "Stock Decision Support Layer",
     "heroTitleAccent": "for IZYVAPE",
     "heroLead": "We build a layer that connects your existing systems via APIs, evaluates inventory signals and produces concrete recommended tasks for the team on a recurring basis. Not another dashboard or a chat bolt-on.",
-    "primaryCta": "Book a short call",
-    "secondaryCta": "More detail below",
+    "primaryCta": "Expansion strategy · 6 directions",
+    "secondaryCta": "How the MVP works below",
     "diagram": {
       "title": "Connected data and APIs with a decision outcome",
       "lead": "Same pattern as multi-source decision intelligence: multiple inputs, one normalization and evaluation step, outputs your team can schedule as work.",
@@ -572,6 +572,75 @@
     "closingTitle": "From concept to a concrete plan",
     "closingLead": "Short discovery, then a binding plan for ingestion, first snapshots and findings v1 – without reorganizing your entire systems stack.",
     "closingCta": "Schedule intro call"
+  },
+  "IzyvapeStrategy": {
+    "eyebrow": "IZYVAPE · Post-MVP expansion",
+    "heroTitlePrefix": "Six directions for the",
+    "heroTitleAccent": "decision layer",
+    "heroLead": "After the Stock Decision Support pillar, operational intelligence can expand into commerce view, channels, profitability, role digests, publishing assistance and later prediction. Not an AI feature roadmap – a phased decision system on data you already have.",
+    "backLink": "Back to Stock Decision Support MVP",
+    "stackEyebrow": "Expansion architecture",
+    "stackTitle": "Six layers on a shared data foundation",
+    "stackLead": "Cards stack as you scroll – each direction uses the same structure: name, problem, proposed value.",
+    "labelProblem": "Problem / what it solves",
+    "labelProposal": "Proposal",
+    "labelExamples": "Example findings or capabilities",
+    "cardIndex": "Direction {current} / {total}",
+    "cards": {
+      "c1": {
+        "title": "Commerce Intelligence Layer",
+        "subtitle": "Marketing, profit and commercial view combined",
+        "tag": "",
+        "problem": "The business needs to know what to push, what not to promote, where opportunity sits and where margin leaks – not isolated channel metrics.",
+        "proposal": "A unified commercial view on products, categories and channels: high margin / low visibility, traffic without conversion, promo-safe SKUs, revenue growth without profitability growth.",
+        "examples": "high margin + low visibility|traffic without conversion|promo-safe products|revenue up, profit flat|capital tied in stock"
+      },
+      "c2": {
+        "title": "B2B / Channel Intelligence Layer",
+        "subtitle": "Protect wholesale and distribution channels",
+        "tag": "",
+        "problem": "Retail and B2B pull from the same inventory. Without an explicit layer, promos and allocation can hurt top partners and traffic.",
+        "proposal": "Risk monitoring for B2B: key SKU stockouts, partner order drops, promo vs. B2B availability conflicts, unstable regions or partners.",
+        "examples": "top B2B SKUs at stockout risk|partner order decline|promo threatens B2B availability|unstable partners or regions"
+      },
+      "c3": {
+        "title": "Profitability Intelligence Layer",
+        "subtitle": "Money S, WooCommerce, B2B and margin in one logic",
+        "tag": "",
+        "problem": "Revenue alone does not show business health. Costs, margins and contribution are scattered across systems.",
+        "proposal": "Connect turnover, costs and margin into findings: weak or loss-making categories, inefficient promos, low contribution margin product groups.",
+        "examples": "high turnover, low profit|loss-making categories|inefficient promo SKUs|low contribution margin groups"
+      },
+      "c4": {
+        "title": "Executive & Operational Digest Layer",
+        "subtitle": "Role-based digests instead of manual report assembly",
+        "tag": "",
+        "problem": "CEO, logistics, marketing and B2B each live in different tools. A shared priority language is missing without hours of manual work.",
+        "proposal": "Daily or weekly role digests: critical issues, stock alerts, promo opportunities, profitability warnings and operational priorities in one format.",
+        "examples": "TOP critical issues|stock alerts|promo opportunities|profitability warnings|operational priorities"
+      },
+      "c5": {
+        "title": "Social Publishing Assistance Layer",
+        "subtitle": "Content tied to stock and commercial priority",
+        "tag": "",
+        "problem": "Marketing often plans content separately from real availability and inventory priority.",
+        "proposal": "Queue, publish workflow and approval support with promo and post suggestions based on what is promo-safe and commercially sensible.",
+        "examples": "promo product suggestions|post suggestions|publish later|promo-safe queue|approval workflow"
+      },
+      "c6": {
+        "title": "Predictive & Forecasting Layer",
+        "subtitle": "Demand, seasonality, replenishment",
+        "tag": "After data stabilizes",
+        "problem": "Prediction without trustworthy snapshots and validated operational flows creates false confidence.",
+        "proposal": "After the decision layer is trusted: demand forecasting, seasonal modelling, replenishment planning and trend prediction linked to historical findings.",
+        "examples": "demand forecasting|seasonal modelling|replenishment planning|trend prediction"
+      }
+    },
+    "closingEyebrow": "Closing",
+    "closingTitle": "This is not a list of AI features",
+    "closingLead": "It is a phased operational decision system on data from stores, B2B and online channels. First visibility, prioritization and a trustworthy data layer – then automation, prediction and workflow assistance.",
+    "closingQuote": "The goal is not another dashboard or AI experiment, but a practical decision layer that helps the business decide faster and better on data it already has.",
+    "closingPrinciple": "Principle: AI proposes and prioritizes – people decide and execute in existing systems."
   },
   "Navbar": {
     "links": {

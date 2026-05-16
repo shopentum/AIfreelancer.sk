@@ -270,12 +270,31 @@ export default function IzyvapeMvpLanding() {
             </h1>
 
             <p className="mt-6 max-w-3xl mx-auto text-lg md:text-xl text-slate-400 font-medium leading-relaxed">{t("heroLead")}</p>
+
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link
+                href="/izyvape-strategy"
+                className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all shadow-lg shadow-white/5"
+              >
+                {t("primaryCta")}
+                <ArrowRight size={14} />
+              </Link>
+              <a
+                href="#architektura"
+                className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors py-3"
+              >
+                {t("secondaryCta")}
+              </a>
+            </div>
           </motion.div>
         </div>
       </section>
 
       {/* 1. Diagram toku – ako Shopentum */}
-      <section className="relative pb-20 md:pb-28 px-6 border-t border-white/5 pt-16 md:pt-20 bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.06)_0%,transparent_65%)]">
+      <section
+        id="architektura"
+        className="relative pb-20 md:pb-28 px-6 border-t border-white/5 pt-16 md:pt-20 scroll-mt-28 bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.06)_0%,transparent_65%)]"
+      >
         <IzyvapeDataFlowDiagram />
       </section>
 

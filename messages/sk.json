@@ -453,8 +453,8 @@
     "heroTitlePrefix": "Stock Decision Support Layer",
     "heroTitleAccent": "pre IZYVAPE",
     "heroLead": "Budujeme vrstvu, ktorá cez API prepojí existujúce systémy, vyhodnotí signály o zásobách a pravidelne vygeneruje konkrétne odporúčané úlohy pre tím. Nie ďalší dashboard ani samoúčelný AI chat.",
-    "primaryCta": "Dohodnúť krátky call",
-    "secondaryCta": "Ďalší detail nižšie",
+    "primaryCta": "Stratégia rozšírenia · 6 smerov",
+    "secondaryCta": "Ako funguje MVP nižšie",
     "diagram": {
       "title": "Prepojenie dát a API s rozhodovacím výstupom",
       "lead": "Ten istý princíp ako pri decision vrstve nad viacerými biznis signálmi: viac zdrojov, jedna normalizácia a vyhodnotenie, výstup vo forme úloh pre tím.",
@@ -572,6 +572,75 @@
     "closingTitle": "Od konceptu k konkrétnemu plánu",
     "closingLead": "Krátka discovery, potom záväzný plán ingestov, prvých snapshotov a logiky nálezov v1 – bez reorganizácie celého vášho systémového stacku.",
     "closingCta": "Naplánovať úvodný call"
+  },
+  "IzyvapeStrategy": {
+    "eyebrow": "IZYVAPE · Rozšírenie po MVP",
+    "heroTitlePrefix": "Šesť smerov",
+    "heroTitleAccent": "decision vrstvy",
+    "heroLead": "Po prvom pilieri Stock Decision Support sa dá postupne rozšíriť operational intelligence o obchodný pohľad, kanály, profitabilitu, digesty pre role, podporu publikovania a až neskôr predikciu. Nie roadmapa AI feature – postupné budovanie decision systému nad existujúcimi dátami.",
+    "backLink": "Späť na MVP Stock Decision Support",
+    "stackEyebrow": "Architektúra rozšírenia",
+    "stackTitle": "Šesť vrstiev nad spoločným dátovým základom",
+    "stackLead": "Pri scrolli sa karty vrstvia – každý smer má rovnakú štruktúru: názov, čo rieši, návrh hodnoty.",
+    "labelProblem": "Problém / čo rieši",
+    "labelProposal": "Návrh",
+    "labelExamples": "Príklady nálezov alebo schopností",
+    "cardIndex": "Smer {current} / {total}",
+    "cards": {
+      "c1": {
+        "title": "Commerce Intelligence Layer",
+        "subtitle": "Spája marketing, profit a obchodný pohľad",
+        "tag": "",
+        "problem": "Firma potrebuje vedieť, čo podporiť v predaji, čo nepromovať, kde je obchodný potenciál a kde uniká marža – nie len sledovať izolované metriky kanálov.",
+        "proposal": "Jednotný obchodný pohľad na produkty, kategórie a kanály: nálezy typu vysoká marža s nízkou viditeľnosťou, traffic bez konverzie, promo-safe položky alebo rast obratu bez rastu profitability.",
+        "examples": "vysoká marža + nízka viditeľnosť|traffic bez konverzie|promo-safe produkty|revenue rast bez rastu profitability|produkty viažuce kapitál"
+      },
+      "c2": {
+        "title": "B2B / Channel Intelligence Layer",
+        "subtitle": "Ochrana veľkoobchodu a distribučných kanálov",
+        "tag": "",
+        "problem": "Retail a B2B ťahajú na ten istý sklad. Bez explicitnej vrstvy hrozí, že promo alebo alokácia zásob ohrozí top partnerov a trafík.",
+        "proposal": "Monitoring a prioritizácia rizík pre B2B: výpadky u kľúčových SKU, pokles objednávok partnerov, konflikt promo vs. B2B dostupnosť, nestabilné regióny alebo partneri.",
+        "examples": "top B2B produkty s rizikom výpadku|pokles objednávok partnerov|promo ohrozuje B2B dostupnosť|nestabilní partneri alebo regióny"
+      },
+      "c3": {
+        "title": "Profitability Intelligence Layer",
+        "subtitle": "Money S, WooCommerce, B2B a marže v jednej logike",
+        "tag": "",
+        "problem": "Obrat sám o sebe neukazuje zdravie businessu. Náklady, marže a contribution margin sú rozptýlené medzi systémami.",
+        "proposal": "Prepojenie obratu, nákladov a marže do nálezov: slabé alebo stratové kategórie, neefektívne promo, produktové skupiny s nízkou contribution margin.",
+        "examples": "vysoký obrat, nízky zisk|stratové kategórie|neefektívne promo produkty|nízka contribution margin na skupine SKU"
+      },
+      "c4": {
+        "title": "Executive & Operational Digest Layer",
+        "subtitle": "Role-based prehľady namiesto manuálneho skladania reportov",
+        "tag": "",
+        "problem": "CEO, logistika, marketing a B2B každý deň prechádzajú iné systémy. Chýba spoločný jazyk priority bez hodín ručnej práce.",
+        "proposal": "Denné alebo týždenné digesty podľa role: critical issues, stock alerts, promo príležitosti, profitability warnings a operatívne priority v jednom formáte.",
+        "examples": "TOP critical issues|stock alerts|promo opportunities|profitability warnings|operational priorities"
+      },
+      "c5": {
+        "title": "Social Publishing Assistance Layer",
+        "subtitle": "Obsah naviazaný na sklad a obchodnú prioritu",
+        "tag": "",
+        "problem": "Marketing plánuje obsah často oddelene od reálnej dostupnosti a skladovej priority produktov.",
+        "proposal": "Podpora queue, publish workflow a schvaľovania s návrhmi promo produktov a postov podľa toho, čo je promo-safe a obchodne zmysluplné.",
+        "examples": "návrhy promo produktov|návrhy postov|publish later|promo-safe queue|approval workflow"
+      },
+      "c6": {
+        "title": "Predictive & Forecasting Layer",
+        "subtitle": "Demand, sezónnosť, replenishment",
+        "tag": "Až po stabilizácii dát",
+        "problem": "Predikcia bez dôveryhodných snapshotov a overených operational flow vedie k falošnej istote. Vyžaduje kvalitné historické rezy a stabilný dataset.",
+        "proposal": "Až po fungujúcej decision vrstve: demand forecasting, sezónne modelovanie, replenishment planning a trend prediction s jasnou väzbou na minulé nálezy.",
+        "examples": "demand forecasting|sezónne modelovanie|replenishment planning|trend prediction"
+      }
+    },
+    "closingEyebrow": "Záver",
+    "closingTitle": "Toto nie je zoznam AI feature",
+    "closingLead": "Je to postupné budovanie operational decision systému nad existujúcimi dátami z prevádzok, B2B a online kanálov. Najprv viditeľnosť, prioritizácia a dôveryhodná dátová vrstva – až potom automatizácia, predikcia a workflow assistance.",
+    "closingQuote": "Cieľom nie je ďalší dashboard ani AI experiment, ale praktická decision vrstva, ktorá pomáha firme robiť rýchlejšie a kvalitnejšie obchodné rozhodnutia nad dátami, ktoré už má.",
+    "closingPrinciple": "Princíp: AI navrhuje a prioritizuje – človek rozhoduje a vykonáva v existujúcich systémoch."
   },
   "Navbar": {
     "links": {

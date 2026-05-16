@@ -453,8 +453,8 @@
     "heroTitlePrefix": "Stock Decision Support Layer",
     "heroTitleAccent": "für IZYVAPE",
     "heroLead": "Wir bauen eine Schicht, die bestehende Systeme per API verbindet, Bestandssignale auswertet und wiederkehrend konkrete empfohlene Aufgaben für das Team erzeugt – kein weiteres Dashboard und kein Chat-Only-Produkt.",
-    "primaryCta": "Kurzes Gespräch vereinbaren",
-    "secondaryCta": "Mehr Details unten",
+    "primaryCta": "Erweiterungsstrategie · 6 Richtungen",
+    "secondaryCta": "So funktioniert das MVP unten",
     "diagram": {
       "title": "Verbundene Daten und APIs mit Entscheidungsoutput",
       "lead": "Dasselbe Muster wie bei Multi-Signal-Decision-Intelligence: mehrere Quellen, eine Normalisierung und Auswertung, Outputs die sich als Arbeit einplanen lassen.",
@@ -572,6 +572,75 @@
     "closingTitle": "Vom Konzept zum konkreten Plan",
     "closingLead": "Kurze Discovery, dann verbindlicher Plan für Ingest, erste Snapshots und Findings v1 – ohne Ihren gesamten System-Stack neu zu organisieren.",
     "closingCta": "Intro-Call planen"
+  },
+  "IzyvapeStrategy": {
+    "eyebrow": "IZYVAPE · Ausbau nach MVP",
+    "heroTitlePrefix": "Sechs Richtungen für die",
+    "heroTitleAccent": "Decision-Schicht",
+    "heroLead": "Nach dem Stock-Decision-Support-Pfeiler kann sich Operational Intelligence um Handelsperspektive, Kanäle, Profitabilität, Rollen-Digests, Publishing-Unterstützung und später Prognose erweitern. Keine AI-Feature-Roadmap – ein schrittweiser Decision-Aufbau auf vorhandenen Daten.",
+    "backLink": "Zurück zum Stock Decision Support MVP",
+    "stackEyebrow": "Erweiterungsarchitektur",
+    "stackTitle": "Sechs Schichten auf gemeinsamer Datenbasis",
+    "stackLead": "Beim Scrollen stapeln sich die Karten – jede Richtung: Name, Problem, vorgeschlagener Nutzen.",
+    "labelProblem": "Problem / was es löst",
+    "labelProposal": "Vorschlag",
+    "labelExamples": "Beispiel-Befunde oder Fähigkeiten",
+    "cardIndex": "Richtung {current} / {total}",
+    "cards": {
+      "c1": {
+        "title": "Commerce Intelligence Layer",
+        "subtitle": "Marketing, Profit und Handelsperspektive",
+        "tag": "",
+        "problem": "Das Unternehmen muss wissen, was es pusht, was nicht, wo Potenzial liegt und wo Marge verloren geht – nicht nur isolierte Kanalmetriken.",
+        "proposal": "Einheitliche Handelssicht auf Produkte, Kategorien und Kanäle: hohe Marge / geringe Sichtbarkeit, Traffic ohne Conversion, promo-sichere Artikel, Umsatz ohne Profitabilität.",
+        "examples": "hohe Marge + geringe Sichtbarkeit|Traffic ohne Conversion|promo-sichere Produkte|Umsatz steigt, Profit flach|gebundenes Kapital"
+      },
+      "c2": {
+        "title": "B2B / Channel Intelligence Layer",
+        "subtitle": "Schutz von Großhandel und Vertriebskanälen",
+        "tag": "",
+        "problem": "Retail und B2B ziehen aus demselben Bestand. Ohne explizite Schicht können Promos und Allokation Top-Partner gefährden.",
+        "proposal": "B2B-Risiko-Monitoring: Stockout bei Schlüssel-SKU, Partner-Rückgang, Promo vs. B2B-Verfügbarkeit, instabile Regionen oder Partner.",
+        "examples": "Top-B2B-SKU mit Stockout-Risiko|Partner-Bestellrückgang|Promo gefährdet B2B|instabile Partner oder Regionen"
+      },
+      "c3": {
+        "title": "Profitability Intelligence Layer",
+        "subtitle": "Money S, WooCommerce, B2B und Marge",
+        "tag": "",
+        "problem": "Umsatz allein zeigt nicht die Gesundheit des Geschäfts. Kosten und Marge sind über Systeme verteilt.",
+        "proposal": "Umsatz, Kosten und Marge in Befunden: schwache Kategorien, ineffiziente Promos, niedrige Contribution Margin.",
+        "examples": "hoher Umsatz, geringer Gewinn|verlustbringende Kategorien|ineffiziente Promo-Artikel|niedrige Contribution Margin"
+      },
+      "c4": {
+        "title": "Executive & Operational Digest Layer",
+        "subtitle": "Rollenbasierte Digests statt manueller Reports",
+        "tag": "",
+        "problem": "CEO, Logistik, Marketing und B2B arbeiten in verschiedenen Tools. Gemeinsame Prioritätssprache fehlt ohne manuelle Arbeit.",
+        "proposal": "Tägliche oder wöchentliche Digests pro Rolle: Critical Issues, Stock Alerts, Promo-Chancen, Profitability-Warnungen, operative Prioritäten.",
+        "examples": "TOP critical issues|stock alerts|promo opportunities|profitability warnings|operational priorities"
+      },
+      "c5": {
+        "title": "Social Publishing Assistance Layer",
+        "subtitle": "Content an Bestand und Handelspriorität",
+        "tag": "",
+        "problem": "Marketing plant Content oft getrennt von Verfügbarkeit und Lagerpriorität.",
+        "proposal": "Queue, Publish-Workflow und Freigaben mit Vorschlägen für promo-sichere Produkte und Posts.",
+        "examples": "Promo-Produktvorschläge|Post-Vorschläge|publish later|promo-safe queue|approval workflow"
+      },
+      "c6": {
+        "title": "Predictive & Forecasting Layer",
+        "subtitle": "Nachfrage, Saison, Replenishment",
+        "tag": "Nach Datenstabilität",
+        "problem": "Prognose ohne verlässliche Snapshots und validierte Flows erzeugt falsche Sicherheit.",
+        "proposal": "Erst nach vertrauenswürdiger Decision-Schicht: Demand Forecasting, Saisonmodell, Replenishment, Trendprognose.",
+        "examples": "demand forecasting|Saisonmodell|replenishment planning|trend prediction"
+      }
+    },
+    "closingEyebrow": "Abschluss",
+    "closingTitle": "Das ist keine AI-Feature-Liste",
+    "closingLead": "Es ist ein schrittweiser Operational-Decision-Aufbau auf Daten aus Filialen, B2B und Online. Zuerst Sichtbarkeit und Priorisierung – dann Automatisierung und Prognose.",
+    "closingQuote": "Ziel ist keine weitere Dashboard-Flut, sondern eine praktische Decision-Schicht für schnellere, bessere Handelsentscheidungen auf vorhandenen Daten.",
+    "closingPrinciple": "Prinzip: KI schlägt vor und priorisiert – Menschen entscheiden und führen in bestehenden Systemen aus."
   },
   "Navbar": {
     "links": {

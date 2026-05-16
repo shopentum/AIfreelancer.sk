@@ -1,0 +1,251 @@
+"use client";
+
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
+import { useTranslations } from "next-intl";
+import {
+  Layers,
+  TrendingUp,
+  Building2,
+  CircleDollarSign,
+  Mail,
+  Share2,
+  LineChart,
+  ArrowLeft,
+} from "lucide-react";
+import { Link } from "@/i18n/navigation";
+
+const CARD_KEYS = ["c1", "c2", "c3", "c4", "c5", "c6"] as const;
+
+const CARD_ICONS = {
+  c1: TrendingUp,
+  c2: Building2,
+  c3: CircleDollarSign,
+  c4: Mail,
+  c5: Share2,
+  c6: LineChart,
+} as const;
+
+const CARD_ACCENTS = {
+  c1: "from-purple-600/20 to-fuchsia-600/5 border-purple-500/25",
+  c2: "from-blue-600/20 to-cyan-600/5 border-blue-500/25",
+  c3: "from-emerald-600/20 to-teal-600/5 border-emerald-500/25",
+  c4: "from-amber-600/20 to-orange-600/5 border-amber-500/25",
+  c5: "from-pink-600/20 to-rose-600/5 border-pink-500/25",
+  c6: "from-slate-600/20 to-slate-500/5 border-slate-400/25",
+} as const;
+
+const CARD_ICON_COLOR = {
+  c1: "text-purple-400",
+  c2: "text-blue-400",
+  c3: "text-emerald-400",
+  c4: "text-amber-400",
+  c5: "text-pink-400",
+  c6: "text-slate-300",
+} as const;
+
+function StackingDirectionCard({
+  cardKey,
+  index,
+  total,
+}: {
+  cardKey: (typeof CARD_KEYS)[number];
+  index: number;
+  total: number;
+}) {
+  const t = useTranslations("IzyvapeStrategy");
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "start start"],
+  });
+
+  const scale = useTransform(scrollYProgress, [0, 1], [0.96, 1]);
+  const opacity = useTransform(scrollYProgress, [0, 0.35], [0.55, 1]);
+
+  const Icon = CARD_ICONS[cardKey];
+  const stickyTop = `calc(5.5rem + ${index * 1.35}rem)`;
+  const examples = t(`cards.${cardKey}.examples`).split("|").filter(Boolean);
+  const tag = t(`cards.${cardKey}.tag`);
+
+  return (
+    <article
+      ref={ref}
+      className="relative"
+      style={{
+        zIndex: index + 1,
+        marginBottom: index < total - 1 ? "1.5rem" : 0,
+      }}
+    >
+      <motion.div
+        style={{
+          position: "sticky",
+          top: stickyTop,
+          scale,
+          opacity,
+        }}
+        className="will-change-transform"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-8%" }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className={`relative min-h-[min(72vh,680px)] rounded-[2rem] border bg-gradient-to-br ${CARD_ACCENTS[cardKey]} bg-[#080809] p-8 md:p-12 flex flex-col shadow-[0_-20px_80px_rgba(0,0,0,0.45)]`}
+        >
+          <motion.div
+            className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
+            aria-hidden
+          />
+
+          <motion.div className="flex flex-wrap items-start justify-between gap-4 mb-8">
+            <motion.div className="flex items-center gap-4">
+              <motion.div
+                className={`w-14 h-14 rounded-2xl bg-black/50 border border-white/10 flex items-center justify-center ${CARD_ICON_COLOR[cardKey]}`}
+              >
+                <Icon size={28} strokeWidth={1.25} />
+              </motion.div>
+              <motion.div>
+                <motion.p className="text-[10px] font-black uppercase tracking-[0.35em] text-slate-500">
+                  {t("cardIndex", { current: index + 1, total })}
+                </motion.p>
+                <motion.h3 className="text-xl md:text-2xl font-sora font-black text-white tracking-tight">
+                  {t(`cards.${cardKey}.title`)}
+                </motion.h3>
+              </motion.div>
+            </motion.div>
+            {tag.length > 0 ? (
+              <motion.span className="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border border-white/15 bg-white/5 text-slate-400">
+                {tag}
+              </motion.span>
+            ) : null}
+          </motion.div>
+
+          {t(`cards.${cardKey}.subtitle`) ? (
+            <motion.p className="text-sm text-slate-500 mb-8 -mt-4 md:pl-[4.5rem]">
+              {t(`cards.${cardKey}.subtitle`)}
+            </motion.p>
+          ) : null}
+
+          <motion.div className="grid md:grid-cols-2 gap-8 flex-1">
+            <motion.div className="space-y-3">
+              <motion.p className="text-[10px] font-black uppercase tracking-[0.28em] text-rose-400/90">
+                {t("labelProblem")}
+              </motion.p>
+              <motion.p className="text-slate-300 leading-relaxed">{t(`cards.${cardKey}.problem`)}</motion.p>
+            </motion.div>
+            <motion.div className="space-y-3">
+              <motion.p className="text-[10px] font-black uppercase tracking-[0.28em] text-emerald-400/90">
+                {t("labelProposal")}
+              </motion.p>
+              <motion.p className="text-slate-300 leading-relaxed">{t(`cards.${cardKey}.proposal`)}</motion.p>
+            </motion.div>
+          </motion.div>
+
+          {examples.length > 0 ? (
+            <motion.div className="mt-8 pt-8 border-t border-white/10">
+              <motion.p className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-500 mb-4">
+                {t("labelExamples")}
+              </motion.p>
+              <motion.ul className="grid sm:grid-cols-2 gap-2">
+                {examples.map((item) => (
+                  <motion.li
+                    key={item}
+                    className="text-sm text-slate-400 pl-4 border-l border-white/10 leading-snug"
+                  >
+                    {item.trim()}
+                  </motion.li>
+                ))}
+              </motion.ul>
+            </motion.div>
+          ) : null}
+        </motion.div>
+      </motion.div>
+    </article>
+  );
+}
+
+export default function IzyvapeStrategyLanding() {
+  const t = useTranslations("IzyvapeStrategy");
+
+  return (
+    <div className="min-h-screen bg-[#030303] text-white font-inter selection:bg-blue-500/30 overflow-x-hidden">
+      <section className="relative pt-36 pb-16 md:pt-40 md:pb-20 px-6 overflow-hidden">
+        <motion.div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none">
+          <motion.div className="absolute top-[-10%] right-[-10%] w-[42%] h-[42%] bg-purple-600/18 rounded-full blur-[120px] animate-pulse" />
+          <motion.div className="absolute bottom-[5%] left-[-12%] w-[34%] h-[34%] bg-blue-600/12 rounded-full blur-[100px]" />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+          className="max-w-4xl mx-auto relative z-10 text-center space-y-8"
+        >
+          <motion.div>
+            <Link
+              href="/izyvape"
+              className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors mb-8"
+            >
+              <ArrowLeft size={14} />
+              {t("backLink")}
+            </Link>
+          </motion.div>
+
+          <motion.div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-purple-400">
+            <Layers size={12} />
+            <span>{t("eyebrow")}</span>
+          </motion.div>
+
+          <motion.h1 className="text-4xl md:text-[3.25rem] font-sora font-black tracking-tighter leading-[1.08] text-white">
+            {t("heroTitlePrefix")}{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400">
+              {t("heroTitleAccent")}
+            </span>
+          </motion.h1>
+
+          <motion.p className="max-w-3xl mx-auto text-lg md:text-xl text-slate-400 font-medium leading-relaxed">
+            {t("heroLead")}
+          </motion.p>
+        </motion.div>
+      </section>
+
+      <section className="relative px-6 pb-8">
+        <motion.div className="max-w-4xl mx-auto text-center mb-12 space-y-3">
+          <motion.p className="text-[10px] font-black uppercase tracking-[0.28em] text-purple-400">{t("stackEyebrow")}</motion.p>
+          <motion.h2 className="text-2xl md:text-3xl font-sora font-black text-white">{t("stackTitle")}</motion.h2>
+          <motion.p className="text-slate-500 text-sm md:text-base max-w-2xl mx-auto">{t("stackLead")}</motion.p>
+        </motion.div>
+      </section>
+
+      <section className="relative px-6 pb-32">
+        <motion.div className="max-w-4xl mx-auto">
+          {CARD_KEYS.map((key, index) => (
+            <StackingDirectionCard key={key} cardKey={key} index={index} total={CARD_KEYS.length} />
+          ))}
+          <motion.div aria-hidden className="h-[min(45vh,420px)]" />
+        </motion.div>
+      </section>
+
+      <section className="relative px-6 pb-28 md:pb-36 border-t border-white/5 pt-20 bg-gradient-to-b from-transparent to-purple-950/15">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="max-w-3xl mx-auto space-y-8 text-center"
+        >
+          <motion.p className="text-[10px] font-black uppercase tracking-[0.28em] text-blue-400">{t("closingEyebrow")}</motion.p>
+          <motion.h2 className="text-2xl md:text-4xl font-sora font-black text-white tracking-tight">{t("closingTitle")}</motion.h2>
+          <motion.p className="text-slate-400 leading-relaxed text-left md:text-center">{t("closingLead")}</motion.p>
+          <motion.div className="rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-6 text-left">
+            <motion.p className="text-base md:text-lg text-slate-200 font-medium leading-relaxed border-l-2 border-purple-500/70 pl-4">
+              {t("closingQuote")}
+            </motion.p>
+          </motion.div>
+          <motion.p className="text-sm text-slate-500 leading-relaxed">{t("closingPrinciple")}</motion.p>
+        </motion.div>
+      </section>
+    </div>
+  );
+}
+
