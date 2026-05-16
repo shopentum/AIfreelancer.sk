@@ -1,6 +1,6 @@
 # Features (`src/features`)
 
-**Zameranie:** produktové alebo klientské featury s vlastnou doménou logiky a UI, ktoré **nie sú** samostatná Vercel appka.
+**Zameranie:** default pre menšie veci — klientske decky, landingy, prezentácie, logika pod jednou URL **`aifreelancer.sk/<path>`**. Nie samostatné repo, nie nový Vercel projekt z monorepa.
 
 Príklady (aktuálne mimo tohto priečinka — historicky v `components/` / `app/`):
 

@@ -1,6 +1,6 @@
 # Modules (`src/modules`)
 
-**Zameranie:** väčšie interné nástroje / prototypy integrované do hlavného Next.js (`site`), **bez** vlastného Vercel projektu.
+**Zameranie:** väčšie interné nástroje pod **`aifreelancer.sk/...`** (Next.js `site`), nie samostatný produkt ani nové repo. Medzi `features/` (prezentácie) a `apps/` (samostatná SPA build).
 
 | Modul | Kód dnes | Route |
 |-------|----------|-------|

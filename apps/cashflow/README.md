@@ -1,6 +1,6 @@
-# Cashflow (externý repozitár)
+# Cashflow (samostatný produkt — externý repozitár)
 
-Tento priečinok **neobsahuje zdroják**. Slúži ako kotva v štruktúre `/apps` a pripomienka v monorepe.
+Tento priečinok **neobsahuje zdroják**. Kotva v `/apps` + pripomienka: cashflow spĺňa pravidlo **standalone-product** (nie „menšia vec na aifreelancer.sk/“).
 
 | | |
 |--|--|

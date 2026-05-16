@@ -6,6 +6,22 @@ Posledná revízia: 2026-05-16
 
 ---
 
+## Produktové pravidlo (default)
+
+**Samostatné Git repo len pre samostatný produkt** (vlastný životný cyklus, často vlastná značka alebo dlhodobo oddelený vývoj mimo marketingového webu).
+
+Všetko menšie patrí do ekosystému **aifreelancer.sk** — nie nový Vercel import toho istého monorepa, nie duplicitný kód.
+
+| Veľkosť / účel | Kam | URL typicky | Nový repo? |
+|----------------|-----|-------------|------------|
+| Landing, klient deck, interný modul, prototyp | `src/features/` alebo `src/modules/` + `src/app/…` | `aifreelancer.sk/<path>` | **Nie** |
+| Väčšia SPA, ale stále jeden ekosystém (nástroj, dashboard) | `apps/<id>/` v monorepe | subdoména `*.aifreelancer.sk` alebo path na `site` | **Nie** |
+| **Samostatný produkt** | vlastný GitHub repo | vlastná doména / subdoména | **Áno** |
+
+**Predvolené:** skús najprv path na `site` → potom `apps/` v monorepe → samostatné repo až po explicitnom rozhodnutí v registri (stĺpec *deployment model* obsahuje `standalone-product`).
+
+---
+
 ## Ako čítať tabuľku
 
 | Stĺpec | Význam |
@@ -23,10 +39,10 @@ Posledná revízia: 2026-05-16
 
 | app | root | domain | deployment model | owner | production state |
 |-----|------|--------|------------------|-------|------------------|
-| **site** | `/` (tento repo, Next.js `src/app`) | `www.aifreelancer.sk`, `aifreelancer.sk` | Vercel **`a-ifreelancer-sk`** · Root **prázdne** · `npm run build` | Daniel / shopentum | **live** |
-| **kanban** | `apps/kanban` | `kanban.aifreelancer.sk` | Vercel **`kanban_app`** · Root **`apps/kanban`** · `vite build` | Daniel / shopentum | **live** |
-| **cashflow** | GitHub **`shopentum/cashflow`** (nie v tomto repe) | `cashflow.aifreelancer.sk` | Vercel **`cashflow-omega`** · Root **prázdne** · samostatný repo | Daniel / shopentum | **live** |
-| **shopentum** | GitHub **`shopentum/shopentum.sk`** | `shopentum.sk` (podľa DNS projektu) | Vercel **`shopentum-sk`** · samostatný repo | shopentum | **live** |
+| **site** | `/` (Next.js `src/app`) | `www.aifreelancer.sk`, `aifreelancer.sk` | **`monorepo-site`** · Vercel `a-ifreelancer-sk` · Root `.` | Daniel / shopentum | **live** |
+| **kanban** | `apps/kanban` | `kanban.aifreelancer.sk` | **`monorepo-app`** · Vercel `kanban_app` · Root `apps/kanban` | Daniel / shopentum | **live** |
+| **cashflow** | GitHub **`shopentum/cashflow`** | `cashflow.aifreelancer.sk` | **`standalone-product`** · Vercel `cashflow-omega` | Daniel / shopentum | **live** |
+| **shopentum** | GitHub **`shopentum/shopentum.sk`** | `shopentum.sk` | **`standalone-product`** · Vercel `shopentum-sk` | shopentum | **live** |
 
 ### Presmerovania na hlavnom webe (nie samostatné appky)
 
@@ -86,15 +102,16 @@ Externé appky **nemajú** duplicitný kód v `apps/<name>/` — len `apps/<name
 
 ---
 
-## Checklist — nová aplikácia
+## Checklist — nová vec (vždy v tomto poradí)
 
-1. [ ] Záznam v tabuľke **Centrálny register** v tomto súbore.
-2. [ ] Rozhodnutie: **monorepo `apps/<id>`** vs **nový Git repo** (cashflow / shopentum model).
-3. [ ] Presne **jeden** Vercel projekt + **jedna** produkčná doména.
-4. [ ] Root Directory = priečinok s `package.json` danej appky (nie koreň monorepa pre SPA).
-5. [ ] `ignoreCommand` / úprava `scripts/vercel-should-build-main.sh` ak je v monorepe.
-6. [ ] Žiadna druhá kópia appky v `src/` ani `omega-*` paralelný priečinok.
-7. [ ] Aktualizovať `apps/README.md` a prípadne `src/routes/ROUTES.md`.
+1. [ ] Je to **samostatný produkt**? Ak **nie** → žiadne nové repo (pokračuj krokom 2–3).
+2. [ ] Stačí **stránka / modul**? → `src/features/<name>/` + route `aifreelancer.sk/...` + záznam v **Site moduly**.
+3. [ ] Potrebuje **vlastnú SPA** (Vite), ale stále náš ekosystém? → `apps/<id>/` + Vercel s Root `apps/<id>` (nie nový repo).
+4. [ ] Až ak **samostatný produkt** → nový repo + jeden Vercel + záznam s `standalone-product`.
+5. [ ] Záznam v tabuľke **Centrálny register** (app, root, domain, deployment model, owner, state).
+6. [ ] Presne **jeden** Vercel projekt + **jedna** produkčná doména.
+7. [ ] Žiadna druhá kópia kódu (`src/` + `apps/` + externý repo naraz).
+8. [ ] `src/routes/ROUTES.md` pri novej verejnej ceste na `site`.
 
 ---
 
