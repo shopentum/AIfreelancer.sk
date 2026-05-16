@@ -12,6 +12,7 @@ import { flushDoneToArchive } from "@/domain/archiveFlush";
 import {
   applyTaskStatusUpdate,
   createTask,
+  deleteTaskFromList,
   timerPause,
   timerStart,
   timerStop,
@@ -32,8 +33,7 @@ interface KanbanContextValue {
   visibleTasks: Task[];
   addTask: (title: string, project?: string) => void;
   updateTaskStatus: (taskId: string, status: TaskStatus) => void;
-  draggingTaskId: string | null;
-  setDraggingTaskId: (id: string | null) => void;
+  deleteTask: (taskId: string) => void;
   detailTaskId: string | null;
   openTaskDetail: (taskId: string) => void;
   closeTaskDetail: () => void;
@@ -71,7 +71,6 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
     return active;
   });
   const [projectFilter, setProjectFilter] = useState<ProjectFilter>("all");
-  const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
   const [detailTaskId, setDetailTaskId] = useState<string | null>(null);
   const [, setTimerTick] = useState(0);
 
@@ -111,6 +110,14 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
   const updateTaskStatus = useCallback((taskId: string, status: TaskStatus) => {
     setTasks((prev) => applyTaskStatusUpdate(prev, taskId, status));
   }, []);
+
+  const deleteTask = useCallback(
+    (taskId: string) => {
+      setTasks((prev) => deleteTaskFromList(prev, taskId));
+      setDetailTaskId((id) => (id === taskId ? null : id));
+    },
+    [],
+  );
 
   const openTaskDetail = useCallback((taskId: string) => {
     setDetailTaskId(taskId);
@@ -160,8 +167,7 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
       visibleTasks,
       addTask,
       updateTaskStatus,
-      draggingTaskId,
-      setDraggingTaskId,
+      deleteTask,
       detailTaskId,
       openTaskDetail,
       closeTaskDetail,
@@ -179,7 +185,7 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
       visibleTasks,
       addTask,
       updateTaskStatus,
-      draggingTaskId,
+      deleteTask,
       detailTaskId,
       openTaskDetail,
       closeTaskDetail,

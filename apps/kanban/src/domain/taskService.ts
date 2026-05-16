@@ -187,3 +187,7 @@ export function timerStop(task: Task): Task {
     activityLog: appendActivity(task.activityLog, "timer_stopped"),
   };
 }
+
+export function deleteTaskFromList(tasks: Task[], taskId: string): Task[] {
+  return tasks.filter((t) => t.id !== taskId);
+}

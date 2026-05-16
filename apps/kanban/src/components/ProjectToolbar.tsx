@@ -1,0 +1,148 @@
+import { Archive, Layout, Moon, Sun } from "lucide-react";
+import { NavLink } from "react-router-dom";
+import { getProjectIcon } from "@/config/projectStyle";
+import { PROJECTS } from "@/config/projects";
+import { useKanban, type ProjectFilter } from "@/hooks/useKanbanStore";
+import { t, useTheme } from "@/hooks/useTheme";
+import { getTaskStorageMode } from "@/repositories";
+import { cn } from "@/lib/utils";
+
+const FILTER_OPTIONS: { id: ProjectFilter; label: string }[] = [
+  { id: "all", label: "Všetky projekty" },
+  ...PROJECTS.map((p) => ({ id: p.id, label: p.label })),
+];
+
+export function ProjectToolbar() {
+  const { isDark, toggleTheme } = useTheme();
+  const { projectFilter, setProjectFilter } = useKanban();
+  const storageMode = getTaskStorageMode();
+
+  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+    cn(
+      "flex items-center gap-2 rounded-lg px-3 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all",
+      isActive
+        ? t(
+            isDark,
+            "border border-slate-200 bg-white text-slate-900 shadow-sm",
+            "bg-slate-800 text-white shadow-sm",
+          )
+        : t(isDark, "text-slate-500 hover:text-slate-700", "text-slate-500 hover:text-slate-200"),
+    );
+
+  return (
+    <div
+      className={cn(
+        "border-b transition-colors duration-500",
+        t(isDark, "border-slate-200 bg-white", "border-slate-800 bg-slate-900/50"),
+      )}
+    >
+      <div className="mx-auto flex max-w-[1800px] flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:justify-between md:px-8">
+        <div
+          className="scrollbar-kanban flex items-center gap-2 overflow-x-auto pb-1"
+          role="tablist"
+          aria-label="Filter projektu"
+        >
+          {FILTER_OPTIONS.map((opt, i) => (
+            <div key={opt.id} className="flex shrink-0 items-center gap-2">
+              {i === 1 && (
+                <div
+                  className={cn(
+                    "mx-2 h-4 w-px",
+                    t(isDark, "bg-slate-200", "bg-slate-800"),
+                  )}
+                />
+              )}
+              <button
+                type="button"
+                role="tab"
+                aria-selected={projectFilter === opt.id}
+                onClick={() => setProjectFilter(opt.id)}
+                className={cn(
+                  "flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs font-bold transition-all",
+                  projectFilter === opt.id
+                    ? t(
+                        isDark,
+                        "bg-slate-900 text-white shadow-lg",
+                        "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20",
+                      )
+                    : t(
+                        isDark,
+                        "text-slate-400 hover:bg-slate-50 hover:text-slate-900",
+                        "text-slate-500 hover:bg-slate-800 hover:text-slate-200",
+                      ),
+                )}
+              >
+                {opt.id !== "all" && (
+                  <span className="opacity-60">
+                    {getProjectIcon(opt.id, 14)}
+                  </span>
+                )}
+                <span>{opt.label}</span>
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex shrink-0 items-center gap-2">
+          <div
+            className={cn(
+              "flex items-center rounded-xl border p-1 transition-colors",
+              t(isDark, "border-slate-200 bg-slate-100", "border-slate-800 bg-slate-900"),
+            )}
+          >
+            <NavLink to="/" className={navLinkClass} end>
+              <Layout size={12} aria-hidden />
+              <span>Board</span>
+            </NavLink>
+            <NavLink to="/archive" className={navLinkClass}>
+              <Archive size={12} aria-hidden />
+              <span>Archív</span>
+            </NavLink>
+          </div>
+
+          <div
+            className={cn(
+              "mx-2 h-8 w-px shrink-0",
+              t(isDark, "bg-slate-200", "bg-slate-800"),
+            )}
+            aria-hidden
+          />
+
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className={cn(
+              "flex h-10 w-10 items-center justify-center rounded-xl border transition-all",
+              t(
+                isDark,
+                "border-slate-700 bg-slate-800 text-amber-400 hover:bg-slate-700",
+                "border-slate-200 bg-white text-slate-400 hover:bg-slate-50 hover:text-slate-900",
+              ),
+            )}
+            aria-label={isDark ? "Svetlý režim" : "Tmavý režim"}
+          >
+            {isDark ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+
+          <span
+            className={cn(
+              "hidden rounded-lg border px-2 py-1 text-[10px] font-semibold uppercase tracking-wider sm:inline",
+              t(
+                isDark,
+                "border-slate-200 text-slate-500",
+                "border-slate-700 text-slate-500",
+              ),
+            )}
+            title={
+              storageMode === "local"
+                ? "Dáta len v tomto prehliadači."
+                : "Supabase režim"
+            }
+          >
+            {storageMode === "local" ? "Local" : "Supabase"}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}

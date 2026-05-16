@@ -1,10 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { PageHeader } from "@/components/PageHeader";
+import { AppShell } from "@/components/AppShell";
 import { getTaskCardLabel } from "@/lib/formatters";
 import { PROJECTS, getProjectLabel } from "@/config/projects";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { formatDuration, formatSkDateTime, getDisplayTrackedSeconds } from "@/lib/formatters";
+import { t, useTheme } from "@/hooks/useTheme";
+import {
+  formatDuration,
+  formatSkDateTime,
+  getDisplayTrackedSeconds,
+} from "@/lib/formatters";
 import {
   addCalendarDaysBratislava,
   firstDayOfMonthKeyFromToday,
@@ -12,6 +17,7 @@ import {
   todayBratislavaDateKey,
 } from "@/lib/archiveDateFilter";
 import { taskRepository } from "@/repositories";
+import { cn } from "@/lib/utils";
 import type { ArchivedTask, ArchivesByProject } from "@/types/task";
 
 function flattenArchives(archives: ArchivesByProject): ArchivedTask[] {
@@ -22,6 +28,7 @@ type ProjectArchiveFilter = "all" | string;
 
 export function ArchivePage() {
   usePageTitle("Archív");
+  const { isDark } = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [archives] = useState<ArchivesByProject>(() =>
@@ -52,11 +59,11 @@ export function ArchivePage() {
   );
 
   const filtered = useMemo(() => {
-    return allItems.filter((t) => {
-      if (projectFilter !== "all" && t.project !== projectFilter) {
+    return allItems.filter((item) => {
+      if (projectFilter !== "all" && item.project !== projectFilter) {
         return false;
       }
-      const dayKey = isoToBratislavaDateKey(t.archivedAt);
+      const dayKey = isoToBratislavaDateKey(item.archivedAt);
       if (dateFrom && dayKey < dateFrom) return false;
       if (dateTo && dayKey > dateTo) return false;
       return true;
@@ -65,24 +72,47 @@ export function ArchivePage() {
 
   const sumSeconds = useMemo(
     () =>
-      filtered.reduce(
-        (acc, t) => acc + getDisplayTrackedSeconds(t),
-        0,
-      ),
+      filtered.reduce((acc, item) => acc + getDisplayTrackedSeconds(item), 0),
     [filtered],
   );
 
   const today = todayBratislavaDateKey();
 
-  return (
-    <div className="mx-auto max-w-[1200px] px-4 py-8 md:px-8">
-      <PageHeader title="Archív" />
+  const chipClass = cn(
+    "rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors",
+    t(
+      isDark,
+      "border-slate-200 text-slate-600 hover:bg-slate-50",
+      "border-slate-700 text-slate-300 hover:bg-slate-800",
+    ),
+  );
 
-      <div className="kanban-panel mb-6 space-y-4">
+  const inputClass = cn(
+    "w-full rounded-2xl border px-4 py-2.5 text-sm outline-none transition-all",
+    t(
+      isDark,
+      "border-slate-200 bg-slate-50 text-slate-900 focus:border-slate-300",
+      "border-slate-700 bg-slate-800 text-white focus:border-indigo-500",
+    ),
+  );
+
+  const labelClass = cn(
+    "mb-1.5 block text-[11px] font-bold uppercase tracking-widest",
+    t(isDark, "text-slate-500", "text-slate-500"),
+  );
+
+  return (
+    <AppShell title="Archív" subtitle="Dokončené úlohy" showBrainDump={false}>
+      <div
+        className={cn(
+          "mb-6 space-y-4 rounded-2xl border p-5 shadow-sm",
+          t(isDark, "border-slate-200 bg-white", "border-slate-800 bg-slate-900/50"),
+        )}
+      >
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            className="rounded-xl border border-white/10 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-white/5"
+            className={chipClass}
             onClick={() => {
               setDateFrom(today);
               setDateTo(today);
@@ -92,7 +122,7 @@ export function ArchivePage() {
           </button>
           <button
             type="button"
-            className="rounded-xl border border-white/10 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-white/5"
+            className={chipClass}
             onClick={() => {
               setDateFrom(addCalendarDaysBratislava(today, -6));
               setDateTo(today);
@@ -102,7 +132,7 @@ export function ArchivePage() {
           </button>
           <button
             type="button"
-            className="rounded-xl border border-white/10 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-white/5"
+            className={chipClass}
             onClick={() => {
               setDateFrom(firstDayOfMonthKeyFromToday(today));
               setDateTo(today);
@@ -112,7 +142,7 @@ export function ArchivePage() {
           </button>
           <button
             type="button"
-            className="rounded-xl border border-white/10 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-white/5"
+            className={chipClass}
             onClick={() => {
               setDateFrom("");
               setDateTo("");
@@ -124,7 +154,7 @@ export function ArchivePage() {
 
         <div className="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-end">
           <div className="min-w-[160px] flex-1">
-            <label htmlFor="arch-project" className="kanban-label">
+            <label htmlFor="arch-project" className={labelClass}>
               Projekt
             </label>
             <select
@@ -133,7 +163,7 @@ export function ArchivePage() {
               onChange={(e) =>
                 setProjectFilter(e.target.value as ProjectArchiveFilter)
               }
-              className="kanban-select"
+              className={inputClass}
             >
               <option value="all">Všetky</option>
               {PROJECTS.map((p) => (
@@ -144,7 +174,7 @@ export function ArchivePage() {
             </select>
           </div>
           <div>
-            <label htmlFor="arch-from" className="kanban-label">
+            <label htmlFor="arch-from" className={labelClass}>
               Archivované od
             </label>
             <input
@@ -152,11 +182,11 @@ export function ArchivePage() {
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="kanban-input"
+              className={inputClass}
             />
           </div>
           <div>
-            <label htmlFor="arch-to" className="kanban-label">
+            <label htmlFor="arch-to" className={labelClass}>
               Archivované do
             </label>
             <input
@@ -164,28 +194,60 @@ export function ArchivePage() {
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              className="kanban-input"
+              className={inputClass}
             />
           </div>
         </div>
 
-        <div className="rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-4 py-3">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-indigo-300">
+        <div
+          className={cn(
+            "rounded-2xl border px-4 py-3",
+            t(
+              isDark,
+              "border-indigo-200 bg-indigo-50",
+              "border-indigo-500/30 bg-indigo-500/10",
+            ),
+          )}
+        >
+          <p
+            className={cn(
+              "text-[11px] font-bold uppercase tracking-widest",
+              t(isDark, "text-indigo-600", "text-indigo-300"),
+            )}
+          >
             Súčet vyfiltrovaného času
           </p>
-          <p className="mt-1 text-2xl font-semibold tabular-nums text-white">
+          <p
+            className={cn(
+              "mt-1 text-2xl font-semibold tabular-nums",
+              t(isDark, "text-slate-900", "text-white"),
+            )}
+          >
             {formatDuration(sumSeconds)}
           </p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className={cn("mt-1 text-xs", t(isDark, "text-slate-500", "text-slate-500"))}>
             {filtered.length} položiek
-            {filtered.length === 0 ? " · zobrazuje sa 0m" : ""}
           </p>
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-white/10">
+      <div
+        className={cn(
+          "overflow-x-auto rounded-2xl border",
+          t(isDark, "border-slate-200", "border-slate-800"),
+        )}
+      >
         <table className="w-full min-w-[640px] text-left text-sm">
-          <thead className="border-b border-white/10 bg-white/[0.03] text-[11px] font-bold uppercase tracking-wider text-slate-500">
+          <thead
+            className={cn(
+              "border-b text-[11px] font-bold uppercase tracking-wider",
+              t(
+                isDark,
+                "border-slate-200 bg-slate-50 text-slate-500",
+                "border-slate-800 bg-slate-900/50 text-slate-500",
+              ),
+            )}
+          >
             <tr>
               <th className="px-4 py-3">Summary</th>
               <th className="px-4 py-3">Názov</th>
@@ -199,31 +261,66 @@ export function ArchivePage() {
               <tr>
                 <td
                   colSpan={5}
-                  className="px-4 py-12 text-center text-slate-500"
+                  className={cn(
+                    "px-4 py-12 text-center",
+                    t(isDark, "text-slate-400", "text-slate-500"),
+                  )}
                 >
                   Žiadne položky podľa filtra.
                 </td>
               </tr>
             ) : (
-              filtered.map((t) => (
+              filtered.map((item) => (
                 <tr
-                  key={t.id}
-                  className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]"
+                  key={item.id}
+                  className={cn(
+                    "border-b last:border-0",
+                    t(
+                      isDark,
+                      "border-slate-100 hover:bg-slate-50",
+                      "border-slate-800/50 hover:bg-white/[0.02]",
+                    ),
+                  )}
                 >
-                  <td className="max-w-[200px] truncate px-4 py-3 font-medium text-white">
-                    {getTaskCardLabel(t)}
+                  <td
+                    className={cn(
+                      "max-w-[200px] truncate px-4 py-3 font-medium",
+                      t(isDark, "text-slate-900", "text-white"),
+                    )}
+                  >
+                    {getTaskCardLabel(item)}
                   </td>
-                  <td className="max-w-[200px] truncate px-4 py-3 text-slate-400">
-                    {t.title}
+                  <td
+                    className={cn(
+                      "max-w-[200px] truncate px-4 py-3",
+                      t(isDark, "text-slate-500", "text-slate-400"),
+                    )}
+                  >
+                    {item.title}
                   </td>
-                  <td className="px-4 py-3 text-slate-400">
-                    {getProjectLabel(t.project)}
+                  <td
+                    className={cn(
+                      "px-4 py-3",
+                      t(isDark, "text-slate-500", "text-slate-400"),
+                    )}
+                  >
+                    {getProjectLabel(item.project)}
                   </td>
-                  <td className="px-4 py-3 tabular-nums text-slate-300">
-                    {formatDuration(getDisplayTrackedSeconds(t))}
+                  <td
+                    className={cn(
+                      "px-4 py-3 tabular-nums",
+                      t(isDark, "text-slate-700", "text-slate-300"),
+                    )}
+                  >
+                    {formatDuration(getDisplayTrackedSeconds(item))}
                   </td>
-                  <td className="px-4 py-3 tabular-nums text-slate-400">
-                    {formatSkDateTime(t.archivedAt)}
+                  <td
+                    className={cn(
+                      "px-4 py-3 tabular-nums",
+                      t(isDark, "text-slate-500", "text-slate-400"),
+                    )}
+                  >
+                    {formatSkDateTime(item.archivedAt)}
                   </td>
                 </tr>
               ))
@@ -231,6 +328,6 @@ export function ArchivePage() {
           </tbody>
         </table>
       </div>
-    </div>
+    </AppShell>
   );
 }

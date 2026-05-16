@@ -50,6 +50,17 @@ export function formatDurationWithSeconds(totalSeconds: number): string {
   return `${m}:${pad(sec)}`;
 }
 
+/** Short date on card, e.g. 15. 5. */
+export function formatSkShortDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return new Intl.DateTimeFormat(SK_LOCALE, {
+    timeZone: TZ,
+    day: "numeric",
+    month: "short",
+  }).format(d);
+}
+
 /** Card headline: summary on board, fallback to title. */
 export function getTaskCardLabel(task: { summary: string; title: string }): string {
   const s = task.summary.trim();
