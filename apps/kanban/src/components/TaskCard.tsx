@@ -54,7 +54,7 @@ export function TaskCard({ task, index, columnStatus }: TaskCardProps) {
           {...provided.dragHandleProps}
           onClick={() => openTaskDetail(task.id)}
           className={cn(
-            "group relative cursor-grab select-none overflow-hidden rounded-[1.5rem] border p-5 shadow-sm transition-all active:cursor-grabbing",
+            "group relative cursor-grab select-none overflow-hidden rounded-[1.5rem] border p-4 shadow-sm transition-all active:cursor-grabbing",
             t(
               isDark,
               "border-slate-200 bg-white text-slate-900 shadow-slate-200/50 hover:-translate-y-0.5 hover:shadow-xl",
@@ -76,7 +76,7 @@ export function TaskCard({ task, index, columnStatus }: TaskCardProps) {
             aria-hidden
           />
 
-          <div className="space-y-4">
+          <div className="space-y-2.5">
             <div className="flex flex-wrap items-center gap-1.5 pr-6">
               <div
                 className={cn(
@@ -98,12 +98,13 @@ export function TaskCard({ task, index, columnStatus }: TaskCardProps) {
               )}
             </div>
 
-            <div className="space-y-1 pr-4">
+            <div className="min-h-[2.375rem] space-y-0.5 pr-4">
               <h3
                 className={cn(
-                  "line-clamp-2 text-sm font-bold leading-snug",
+                  "truncate text-sm font-bold leading-5",
                   t(isDark, "text-slate-800", "text-slate-100"),
                 )}
+                title={getTaskCardLabel(task)}
               >
                 {getTaskCardLabel(task)}
               </h3>
@@ -122,7 +123,7 @@ export function TaskCard({ task, index, columnStatus }: TaskCardProps) {
 
             <div
               className={cn(
-                "flex items-center justify-between gap-3 border-t pt-2 transition-colors",
+                "flex items-center justify-between gap-3 border-t pt-1.5 transition-colors",
                 t(isDark, "border-slate-50", "border-slate-800"),
               )}
             >
