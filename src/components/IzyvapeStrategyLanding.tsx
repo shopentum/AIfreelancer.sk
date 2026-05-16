@@ -142,6 +142,15 @@ const CARD_ICON_COLOR = {
   c6: "text-slate-300",
 } as const;
 
+/** Sticky offset per card — larger index = lower on screen = visible stack overlap */
+const STICKY_TOP_REM = 5.25;
+const STICKY_STEP_REM = 0.85;
+
+/** Scroll runway + negative overlap pull the deck together on scroll */
+const CARD_SCROLL_MIN_H = "72vh";
+const CARD_STACK_PULL_VH = 48;
+const LAST_CARD_SCROLL_MIN_H = "32vh";
+
 function StackingDirectionCard({
   cardKey,
   index,
@@ -158,11 +167,12 @@ function StackingDirectionCard({
     offset: ["start end", "start start"],
   });
 
-  const scale = useTransform(scrollYProgress, [0, 1], [0.96, 1]);
-  const opacity = useTransform(scrollYProgress, [0, 0.35], [0.55, 1]);
+  const scale = useTransform(scrollYProgress, [0, 0.85, 1], [0.92, 0.98, 1]);
+  const opacity = useTransform(scrollYProgress, [0, 0.25, 1], [0.65, 1, 1]);
+  const isLast = index === total - 1;
 
   const Icon = CARD_ICONS[cardKey];
-  const stickyTop = `calc(5.5rem + ${index * 1.35}rem)`;
+  const stickyTop = `calc(${STICKY_TOP_REM}rem + ${index * STICKY_STEP_REM}rem)`;
   const examples = t(`cards.${cardKey}.examples`).split("|").filter(Boolean);
   const phase = CARD_PHASE[cardKey];
   const phaseVisual = PHASE_VISUAL[phase];
@@ -173,7 +183,8 @@ function StackingDirectionCard({
       className="relative"
       style={{
         zIndex: index + 1,
-        marginBottom: index < total - 1 ? "1.5rem" : 0,
+        minHeight: isLast ? LAST_CARD_SCROLL_MIN_H : CARD_SCROLL_MIN_H,
+        marginTop: index > 0 ? `-${CARD_STACK_PULL_VH}vh` : undefined,
       }}
     >
       <motion.div
@@ -182,15 +193,19 @@ function StackingDirectionCard({
           top: stickyTop,
           scale,
           opacity,
+          zIndex: index + 1,
         }}
-        className="will-change-transform"
+        className="will-change-[transform,opacity]"
       >
         <motion.div
-          initial={{ opacity: 0, y: 28 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-8%" }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className={`relative min-h-[min(72vh,680px)] rounded-[2rem] border bg-gradient-to-br ${CARD_ACCENTS[cardKey]} bg-[#080809] p-8 md:p-12 flex flex-col shadow-[0_-20px_80px_rgba(0,0,0,0.45)] overflow-hidden`}
+          viewport={{ once: true, margin: "-5%" }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className={`relative min-h-[min(52vh,560px)] rounded-[2rem] border bg-gradient-to-br ${CARD_ACCENTS[cardKey]} bg-[#080809] p-8 md:p-12 flex flex-col overflow-hidden ring-1 ring-white/[0.06]`}
+          style={{
+            boxShadow: `0 -${18 + index * 6}px ${48 + index * 12}px rgba(0,0,0,${0.42 + index * 0.04})`,
+          }}
         >
           <div
             className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${phaseVisual.stripe}`}
@@ -317,17 +332,18 @@ export default function IzyvapeStrategyLanding() {
         </motion.div>
       </section>
 
-      <section className="relative px-6 pb-32">
-        <motion.div className="max-w-4xl mx-auto">
+      <section className="relative px-6 pb-12 md:pb-16">
+        <div className="max-w-4xl mx-auto">
           <PhaseLegend />
-          {CARD_KEYS.map((key, index) => (
-            <StackingDirectionCard key={key} cardKey={key} index={index} total={CARD_KEYS.length} />
-          ))}
-          <motion.div aria-hidden className="h-[min(45vh,420px)]" />
+          <motion.div className="relative">
+            {CARD_KEYS.map((key, index) => (
+              <StackingDirectionCard key={key} cardKey={key} index={index} total={CARD_KEYS.length} />
+            ))}
+          </motion.div>
         </motion.div>
       </section>
 
-      <section className="relative px-6 pb-28 md:pb-36 border-t border-white/5 pt-20 bg-gradient-to-b from-transparent to-purple-950/15">
+      <section className="relative px-6 pb-28 md:pb-36 border-t border-white/5 pt-12 md:pt-16 bg-gradient-to-b from-transparent to-purple-950/15">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
