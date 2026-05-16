@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
 import { getTaskCardLabel } from "@/lib/formatters";
-import { PROJECTS, getProjectLabel } from "@/config/projects";
+import { useProjects } from "@/hooks/useProjects";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { t, useTheme } from "@/hooks/useTheme";
 import {
@@ -29,6 +29,7 @@ type ProjectArchiveFilter = "all" | string;
 export function ArchivePage() {
   usePageTitle("Archív");
   const { isDark } = useTheme();
+  const { filterProjects, getLabel } = useProjects();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [archives] = useState<ArchivesByProject>(() =>
@@ -166,9 +167,10 @@ export function ArchivePage() {
               className={inputClass}
             >
               <option value="all">Všetky</option>
-              {PROJECTS.map((p) => (
+              {filterProjects.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.label}
+                  {!p.active ? " (neaktívny)" : ""}
                 </option>
               ))}
             </select>
@@ -304,7 +306,7 @@ export function ArchivePage() {
                       t(isDark, "text-slate-500", "text-slate-400"),
                     )}
                   >
-                    {getProjectLabel(item.project)}
+                    {getLabel(item.project)}
                   </td>
                   <td
                     className={cn(

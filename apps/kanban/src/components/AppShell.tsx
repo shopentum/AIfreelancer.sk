@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { KanbanHeader } from "@/components/KanbanHeader";
 import { ProjectToolbar } from "@/components/ProjectToolbar";
+import { ProjectSettingsModal } from "@/components/ProjectSettingsModal";
 import { TaskDetailDrawer } from "@/components/TaskDetailDrawer";
 import { t, useTheme } from "@/hooks/useTheme";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,7 @@ export function AppShell({
         {children}
       </main>
       <TaskDetailDrawer />
+      <ProjectSettingsModal />
     </div>
   );
 }

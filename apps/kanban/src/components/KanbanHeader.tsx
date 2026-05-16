@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { ChevronDown, Plus } from "lucide-react";
-import { DEFAULT_PROJECT_ID, PROJECTS } from "@/config/projects";
+import { DEFAULT_PROJECT_ID } from "@/config/defaultProjects";
+import { useProjects } from "@/hooks/useProjects";
 import { useKanban } from "@/hooks/useKanbanStore";
 import { t, useTheme } from "@/hooks/useTheme";
 import { cn } from "@/lib/utils";
@@ -18,6 +19,7 @@ export function KanbanHeader({
 }: KanbanHeaderProps) {
   const { isDark } = useTheme();
   const { addTask, projectFilter } = useKanban();
+  const { selectableProjects } = useProjects();
   const [titleInput, setTitleInput] = useState("");
   const [brainProject, setBrainProject] = useState(DEFAULT_PROJECT_ID);
   const projectForNewTask =
@@ -75,7 +77,7 @@ export function KanbanHeader({
                 )}
                 aria-label="Projekt pre novú úlohu"
               >
-                {PROJECTS.map((p) => (
+                {selectableProjects.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.label}
                   </option>

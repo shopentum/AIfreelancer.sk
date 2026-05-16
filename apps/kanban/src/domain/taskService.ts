@@ -1,4 +1,4 @@
-import { DEFAULT_PROJECT_ID, getProjectLabel } from "@/config/projects";
+import { DEFAULT_PROJECT_ID } from "@/config/defaultProjects";
 import { appendActivity } from "@/domain/activityLog";
 import { newId } from "@/lib/id";
 import type { Task, TaskStatus } from "@/types/task";
@@ -123,12 +123,17 @@ export function updateTaskSummary(task: Task, summary: string): Task {
   return { ...task, summary: trimmed, updatedAt: now };
 }
 
-export function updateTaskProject(task: Task, projectId: string): Task {
+export function updateTaskProject(
+  task: Task,
+  projectId: string,
+  fromLabel: string,
+  toLabel: string,
+): Task {
   if (projectId === task.project) return task;
   const now = new Date().toISOString();
   const log = appendActivity(task.activityLog, "project_changed", {
-    from: getProjectLabel(task.project),
-    to: getProjectLabel(projectId),
+    from: fromLabel,
+    to: toLabel,
   });
   return {
     ...task,

@@ -2,7 +2,7 @@ import type { MouseEvent } from "react";
 import { Draggable } from "@hello-pangea/dnd";
 import { Clock, Pause, Play, Square, Timer } from "lucide-react";
 import { getProjectBadgeClass, getProjectIcon } from "@/config/projectStyle";
-import { getProjectLabel } from "@/config/projects";
+import { useProjects } from "@/hooks/useProjects";
 import { useKanban } from "@/hooks/useKanbanStore";
 import { useLiveTrackedSeconds } from "@/hooks/useLiveTrackedSeconds";
 import { t, useTheme } from "@/hooks/useTheme";
@@ -27,6 +27,7 @@ function stopPropagation(e: MouseEvent) {
 export function TaskCard({ task, index }: TaskCardProps) {
   const { isDark } = useTheme();
   const { openTaskDetail, startTimer, pauseTimer, stopTimer } = useKanban();
+  const { getLabel } = useProjects();
 
   const seconds = useLiveTrackedSeconds(task);
   const timeLabel = task.isTimerRunning
@@ -68,7 +69,7 @@ export function TaskCard({ task, index }: TaskCardProps) {
                   getProjectBadgeClass(task.project, isDark),
                 )}
               >
-                {getProjectLabel(task.project)}
+                {getLabel(task.project)}
               </div>
 
               <div

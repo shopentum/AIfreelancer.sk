@@ -7,7 +7,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { DEFAULT_PROJECT_ID } from "@/config/projects";
+import { DEFAULT_PROJECT_ID } from "@/config/defaultProjects";
+import { useProjects } from "@/hooks/useProjects";
 import { flushDoneToArchive } from "@/domain/archiveFlush";
 import {
   applyTaskStatusUpdate,
@@ -57,6 +58,8 @@ function mapTask(
 }
 
 export function KanbanProvider({ children }: { children: ReactNode }) {
+  const { getLabel } = useProjects();
+
   const [tasks, setTasks] = useState<Task[]>(() => {
     const rawActive = taskRepository.loadActiveTasks();
     const archives = taskRepository.loadArchives();
@@ -137,11 +140,16 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
-  const setTaskProject = useCallback((taskId: string, projectId: string) => {
-    setTasks((prev) =>
-      mapTask(prev, taskId, (t) => updateTaskProject(t, projectId)),
-    );
-  }, []);
+  const setTaskProject = useCallback(
+    (taskId: string, projectId: string) => {
+      setTasks((prev) =>
+        mapTask(prev, taskId, (t) =>
+          updateTaskProject(t, projectId, getLabel(t.project), getLabel(projectId)),
+        ),
+      );
+    },
+    [getLabel],
+  );
 
   const setTaskNotes = useCallback((taskId: string, notes: string) => {
     setTasks((prev) => mapTask(prev, taskId, (t) => updateTaskNotes(t, notes)));

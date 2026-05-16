@@ -1,19 +1,30 @@
-import { Archive, Layout, Moon, Sun } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { Archive, Layout, Moon, Settings, Sun } from "lucide-react";
+import { NavLink, useLocation } from "react-router-dom";
 import { getProjectIcon } from "@/config/projectStyle";
-import { PROJECTS } from "@/config/projects";
 import { useKanban, type ProjectFilter } from "@/hooks/useKanbanStore";
+import { useProjects } from "@/hooks/useProjects";
 import { t, useTheme } from "@/hooks/useTheme";
 import { cn } from "@/lib/utils";
 
-const FILTER_OPTIONS: { id: ProjectFilter; label: string }[] = [
-  { id: "all", label: "Všetky projekty" },
-  ...PROJECTS.map((p) => ({ id: p.id, label: p.label })),
-];
-
 export function ProjectToolbar() {
   const { isDark, toggleTheme } = useTheme();
+  const { pathname } = useLocation();
+  const isArchive = pathname.startsWith("/archive");
   const { projectFilter, setProjectFilter } = useKanban();
+  const { activeProjects, filterProjects, openSettings } = useProjects();
+
+  const projectList = isArchive ? filterProjects : activeProjects;
+
+  const filterOptions: { id: ProjectFilter; label: string; inactive?: boolean }[] =
+    [
+      { id: "all", label: "Všetky projekty" },
+      ...projectList.map((p) => ({
+        id: p.id,
+        label: p.label,
+        inactive: !p.active,
+      })),
+    ];
+
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     cn(
       "flex items-center gap-2 rounded-lg px-3 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all",
@@ -39,7 +50,7 @@ export function ProjectToolbar() {
           role="tablist"
           aria-label="Filter projektu"
         >
-          {FILTER_OPTIONS.map((opt, i) => (
+          {filterOptions.map((opt, i) => (
             <div key={opt.id} className="flex shrink-0 items-center gap-2">
               {i === 1 && (
                 <div
@@ -67,6 +78,7 @@ export function ProjectToolbar() {
                         "text-slate-400 hover:bg-slate-50 hover:text-slate-900",
                         "text-slate-500 hover:bg-slate-800 hover:text-slate-200",
                       ),
+                  opt.inactive && "opacity-70",
                 )}
               >
                 {opt.id !== "all" && (
@@ -104,6 +116,22 @@ export function ProjectToolbar() {
             )}
             aria-hidden
           />
+
+          <button
+            type="button"
+            onClick={openSettings}
+            className={cn(
+              "flex h-10 w-10 items-center justify-center rounded-xl border transition-all",
+              t(
+                isDark,
+                "border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900",
+                "border-slate-700 bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white",
+              ),
+            )}
+            aria-label="Nastavenia projektov"
+          >
+            <Settings size={20} />
+          </button>
 
           <button
             type="button"

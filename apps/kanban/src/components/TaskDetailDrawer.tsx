@@ -3,8 +3,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { Clock, Square, Trash2, X } from "lucide-react";
 import { KANBAN_COLUMNS } from "@/config/columns";
 import { getProjectBadgeClass } from "@/config/projectStyle";
-import { PROJECTS, getProjectLabel } from "@/config/projects";
 import { useKanban } from "@/hooks/useKanbanStore";
+import { useProjects } from "@/hooks/useProjects";
 import { useLiveTrackedSeconds } from "@/hooks/useLiveTrackedSeconds";
 import { t, useTheme } from "@/hooks/useTheme";
 import {
@@ -47,6 +47,8 @@ interface DrawerBodyProps {
 
 function DrawerBody({ task, onClose }: DrawerBodyProps) {
   const { isDark } = useTheme();
+  const { getLabel, projectsForTask } = useProjects();
+  const assignableProjects = projectsForTask(task.project);
   const {
     updateTaskStatus,
     setTaskTitle,
@@ -167,7 +169,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
               getProjectBadgeClass(task.project, isDark),
             )}
           >
-            {getProjectLabel(task.project)}
+            {getLabel(task.project)}
           </div>
           <button
             type="button"
@@ -221,9 +223,10 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
                 onChange={(e) => setTaskProject(task.id, e.target.value)}
                 className={selectClass}
               >
-                {PROJECTS.map((p) => (
+                {assignableProjects.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.label}
+                    {!p.active ? " (neaktívny)" : ""}
                   </option>
                 ))}
               </select>
