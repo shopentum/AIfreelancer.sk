@@ -292,16 +292,16 @@ export default function IzyvapeStrategyLanding() {
             <span>{t("eyebrow")}</span>
           </motion.div>
 
-          <motion.h1 className="text-4xl md:text-[3.25rem] font-sora font-black tracking-tighter leading-[1.08] text-white">
+          <h1 className="text-4xl md:text-[3.25rem] font-sora font-black tracking-tighter leading-[1.08] text-white">
             {t("heroTitlePrefix")}{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400">
               {t("heroTitleAccent")}
             </span>
-          </motion.h1>
+          </h1>
 
-          <motion.p className="max-w-3xl mx-auto text-lg md:text-xl text-slate-400 font-medium leading-relaxed">
+          <p className="max-w-3xl mx-auto text-lg md:text-xl text-slate-400 font-medium leading-relaxed">
             {t("heroLead")}
-          </motion.p>
+          </p>
         </motion.div>
       </section>
 
@@ -331,15 +331,15 @@ export default function IzyvapeStrategyLanding() {
           viewport={{ once: true }}
           className="max-w-3xl mx-auto space-y-8 text-center"
         >
-          <motion.p className="text-[10px] font-black uppercase tracking-[0.28em] text-blue-400">{t("closingEyebrow")}</motion.p>
-          <motion.h2 className="text-2xl md:text-4xl font-sora font-black text-white tracking-tight">{t("closingTitle")}</motion.h2>
-          <motion.p className="text-slate-400 leading-relaxed text-left md:text-center">{t("closingLead")}</motion.p>
+          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-blue-400">{t("closingEyebrow")}</p>
+          <h2 className="text-2xl md:text-4xl font-sora font-black text-white tracking-tight">{t("closingTitle")}</h2>
+          <p className="text-slate-400 leading-relaxed text-left md:text-center">{t("closingLead")}</p>
           <motion.div className="rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-6 text-left">
-            <motion.p className="text-base md:text-lg text-slate-200 font-medium leading-relaxed border-l-2 border-purple-500/70 pl-4">
+            <p className="text-base md:text-lg text-slate-200 font-medium leading-relaxed border-l-2 border-purple-500/70 pl-4">
               {t("closingQuote")}
-            </motion.p>
+            </p>
           </motion.div>
-          <motion.p className="text-sm text-slate-500 leading-relaxed">{t("closingPrinciple")}</motion.p>
+          <p className="text-sm text-slate-500 leading-relaxed">{t("closingPrinciple")}</p>
         </motion.div>
       </section>
     </motion.div>
