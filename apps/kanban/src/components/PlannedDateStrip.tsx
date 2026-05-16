@@ -13,22 +13,12 @@ function groupByDay(tasks: Task[], dayKey: string): Task[] {
 function TaskLinks({
   tasks,
   onOpen,
-  emptyLabel,
   isDark,
 }: {
   tasks: Task[];
   onOpen: (id: string) => void;
-  emptyLabel: string;
   isDark: boolean;
 }) {
-  if (tasks.length === 0) {
-    return (
-      <span className={t(isDark, "text-slate-400", "text-slate-600")}>
-        {emptyLabel}
-      </span>
-    );
-  }
-
   return (
     <>
       {tasks.map((task, i) => (
@@ -75,6 +65,10 @@ export function PlannedDateStrip() {
     };
   }, [visibleTasks]);
 
+  if (todayTasks.length === 0 && tomorrowTasks.length === 0) {
+    return null;
+  }
+
   return (
     <div
       className={cn(
@@ -86,40 +80,38 @@ export function PlannedDateStrip() {
         ),
       )}
     >
-      <p className="flex min-w-0 flex-wrap items-baseline gap-1.5">
-        <span
-          className={cn(
-            "shrink-0 font-semibold uppercase tracking-wider",
-            t(isDark, "text-emerald-700", "text-emerald-400"),
-          )}
-        >
-          Dnes
-        </span>
-        <span className={t(isDark, "text-slate-300", "text-slate-600")}>:</span>
-        <TaskLinks
-          tasks={todayTasks}
-          onOpen={openTaskDetail}
-          emptyLabel="—"
-          isDark={isDark}
-        />
-      </p>
-      <p className="flex min-w-0 flex-wrap items-baseline gap-1.5">
-        <span
-          className={cn(
-            "shrink-0 font-semibold uppercase tracking-wider",
-            t(isDark, "text-sky-700", "text-sky-400"),
-          )}
-        >
-          Zajtra
-        </span>
-        <span className={t(isDark, "text-slate-300", "text-slate-600")}>:</span>
-        <TaskLinks
-          tasks={tomorrowTasks}
-          onOpen={openTaskDetail}
-          emptyLabel="—"
-          isDark={isDark}
-        />
-      </p>
+      {todayTasks.length > 0 && (
+        <p className="flex min-w-0 flex-wrap items-baseline gap-1.5">
+          <span
+            className={cn(
+              "shrink-0 font-semibold uppercase tracking-wider",
+              t(isDark, "text-emerald-700", "text-emerald-400"),
+            )}
+          >
+            Dnes
+          </span>
+          <span className={t(isDark, "text-slate-300", "text-slate-600")}>:</span>
+          <TaskLinks tasks={todayTasks} onOpen={openTaskDetail} isDark={isDark} />
+        </p>
+      )}
+      {tomorrowTasks.length > 0 && (
+        <p className="flex min-w-0 flex-wrap items-baseline gap-1.5">
+          <span
+            className={cn(
+              "shrink-0 font-semibold uppercase tracking-wider",
+              t(isDark, "text-sky-700", "text-sky-400"),
+            )}
+          >
+            Zajtra
+          </span>
+          <span className={t(isDark, "text-slate-300", "text-slate-600")}>:</span>
+          <TaskLinks
+            tasks={tomorrowTasks}
+            onOpen={openTaskDetail}
+            isDark={isDark}
+          />
+        </p>
+      )}
     </div>
   );
 }
