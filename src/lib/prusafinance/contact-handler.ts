@@ -4,6 +4,7 @@ import {
   splitFullName,
   subscribeLead,
 } from "@/lib/prusafinance/ecomail";
+import {notifyPrusafinanceLead} from "@/lib/prusafinance/notify-lead";
 
 const ALLOWED_TAGS = new Set([
   "formular:index-kontakt",
@@ -99,6 +100,8 @@ export async function handlePrusafinanceContactPost(request: NextRequest) {
   const { name, surname } = splitFullName(jmeno);
   const zprava = typeof data.zprava === "string" ? data.zprava.trim() : "";
   const temata = typeof data.temata === "string" ? data.temata.trim() : "";
+  const placement =
+    typeof data.placement === "string" ? data.placement.trim() : "";
 
   const customFields: Record<string, string> = {};
   if (zprava) customFields.zprava = zprava.slice(0, 2000);
@@ -113,6 +116,20 @@ export async function handlePrusafinanceContactPost(request: NextRequest) {
       tags: [tag],
       customFields: Object.keys(customFields).length ? customFields : undefined,
     });
+
+    const fullName = [name, surname].filter(Boolean).join(" ").trim() || jmeno;
+    notifyPrusafinanceLead({
+      tag,
+      placement: placement || undefined,
+      jmeno: fullName,
+      email,
+      phone,
+      zprava: zprava || undefined,
+      temata: temata || undefined,
+    }).catch((err) => {
+      console.error("[prusafinance/notify]", err);
+    });
+
     return json({ ok: true }, 200, origin);
   } catch (err) {
     console.error("[prusafinance/contact]", err);

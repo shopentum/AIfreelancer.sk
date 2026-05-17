@@ -8,7 +8,12 @@
     "prebuild": "node scripts/sync-prusafinance-public.mjs && node scripts/prusafinance-prefix-paths.mjs && node scripts/prusafinance-mobile-responsive.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:prusafinance:api": "node scripts/prusafinance-forms-api-test.mjs",
+    "test:prusafinance:e2e": "playwright test e2e/prusafinance-forms.spec.ts",
+    "test:prusafinance:e2e:ui": "playwright test e2e/prusafinance-forms.spec.ts --ui",
+    "test:prusafinance:e2e:mock": "node scripts/run-prusafinance-e2e.mjs --mock",
+    "test:prusafinance:e2e:prod": "node scripts/run-prusafinance-e2e.mjs --prod"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -27,6 +32,7 @@
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
+    "@playwright/test": "^1.52.0",
     "eslint-config-next": "16.2.1",
     "tailwindcss": "^4",
     "typescript": "^5"
