@@ -125,6 +125,7 @@ function applyLeadForms(html, destName) {
     const pdfAttr = destName === "stahnout-pruvodce.html" ? ' data-pf-pdf="1"' : "";
     const cleaned = attrs
       .replace(/\saction="[^"]*"/gi, "")
+      .replace(/\smethod="[^"]*"/gi, "")
       .replace(/\sonsubmit="[^"]*"/gi, "");
     return `<form${cleaned} action="#" method="post" data-pf-lead data-pf-tag="${tag}" data-pf-placement="${placement}"${pdfAttr}>`;
   });
