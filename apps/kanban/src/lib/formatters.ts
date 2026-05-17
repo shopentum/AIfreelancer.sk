@@ -50,6 +50,24 @@ export function formatDurationWithSeconds(totalSeconds: number): string {
   return `${m}:${pad(sec)}`;
 }
 
+/** Calendar date only, e.g. 15.5.2026 */
+export function formatSkDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+
+  const parts = new Intl.DateTimeFormat(SK_LOCALE, {
+    timeZone: TZ,
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+  }).formatToParts(d);
+
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === type)?.value ?? "";
+
+  return `${get("day")}.${get("month")}.${get("year")}`;
+}
+
 /** Short date on card, e.g. 15. 5. */
 export function formatSkShortDate(iso: string): string {
   const d = new Date(iso);

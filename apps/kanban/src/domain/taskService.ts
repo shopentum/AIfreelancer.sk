@@ -236,7 +236,7 @@ export function timerPause(task: Task): Task {
 
 export function addTaskTrackedMinutes(task: Task, minutes: number): Task {
   const wholeMinutes = Math.floor(minutes);
-  if (wholeMinutes <= 0 || !Number.isFinite(wholeMinutes)) return task;
+  if (wholeMinutes === 0 || !Number.isFinite(wholeMinutes)) return task;
 
   const nowIso = new Date().toISOString();
   let working: Task = task;
@@ -250,7 +250,10 @@ export function addTaskTrackedMinutes(task: Task, minutes: number): Task {
 
   return {
     ...working,
-    totalTrackedSeconds: working.totalTrackedSeconds + wholeMinutes * 60,
+    totalTrackedSeconds: Math.max(
+      0,
+      working.totalTrackedSeconds + wholeMinutes * 60,
+    ),
     updatedAt: nowIso,
     activityLog: log,
   };

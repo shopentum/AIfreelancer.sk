@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ChevronDown, Clock, Square, Trash2, X } from "lucide-react";
+import { ChevronDown, Clock, Trash2, X } from "lucide-react";
 import { TaskDetailAiSummary } from "@/components/TaskDetailAiSummary";
 import { CopyTaskContextButton } from "@/components/CopyTaskContextButton";
 import { TaskManualTimeAdd } from "@/components/TaskManualTimeAdd";
@@ -13,6 +13,7 @@ import { t, useTheme } from "@/hooks/useTheme";
 import {
   formatDuration,
   formatDurationWithSeconds,
+  formatSkDate,
   formatSkDateTime,
 } from "@/lib/formatters";
 import {
@@ -44,8 +45,11 @@ function activityLabel(entry: ActivityEntry): string {
       return `Termín: ${p.from ?? "?"} → ${p.to ?? "?"}`;
     case "ai_summary_updated":
       return "AI summary upravené";
-    case "time_added_manually":
-      return `+${p.minutes ?? "?"} min ručne`;
+    case "time_added_manually": {
+      const m = p.minutes ?? "?";
+      if (m.startsWith("-")) return `${m} min ručne`;
+      return `+${m} min ručne`;
+    }
     case "marked_done":
       return "Označené ako hotové";
     default:
@@ -212,15 +216,25 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
             t(isDark, "border-slate-100", "border-slate-800"),
           )}
         >
-          <div
-            className={cn(
-              "rounded-xl border px-4 py-2 text-xs font-black uppercase tracking-widest",
-              getProjectBadgeClass(task.project, isDark),
-            )}
-          >
-            {getLabel(task.project)}
+          <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+            <div
+              className={cn(
+                "w-fit rounded-xl border px-4 py-2 text-xs font-black uppercase tracking-widest",
+                getProjectBadgeClass(task.project, isDark),
+              )}
+            >
+              {getLabel(task.project)}
+            </div>
+            <span
+              className={cn(
+                "text-[10px] font-bold uppercase tracking-widest tabular-nums",
+                t(isDark, "text-slate-400", "text-slate-500"),
+              )}
+            >
+              Vytvorené {formatSkDate(task.createdAt)}
+            </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <CopyTaskContextButton task={task} />
             <button
               type="button"
@@ -400,54 +414,57 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
             isDark={isDark}
           />
 
-          <div className="space-y-6">
+          <div className="space-y-3">
             <p className={labelClass}>Časovač</p>
             <div
               className={cn(
-                "flex flex-col gap-6 rounded-[2.5rem] border p-6 sm:flex-row sm:items-center sm:justify-between md:p-8",
+                "grid grid-cols-1 gap-5 rounded-[2rem] border p-5 sm:grid-cols-2 sm:gap-6 md:p-6",
                 t(isDark, "border-slate-100 bg-slate-50", "border-slate-800 bg-slate-800/50"),
               )}
             >
-              <div className="space-y-1">
+              <div className="flex flex-col gap-3">
                 <p
                   className={cn(
-                    "font-mono text-3xl font-black tracking-tighter tabular-nums md:text-4xl",
+                    "flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono text-lg font-black tracking-tight tabular-nums sm:text-xl",
                     t(isDark, "text-slate-900", "text-white"),
                   )}
                 >
-                  {task.isTimerRunning
-                    ? formatDurationWithSeconds(displaySeconds)
-                    : formatDuration(displaySeconds)}
-                </p>
-                <div className="flex items-center gap-2">
+                  <span>
+                    {task.isTimerRunning
+                      ? formatDurationWithSeconds(displaySeconds)
+                      : formatDuration(displaySeconds)}
+                  </span>
                   <span
                     className={cn(
                       "text-[10px] font-bold uppercase tracking-widest",
                       task.isTimerRunning
                         ? "text-emerald-500"
-                        : t(isDark, "text-slate-400", "text-slate-500"),
+                        : t(isDark, "text-slate-500", "text-slate-400"),
                     )}
                   >
-                    Stav:{" "}
+                    · Stav:{" "}
                     {timerState === "running"
                       ? "beží"
                       : timerState === "paused"
                         ? "pozastavený"
                         : "zastavený"}
+                    {task.isTimerRunning && (
+                      <span className="ml-1.5 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500 align-middle" />
+                    )}
                   </span>
-                  {task.isTimerRunning && (
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-                  )}
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-3">
+                </p>
+                <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() => startTimer(task.id)}
                   disabled={task.isTimerRunning}
                   className={cn(
-                    "rounded-xl px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all active:scale-95 disabled:opacity-40",
-                    t(isDark, "bg-slate-900 text-white hover:bg-slate-800", "bg-white text-slate-900 hover:bg-slate-100"),
+                    "rounded-xl px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 disabled:opacity-40",
+                    t(
+                      isDark,
+                      "bg-slate-900 text-white hover:bg-slate-800",
+                      "bg-white text-slate-900 hover:bg-slate-100",
+                    ),
                   )}
                 >
                   Start
@@ -456,7 +473,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
                   type="button"
                   onClick={() => pauseTimer(task.id)}
                   disabled={!task.isTimerRunning}
-                  className="rounded-xl border border-amber-500/20 bg-amber-500/10 px-6 py-3 text-xs font-bold uppercase tracking-widest text-amber-500 transition-all active:scale-95 disabled:opacity-40"
+                  className="rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-amber-500 transition-all active:scale-95 disabled:opacity-40"
                 >
                   Pause
                 </button>
@@ -465,20 +482,20 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
                   onClick={() => stopTimer(task.id)}
                   disabled={!task.isTimerRunning}
                   className={cn(
-                    "flex h-10 w-10 items-center justify-center rounded-xl border transition-all active:scale-95 disabled:opacity-40",
+                    "rounded-xl border px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 disabled:opacity-40",
                     t(
                       isDark,
-                      "border-slate-200 bg-white text-slate-300 hover:text-red-500",
-                      "border-slate-700 bg-slate-800 text-slate-600 hover:text-red-400",
+                      "border-slate-700 bg-slate-800 text-slate-400 hover:text-red-400",
+                      "border-slate-200 bg-white text-slate-500 hover:text-red-500",
                     ),
                   )}
-                  aria-label="Stop"
                 >
-                  <Square size={16} className="fill-current" />
+                  Stop
                 </button>
+                </div>
               </div>
               <TaskManualTimeAdd
-                onAdd={(minutes) => addTaskTrackedMinutes(task.id, minutes)}
+                onAdjust={(minutes) => addTaskTrackedMinutes(task.id, minutes)}
               />
             </div>
           </div>
