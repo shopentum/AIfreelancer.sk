@@ -32,6 +32,7 @@ const copies = [
 
 /** Ecomail tag per deployed HTML filename */
 const FORM_TAGS = {
+  "index.html": "formular:index-kontakt",
   "stahnout-pruvodce.html": "formular:stahnout-pruvodce",
   "ppc-bezurocne-uvery.html": "formular:ppc-bezurocne-uvery",
   "ppc-refinancovani.html": "formular:ppc-refinancovani",

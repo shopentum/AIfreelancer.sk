@@ -4,13 +4,31 @@
     return p.indexOf("/prusafinance/") === 0 ? "/prusafinance" : "";
   }
 
+  function resolveForm(event) {
+    if (event.currentTarget && event.currentTarget.tagName === "FORM") {
+      return event.currentTarget;
+    }
+    var t = event.target;
+    if (t && t.tagName === "FORM") return t;
+    if (t && t.form) return t.form;
+    if (t && t.closest) return t.closest("form");
+    return null;
+  }
+
   function readForm(form) {
     var fd = new FormData(form);
+    var pills = form.querySelectorAll(".pill.on");
+    var temata = [];
+    for (var i = 0; i < pills.length; i++) {
+      temata.push((pills[i].textContent || "").trim());
+    }
     return {
       tag: form.getAttribute("data-pf-tag") || "",
       jmeno: (fd.get("jmeno") || "").toString().trim(),
       email: (fd.get("email") || "").toString().trim(),
       kontakt: (fd.get("kontakt") || "").toString().trim(),
+      zprava: (fd.get("zprava") || "").toString().trim(),
+      temata: temata.join(", "),
       placement: form.getAttribute("data-pf-placement") || "",
     };
   }
@@ -29,7 +47,9 @@
     var btn = form.querySelector('[type="submit"]');
     if (!btn) return;
     if (on) {
-      btn.setAttribute("data-pf-label", btn.textContent || "");
+      if (!btn.getAttribute("data-pf-label")) {
+        btn.setAttribute("data-pf-label", btn.textContent || "");
+      }
       btn.disabled = true;
       btn.textContent = "Odesílám…";
     } else {
@@ -41,7 +61,7 @@
 
   window.pfLeadSubmit = function (event) {
     event.preventDefault();
-    var form = event.target;
+    var form = resolveForm(event);
     if (!form || !form.getAttribute("data-pf-lead")) return false;
 
     var payload = readForm(form);
@@ -77,4 +97,22 @@
 
     return false;
   };
+
+  function bindForms() {
+    var forms = document.querySelectorAll("form[data-pf-lead]");
+    for (var i = 0; i < forms.length; i++) {
+      var form = forms[i];
+      if (form.getAttribute("data-pf-bound") === "1") continue;
+      form.setAttribute("data-pf-bound", "1");
+      form.addEventListener("submit", function (e) {
+        window.pfLeadSubmit(e);
+      });
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bindForms);
+  } else {
+    bindForms();
+  }
 })();

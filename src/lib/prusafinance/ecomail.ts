@@ -42,6 +42,7 @@ export type SubscribeLeadInput = {
   phone?: string;
   tags: string[];
   source?: string;
+  customFields?: Record<string, string>;
 };
 
 export async function subscribeLead(input: SubscribeLeadInput) {
@@ -64,6 +65,7 @@ export async function subscribeLead(input: SubscribeLeadInput) {
         tags,
         source: input.source ?? "prusafinance-web",
         status: 1,
+        ...(input.customFields ? { custom_fields: input.customFields } : {}),
       },
       trigger_autoresponders: false,
       update_existing: true,

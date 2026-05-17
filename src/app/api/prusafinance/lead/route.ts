@@ -6,6 +6,7 @@ import {
 } from "@/lib/prusafinance/ecomail";
 
 const ALLOWED_TAGS = new Set([
+  "formular:index-kontakt",
   "formular:ppc-refinancovani",
   "formular:ppc-bezurocne-uvery",
   "formular:ppc-pojisteni-osvc",
@@ -96,6 +97,12 @@ export async function POST(request: NextRequest) {
   }
 
   const { name, surname } = splitFullName(jmeno);
+  const zprava = typeof data.zprava === "string" ? data.zprava.trim() : "";
+  const temata = typeof data.temata === "string" ? data.temata.trim() : "";
+
+  const customFields: Record<string, string> = {};
+  if (zprava) customFields.zprava = zprava.slice(0, 2000);
+  if (temata) customFields.temata = temata.slice(0, 500);
 
   try {
     await subscribeLead({
@@ -104,6 +111,7 @@ export async function POST(request: NextRequest) {
       surname,
       phone,
       tags: [tag],
+      customFields: Object.keys(customFields).length ? customFields : undefined,
     });
     return json({ ok: true }, 200, origin);
   } catch (err) {
