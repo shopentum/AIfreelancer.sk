@@ -26,35 +26,28 @@
       "has": [{ "type": "host", "value": "www.aifreelancer.sk" }],
       "destination": "/prusafinance/dekujeme.html",
       "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "prusafinance.com" }],
+      "destination": "/prusafinance/index.html"
     },
     {
       "source": "/",
       "has": [{ "type": "host", "value": "www.prusafinance.com" }],
-      "destination": "https://prusafinance.com/",
-      "permanent": true
+      "destination": "/prusafinance/index.html"
     },
-    {
-      "source": "/:path+",
-      "has": [{ "type": "host", "value": "www.prusafinance.com" }],
-      "destination": "https://prusafinance.com/:path",
-      "permanent": true
-    }
-  ],
-  "rewrites": [
     {
       "source": "/dekujeme",
       "has": [{ "type": "host", "value": "prusafinance.com" }],
       "destination": "/prusafinance/dekujeme.html"
     },
     {
-      "source": "/prusafinance/:path*",
-      "has": [{ "type": "host", "value": "prusafinance.com" }],
-      "destination": "/prusafinance/:path*"
-    },
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "prusafinance.com" }],
-      "destination": "/prusafinance/:path*"
+      "source": "/dekujeme",
+      "has": [{ "type": "host", "value": "www.prusafinance.com" }],
+      "destination": "/prusafinance/dekujeme.html"
     }
   ]
 }

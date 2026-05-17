@@ -56,7 +56,7 @@ Všetko menšie patrí do ekosystému **aifreelancer.sk** — nie nový Vercel i
 
 | Vercel project | Git repo | Root Directory | Doména |
 |----------------|----------|----------------|--------|
-| `a-ifreelancer-sk` | `AIfreelancer.sk` | `.` | `www` + apex `aifreelancer.sk`, `prusafinance.com` (+ `www` redirect na apex) |
+| `a-ifreelancer-sk` | `AIfreelancer.sk` | `.` | `www` + apex `aifreelancer.sk`, `prusafinance.com` + `www.prusafinance.com` (Vercel Domains: **primary = apex**, www → apex; nie súčasne apex→www v UI a www→apex v `vercel.json`) |
 | `kanban_app` | `AIfreelancer.sk` | `apps/kanban` | `kanban.aifreelancer.sk` |
 
 **Zakázané:** druhý import toho istého repa pre `site` (`a-ifreelancer-sk-*`, `eagle-cms`, …).  
