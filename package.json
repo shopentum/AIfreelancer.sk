@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "sync:prusafinance": "node scripts/sync-prusafinance-public.mjs && node scripts/prusafinance-prefix-paths.mjs && node scripts/prusafinance-mobile-responsive.mjs",
+    "prusafinance:client-feedback": "node scripts/prusafinance-client-feedback.mjs && node scripts/prusafinance-client-feedback-fix.mjs",
     "dev": "next dev",
     "prebuild": "node scripts/sync-prusafinance-public.mjs && node scripts/prusafinance-prefix-paths.mjs && node scripts/prusafinance-mobile-responsive.mjs",
     "build": "next build",
