@@ -6,10 +6,40 @@ const intlMiddleware = createMiddleware(routing);
 
 const PRUSAFINANCE_HOSTS = new Set(["prusafinance.com", "www.prusafinance.com"]);
 
+function prusafinanceStaticPath(pathname: string): string | null {
+  if (pathname === "/" || pathname === "") {
+    return "/prusafinance/index.html";
+  }
+  if (pathname === "/dekujeme" || pathname === "/dekujeme/") {
+    return "/prusafinance/dekujeme.html";
+  }
+  if (pathname.startsWith("/prusafinance")) {
+    return null;
+  }
+  return `/prusafinance${pathname}`;
+}
+
+function handlePrusafinanceHost(request: NextRequest): NextResponse {
+  const {pathname} = request.nextUrl;
+
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
+
+  const target = prusafinanceStaticPath(pathname);
+  if (target === null) {
+    return NextResponse.next();
+  }
+
+  const url = request.nextUrl.clone();
+  url.pathname = target;
+  return NextResponse.rewrite(url);
+}
+
 export default function middleware(request: NextRequest) {
   const host = request.headers.get("host")?.split(":")[0]?.toLowerCase() ?? "";
   if (PRUSAFINANCE_HOSTS.has(host)) {
-    return NextResponse.next();
+    return handlePrusafinanceHost(request);
   }
   return intlMiddleware(request);
 }
