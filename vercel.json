@@ -17,11 +17,13 @@
   "redirects": [
     {
       "source": "/dekujeme.html",
+      "has": [{ "type": "host", "value": "aifreelancer.sk" }],
       "destination": "/prusafinance/dekujeme.html",
       "permanent": false
     },
     {
-      "source": "/dekujeme",
+      "source": "/dekujeme.html",
+      "has": [{ "type": "host", "value": "www.aifreelancer.sk" }],
       "destination": "/prusafinance/dekujeme.html",
       "permanent": false
     },
