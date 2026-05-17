@@ -1,4 +1,6 @@
 (function () {
+  var API = "/api/prusafinance/contact";
+
   function pfBasePath() {
     var p = window.location.pathname || "";
     return p.indexOf("/prusafinance/") === 0 ? "/prusafinance" : "";
@@ -69,8 +71,7 @@
     }
 
     var form = resolveForm(event);
-    if (!form || !form.getAttribute("data-pf-lead")) return false;
-
+    if (!form || !form.getAttribute("data-pf-form")) return false;
     if (form.getAttribute("data-pf-sending") === "1") return false;
 
     if (typeof form.reportValidity === "function" && !form.reportValidity()) {
@@ -83,7 +84,7 @@
     form.setAttribute("data-pf-sending", "1");
     setLoading(form, true);
 
-    fetch("/api/prusafinance/lead", {
+    fetch(API, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify(payload),
@@ -112,16 +113,15 @@
     return false;
   }
 
-  window.pfLeadSubmit = handleSubmit;
+  window.pfFormSubmit = handleSubmit;
 
   function bindForms() {
-    var forms = document.querySelectorAll("form[data-pf-lead]");
+    var forms = document.querySelectorAll("form[data-pf-form]");
     for (var i = 0; i < forms.length; i++) {
       var form = forms[i];
       if (form.getAttribute("data-pf-bound") === "1") continue;
       form.setAttribute("data-pf-bound", "1");
       form.addEventListener("submit", handleSubmit);
-
       var btn = form.querySelector('[type="submit"]');
       if (btn) {
         btn.style.pointerEvents = "auto";
@@ -132,14 +132,14 @@
 
   var style = document.createElement("style");
   style.textContent =
-    "form[data-pf-lead] [type=submit]{pointer-events:auto!important;cursor:pointer!important}" +
-    "form[data-pf-lead] [type=submit]:disabled{opacity:.75;cursor:wait!important}";
+    "form[data-pf-form] [type=submit]{pointer-events:auto!important;cursor:pointer!important}" +
+    "form[data-pf-form] [type=submit]:disabled{opacity:.75;cursor:wait!important}";
   document.head.appendChild(style);
 
   bindForms();
   document.addEventListener("DOMContentLoaded", bindForms);
   window.addEventListener("pageshow", function () {
-    document.querySelectorAll("form[data-pf-lead]").forEach(function (form) {
+    document.querySelectorAll("form[data-pf-form]").forEach(function (form) {
       setLoading(form, false);
     });
   });

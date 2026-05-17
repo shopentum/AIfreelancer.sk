@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, "..");
 const outDir = path.join(root, "public", "prusafinance");
-const pfLeadSrc = path.join(root, "finance", "Web", "assets", "pf-lead.js");
+const pfContactSrc = path.join(root, "finance", "Web", "assets", "pf-contact.js");
 
 const copies = [
   ["finance/Web/prusafinance_9.html", "index.html"],
@@ -41,8 +41,8 @@ const FORM_TAGS = {
   "ppc-raiffeisen-ucet.html": "formular:ppc-raiffeisen-ucet",
 };
 
-const PF_LEAD_SCRIPT =
-  '<script src="/prusafinance/pf-lead.js"></script>\n';
+const PF_FORM_SCRIPT =
+  '<script src="/prusafinance/pf-contact.js"></script>\n';
 
 /** Tiny valid PDF placeholder — replace with real asset when the client provides it. */
 const MINIMAL_PDF = `%PDF-1.4
@@ -118,7 +118,7 @@ function applyLeadForms(html, destName) {
   let s = html;
 
   s = s.replace(/<form\b([^>]*)>/gi, (full, attrs) => {
-    if (/data-pf-lead/i.test(attrs)) return full;
+    if (/data-pf-form/i.test(attrs)) return full;
     const idMatch = attrs.match(/\sid="([^"]+)"/i);
     const formId = idMatch ? idMatch[1] : "form";
     const placement = formPlacement(formId);
@@ -127,16 +127,20 @@ function applyLeadForms(html, destName) {
       .replace(/\saction="[^"]*"/gi, "")
       .replace(/\smethod="[^"]*"/gi, "")
       .replace(/\sonsubmit="[^"]*"/gi, "");
-    return `<form${cleaned} action="#" method="post" data-pf-lead data-pf-tag="${tag}" data-pf-placement="${placement}"${pdfAttr}>`;
+    return `<form${cleaned} action="#" method="post" data-pf-form data-pf-tag="${tag}" data-pf-placement="${placement}"${pdfAttr}>`;
   });
 
   s = s.replace(
     /<script>\s*function (handleSubmit|sub)\([\s\S]*?<\/script>\s*(?=<\/body>)/i,
-    PF_LEAD_SCRIPT,
+    PF_FORM_SCRIPT,
   );
 
-  if (!s.includes("pf-lead.js")) {
-    s = s.replace("</body>", `${PF_LEAD_SCRIPT}</body>`);
+  s = s.replace(/\sdata-pf-lead\b/g, " data-pf-form");
+  s = s.replace(/\/pf-lead\.js/g, "/pf-contact.js");
+  s = s.replace(/\bid="lead-form"/g, 'id="form-pruvodce"');
+
+  if (!s.includes("pf-contact.js")) {
+    s = s.replace("</body>", `${PF_FORM_SCRIPT}</body>`);
   }
 
   return s;
@@ -164,17 +168,19 @@ for (const [srcRel, destName] of copies) {
   fs.writeFileSync(path.join(outDir, destName), html, "utf8");
 }
 
-if (!fs.existsSync(pfLeadSrc)) {
-  console.error("Missing:", path.relative(root, pfLeadSrc));
+if (!fs.existsSync(pfContactSrc)) {
+  console.error("Missing:", path.relative(root, pfContactSrc));
   process.exit(1);
 }
-fs.copyFileSync(pfLeadSrc, path.join(outDir, "pf-lead.js"));
+fs.copyFileSync(pfContactSrc, path.join(outDir, "pf-contact.js"));
+const legacyLeadJs = path.join(outDir, "pf-lead.js");
+if (fs.existsSync(legacyLeadJs)) fs.unlinkSync(legacyLeadJs);
 
 fs.writeFileSync(path.join(outDir, "financni-gramotnost-prusa.pdf"), MINIMAL_PDF, "utf8");
 
 console.log(
   "Wrote",
   copies.length,
-  "HTML + pf-lead.js + placeholder PDF to",
+  "HTML + pf-contact.js + placeholder PDF to",
   path.relative(root, outDir),
 );

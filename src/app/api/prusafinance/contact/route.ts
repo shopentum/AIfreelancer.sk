@@ -4,7 +4,6 @@ import {
   handlePrusafinanceContactPost,
 } from "@/lib/prusafinance/contact-handler";
 
-/** @deprecated Use /api/prusafinance/contact — kept for older cached HTML */
 export async function OPTIONS(request: NextRequest) {
   return handlePrusafinanceContactOptions(request);
 }
