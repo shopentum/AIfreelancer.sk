@@ -25,6 +25,8 @@ const copies = [
   ["finance/Web/Landing page/ppc-bezurocne-uvery.html", "ppc-bezurocne-uvery.html"],
   ["finance/Web/Landing page/ppc-refinancovani.html", "ppc-refinancovani.html"],
   ["finance/Web/Landing page/ppc-pojisteni-osvc.html", "ppc-pojisteni-osvc.html"],
+  ["finance/Web/Landing page/ppc-modernizace-bydleni.html", "ppc-modernizace-bydleni.html"],
+  ["finance/Web/Landing page/ppc-raiffeisen-ucet.html", "ppc-raiffeisen-ucet.html"],
 ];
 
 const formspreeUrl =
