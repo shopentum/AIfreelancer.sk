@@ -2,7 +2,7 @@
 
 **Jediný zdroj pravdy** pre aplikácie, domény a deploy. Pred novou appkou, Vercel projektom alebo duplicitným priečinkom **najprv uprav tento súbor**, potom kód.
 
-Posledná revízia: 2026-05-16
+Posledná revízia: 2026-05-17
 
 ---
 
@@ -56,7 +56,7 @@ Všetko menšie patrí do ekosystému **aifreelancer.sk** — nie nový Vercel i
 
 | Vercel project | Git repo | Root Directory | Doména |
 |----------------|----------|----------------|--------|
-| `a-ifreelancer-sk` | `AIfreelancer.sk` | `.` | `www` + apex |
+| `a-ifreelancer-sk` | `AIfreelancer.sk` | `.` | `www` + apex `aifreelancer.sk`, `prusafinance.com` (+ `www` redirect na apex) |
 | `kanban_app` | `AIfreelancer.sk` | `apps/kanban` | `kanban.aifreelancer.sk` |
 
 **Zakázané:** druhý import toho istého repa pre `site` (`a-ifreelancer-sk-*`, `eagle-cms`, …).  
@@ -98,7 +98,7 @@ Externé appky **nemajú** duplicitný kód v `apps/<name>/` — len `apps/<name
 | eagle-admin | `src/eagle_admin/`, `src/app/.../eagle-admin` | `/eagle-admin` | prototyp CMS, **nie** `eagle-cms` projekt |
 | nmh | `src/app/.../nmh` | `/nmh`, `/nmh/copilot-blueprint` | interné / demo |
 | proficrafts | `src/components/proficrafts/` | `/proficrafts` | microsite v Next |
-| prusafinance | `public/prusafinance/` | `/prusafinance/*` | statický export v `public` |
+| prusafinance | `public/prusafinance/` | `prusafinance.com` (rewrite na `/prusafinance/*`), záložne `aifreelancer.sk/prusafinance/*` | statický HTML v `public`, host bypass v `middleware.ts`, routing v `vercel.json` |
 
 ---
 

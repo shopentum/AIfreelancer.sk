@@ -1,3 +1,29 @@
 {
-  "ignoreCommand": "bash scripts/vercel-should-build-main.sh"
+  "ignoreCommand": "bash scripts/vercel-should-build-main.sh",
+  "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "www.prusafinance.com" }],
+      "destination": "https://prusafinance.com/",
+      "permanent": true
+    },
+    {
+      "source": "/:path+",
+      "has": [{ "type": "host", "value": "www.prusafinance.com" }],
+      "destination": "https://prusafinance.com/:path",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/prusafinance/:path*",
+      "has": [{ "type": "host", "value": "prusafinance.com" }],
+      "destination": "/prusafinance/:path*"
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "prusafinance.com" }],
+      "destination": "/prusafinance/:path*"
+    }
+  ]
 }
