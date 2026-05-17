@@ -73,7 +73,7 @@
     var form = resolveForm(event);
     if (
       !form ||
-      (!form.getAttribute("data-pf-form") && !form.getAttribute("data-pf-lead"))
+      (!form.hasAttribute("data-pf-form") && !form.hasAttribute("data-pf-lead"))
     ) {
       return false;
     }
