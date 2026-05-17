@@ -1,7 +1,6 @@
 /**
  * Copies finance/Web HTML into public/prusafinance for deployment at /prusafinance/*.
  * Run: node scripts/sync-prusafinance-public.mjs
- * Optional env: PRUSAFINANCE_FORMSPREE_URL — full Formspree action URL (default keeps a clear placeholder).
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -10,6 +9,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, "..");
 const outDir = path.join(root, "public", "prusafinance");
+const pfLeadSrc = path.join(root, "finance", "Web", "assets", "pf-lead.js");
 
 const copies = [
   ["finance/Web/prusafinance_9.html", "index.html"],
@@ -21,6 +21,7 @@ const copies = [
   ["finance/Web/Ostatni/hypoteka-2025_1.html", "hypoteka-2025.html"],
   ["finance/Web/Ostatni/gdpr_1.html", "gdpr.html"],
   ["finance/Web/Ostatni/obchodni-podminky_1.html", "obchodni-podminky.html"],
+  ["finance/Web/Ostatni/dekujeme.html", "dekujeme.html"],
   ["finance/Web/Landing page/stahnout-pruvodce.html", "stahnout-pruvodce.html"],
   ["finance/Web/Landing page/ppc-bezurocne-uvery.html", "ppc-bezurocne-uvery.html"],
   ["finance/Web/Landing page/ppc-refinancovani.html", "ppc-refinancovani.html"],
@@ -29,9 +30,18 @@ const copies = [
   ["finance/Web/Landing page/ppc-raiffeisen-ucet.html", "ppc-raiffeisen-ucet.html"],
 ];
 
-const formspreeUrl =
-  process.env.PRUSAFINANCE_FORMSPREE_URL?.trim() ||
-  "https://formspree.io/f/REPLACE_WITH_YOUR_FORM_ID";
+/** Ecomail tag per deployed HTML filename */
+const FORM_TAGS = {
+  "stahnout-pruvodce.html": "formular:stahnout-pruvodce",
+  "ppc-bezurocne-uvery.html": "formular:ppc-bezurocne-uvery",
+  "ppc-refinancovani.html": "formular:ppc-refinancovani",
+  "ppc-pojisteni-osvc.html": "formular:ppc-pojisteni-osvc",
+  "ppc-modernizace-bydleni.html": "formular:ppc-modernizace-bydleni",
+  "ppc-raiffeisen-ucet.html": "formular:ppc-raiffeisen-ucet",
+};
+
+const PF_LEAD_SCRIPT =
+  '<script src="/prusafinance/pf-lead.js" defer></script>\n';
 
 /** Tiny valid PDF placeholder — replace with real asset when the client provides it. */
 const MINIMAL_PDF = `%PDF-1.4
@@ -84,11 +94,47 @@ function applyTransforms(html) {
       /<a href="#">📋 Obch\. podmínky<\/a>/g,
       '<a href="obchodni-podminky.html">📋 Obch. podmínky</a>',
     ],
-    [/https:\/\/formspree\.io\/f\/VAŠID/g, formspreeUrl],
+    [/https:\/\/formspree\.io\/f\/VAŠID/g, "#"],
+    [/https:\/\/formspree\.io\/f\/REPLACE_WITH_YOUR_FORM_ID/g, "#"],
   ];
 
   for (const [re, rep] of pairs) {
     s = s.replace(re, rep);
+  }
+
+  return s;
+}
+
+function formPlacement(formId) {
+  if (/bottom|bot/i.test(formId)) return "bottom";
+  return "hero";
+}
+
+function applyLeadForms(html, destName) {
+  const tag = FORM_TAGS[destName];
+  if (!tag) return html;
+
+  let s = html;
+
+  s = s.replace(/<form\b([^>]*)>/gi, (full, attrs) => {
+    if (/data-pf-lead/i.test(attrs)) return full;
+    const idMatch = attrs.match(/\sid="([^"]+)"/i);
+    const formId = idMatch ? idMatch[1] : "form";
+    const placement = formPlacement(formId);
+    const pdfAttr = destName === "stahnout-pruvodce.html" ? ' data-pf-pdf="1"' : "";
+    const cleaned = attrs
+      .replace(/\saction="[^"]*"/gi, "")
+      .replace(/\sonsubmit="[^"]*"/gi, "");
+    return `<form${cleaned} action="#" data-pf-lead data-pf-tag="${tag}" data-pf-placement="${placement}"${pdfAttr} onsubmit="return pfLeadSubmit(event)">`;
+  });
+
+  s = s.replace(
+    /<script>\s*function (handleSubmit|sub)\([\s\S]*?<\/script>\s*(?=<\/body>)/i,
+    PF_LEAD_SCRIPT,
+  );
+
+  if (!s.includes("pf-lead.js")) {
+    s = s.replace("</body>", `${PF_LEAD_SCRIPT}</body>`);
   }
 
   return s;
@@ -112,9 +158,21 @@ for (const [srcRel, destName] of copies) {
   }
   let html = fs.readFileSync(src, "utf8");
   html = applyTransforms(html);
+  html = applyLeadForms(html, destName);
   fs.writeFileSync(path.join(outDir, destName), html, "utf8");
 }
 
+if (!fs.existsSync(pfLeadSrc)) {
+  console.error("Missing:", path.relative(root, pfLeadSrc));
+  process.exit(1);
+}
+fs.copyFileSync(pfLeadSrc, path.join(outDir, "pf-lead.js"));
+
 fs.writeFileSync(path.join(outDir, "financni-gramotnost-prusa.pdf"), MINIMAL_PDF, "utf8");
 
-console.log("Wrote", copies.length, "HTML files + placeholder PDF to", path.relative(root, outDir));
+console.log(
+  "Wrote",
+  copies.length,
+  "HTML + pf-lead.js + placeholder PDF to",
+  path.relative(root, outDir),
+);

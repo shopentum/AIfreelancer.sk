@@ -270,7 +270,7 @@ body.mob-open{overflow:hidden}
       <div class="form-badge">Bezplatná konzultace</div>
       <div class="form-title">Mám zájem o bezúročný úvěr</div>
       <div class="form-sub">Zjistím, zda máte nárok — a zařídím vše od A do Z. Ozvu se do 24 hodin.</div>
-      <form id="form-hero" action="https://formspree.io/f/REPLACE_WITH_YOUR_FORM_ID" method="POST" onsubmit="handleSubmit(event,'form-hero')">
+      <form id="form-hero" method="POST" action="#" data-pf-lead data-pf-tag="formular:ppc-bezurocne-uvery" data-pf-placement="hero" onsubmit="return pfLeadSubmit(event)">
         <input type="hidden" name="_subject" value="Zájem o bezúročný úvěr na energie">
         <div class="form-field">
           <label>Jméno</label>
@@ -508,7 +508,7 @@ body.mob-open{overflow:hidden}
     <div class="cta-form">
       <div class="form-title">Zapsat se na konzultaci</div>
       <div class="form-sub">Ozvu se do 24 hodin.</div>
-      <form id="form-bottom" action="https://formspree.io/f/REPLACE_WITH_YOUR_FORM_ID" method="POST" onsubmit="handleSubmit(event,'form-bottom')">
+      <form id="form-bottom" method="POST" action="#" data-pf-lead data-pf-tag="formular:ppc-bezurocne-uvery" data-pf-placement="bottom" onsubmit="return pfLeadSubmit(event)">
         <input type="hidden" name="_subject" value="Bezúročný úvěr — spodní formulář">
         <div class="form-field">
           <label style="color:rgba(255,255,255,.45)">Jméno</label>
@@ -546,25 +546,6 @@ body.mob-open{overflow:hidden}
   <a href="#kontakt">Chci konzultaci →</a>
 </div>
 
-<script>
-function handleSubmit(e, id) {
-  e.preventDefault();
-  var form = document.getElementById(id);
-  var ok = document.getElementById(id+'-success');
-  fetch(form.action, {method:'POST',body:new FormData(form),headers:{'Accept':'application/json'}})
-    .then(r => { form.style.display='none'; ok.style.display='block'; })
-    .catch(() => { form.style.display='none'; ok.style.display='block'; });
-}
-
-function toggleFaq(el) {
-  var item = el.parentElement;
-  item.classList.toggle('open');
-}
-
-window.addEventListener('scroll', function() {
-  var bar = document.getElementById('sticky-bar');
-  if (bar) bar.style.display = window.scrollY > 400 ? 'flex' : 'none';
-}, {passive:true});
-</script>
+<script src="/prusafinance/pf-lead.js" defer></script>
 </body>
 </html>

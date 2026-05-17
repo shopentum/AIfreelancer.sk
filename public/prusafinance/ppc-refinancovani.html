@@ -224,7 +224,7 @@ body.mob-open{overflow:hidden}
       <div class="form-title">Spočítat moji úsporu</div>
       <div class="form-sub">Bezplatně, bez závazků. Výsledek do 24 hodin.</div>
       
-    <form id="form-hero-hypo" action="https://formspree.io/f/REPLACE_WITH_YOUR_FORM_ID" method="POST" onsubmit="handleSubmit(event, 'form-hero-hypo')">
+    <form id="form-hero-hypo" method="POST" action="#" data-pf-lead data-pf-tag="formular:ppc-refinancovani" data-pf-placement="hero" onsubmit="return pfLeadSubmit(event)">
       <input type="hidden" name="_subject" value="Zájem o refinancování / hypotéku">
       <input type="hidden" name="_next" value="">
       <div class="form-field">
@@ -373,7 +373,7 @@ body.mob-open{overflow:hidden}
       <div class="form-title" style="color:var(--w);margin-bottom:4px;font-family:var(--serif);font-size:18px">Napište mi</div>
       <div class="form-sub" style="color:rgba(255,255,255,.4);margin-bottom:16px">Ozvu se do 24 hodin.</div>
       
-    <form id="form-bottom-hypo" action="https://formspree.io/f/REPLACE_WITH_YOUR_FORM_ID" method="POST" onsubmit="handleSubmit(event, 'form-bottom-hypo')">
+    <form id="form-bottom-hypo" method="POST" action="#" data-pf-lead data-pf-tag="formular:ppc-refinancovani" data-pf-placement="bottom" onsubmit="return pfLeadSubmit(event)">
       <input type="hidden" name="_subject" value="Zájem o refinancování — spodní formulář">
       <input type="hidden" name="_next" value="">
       <div class="form-field">
@@ -412,28 +412,6 @@ body.mob-open{overflow:hidden}
   <a href="#kontakt">Chci spočítat úsporu →</a>
 </div>
 
-<script>
-function handleSubmit(e, formId) {
-  e.preventDefault();
-  var form = document.getElementById(formId);
-  var success = document.getElementById(formId + '-success');
-  var data = new FormData(form);
-  fetch(form.action, {
-    method: 'POST', body: data,
-    headers: { 'Accept': 'application/json' }
-  }).then(r => {
-    if (r.ok) { form.style.display='none'; success.style.display='block'; }
-  }).catch(() => {
-    // Fallback — show success anyway (for testing)
-    form.style.display='none'; success.style.display='block';
-  });
-}
-
-// Show sticky bar after scroll
-window.addEventListener('scroll', function() {
-  var bar = document.getElementById('sticky-bar');
-  if (bar) bar.style.display = window.scrollY > 400 ? 'flex' : 'none';
-}, { passive: true });
-</script>
+<script src="/prusafinance/pf-lead.js" defer></script>
 </body>
 </html>

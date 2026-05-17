@@ -208,7 +208,7 @@ body.mob-open{overflow:hidden}
     <p class="form-sub">Pošleme vám ho okamžitě. Žádné platby, žádný spam — jen průvodce.</p>
 
     <div class="form-box">
-      <form id="lead-form" action="https://formspree.io/f/REPLACE_WITH_YOUR_FORM_ID" method="POST" onsubmit="handleSubmit(event)">
+      <form id="lead-form" method="POST" action="#" data-pf-lead data-pf-tag="formular:stahnout-pruvodce" data-pf-placement="hero" data-pf-pdf="1" onsubmit="return pfLeadSubmit(event)">
         <input type="hidden" name="_subject" value="Stažení průvodce — nový lead">
         <div class="field">
           <label>Jméno</label>
@@ -322,25 +322,6 @@ body.mob-open{overflow:hidden}
   <span class="foot-copy">© 2025 Mgr. Martin Průša · IČ: 07179235</span>
 </footer>
 
-<script>
-function handleSubmit(e) {
-  e.preventDefault();
-  var form = document.getElementById('lead-form');
-  var ok   = document.getElementById('lead-success');
-  fetch(form.action, {
-    method: 'POST',
-    body: new FormData(form),
-    headers: {'Accept': 'application/json'}
-  }).then(r => {
-    form.style.display = 'none';
-    ok.style.display = 'block';
-    // Scroll to success
-    ok.scrollIntoView({behavior:'smooth', block:'center'});
-  }).catch(() => {
-    form.style.display = 'none';
-    ok.style.display = 'block';
-  });
-}
-</script>
+<script src="/prusafinance/pf-lead.js" defer></script>
 </body>
 </html>

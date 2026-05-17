@@ -98,7 +98,7 @@ Externé appky **nemajú** duplicitný kód v `apps/<name>/` — len `apps/<name
 | eagle-admin | `src/eagle_admin/`, `src/app/.../eagle-admin` | `/eagle-admin` | prototyp CMS, **nie** `eagle-cms` projekt |
 | nmh | `src/app/.../nmh` | `/nmh`, `/nmh/copilot-blueprint` | interné / demo |
 | proficrafts | `src/components/proficrafts/` | `/proficrafts` | microsite v Next |
-| prusafinance | `public/prusafinance/` | `prusafinance.com` (rewrite na `/prusafinance/*`), záložne `aifreelancer.sk/prusafinance/*` | statický HTML v `public`, host bypass v `middleware.ts`, routing v `vercel.json` |
+| prusafinance | `public/prusafinance/`, `src/app/api/prusafinance/lead` | `prusafinance.com` (rewrite na `/prusafinance/*`, `/dekujeme`), záložne `aifreelancer.sk/prusafinance/*` | statický HTML + lead API → Ecomail list `ECOMAIL_LIST_ID` |
 
 ---
 

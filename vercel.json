@@ -16,6 +16,11 @@
   ],
   "rewrites": [
     {
+      "source": "/dekujeme",
+      "has": [{ "type": "host", "value": "prusafinance.com" }],
+      "destination": "/prusafinance/dekujeme.html"
+    },
+    {
       "source": "/prusafinance/:path*",
       "has": [{ "type": "host", "value": "prusafinance.com" }],
       "destination": "/prusafinance/:path*"

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Děkujeme — PrůšaFinance</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --y:#FFDD00;--yd:#C9951A;--yp:#FFFBE5;
+  --bl:#0C0C0C;--gr:#6B6B6B;--gu:#F7F7F5;--gl:#E8E8E8;--w:#fff;
+  --serif:'DM Serif Display',Georgia,serif;
+  --sans:'DM Sans',sans-serif;
+  --max:640px;--pad:24px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--gu);-webkit-font-smoothing:antialiased;color:var(--bl);min-height:100vh;display:flex;flex-direction:column}
+a{text-decoration:none;color:inherit}
+.wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:48px var(--pad)}
+.card{max-width:var(--max);width:100%;background:var(--w);border-radius:20px;padding:40px 32px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.06);border:1px solid var(--gl)}
+.icon{font-size:48px;margin-bottom:16px}
+h1{font-family:var(--serif);font-size:clamp(28px,4vw,36px);line-height:1.15;margin-bottom:12px;letter-spacing:-.5px}
+.lead{font-size:16px;color:var(--gr);line-height:1.7;margin-bottom:28px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 28px;background:var(--y);color:var(--bl);font-size:14px;font-weight:700;border-radius:100px;transition:all .15s;margin:6px}
+.btn:hover{background:var(--yd);color:#fff}
+.btn-ghost{background:var(--bl);color:var(--w)}
+.btn-ghost:hover{background:#222;color:#fff}
+.actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+footer{padding:20px var(--pad);text-align:center;font-size:12px;color:#aaa}
+footer a{color:var(--yd);margin:0 8px}
+#pdf-block{display:none;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="icon" aria-hidden="true">✅</div>
+    <h1>Děkujeme, zpráva je odeslána</h1>
+    <p class="lead" id="lead-msg">Ozveme se vám co nejdříve, obvykle do 24 hodin.</p>
+    <div id="pdf-block">
+      <p class="lead" style="margin-bottom:16px">Váš průvodce je připraven ke stažení.</p>
+      <a class="btn btn-ghost" id="pdf-link" href="financni-gramotnost-prusa.pdf" download>Stáhnout průvodce (PDF) →</a>
+    </div>
+    <div class="actions" style="margin-top:24px">
+      <a class="btn" href="index.html">Na hlavní web →</a>
+    </div>
+  </div>
+</div>
+<footer>
+  <a href="gdpr.html">GDPR</a>
+  <a href="obchodni-podminky.html">Obchodní podmínky</a>
+  <span>© 2025 Mgr. Martin Průša</span>
+</footer>
+<script>
+(function () {
+  var params = new URLSearchParams(window.location.search);
+  var form = params.get("form") || "unknown";
+  var placement = params.get("placement") || "";
+  var pdf = params.get("pdf") === "1";
+
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({
+    event: "pf_lead_success",
+    form_id: form,
+    form_placement: placement,
+    page_location: window.location.href,
+  });
+
+  if (pdf) {
+    document.getElementById("pdf-block").style.display = "block";
+    var msg = document.getElementById("lead-msg");
+    if (msg) msg.textContent = "Děkujeme. Průvodce si můžete stáhnout níže.";
+  }
+
+  if (form === "formular:stahnout-pruvodce" && !pdf) {
+    document.getElementById("pdf-block").style.display = "block";
+  }
+})();
+</script>
+</body>
+</html>
