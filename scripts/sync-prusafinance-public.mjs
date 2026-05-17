@@ -173,8 +173,8 @@ if (!fs.existsSync(pfContactSrc)) {
   process.exit(1);
 }
 fs.copyFileSync(pfContactSrc, path.join(outDir, "pf-contact.js"));
-const legacyLeadJs = path.join(outDir, "pf-lead.js");
-if (fs.existsSync(legacyLeadJs)) fs.unlinkSync(legacyLeadJs);
+// Legacy filename for CDN/browser cache still requesting pf-lead.js
+fs.copyFileSync(pfContactSrc, path.join(outDir, "pf-lead.js"));
 
 fs.writeFileSync(path.join(outDir, "financni-gramotnost-prusa.pdf"), MINIMAL_PDF, "utf8");
 

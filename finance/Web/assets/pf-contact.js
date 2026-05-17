@@ -71,7 +71,12 @@
     }
 
     var form = resolveForm(event);
-    if (!form || !form.getAttribute("data-pf-form")) return false;
+    if (
+      !form ||
+      (!form.getAttribute("data-pf-form") && !form.getAttribute("data-pf-lead"))
+    ) {
+      return false;
+    }
     if (form.getAttribute("data-pf-sending") === "1") return false;
 
     if (typeof form.reportValidity === "function" && !form.reportValidity()) {
@@ -116,7 +121,7 @@
   window.pfFormSubmit = handleSubmit;
 
   function bindForms() {
-    var forms = document.querySelectorAll("form[data-pf-form]");
+    var forms = document.querySelectorAll("form[data-pf-form], form[data-pf-lead]");
     for (var i = 0; i < forms.length; i++) {
       var form = forms[i];
       if (form.getAttribute("data-pf-bound") === "1") continue;
@@ -132,14 +137,14 @@
 
   var style = document.createElement("style");
   style.textContent =
-    "form[data-pf-form] [type=submit]{pointer-events:auto!important;cursor:pointer!important}" +
-    "form[data-pf-form] [type=submit]:disabled{opacity:.75;cursor:wait!important}";
+    "form[data-pf-form] [type=submit],form[data-pf-lead] [type=submit]{pointer-events:auto!important;cursor:pointer!important}" +
+    "form[data-pf-form] [type=submit]:disabled,form[data-pf-lead] [type=submit]:disabled{opacity:.75;cursor:wait!important}";
   document.head.appendChild(style);
 
   bindForms();
   document.addEventListener("DOMContentLoaded", bindForms);
   window.addEventListener("pageshow", function () {
-    document.querySelectorAll("form[data-pf-form]").forEach(function (form) {
+    document.querySelectorAll("form[data-pf-form], form[data-pf-lead]").forEach(function (form) {
       setLoading(form, false);
     });
   });

@@ -1,5 +1,19 @@
 {
   "ignoreCommand": "bash scripts/vercel-should-build-main.sh",
+  "headers": [
+    {
+      "source": "/prusafinance/(.*)\\.html",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/prusafinance/pf-contact.js",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/prusafinance/pf-lead.js",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    }
+  ],
   "redirects": [
     {
       "source": "/",
