@@ -16,6 +16,16 @@
   ],
   "redirects": [
     {
+      "source": "/dekujeme.html",
+      "destination": "/prusafinance/dekujeme.html",
+      "permanent": false
+    },
+    {
+      "source": "/dekujeme",
+      "destination": "/prusafinance/dekujeme.html",
+      "permanent": false
+    },
+    {
       "source": "/",
       "has": [{ "type": "host", "value": "www.prusafinance.com" }],
       "destination": "https://prusafinance.com/",

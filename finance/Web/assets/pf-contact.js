@@ -1,9 +1,20 @@
 (function () {
   var API = "/api/prusafinance/contact";
 
-  function pfBasePath() {
+  function isPrusafinanceHost() {
+    var host = (window.location.hostname || "").toLowerCase();
+    return host === "prusafinance.com" || host === "www.prusafinance.com";
+  }
+
+  function isPrusafinancePath() {
     var p = window.location.pathname || "";
-    return p.indexOf("/prusafinance/") === 0 ? "/prusafinance" : "";
+    return p === "/prusafinance" || p.indexOf("/prusafinance/") === 0;
+  }
+
+  function thankYouPath() {
+    if (isPrusafinanceHost()) return "/dekujeme";
+    if (isPrusafinancePath()) return "/prusafinance/dekujeme.html";
+    return "/prusafinance/dekujeme.html";
   }
 
   function resolveForm(event) {
@@ -36,13 +47,12 @@
   }
 
   function thankYouUrl(form) {
-    var base = pfBasePath();
     var tag = form.getAttribute("data-pf-tag") || "";
     var q = "form=" + encodeURIComponent(tag);
     if (form.getAttribute("data-pf-pdf") === "1") q += "&pdf=1";
     var placement = form.getAttribute("data-pf-placement");
     if (placement) q += "&placement=" + encodeURIComponent(placement);
-    return base + "/dekujeme.html?" + q;
+    return thankYouPath() + "?" + q;
   }
 
   function setLoading(form, on) {
