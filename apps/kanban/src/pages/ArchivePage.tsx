@@ -2,7 +2,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
-import { deleteArchivedTask } from "@/domain/archiveService";
+import {
+  deleteArchivedTask,
+  KANBAN_ARCHIVES_CHANGED,
+} from "@/domain/archiveService";
 import { getTaskCardLabel } from "@/lib/formatters";
 import { useProjects } from "@/hooks/useProjects";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -37,6 +40,12 @@ export function ArchivePage() {
   const [archives, setArchives] = useState<ArchivesByProject>(() =>
     taskRepository.loadArchives(),
   );
+
+  useEffect(() => {
+    const reload = () => setArchives(taskRepository.loadArchives());
+    window.addEventListener(KANBAN_ARCHIVES_CHANGED, reload);
+    return () => window.removeEventListener(KANBAN_ARCHIVES_CHANGED, reload);
+  }, []);
 
   const handleDeleteArchived = useCallback(
     (taskId: string, label: string) => {

@@ -9,7 +9,10 @@ import {
 } from "react";
 import { DEFAULT_PROJECT_ID } from "@/config/defaultProjects";
 import { useProjects } from "@/hooks/useProjects";
-import { bootstrapActiveTasksWithDoneFlush } from "@/domain/doneArchiveSchedule";
+import {
+  archiveTaskToArchives,
+  notifyArchivesChanged,
+} from "@/domain/archiveService";
 import { runIndexToBacklogMigration, normalizeTasksOnLoad } from "@/domain/migrateIndexToBacklog";
 import {
   addTaskTrackedMinutes,
@@ -43,6 +46,7 @@ interface KanbanContextValue {
   promoteToReady: (taskId: string, targetProjectId: string) => void;
   updateTaskStatus: (taskId: string, status: TaskStatus) => void;
   deleteTask: (taskId: string) => void;
+  archiveTask: (taskId: string) => void;
   detailTaskId: string | null;
   openTaskDetail: (taskId: string) => void;
   closeTaskDetail: () => void;
@@ -73,15 +77,7 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
 
   const [tasks, setTasks] = useState<Task[]>(() => {
     runIndexToBacklogMigration();
-    const rawActive = normalizeTasksOnLoad(taskRepository.loadActiveTasks());
-    const archives = taskRepository.loadArchives();
-    const { active, archives: nextArchives, didFlush } =
-      bootstrapActiveTasksWithDoneFlush(rawActive, archives);
-    if (didFlush) {
-      taskRepository.saveActiveTasks(active);
-      taskRepository.saveArchives(nextArchives);
-    }
-    return active;
+    return normalizeTasksOnLoad(taskRepository.loadActiveTasks());
   });
   const [projectFilter, setProjectFilter] = useState<ProjectFilter>("all");
   const [detailTaskId, setDetailTaskId] = useState<string | null>(null);
@@ -140,6 +136,19 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
     },
     [],
   );
+
+  const archiveTask = useCallback((taskId: string) => {
+    setTasks((prev) => {
+      const task = prev.find((t) => t.id === taskId);
+      if (!task || task.status !== "Done") return prev;
+      const archives = taskRepository.loadArchives();
+      const nextArchives = archiveTaskToArchives(task, archives);
+      taskRepository.saveArchives(nextArchives);
+      notifyArchivesChanged();
+      return deleteTaskFromList(prev, taskId);
+    });
+    setDetailTaskId((id) => (id === taskId ? null : id));
+  }, []);
 
   const promoteToReady = useCallback(
     (taskId: string, targetProjectId: string) => {
@@ -237,6 +246,7 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
       promoteToReady,
       updateTaskStatus,
       deleteTask,
+      archiveTask,
       detailTaskId,
       openTaskDetail,
       closeTaskDetail,
@@ -260,6 +270,7 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
       promoteToReady,
       updateTaskStatus,
       deleteTask,
+      archiveTask,
       detailTaskId,
       openTaskDetail,
       closeTaskDetail,

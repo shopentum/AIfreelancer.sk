@@ -1,4 +1,33 @@
-import type { ArchivesByProject } from "@/types/task";
+import { mergeRunningSegmentIntoTotal } from "@/domain/taskService";
+import type {
+  ArchivedTask,
+  ArchivesByProject,
+  Task,
+} from "@/types/task";
+
+export const KANBAN_ARCHIVES_CHANGED = "kanban-archives-changed";
+
+export function notifyArchivesChanged(): void {
+  window.dispatchEvent(new CustomEvent(KANBAN_ARCHIVES_CHANGED));
+}
+
+/** Move one task from the board into per-project archive storage. */
+export function archiveTaskToArchives(
+  task: Task,
+  archives: ArchivesByProject,
+): ArchivesByProject {
+  const finalized = task.isTimerRunning
+    ? { ...task, ...mergeRunningSegmentIntoTotal(task) }
+    : task;
+  const entry: ArchivedTask = {
+    ...finalized,
+    archivedAt: new Date().toISOString(),
+  };
+  const next: ArchivesByProject = { ...archives };
+  const prev = next[task.project] ?? [];
+  next[task.project] = [...prev, entry];
+  return next;
+}
 
 /** Remove one archived task by id (searches all project buckets). */
 export function deleteArchivedTask(

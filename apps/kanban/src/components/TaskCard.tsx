@@ -1,6 +1,6 @@
 import type { MouseEvent } from "react";
 import { Draggable } from "@hello-pangea/dnd";
-import { Clock, Pause, Play, Square } from "lucide-react";
+import { Clock, Pause, Play, Square, X } from "lucide-react";
 import { getColumnTheme } from "@/config/columnStyle";
 import { getProjectBadgeClass } from "@/config/projectStyle";
 import { useProjects } from "@/hooks/useProjects";
@@ -33,7 +33,9 @@ function stopPropagation(e: MouseEvent) {
 export function TaskCard({ task, index, columnStatus }: TaskCardProps) {
   const { isDark } = useTheme();
   const columnTheme = getColumnTheme(columnStatus, isDark);
-  const { openTaskDetail, startTimer, pauseTimer, stopTimer } = useKanban();
+  const { openTaskDetail, startTimer, pauseTimer, stopTimer, archiveTask } =
+    useKanban();
+  const isDone = columnStatus === "Done";
   const { getLabel } = useProjects();
 
   const seconds = useLiveTrackedSeconds(task);
@@ -68,13 +70,43 @@ export function TaskCard({ task, index, columnStatus }: TaskCardProps) {
               ),
           )}
         >
-          <div
-            className={cn(
-              "absolute top-4 right-4 h-2 w-2 rounded-full",
-              columnTheme.dotClass,
-            )}
-            aria-hidden
-          />
+          {isDone ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                stopPropagation(e);
+                const label = getTaskCardLabel(task);
+                if (
+                  !window.confirm(
+                    `Archivovať „${label}"? Úloha zmizne z dosky a presunie sa do archívu.`,
+                  )
+                ) {
+                  return;
+                }
+                archiveTask(task.id);
+              }}
+              className={cn(
+                "absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-lg border opacity-80 transition-all hover:opacity-100 active:scale-95",
+                t(
+                  isDark,
+                  "border-slate-200 bg-slate-50 text-slate-500 hover:border-red-200 hover:bg-red-50 hover:text-red-600",
+                  "border-slate-700 bg-slate-800 text-slate-400 hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-400",
+                ),
+              )}
+              title="Archivovať"
+              aria-label="Archivovať úlohu"
+            >
+              <X size={14} strokeWidth={2.5} />
+            </button>
+          ) : (
+            <div
+              className={cn(
+                "absolute top-4 right-4 h-2 w-2 rounded-full",
+                columnTheme.dotClass,
+              )}
+              aria-hidden
+            />
+          )}
 
           <div className="space-y-2.5">
             <div className="flex flex-wrap items-center gap-1.5 pr-6">
@@ -153,59 +185,60 @@ export function TaskCard({ task, index, columnStatus }: TaskCardProps) {
                 >
                   {timeLabel}
                 </span>
-                {task.isTimerRunning ? (
-                  <>
+                {!isDone &&
+                  (task.isTimerRunning ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => pauseTimer(task.id)}
+                        className={cn(
+                          "flex h-8 w-8 items-center justify-center rounded-lg transition-all",
+                          t(
+                            isDark,
+                            "bg-amber-100 text-amber-600 hover:bg-amber-200",
+                            "bg-amber-600/20 text-amber-500 hover:bg-amber-600/30",
+                          ),
+                        )}
+                        title="Pause"
+                        aria-label="Pause"
+                      >
+                        <Pause size={14} fill="currentColor" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => stopTimer(task.id)}
+                        className={cn(
+                          "flex h-8 w-8 items-center justify-center rounded-lg transition-all",
+                          t(
+                            isDark,
+                            "bg-slate-100 text-slate-500 hover:bg-slate-200",
+                            "bg-slate-800 text-slate-400 hover:bg-slate-700",
+                          ),
+                        )}
+                        title="Stop"
+                        aria-label="Stop"
+                      >
+                        <Square size={14} fill="currentColor" />
+                      </button>
+                    </>
+                  ) : (
                     <button
                       type="button"
-                      onClick={() => pauseTimer(task.id)}
+                      onClick={() => startTimer(task.id)}
                       className={cn(
                         "flex h-8 w-8 items-center justify-center rounded-lg transition-all",
                         t(
                           isDark,
-                          "bg-amber-100 text-amber-600 hover:bg-amber-200",
-                          "bg-amber-600/20 text-amber-500 hover:bg-amber-600/30",
+                          "bg-slate-100 text-slate-600 hover:bg-slate-200",
+                          "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200",
                         ),
                       )}
-                      title="Pause"
-                      aria-label="Pause"
+                      title="Start"
+                      aria-label="Start"
                     >
-                      <Pause size={14} fill="currentColor" />
+                      <Play size={14} fill="currentColor" />
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => stopTimer(task.id)}
-                      className={cn(
-                        "flex h-8 w-8 items-center justify-center rounded-lg transition-all",
-                        t(
-                          isDark,
-                          "bg-slate-100 text-slate-500 hover:bg-slate-200",
-                          "bg-slate-800 text-slate-400 hover:bg-slate-700",
-                        ),
-                      )}
-                      title="Stop"
-                      aria-label="Stop"
-                    >
-                      <Square size={14} fill="currentColor" />
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => startTimer(task.id)}
-                    className={cn(
-                      "flex h-8 w-8 items-center justify-center rounded-lg transition-all",
-                      t(
-                        isDark,
-                        "bg-slate-100 text-slate-600 hover:bg-slate-200",
-                        "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200",
-                      ),
-                    )}
-                    title="Start"
-                    aria-label="Start"
-                  >
-                    <Play size={14} fill="currentColor" />
-                  </button>
-                )}
+                  ))}
               </div>
             </div>
           </div>

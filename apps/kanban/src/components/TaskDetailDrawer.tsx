@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ChevronDown, Clock, Trash2, X } from "lucide-react";
+import { Archive, ChevronDown, Clock, Trash2, X } from "lucide-react";
 import { TaskDetailAiSummary } from "@/components/TaskDetailAiSummary";
 import { CopyTaskContextButton } from "@/components/CopyTaskContextButton";
 import { TaskManualTimeAdd } from "@/components/TaskManualTimeAdd";
@@ -79,6 +79,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
     stopTimer,
     addTaskTrackedMinutes,
     deleteTask,
+    archiveTask,
   } = useKanban();
 
   const [notesDraft, setNotesDraft] = useState(() => task.notes);
@@ -150,6 +151,19 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
     if (!line) return "";
     return line.length > 56 ? `${line.slice(0, 56)}…` : line;
   }, [task.aiSummary]);
+
+  function handleArchive() {
+    const label = task.title.trim() || "úlohu";
+    if (
+      !window.confirm(
+        `Archivovať „${label}"? Úloha zmizne z dosky a presunie sa do archívu.`,
+      )
+    ) {
+      return;
+    }
+    archiveTask(task.id);
+    onClose();
+  }
 
   function handleDelete() {
     if (
@@ -608,21 +622,40 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
             t(isDark, "border-slate-100 bg-slate-50/50", "border-slate-800 bg-slate-950/40"),
           )}
         >
-          <button
-            type="button"
-            onClick={handleDelete}
-            className={cn(
-              "flex items-center gap-2 rounded-xl px-6 py-3 text-xs font-black uppercase tracking-widest transition-colors",
-              t(
-                isDark,
-                "text-red-500 hover:bg-red-50 hover:text-red-600",
-                "text-red-400/80 hover:bg-red-400/10 hover:text-red-400",
-              ),
+          <div className="flex flex-wrap items-center gap-2">
+            {task.status === "Done" && (
+              <button
+                type="button"
+                onClick={handleArchive}
+                className={cn(
+                  "flex items-center gap-2 rounded-xl px-6 py-3 text-xs font-black uppercase tracking-widest transition-colors",
+                  t(
+                    isDark,
+                    "text-slate-600 hover:bg-slate-100",
+                    "text-slate-300 hover:bg-slate-800",
+                  ),
+                )}
+              >
+                <Archive size={14} />
+                <span>Archivovať</span>
+              </button>
             )}
-          >
-            <Trash2 size={14} />
-            <span>Zmazať úlohu</span>
-          </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              className={cn(
+                "flex items-center gap-2 rounded-xl px-6 py-3 text-xs font-black uppercase tracking-widest transition-colors",
+                t(
+                  isDark,
+                  "text-red-500 hover:bg-red-50 hover:text-red-600",
+                  "text-red-400/80 hover:bg-red-400/10 hover:text-red-400",
+                ),
+              )}
+            >
+              <Trash2 size={14} />
+              <span>Zmazať úlohu</span>
+            </button>
+          </div>
           <span
             className={cn(
               "text-[9px] font-black uppercase tracking-widest",

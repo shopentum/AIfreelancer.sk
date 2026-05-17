@@ -1,10 +1,7 @@
-import { mergeRunningSegmentIntoTotal } from "@/domain/taskService";
-import type { ArchivedTask, ArchivesByProject, Task } from "@/types/task";
+import { archiveTaskToArchives } from "@/domain/archiveService";
+import type { ArchivesByProject, Task } from "@/types/task";
 
-/**
- * Presun úloh so statusom Done z aktívneho poľa do archívu (per project).
- * Volá sa z {@link bootstrapActiveTasksWithDoneFlush} pri prvom načítaní po polnoci.
- */
+/** Bulk archive (e.g. migration); normal flow uses per-task HITL on Done cards. */
 export function flushDoneToArchive(
   activeTasks: Task[],
   archives: ArchivesByProject,
@@ -14,19 +11,9 @@ export function flushDoneToArchive(
     return { active: activeTasks, archives };
   }
 
-  const archivedAt = new Date().toISOString();
-  const nextArchives: ArchivesByProject = { ...archives };
-
+  let nextArchives = archives;
   for (const t of doneTasks) {
-    const finalized = t.isTimerRunning
-      ? { ...t, ...mergeRunningSegmentIntoTotal(t) }
-      : t;
-    const entry: ArchivedTask = {
-      ...finalized,
-      archivedAt,
-    };
-    const prev = nextArchives[t.project] ?? [];
-    nextArchives[t.project] = [...prev, entry];
+    nextArchives = archiveTaskToArchives(t, nextArchives);
   }
 
   const active = activeTasks.filter((t) => t.status !== "Done");
