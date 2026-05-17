@@ -5,10 +5,10 @@
   }
 
   function resolveForm(event) {
-    if (event.currentTarget && event.currentTarget.tagName === "FORM") {
+    if (event && event.currentTarget && event.currentTarget.tagName === "FORM") {
       return event.currentTarget;
     }
-    var t = event.target;
+    var t = event && event.target;
     if (t && t.tagName === "FORM") return t;
     if (t && t.form) return t.form;
     if (t && t.closest) return t.closest("form");
@@ -51,22 +51,36 @@
         btn.setAttribute("data-pf-label", btn.textContent || "");
       }
       btn.disabled = true;
+      btn.setAttribute("aria-busy", "true");
       btn.textContent = "Odesílám…";
     } else {
       btn.disabled = false;
+      btn.removeAttribute("aria-busy");
       var prev = btn.getAttribute("data-pf-label");
       if (prev) btn.textContent = prev;
+      form.removeAttribute("data-pf-sending");
     }
   }
 
-  window.pfLeadSubmit = function (event) {
-    event.preventDefault();
+  function handleSubmit(event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
     var form = resolveForm(event);
     if (!form || !form.getAttribute("data-pf-lead")) return false;
+
+    if (form.getAttribute("data-pf-sending") === "1") return false;
+
+    if (typeof form.reportValidity === "function" && !form.reportValidity()) {
+      return false;
+    }
 
     var payload = readForm(form);
     if (!payload.tag) return false;
 
+    form.setAttribute("data-pf-sending", "1");
     setLoading(form, true);
 
     fetch("/api/prusafinance/lead", {
@@ -96,7 +110,9 @@
       });
 
     return false;
-  };
+  }
+
+  window.pfLeadSubmit = handleSubmit;
 
   function bindForms() {
     var forms = document.querySelectorAll("form[data-pf-lead]");
@@ -104,15 +120,27 @@
       var form = forms[i];
       if (form.getAttribute("data-pf-bound") === "1") continue;
       form.setAttribute("data-pf-bound", "1");
-      form.addEventListener("submit", function (e) {
-        window.pfLeadSubmit(e);
-      });
+      form.addEventListener("submit", handleSubmit);
+
+      var btn = form.querySelector('[type="submit"]');
+      if (btn) {
+        btn.style.pointerEvents = "auto";
+        btn.style.cursor = "pointer";
+      }
     }
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", bindForms);
-  } else {
-    bindForms();
-  }
+  var style = document.createElement("style");
+  style.textContent =
+    "form[data-pf-lead] [type=submit]{pointer-events:auto!important;cursor:pointer!important}" +
+    "form[data-pf-lead] [type=submit]:disabled{opacity:.75;cursor:wait!important}";
+  document.head.appendChild(style);
+
+  bindForms();
+  document.addEventListener("DOMContentLoaded", bindForms);
+  window.addEventListener("pageshow", function () {
+    document.querySelectorAll("form[data-pf-lead]").forEach(function (form) {
+      setLoading(form, false);
+    });
+  });
 })();

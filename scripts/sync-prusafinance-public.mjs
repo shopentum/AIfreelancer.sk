@@ -42,7 +42,7 @@ const FORM_TAGS = {
 };
 
 const PF_LEAD_SCRIPT =
-  '<script src="/prusafinance/pf-lead.js" defer></script>\n';
+  '<script src="/prusafinance/pf-lead.js"></script>\n';
 
 /** Tiny valid PDF placeholder — replace with real asset when the client provides it. */
 const MINIMAL_PDF = `%PDF-1.4
@@ -126,7 +126,7 @@ function applyLeadForms(html, destName) {
     const cleaned = attrs
       .replace(/\saction="[^"]*"/gi, "")
       .replace(/\sonsubmit="[^"]*"/gi, "");
-    return `<form${cleaned} action="#" data-pf-lead data-pf-tag="${tag}" data-pf-placement="${placement}"${pdfAttr} onsubmit="return pfLeadSubmit(event)">`;
+    return `<form${cleaned} action="#" method="post" data-pf-lead data-pf-tag="${tag}" data-pf-placement="${placement}"${pdfAttr}>`;
   });
 
   s = s.replace(
