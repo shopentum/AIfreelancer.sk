@@ -1,4 +1,4 @@
-import { Archive, Inbox, Layout, Moon, Settings, Sun } from "lucide-react";
+import { Archive, BarChart3, Inbox, Layout, Moon, Settings, Sun } from "lucide-react";
 import { KanbanExportPopover } from "@/components/KanbanExportPopover";
 import { NavLink, useLocation, useSearchParams } from "react-router-dom";
 import { getProjectIcon } from "@/config/projectStyle";
@@ -12,6 +12,7 @@ export function ProjectToolbar() {
   const { pathname } = useLocation();
   const isArchive = pathname.startsWith("/archive");
   const isBacklog = pathname.startsWith("/backlog");
+  const isOverview = pathname.startsWith("/overview");
   const [searchParams, setSearchParams] = useSearchParams();
   const { projectFilter, setProjectFilter } = useKanban();
   const { boardProjects, filterProjects, openSettings } = useProjects();
@@ -71,6 +72,15 @@ export function ProjectToolbar() {
             )}
           >
             Inbox — položky mimo boardu
+          </p>
+        ) : isOverview ? (
+          <p
+            className={cn(
+              "text-xs font-bold uppercase tracking-widest",
+              t(isDark, "text-slate-600", "text-slate-400"),
+            )}
+          >
+            Prehľad času podľa projektov a stavov
           </p>
         ) : (
           <div
@@ -139,6 +149,10 @@ export function ProjectToolbar() {
             <NavLink to="/archive" className={navLinkClass}>
               <Archive size={12} aria-hidden />
               <span>Archív</span>
+            </NavLink>
+            <NavLink to="/overview" className={navLinkClass}>
+              <BarChart3 size={12} aria-hidden />
+              <span>Prehľad</span>
             </NavLink>
           </div>
 

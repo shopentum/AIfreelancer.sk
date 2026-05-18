@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { ArchivePage } from "@/pages/ArchivePage";
 import { BacklogPage } from "@/pages/BacklogPage";
 import { BoardPage } from "@/pages/BoardPage";
+import { OverviewPage } from "@/pages/OverviewPage";
 
 export function App() {
   return (
@@ -16,6 +17,7 @@ export function App() {
               <Route path="/" element={<BoardPage />} />
               <Route path="/backlog" element={<BacklogPage />} />
               <Route path="/archive" element={<ArchivePage />} />
+              <Route path="/overview" element={<OverviewPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </KanbanProvider>
