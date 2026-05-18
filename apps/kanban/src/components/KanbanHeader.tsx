@@ -52,7 +52,12 @@ export function KanbanHeader({
         ),
       )}
     >
-      <div className="mx-auto flex max-w-[1800px] flex-col items-center justify-center gap-3">
+      <div
+        className={cn(
+          "mx-auto flex w-full max-w-[1800px] flex-col gap-3",
+          showBrainDump ? "items-center justify-center" : "items-start",
+        )}
+      >
         {showBrainDump ? (
           <form
             onSubmit={submit}
@@ -150,7 +155,7 @@ export function KanbanHeader({
           title && (
             <h1
               className={cn(
-                "w-full text-left text-xl font-bold tracking-tight md:max-w-3xl",
+                "w-full text-left text-xl font-bold tracking-tight",
                 t(isDark, "text-slate-900", "text-white"),
               )}
             >
