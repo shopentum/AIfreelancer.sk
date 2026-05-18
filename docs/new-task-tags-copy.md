@@ -26,7 +26,7 @@ UX:
 • Reuse existujúceho admin copy-to-clipboard + toast (žiadny nový custom UI).
 • „Kopírovať tagy“ · tooltip: „Skopíruje tagy článku do schránky pre ďalšie použitie.“
 • Bez tagov: disabled · „Článok nemá žiadne tagy.“
-• Clipboard error: user-visible.
+• Clipboard error: zrozumiteľná chyba používateľovi (nie silent fail).
 
 Formát schránky:
 tag1, tag2, tag3 — bez #; pri serializácii vynechať prázdne/null; žiadne trailing separators (nie „tag1, , tag3,“).
