@@ -16,7 +16,7 @@ Article Detail + Editor — Kopírovať tagy (Echobox metadata)
 
 ```
 Use case:
-Social tím kopíruje existujúce tagy článku do Echoboxu ako metadata pre analytiku a grouping postov — nie ako public hashtagy ani social copy.
+Tím kopíruje existujúce tagy článku pre social do Echoboxu ako metadata pre analytiku a grouping postov — nie ako public hashtagy ani social copy.
 
 Kde:
 • Article Detail (/article/{id}) — pri tagoch (aj bez edit práv na článok).
@@ -29,10 +29,11 @@ UX:
 • Clipboard error: user-visible.
 
 Formát schránky:
-tag1, tag2, tag3 — všetky tagy z UI, tags.join(", "), bez #.
+tag1, tag2, tag3 — bez #; pri serializácii vynechať prázdne/null; žiadne trailing separators (nie „tag1, , tag3,“).
 
 Tech:
-Rovnaký tag zdroj ako zobrazenie na obrazovke. Žiadny nový BE/API. Copy nič nemení ani neukladá.
+Zdroj tagov = aktuálne renderovaný zoznam na danej obrazovke (Detail / Editor), vrátane neuložených zmien v editore — nie samostatný fetch „iného“ stavu.
+Žiadny nový BE/API. Copy nič nemení ani neukladá.
 
 Mimo scope:
 AI, Echobox integrácia/sync/automation, DAM, hashtag formáty, logovanie.
@@ -42,11 +43,12 @@ AI, Echobox integrácia/sync/automation, DAM, hashtag formáty, logovanie.
 
 ```
 1. Copy akcia pri tagoch na Article Detail aj v Article Editor (existujúci admin pattern).
-2. S tagmi: schránka „tag1, tag2, …“ (", ", bez #, poradie ako v UI) na oboch miestach.
-3. Toast po úspechu (existujúci admin pattern).
-4. Bez tagov: disabled + „Článok nemá žiadne tagy.“ na oboch miestach.
-5. Tagy v systéme sa po akcii nemenia; žiadny sync/ukladanie z tejto feature.
-6. Detail funguje pre používateľa bez edit práva; pri zlyhaní clipboardu je zrozumiteľná chyba.
+2. S tagmi: schránka „tag1, tag2, …“ (", ", bez #, poradie ako v UI; bez prázdnych položiek) na oboch miestach.
+3. Editor: po pridaní tagu bez uloženia článku copy obsahuje aj tento tag (renderovaný stav).
+4. Toast po úspechu (existujúci admin pattern).
+5. Bez tagov: disabled + „Článok nemá žiadne tagy.“ na oboch miestach.
+6. Tagy v systéme sa po akcii nemenia; žiadny sync/ukladanie z tejto feature.
+7. Detail funguje pre používateľa bez edit práva; pri zlyhaní clipboardu je zrozumiteľná chyba.
 ```
 
 ---
