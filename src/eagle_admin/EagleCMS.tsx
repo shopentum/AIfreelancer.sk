@@ -173,6 +173,36 @@ function slugifyForUrl(input: string): string {
     .slice(0, 120);
 }
 
+function stripSeoTitleSuggestion(raw: string): string {
+  return raw
+    .replace(/^(Skráťte titulok na:|Skráťte na:)\s*/i, "")
+    .replace(/^["']|["']$/g, "")
+    .trim();
+}
+
+function seoFieldCurrentValue(
+  key: SeoAuditKey,
+  fields: { title: string; seoTitle: string; urlTitle: string; perex: string },
+): string {
+  switch (key) {
+    case "title":
+      return fields.title;
+    case "seoTitle":
+      return fields.seoTitle;
+    case "url":
+      return fields.urlTitle;
+    case "perex":
+      return fields.perex;
+  }
+}
+
+function seoSuggestionPreviewValue(key: SeoAuditKey, raw: string): string {
+  const trimmed = raw.trim();
+  if (key === "title") return stripSeoTitleSuggestion(trimmed);
+  if (key === "url") return slugifyForUrl(trimmed);
+  return trimmed;
+}
+
 const RISK_ORDER: Record<Claim["risk"], number> = {
   high: 0,
   medium: 1,
@@ -930,11 +960,15 @@ const EagleCMS_Split: React.FC = () => {
     }
   }, [audit, getClaimAtPosition]);
 
-  const handleClaimClick = useCallback((claim: Claim) => {
+  const handleClaimClick = useCallback((
+    claim: Claim,
+    options?: { focusEditor?: boolean },
+  ) => {
     setSelectedClaimId(claim.id);
     if (!claimFirstSeenRef.current[claim.id]) {
       claimFirstSeenRef.current[claim.id] = Date.now();
     }
+    if (options?.focusEditor === false) return;
     const ta = editorRef.current;
     if (!ta) return;
     const index = content.indexOf(claim.text);
@@ -951,8 +985,12 @@ const EagleCMS_Split: React.FC = () => {
     setScrollTop(ta.scrollTop);
   }, [content]);
 
-  const handleResolvedCardClick = useCallback((r: ResolvedClaimRecord) => {
+  const handleResolvedCardClick = useCallback((
+    r: ResolvedClaimRecord,
+    options?: { focusEditor?: boolean },
+  ) => {
     setSelectedClaimId(r.claim.id);
+    if (options?.focusEditor === false) return;
     const ta = editorRef.current;
     if (!ta) return;
     const index = content.indexOf(r.afterText);
@@ -975,14 +1013,38 @@ const EagleCMS_Split: React.FC = () => {
   const scheduleScrollCopilotDetailIntoView = useCallback(() => {
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => {
-        copilotDetailAnchorRef.current?.scrollIntoView({
+        const anchor = copilotDetailAnchorRef.current;
+        if (!anchor) return;
+        const main = editorMainScrollRef.current;
+        if (main) {
+          const mainRect = main.getBoundingClientRect();
+          const anchorRect = anchor.getBoundingClientRect();
+          const top =
+            anchorRect.top - mainRect.top + main.scrollTop - 12;
+          main.scrollTo({
+            top: Math.max(0, top),
+            behavior: "smooth",
+          });
+          return;
+        }
+        anchor.scrollIntoView({
           behavior: "smooth",
-          block: "nearest",
+          block: "start",
           inline: "nearest",
         });
       });
     });
   }, []);
+
+  /** Po kliknutí v Odporúčané: otvor nález a roluj hlavný scroll na detail (nie na editor / záložky). */
+  const activateAssistantPriority = useCallback(
+    (run: () => void, opts?: { scrollToDetail?: boolean }) => {
+      run();
+      if (opts?.scrollToDetail === false) return;
+      window.setTimeout(() => scheduleScrollCopilotDetailIntoView(), 280);
+    },
+    [scheduleScrollCopilotDetailIntoView],
+  );
 
   const scheduleScrollEditorToAppliedPassage = useCallback(
     (rangeStart: number, rangeEnd: number, contentSnapshot: string) => {
@@ -1486,34 +1548,22 @@ const EagleCMS_Split: React.FC = () => {
       const raw = item.suggestion?.trim();
       if (!raw) return;
 
-      const stripTitle = (s: string) =>
-        s
-          .replace(/^(Skráťte titulok na:|Skráťte na:)\s*/i, "")
-          .replace(/^["']|["']$/g, "")
-          .trim();
+      const beforeVal = seoFieldCurrentValue(key, {
+        title,
+        seoTitle,
+        urlTitle,
+        perex,
+      });
 
-      const beforeVal =
-        key === "title"
-          ? title
-          : key === "seoTitle"
-            ? seoTitle
-            : key === "url"
-              ? urlTitle
-              : perex;
-
-      let afterVal = beforeVal;
+      let afterVal = seoSuggestionPreviewValue(key, raw);
       pushArticleSnapshot();
       if (key === "title") {
-        afterVal = stripTitle(raw);
         setTitle(afterVal);
       } else if (key === "seoTitle") {
-        afterVal = raw;
         setSeoTitle(afterVal);
       } else if (key === "url") {
-        afterVal = slugifyForUrl(raw);
         setUrlTitle(afterVal);
       } else if (key === "perex") {
-        afterVal = raw;
         setPerex(afterVal);
       }
 
@@ -1692,11 +1742,13 @@ const EagleCMS_Split: React.FC = () => {
           ? "Dôvera · vyriešené · ťuknite pre rekapituláciu zmeny v článku"
           : "Dôvera · otvorte nález a rozhodnite sa (AI návrh alebo vlastná úprava)",
         onActivate: () => {
-          setRightPanelMode("ai");
-          setActiveAuditTab("trust");
-          if (done && highTrust.resolved)
-            handleResolvedCardClick(highTrust.resolved);
-          else handleClaimClick(highTrust.claim);
+          activateAssistantPriority(() => {
+            setRightPanelMode("ai");
+            setActiveAuditTab("trust");
+            if (done && highTrust.resolved)
+              handleResolvedCardClick(highTrust.resolved, { focusEditor: false });
+            else handleClaimClick(highTrust.claim, { focusEditor: false });
+          });
         },
       });
     }
@@ -1719,7 +1771,9 @@ const EagleCMS_Split: React.FC = () => {
           : "Hotovo · ťuknite pre rekapituláciu v sprievodcovi",
       actionLabel: "Sprievodca",
       onActivate: () => {
-        openTagsLinksWizard();
+        activateAssistantPriority(() => openTagsLinksWizard(), {
+          scrollToDetail: false,
+        });
       },
     });
 
@@ -1739,11 +1793,13 @@ const EagleCMS_Split: React.FC = () => {
           ? "Dôvera · vyriešené · ťuknite pre rekapituláciu zmeny v článku"
           : "Dôvera · stredná závažnosť",
         onActivate: () => {
-          setRightPanelMode("ai");
-          setActiveAuditTab("trust");
-          if (done && mediumTrust.resolved)
-            handleResolvedCardClick(mediumTrust.resolved);
-          else handleClaimClick(mediumTrust.claim);
+          activateAssistantPriority(() => {
+            setRightPanelMode("ai");
+            setActiveAuditTab("trust");
+            if (done && mediumTrust.resolved)
+              handleResolvedCardClick(mediumTrust.resolved, { focusEditor: false });
+            else handleClaimClick(mediumTrust.claim, { focusEditor: false });
+          });
         },
       });
     }
@@ -1764,11 +1820,13 @@ const EagleCMS_Split: React.FC = () => {
           ? "Štýl · vyriešené · ťuknite pre rekapituláciu zmeny v článku"
           : "Štýl a čitateľnosť",
         onActivate: () => {
-          setRightPanelMode("ai");
-          setActiveAuditTab("linguistic");
-          if (done && lingFirst.resolved)
-            handleResolvedCardClick(lingFirst.resolved);
-          else handleClaimClick(lingFirst.claim);
+          activateAssistantPriority(() => {
+            setRightPanelMode("ai");
+            setActiveAuditTab("linguistic");
+            if (done && lingFirst.resolved)
+              handleResolvedCardClick(lingFirst.resolved, { focusEditor: false });
+            else handleClaimClick(lingFirst.claim, { focusEditor: false });
+          });
         },
       });
     }
@@ -1812,9 +1870,11 @@ const EagleCMS_Split: React.FC = () => {
           ? `SEO · ${SEO_FIELD_LABEL[sk]} · vyriešené · rekapitulácia`
           : `SEO · ${SEO_FIELD_LABEL[sk]}`,
         onActivate: () => {
-          setRightPanelMode("ai");
-          setActiveAuditTab("seo");
-          setSelectedClaimId(sk);
+          activateAssistantPriority(() => {
+            setRightPanelMode("ai");
+            setActiveAuditTab("seo");
+            setSelectedClaimId(sk);
+          });
         },
       });
     }
@@ -1827,14 +1887,17 @@ const EagleCMS_Split: React.FC = () => {
         subtitle:
           "SEO · odporúčanie pre čitateľnosť hlavného kľúčového slova v tele článku",
         onActivate: () => {
-          setRightPanelMode("ai");
-          setActiveAuditTab("seo");
-          setSelectedClaimId(null);
+          activateAssistantPriority(() => {
+            setRightPanelMode("ai");
+            setActiveAuditTab("seo");
+            setSelectedClaimId(null);
+          }, { scrollToDetail: false });
         },
       });
     }
     return out.slice(0, 5);
   }, [
+    activateAssistantPriority,
     audit,
     handleClaimClick,
     handleResolvedCardClick,
@@ -3806,6 +3869,16 @@ const EagleCMS_Split: React.FC = () => {
                                     hasSuggestion &&
                                     !seoApplied &&
                                     !ignoredSeoKeys.has(seoKey);
+                                  const seoBeforePreview = seoFieldCurrentValue(seoKey, {
+                                    title,
+                                    seoTitle,
+                                    urlTitle,
+                                    perex,
+                                  });
+                                  const seoAfterPreview = seoSuggestionPreviewValue(
+                                    seoKey,
+                                    seoItem.suggestion ?? "",
+                                  );
 
                                   return (
                                     <div className="space-y-6">
@@ -3819,14 +3892,27 @@ const EagleCMS_Split: React.FC = () => {
                                       </div>
 
                                       {hasSuggestion && !seoApplied ? (
-                                        <div className="space-y-2">
-                                          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                                            AI návrh (náhrada textu)
+                                        <div className="space-y-3 rounded-2xl border-2 border-purple-200/90 bg-gradient-to-b from-purple-50/80 to-white p-4 shadow-sm ring-1 ring-purple-100/70">
+                                          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-purple-800">
+                                            Navrhovaná úprava · {SEO_FIELD_LABEL[seoKey]}
                                           </p>
-                                          <div className="rounded-2xl border border-purple-200/90 bg-purple-50/70 p-4 shadow-sm ring-1 ring-purple-100/70">
-                                            <p className="text-sm font-medium leading-relaxed text-gray-900">
-                                              {seoItem.suggestion}
-                                            </p>
+                                          <div className="grid gap-3 sm:grid-cols-2">
+                                            <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                                              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                                                Aktuálne ({SEO_FIELD_LABEL[seoKey]})
+                                              </p>
+                                              <p className="text-sm leading-relaxed text-slate-800">
+                                                {seoBeforePreview || "—"}
+                                              </p>
+                                            </div>
+                                            <div className="rounded-xl border border-purple-300/80 bg-purple-50/80 p-3 shadow-sm">
+                                              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-purple-900">
+                                                Návrh
+                                              </p>
+                                              <p className="text-sm font-medium leading-relaxed text-slate-900">
+                                                {seoAfterPreview}
+                                              </p>
+                                            </div>
                                           </div>
                                         </div>
                                       ) : null}
