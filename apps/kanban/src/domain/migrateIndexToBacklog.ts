@@ -43,9 +43,18 @@ function migrateProjects(projects: Project[]): {
         label: "Backlog",
         active: true,
         createdAt: new Date().toISOString(),
+        archivedAt: null,
       },
       ...list,
     ];
+    changed = true;
+  }
+
+  const backlogIdx = list.findIndex((p) => p.id === BACKLOG_PROJECT_ID);
+  if (backlogIdx >= 0 && !list[backlogIdx].active) {
+    list = list.map((p, i) =>
+      i === backlogIdx ? { ...p, active: true, archivedAt: null } : p,
+    );
     changed = true;
   }
 
@@ -121,6 +130,14 @@ export function runIndexToBacklogMigration(): void {
       /* ignore */
     }
   }
+}
+
+/** Ensures backlog project exists and stays active (idempotent on each load). */
+export function normalizeProjectsOnLoad(projects: Project[]): {
+  projects: Project[];
+  changed: boolean;
+} {
+  return migrateProjects(projects);
 }
 
 export function normalizeTasksOnLoad(tasks: Task[]): Task[] {

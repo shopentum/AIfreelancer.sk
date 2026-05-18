@@ -17,7 +17,10 @@ import {
   renameProject,
   seedProjects,
 } from "@/domain/projectService";
-import { runIndexToBacklogMigration } from "@/domain/migrateIndexToBacklog";
+import {
+  normalizeProjectsOnLoad,
+  runIndexToBacklogMigration,
+} from "@/domain/migrateIndexToBacklog";
 import {
   loadProjectsFromStorage,
   saveProjectsToStorage,
@@ -59,10 +62,12 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
   const [projects, setProjects] = useState<Project[]>(() => {
     runIndexToBacklogMigration();
     const stored = loadProjectsFromStorage();
-    if (stored.length > 0) return stored;
-    const seeded = seedProjects();
-    saveProjectsToStorage(seeded);
-    return seeded;
+    const base = stored.length > 0 ? stored : seedProjects();
+    const { projects: normalized, changed } = normalizeProjectsOnLoad(base);
+    if (stored.length === 0 || changed) {
+      saveProjectsToStorage(normalized);
+    }
+    return normalized;
   });
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -96,7 +101,17 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     [projects],
   );
 
-  const selectableProjects = boardProjects;
+  /** Brain-dump dropdown: board projects + backlog inbox (not shown on board filter pills). */
+  const selectableProjects = useMemo(() => {
+    const backlog = projects.find(
+      (p) => p.id === BACKLOG_PROJECT_ID && p.active,
+    );
+    if (!backlog) return boardProjects;
+    if (boardProjects.some((p) => p.id === BACKLOG_PROJECT_ID)) {
+      return boardProjects;
+    }
+    return [...boardProjects, backlog];
+  }, [projects, boardProjects]);
 
   const projectsForTask = useCallback(
     (currentProjectId: string) => {

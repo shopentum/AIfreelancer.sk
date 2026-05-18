@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Archive, RotateCcw, X } from "lucide-react";
+import { BACKLOG_PROJECT_ID } from "@/config/defaultProjects";
 import { useKanban } from "@/hooks/useKanbanStore";
 import { useProjects } from "@/hooks/useProjects";
 import { t, useTheme } from "@/hooks/useTheme";
@@ -24,6 +25,10 @@ function ProjectRow({ project }: { project: import("@/types/project").Project })
   }
 
   function handleDeactivate() {
+    if (project.id === BACKLOG_PROJECT_ID) {
+      window.alert("Projekt Backlog nie je možné deaktivovať — slúži na inbox mimo boardu.");
+      return;
+    }
     if (
       !window.confirm(
         `Deaktivovať projekt „${project.label}"? Nebude v rýchlom zápise ani vo filtri boardu. Úlohy na doske ostávajú.`,
@@ -102,7 +107,7 @@ function ProjectRow({ project }: { project: import("@/types/project").Project })
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {project.active ? (
+          {project.active && project.id !== BACKLOG_PROJECT_ID ? (
             <button
               type="button"
               onClick={handleDeactivate}
