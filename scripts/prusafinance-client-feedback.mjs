@@ -16,7 +16,9 @@ const SOCIAL = {
   linkedin: "https://www.linkedin.com/in/martin-prusa-71b489136",
 };
 
-const IG_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="white" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.273 6.98c0 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 10-12.324 6.162 6.162 0 00-12.324zm0 10.162a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>`;
+const IG_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle class="pf-ig-dot" cx="17.5" cy="6.5" r="1.25"/></svg>`;
+const IG_ICON_CSS = `.foot-soc-icon.soc-ig svg,.fsi.soc-ig svg{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.foot-soc-icon.soc-ig svg .pf-ig-dot,.fsi.soc-ig svg .pf-ig-dot{fill:#fff;stroke:none}`;
 
 const MOBILE_CSS = `
 /* pf-client-mobile */
@@ -55,10 +57,15 @@ function applyGlobal(html) {
   s = s.replace(/href="https:\/\/facebook\.com"/g, `href="${SOCIAL.facebook}"`);
   s = s.replace(/href="https:\/\/linkedin\.com"/g, `href="${SOCIAL.linkedin}"`);
   s = s.replace(/href="https:\/\/instagram\.com"/g, `href="${SOCIAL.instagram}"`);
+  if (s.includes(".soc-ig{") && !s.includes("pf-ig-dot")) {
+    s = s.replace(/(\.soc-ig\{[^}]+\})/, `$1\n${IG_ICON_CSS}`);
+  }
   s = s.replace(
-    /(<(?:div|a)[^>]*class="[^"]*soc-ig[^"]*"[^>]*>)\s*<svg[\s\S]*?<\/svg>/g,
+    /(<motion.div class="foot-soc-icon soc-ig">)\s*<svg[\s\S]*?<\/svg>/g,
     `$1${IG_SVG}`,
   );
+  s = s.replace(/(<div class="foot-soc-icon soc-ig">)\s*<svg[\s\S]*?<\/svg>/g, `$1${IG_SVG}`);
+  s = s.replace(/(<div class="fsi soc-ig">)\s*<svg[\s\S]*?<\/svg>/g, `$1${IG_SVG}`);
   return s;
 }
 

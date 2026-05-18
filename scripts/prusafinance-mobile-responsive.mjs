@@ -52,9 +52,11 @@ body.mob-open{overflow:hidden}
   div[style*="grid-template-columns:1fr 400px"],
   div[style*="grid-template-columns:1fr 420px"]{grid-template-columns:1fr !important;gap:28px !important}
   div[style*="grid-template-columns:repeat(4,1fr);gap:0"]{grid-template-columns:repeat(2,1fr) !important}
-  div[style*="grid-template-columns:repeat(4,1fr)"][style*="gap:16px"]{grid-template-columns:1fr 1fr !important}
+  div[style*="grid-template-columns:repeat(4,1fr)"][style*="gap:16px"]{grid-template-columns:1fr !important}
   div[style*="grid-template-columns:repeat(3,1fr)"][style*="gap:0"]{grid-template-columns:1fr !important}
+  div[style*="grid-template-columns:repeat(3,1fr)"][style*="gap:16px"]{grid-template-columns:1fr !important}
   div[style*="grid-template-columns:repeat(3,1fr)"][style*="gap:20px"]{grid-template-columns:1fr !important}
+  .pain-grid,.myths,.products-grid,.sav-grid,.uver-inner,.steps{grid-template-columns:1fr !important}
   div[style*="grid-template-columns:360px 1fr"]{grid-template-columns:1fr !important;gap:32px !important}
   div[style*="grid-template-columns:1fr 1fr"][style*="gap:64px"]{grid-template-columns:1fr !important;gap:32px !important}
   div[style*="grid-template-columns:1fr 1fr"][style*="gap:20px"]{grid-template-columns:1fr !important}
@@ -104,6 +106,26 @@ function mobCtaButton(html) {
   return `<a class="mob-cta" href="index.html#kontakt" onclick="closeMob()" style="display:block;text-decoration:none">☕ Domluvit konzultaci →</a>`;
 }
 
+const MOB_GRID_GAP16_MARKER = 'repeat(3,1fr)"][style*="gap:16px"]';
+const MOB_GRID_EXTRA = `  div[style*="grid-template-columns:repeat(3,1fr)"][style*="gap:16px"]{grid-template-columns:1fr !important}
+  .pain-grid,.myths,.products-grid,.sav-grid,.uver-inner,.steps{grid-template-columns:1fr !important}`;
+
+/** @param {string} html */
+function patchMobGridBlock(html) {
+  let s = html;
+  s = s.replace(
+    /div\[style\*="grid-template-columns:repeat\(4,1fr\)"\]\[style\*="gap:16px"\]\{grid-template-columns:1fr 1fr !important\}/g,
+    'div[style*="grid-template-columns:repeat(4,1fr)"][style*="gap:16px"]{grid-template-columns:1fr !important}',
+  );
+  if (s.includes("/* pf-mob-grid */") && !s.includes(MOB_GRID_GAP16_MARKER)) {
+    s = s.replace(
+      /(\/\* pf-mob-grid \*\/\s*@media\(max-width:900px\)\{[\s\S]*?)(  \.comp\{)/,
+      `$1${MOB_GRID_EXTRA}\n$2`,
+    );
+  }
+  return s;
+}
+
 /** @param {string} html */
 export function applyPrusafinanceMobile(html) {
   let s = html;
@@ -111,6 +133,7 @@ export function applyPrusafinanceMobile(html) {
   if (!s.includes(MOB_MARKER)) {
     s = s.replace("</style>", `${MOB_CSS}\n</style>`);
   }
+  s = patchMobGridBlock(s);
 
   // Dedupe accidental double-injection of nav toggle rules
   s = s.replace(
