@@ -6,7 +6,17 @@ import { CopyTaskContextButton } from "@/components/CopyTaskContextButton";
 import { TaskManualTimeAdd } from "@/components/TaskManualTimeAdd";
 import { KANBAN_COLUMNS } from "@/config/columns";
 import { getProjectBadgeClass } from "@/config/projectStyle";
-import { useKanban } from "@/hooks/useKanbanStore";
+import { useKanban, type DetailScope } from "@/hooks/useKanbanStore";
+import { findArchivedTask } from "@/domain/archiveService";
+import {
+  updateTaskAiSummary,
+  updateTaskNotes,
+  updateTaskPlannedDate,
+  updateTaskProject,
+  updateTaskSummary,
+  updateTaskTitle,
+} from "@/domain/taskService";
+import { taskRepository } from "@/repositories";
 import { useProjects } from "@/hooks/useProjects";
 import { useLiveTrackedSeconds } from "@/hooks/useLiveTrackedSeconds";
 import { t, useTheme } from "@/hooks/useTheme";
@@ -59,10 +69,13 @@ function activityLabel(entry: ActivityEntry): string {
 
 interface DrawerBodyProps {
   task: Task;
+  mode: DetailScope;
+  archivedAt?: string;
   onClose: () => void;
 }
 
-function DrawerBody({ task, onClose }: DrawerBodyProps) {
+function DrawerBody({ task, mode, archivedAt, onClose }: DrawerBodyProps) {
+  const isArchive = mode === "archive";
   const { isDark } = useTheme();
   const { getLabel, projectsForTask } = useProjects();
   const assignableProjects = projectsForTask(task.project);
@@ -80,6 +93,8 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
     addTaskTrackedMinutes,
     deleteTask,
     archiveTask,
+    patchArchivedTask,
+    deleteArchivedTask,
   } = useKanban();
 
   const [notesDraft, setNotesDraft] = useState(() => task.notes);
@@ -104,6 +119,61 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  useEffect(() => {
+    setNotesDraft(task.notes);
+    setAiSummaryDraft(task.aiSummary);
+  }, [task.id, task.notes, task.aiSummary, task.updatedAt]);
+
+  const applyTitle = (title: string) => {
+    if (isArchive) {
+      patchArchivedTask(task.id, (t) => updateTaskTitle(t, title));
+    } else {
+      setTaskTitle(task.id, title);
+    }
+  };
+
+  const applySummary = (summary: string) => {
+    if (isArchive) {
+      patchArchivedTask(task.id, (t) => updateTaskSummary(t, summary));
+    } else {
+      setTaskSummary(task.id, summary);
+    }
+  };
+
+  const applyProject = (projectId: string) => {
+    if (isArchive) {
+      patchArchivedTask(task.id, (t) =>
+        updateTaskProject(t, projectId, getLabel(t.project), getLabel(projectId)),
+      );
+    } else {
+      setTaskProject(task.id, projectId);
+    }
+  };
+
+  const applyNotes = (notes: string) => {
+    if (isArchive) {
+      patchArchivedTask(task.id, (t) => updateTaskNotes(t, notes));
+    } else {
+      setTaskNotes(task.id, notes);
+    }
+  };
+
+  const applyAiSummary = (aiSummary: string) => {
+    if (isArchive) {
+      patchArchivedTask(task.id, (t) => updateTaskAiSummary(t, aiSummary));
+    } else {
+      setTaskAiSummary(task.id, aiSummary);
+    }
+  };
+
+  const applyPlannedDate = (plannedDate: string | null) => {
+    if (isArchive) {
+      patchArchivedTask(task.id, (t) => updateTaskPlannedDate(t, plannedDate));
+    } else {
+      setTaskPlannedDate(task.id, plannedDate);
+    }
+  };
+
   const timerState = getTimerUiState(task);
   const displaySeconds = useLiveTrackedSeconds(task);
 
@@ -116,7 +186,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
     if (notesDebounceRef.current) clearTimeout(notesDebounceRef.current);
     notesDebounceRef.current = setTimeout(() => {
       notesDebounceRef.current = null;
-      setTaskNotes(task.id, value);
+      applyNotes(value);
     }, 500);
   }
 
@@ -125,14 +195,14 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
       clearTimeout(notesDebounceRef.current);
       notesDebounceRef.current = null;
     }
-    if (notesDraft !== task.notes) setTaskNotes(task.id, notesDraft);
+    if (notesDraft !== task.notes) applyNotes(notesDraft);
   }
 
   function scheduleAiSummarySave(value: string) {
     if (aiSummaryDebounceRef.current) clearTimeout(aiSummaryDebounceRef.current);
     aiSummaryDebounceRef.current = setTimeout(() => {
       aiSummaryDebounceRef.current = null;
-      setTaskAiSummary(task.id, value);
+      applyAiSummary(value);
     }, 500);
   }
 
@@ -142,7 +212,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
       aiSummaryDebounceRef.current = null;
     }
     if (aiSummaryDraft !== task.aiSummary) {
-      setTaskAiSummary(task.id, aiSummaryDraft);
+      applyAiSummary(aiSummaryDraft);
     }
   }
 
@@ -166,14 +236,17 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
   }
 
   function handleDelete() {
-    if (
-      !window.confirm(
-        "Naozaj zmazať túto úlohu? Túto akciu nie je možné vrátiť.",
-      )
-    ) {
+    const message = isArchive
+      ? "Naozaj odstrániť túto úlohu z archívu natrvalo?"
+      : "Naozaj zmazať túto úlohu? Túto akciu nie je možné vrátiť.";
+    if (!window.confirm(message)) {
       return;
     }
-    deleteTask(task.id);
+    if (isArchive) {
+      deleteArchivedTask(task.id);
+    } else {
+      deleteTask(task.id);
+    }
     onClose();
   }
 
@@ -247,6 +320,16 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
             >
               Vytvorené {formatSkDate(task.createdAt)}
             </span>
+            {isArchive && archivedAt && (
+              <span
+                className={cn(
+                  "text-[10px] font-bold uppercase tracking-widest tabular-nums",
+                  t(isDark, "text-indigo-600", "text-indigo-400"),
+                )}
+              >
+                Archivované {formatSkDateTime(archivedAt)}
+              </span>
+            )}
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <CopyTaskContextButton task={task} />
@@ -279,7 +362,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
               <input
                 type="text"
                 value={task.title}
-                onChange={(e) => setTaskTitle(task.id, e.target.value)}
+                onChange={(e) => applyTitle(e.target.value)}
                 className={cn(
                   inputClass,
                   "text-xl font-bold tracking-tight md:text-2xl",
@@ -291,7 +374,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
               <input
                 type="text"
                 value={task.summary}
-                onChange={(e) => setTaskSummary(task.id, e.target.value)}
+                onChange={(e) => applySummary(e.target.value)}
                 placeholder="Posledný vyriešený bod, krátko…"
                 className={inputClass}
               />
@@ -305,16 +388,13 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
                 type="date"
                 value={task.plannedDate ?? ""}
                 onChange={(e) =>
-                  setTaskPlannedDate(
-                    task.id,
-                    e.target.value ? e.target.value : null,
-                  )
+                  applyPlannedDate(e.target.value ? e.target.value : null)
                 }
                 className={cn(inputClass, "w-auto max-w-full")}
               />
               <button
                 type="button"
-                onClick={() => setTaskPlannedDate(task.id, getTodayKey())}
+                onClick={() => applyPlannedDate(getTodayKey())}
                 className={cn(
                   "rounded-xl border px-3 py-2 text-[10px] font-bold uppercase tracking-widest transition-colors",
                   t(
@@ -328,7 +408,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
               </button>
               <button
                 type="button"
-                onClick={() => setTaskPlannedDate(task.id, getTomorrowKey())}
+                onClick={() => applyPlannedDate(getTomorrowKey())}
                 className={cn(
                   "rounded-xl border px-3 py-2 text-[10px] font-bold uppercase tracking-widest transition-colors",
                   t(
@@ -343,7 +423,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
               {task.plannedDate && (
                 <button
                   type="button"
-                  onClick={() => setTaskPlannedDate(task.id, null)}
+                  onClick={() => applyPlannedDate(null)}
                   className={cn(
                     "rounded-xl border px-3 py-2 text-[10px] font-bold uppercase tracking-widest transition-colors",
                     t(
@@ -364,7 +444,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
               <p className={labelClass}>Projekt</p>
               <select
                 value={task.project}
-                onChange={(e) => setTaskProject(task.id, e.target.value)}
+                onChange={(e) => applyProject(e.target.value)}
                 className={selectClass}
               >
                 {assignableProjects.map((p) => (
@@ -382,7 +462,8 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
                 onChange={(e) =>
                   updateTaskStatus(task.id, e.target.value as TaskStatus)
                 }
-                className={selectClass}
+                disabled={isArchive}
+                className={cn(selectClass, isArchive && "cursor-not-allowed opacity-70")}
               >
                 {KANBAN_COLUMNS.map((col) => (
                   <option key={col.status} value={col.status}>
@@ -467,7 +548,8 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
                     )}
                   </span>
                 </p>
-                <div className="flex flex-wrap gap-2">
+                {!isArchive && (
+                  <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() => startTimer(task.id)}
@@ -506,11 +588,14 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
                 >
                   Stop
                 </button>
-                </div>
+                  </div>
+                )}
               </div>
-              <TaskManualTimeAdd
-                onAdjust={(minutes) => addTaskTrackedMinutes(task.id, minutes)}
-              />
+              {!isArchive && (
+                <TaskManualTimeAdd
+                  onAdjust={(minutes) => addTaskTrackedMinutes(task.id, minutes)}
+                />
+              )}
             </div>
           </div>
 
@@ -623,7 +708,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
           )}
         >
           <div className="flex flex-wrap items-center gap-2">
-            {task.status === "Done" && (
+            {task.status === "Done" && !isArchive && (
               <button
                 type="button"
                 onClick={handleArchive}
@@ -653,7 +738,7 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
               )}
             >
               <Trash2 size={14} />
-              <span>Zmazať úlohu</span>
+              <span>{isArchive ? "Odstrániť z archívu" : "Zmazať úlohu"}</span>
             </button>
           </div>
           <span
@@ -671,17 +756,43 @@ function DrawerBody({ task, onClose }: DrawerBodyProps) {
 }
 
 export function TaskDetailDrawer() {
-  const { tasks, detailTaskId, closeTaskDetail } = useKanban();
+  const {
+    tasks,
+    detailTaskId,
+    detailScope,
+    archivesRevision,
+    closeTaskDetail,
+  } = useKanban();
 
-  const task = useMemo(
-    () => tasks.find((t) => t.id === detailTaskId) ?? null,
-    [tasks, detailTaskId],
+  const activeTask = useMemo(
+    () =>
+      detailScope === "active" && detailTaskId
+        ? (tasks.find((t) => t.id === detailTaskId) ?? null)
+        : null,
+    [tasks, detailTaskId, detailScope],
   );
+
+  const archivedTask = useMemo(() => {
+    if (detailScope !== "archive" || !detailTaskId) return null;
+    return findArchivedTask(taskRepository.loadArchives(), detailTaskId);
+  }, [detailScope, detailTaskId, archivesRevision]);
+
+  const task = detailScope === "archive" ? archivedTask : activeTask;
 
   return (
     <AnimatePresence>
       {task && detailTaskId ? (
-        <DrawerBody key={task.id} task={task} onClose={closeTaskDetail} />
+        <DrawerBody
+          key={task.id}
+          task={task}
+          mode={detailScope}
+          archivedAt={
+            detailScope === "archive" && archivedTask
+              ? archivedTask.archivedAt
+              : undefined
+          }
+          onClose={closeTaskDetail}
+        />
       ) : null}
     </AnimatePresence>
   );

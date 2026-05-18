@@ -29,6 +29,34 @@ export function archiveTaskToArchives(
   return next;
 }
 
+export function findArchivedTask(
+  archives: ArchivesByProject,
+  taskId: string,
+): ArchivedTask | null {
+  for (const items of Object.values(archives)) {
+    const hit = items.find((t) => t.id === taskId);
+    if (hit) return hit;
+  }
+  return null;
+}
+
+/** Update one archived task (moves bucket when project changes). */
+export function updateArchivedTask(
+  archives: ArchivesByProject,
+  taskId: string,
+  updater: (task: ArchivedTask) => ArchivedTask,
+): ArchivesByProject | null {
+  const current = findArchivedTask(archives, taskId);
+  if (!current) return null;
+  const updated = updater(current);
+  const without = deleteArchivedTask(archives, taskId);
+  const bucket = updated.project;
+  return {
+    ...without,
+    [bucket]: [...(without[bucket] ?? []), updated],
+  };
+}
+
 /** Remove one archived task by id (searches all project buckets). */
 export function deleteArchivedTask(
   archives: ArchivesByProject,

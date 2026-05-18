@@ -2,10 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
-import {
-  deleteArchivedTask,
-  KANBAN_ARCHIVES_CHANGED,
-} from "@/domain/archiveService";
+import { KANBAN_ARCHIVES_CHANGED } from "@/domain/archiveService";
+import { useKanban } from "@/hooks/useKanbanStore";
 import { getTaskCardLabel } from "@/lib/formatters";
 import { useProjects } from "@/hooks/useProjects";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -35,6 +33,8 @@ export function ArchivePage() {
   usePageTitle("Archív");
   const { isDark } = useTheme();
   const { getLabel } = useProjects();
+  const { openArchivedTaskDetail, deleteArchivedTask: deleteArchivedFromStore } =
+    useKanban();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [archives, setArchives] = useState<ArchivesByProject>(() =>
@@ -56,13 +56,10 @@ export function ArchivePage() {
       ) {
         return;
       }
-      setArchives((prev) => {
-        const next = deleteArchivedTask(prev, taskId);
-        taskRepository.saveArchives(next);
-        return next;
-      });
+      deleteArchivedFromStore(taskId);
+      setArchives(taskRepository.loadArchives());
     },
-    [],
+    [deleteArchivedFromStore],
   );
   const projectFilter = (searchParams.get("project") ||
     "all") as ProjectArchiveFilter;
@@ -291,8 +288,9 @@ export function ArchivePage() {
               filtered.map((item) => (
                 <tr
                   key={item.id}
+                  onClick={() => openArchivedTaskDetail(item.id)}
                   className={cn(
-                    "border-b last:border-0",
+                    "cursor-pointer border-b last:border-0",
                     t(
                       isDark,
                       "border-slate-100 hover:bg-slate-50",
@@ -343,12 +341,13 @@ export function ArchivePage() {
                   <td className="px-2 py-3 text-right">
                     <button
                       type="button"
-                      onClick={() =>
+                      onClick={(e) => {
+                        e.stopPropagation();
                         handleDeleteArchived(
                           item.id,
                           getTaskCardLabel(item),
-                        )
-                      }
+                        );
+                      }}
                       className={cn(
                         "inline-flex h-9 w-9 items-center justify-center rounded-xl border transition-colors",
                         t(

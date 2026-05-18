@@ -11,7 +11,10 @@ import { DEFAULT_PROJECT_ID } from "@/config/defaultProjects";
 import { useProjects } from "@/hooks/useProjects";
 import {
   archiveTaskToArchives,
+  deleteArchivedTask as removeArchivedTask,
+  KANBAN_ARCHIVES_CHANGED,
   notifyArchivesChanged,
+  updateArchivedTask,
 } from "@/domain/archiveService";
 import { runIndexToBacklogMigration, normalizeTasksOnLoad } from "@/domain/migrateIndexToBacklog";
 import {
@@ -32,9 +35,10 @@ import {
 } from "@/domain/taskService";
 import { filterBacklogTasks, filterBoardTasks } from "@/lib/backlogProject";
 import { taskRepository } from "@/repositories";
-import type { Task, TaskStatus } from "@/types/task";
+import type { ArchivedTask, Task, TaskStatus } from "@/types/task";
 
 export type ProjectFilter = "all" | string;
+export type DetailScope = "active" | "archive";
 
 interface KanbanContextValue {
   tasks: Task[];
@@ -48,8 +52,16 @@ interface KanbanContextValue {
   deleteTask: (taskId: string) => void;
   archiveTask: (taskId: string) => void;
   detailTaskId: string | null;
+  detailScope: DetailScope;
+  archivesRevision: number;
   openTaskDetail: (taskId: string) => void;
+  openArchivedTaskDetail: (taskId: string) => void;
   closeTaskDetail: () => void;
+  patchArchivedTask: (
+    taskId: string,
+    updater: (task: ArchivedTask) => ArchivedTask,
+  ) => void;
+  deleteArchivedTask: (taskId: string) => void;
   setTaskTitle: (taskId: string, title: string) => void;
   setTaskSummary: (taskId: string, summary: string) => void;
   setTaskProject: (taskId: string, projectId: string) => void;
@@ -81,7 +93,15 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
   });
   const [projectFilter, setProjectFilter] = useState<ProjectFilter>("all");
   const [detailTaskId, setDetailTaskId] = useState<string | null>(null);
+  const [detailScope, setDetailScope] = useState<DetailScope>("active");
+  const [archivesRevision, setArchivesRevision] = useState(0);
   const [, setTimerTick] = useState(0);
+
+  useEffect(() => {
+    const bump = () => setArchivesRevision((n) => n + 1);
+    window.addEventListener(KANBAN_ARCHIVES_CHANGED, bump);
+    return () => window.removeEventListener(KANBAN_ARCHIVES_CHANGED, bump);
+  }, []);
 
   const hasRunningTimer = useMemo(
     () => tasks.some((t) => t.isTimerRunning),
@@ -167,11 +187,39 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
   );
 
   const openTaskDetail = useCallback((taskId: string) => {
+    setDetailScope("active");
+    setDetailTaskId(taskId);
+  }, []);
+
+  const openArchivedTaskDetail = useCallback((taskId: string) => {
+    setDetailScope("archive");
     setDetailTaskId(taskId);
   }, []);
 
   const closeTaskDetail = useCallback(() => {
     setDetailTaskId(null);
+    setDetailScope("active");
+  }, []);
+
+  const patchArchivedTask = useCallback(
+    (taskId: string, updater: (task: ArchivedTask) => ArchivedTask) => {
+      const archives = taskRepository.loadArchives();
+      const next = updateArchivedTask(archives, taskId, updater);
+      if (!next) return;
+      taskRepository.saveArchives(next);
+      notifyArchivesChanged();
+      setArchivesRevision((n) => n + 1);
+    },
+    [],
+  );
+
+  const deleteArchivedTaskHandler = useCallback((taskId: string) => {
+    const archives = taskRepository.loadArchives();
+    const next = removeArchivedTask(archives, taskId);
+    taskRepository.saveArchives(next);
+    notifyArchivesChanged();
+    setArchivesRevision((n) => n + 1);
+    setDetailTaskId((id) => (id === taskId ? null : id));
   }, []);
 
   const setTaskTitle = useCallback((taskId: string, title: string) => {
@@ -248,8 +296,13 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
       deleteTask,
       archiveTask,
       detailTaskId,
+      detailScope,
+      archivesRevision,
       openTaskDetail,
+      openArchivedTaskDetail,
       closeTaskDetail,
+      patchArchivedTask,
+      deleteArchivedTask: deleteArchivedTaskHandler,
       setTaskTitle,
       setTaskSummary,
       setTaskProject,
@@ -272,8 +325,13 @@ export function KanbanProvider({ children }: { children: ReactNode }) {
       deleteTask,
       archiveTask,
       detailTaskId,
+      detailScope,
+      archivesRevision,
       openTaskDetail,
+      openArchivedTaskDetail,
       closeTaskDetail,
+      patchArchivedTask,
+      deleteArchivedTaskHandler,
       setTaskTitle,
       setTaskSummary,
       setTaskProject,
