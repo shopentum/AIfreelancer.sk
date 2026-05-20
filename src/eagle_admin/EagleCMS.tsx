@@ -62,6 +62,7 @@ import {
   CheckCircle2,
   RefreshCw,
   PlusCircle,
+  Compass,
   ShieldAlert,
   MousePointer2,
   Edit3,
@@ -483,7 +484,9 @@ const EagleCMS_Split: React.FC = () => {
   const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null);
   const selectedClaimIdRef = useRef<string | null>(selectedClaimId);
   selectedClaimIdRef.current = selectedClaimId;
-  const [activeAuditTab, setActiveAuditTab] = useState<'trust' | 'linguistic' | 'seo'>('trust');
+  const [activeAuditTab, setActiveAuditTab] = useState<"seo" | "discover">(
+    "seo",
+  );
   const [auditError, setAuditError] = useState<string | null>(null);
   const [rightPanelMode, setRightPanelMode] = useState<'settings' | 'ai'>('settings');
   const [seoChangeLog, setSeoChangeLog] = useState<SeoChangeEntry[]>([]);
@@ -953,7 +956,7 @@ const EagleCMS_Split: React.FC = () => {
       (c) => c.id === claim.id,
     );
     setRightPanelMode("ai");
-    setActiveAuditTab(isLinguistic ? "linguistic" : "trust");
+    setActiveAuditTab("discover");
     setSelectedClaimId(claim.id);
     if (!claimFirstSeenRef.current[claim.id]) {
       claimFirstSeenRef.current[claim.id] = Date.now();
@@ -1730,24 +1733,42 @@ const EagleCMS_Split: React.FC = () => {
     const out: AssistantPriorityItem[] = [];
 
     const trustMerged = mergeTrustStripRows(audit.claims, resolvedClaims);
-    const highTrust = trustMerged.find((r) => r.claim.risk === "high");
-    if (highTrust && out.length < 5) {
-      const done = Boolean(highTrust.resolved);
+    const lingMerged = mergeLinguisticStripRows(
+      audit.linguisticClaims ?? [],
+      resolvedClaims,
+    );
+    const discoverTop = [...trustMerged, ...lingMerged].sort((a, b) =>
+      sortClaimsByRisk(a.claim, b.claim),
+    )[0];
+    if (discoverTop && out.length < 5) {
+      const done = Boolean(discoverTop.resolved);
+      const isLinguistic =
+        discoverTop.resolved?.tab === "linguistic" ||
+        (audit.linguisticClaims ?? []).some(
+          (c) => c.id === discoverTop.claim.id,
+        );
       out.push({
-        rowKey: `trust-high-${highTrust.claim.id}`,
-        kind: done ? "info" : "block",
+        rowKey: `discover-${discoverTop.claim.id}`,
+        kind: done ? "info" : discoverTop.claim.risk === "high" ? "block" : "warn",
         done,
-        title: highTrust.claim.reason,
+        title: discoverTop.claim.reason,
         subtitle: done
-          ? "Dôvera · vyriešené · ťuknite pre rekapituláciu zmeny v článku"
-          : "Dôvera · otvorte nález a rozhodnite sa (AI návrh alebo vlastná úprava)",
+          ? "Discover · lightweight trust/style · vyriešené"
+          : isLinguistic
+            ? "Discover · štýl / čitateľnosť · high-confidence"
+            : "Discover · dôvera / formulácia · high-confidence",
         onActivate: () => {
           activateAssistantPriority(() => {
             setRightPanelMode("ai");
-            setActiveAuditTab("trust");
-            if (done && highTrust.resolved)
-              handleResolvedCardClick(highTrust.resolved, { focusEditor: false });
-            else handleClaimClick(highTrust.claim, { focusEditor: false });
+            setActiveAuditTab("discover");
+            if (done && discoverTop.resolved)
+              handleResolvedCardClick(discoverTop.resolved, {
+                focusEditor: false,
+              });
+            else
+              handleClaimClick(discoverTop.claim, {
+                focusEditor: false,
+              });
           });
         },
       });
@@ -1776,60 +1797,6 @@ const EagleCMS_Split: React.FC = () => {
         });
       },
     });
-
-    const mediumTrust = trustMerged.find(
-      (r) =>
-        r.claim.risk === "medium" &&
-        r.claim.id !== highTrust?.claim.id,
-    );
-    if (mediumTrust && out.length < 5) {
-      const done = Boolean(mediumTrust.resolved);
-      out.push({
-        rowKey: `trust-med-${mediumTrust.claim.id}`,
-        kind: done ? "info" : "warn",
-        done,
-        title: mediumTrust.claim.reason,
-        subtitle: done
-          ? "Dôvera · vyriešené · ťuknite pre rekapituláciu zmeny v článku"
-          : "Dôvera · stredná závažnosť",
-        onActivate: () => {
-          activateAssistantPriority(() => {
-            setRightPanelMode("ai");
-            setActiveAuditTab("trust");
-            if (done && mediumTrust.resolved)
-              handleResolvedCardClick(mediumTrust.resolved, { focusEditor: false });
-            else handleClaimClick(mediumTrust.claim, { focusEditor: false });
-          });
-        },
-      });
-    }
-
-    const lingMerged = mergeLinguisticStripRows(
-      audit.linguisticClaims ?? [],
-      resolvedClaims,
-    );
-    const lingFirst = lingMerged[0];
-    if (lingFirst && out.length < 5) {
-      const done = Boolean(lingFirst.resolved);
-      out.push({
-        rowKey: `ling-${lingFirst.claim.id}`,
-        kind: done ? "info" : "warn",
-        done,
-        title: lingFirst.claim.reason,
-        subtitle: done
-          ? "Štýl · vyriešené · ťuknite pre rekapituláciu zmeny v článku"
-          : "Štýl a čitateľnosť",
-        onActivate: () => {
-          activateAssistantPriority(() => {
-            setRightPanelMode("ai");
-            setActiveAuditTab("linguistic");
-            if (done && lingFirst.resolved)
-              handleResolvedCardClick(lingFirst.resolved, { focusEditor: false });
-            else handleClaimClick(lingFirst.claim, { focusEditor: false });
-          });
-        },
-      });
-    }
 
     type SeoStripSlot = {
       key: SeoAuditKey;
@@ -3360,9 +3327,8 @@ const EagleCMS_Split: React.FC = () => {
                         aria-label="Kategórie kontroly"
                       >
                         {[
-                          { id: 'trust', label: 'Dôvera', icon: ShieldAlert, count: audit?.claims.length || 0 },
-                          { id: 'linguistic', label: 'Štýl', icon: MousePointer2, count: audit?.linguisticClaims?.length || 0 },
-                          { id: 'seo', label: 'SEO', icon: Globe, count: Object.values(audit?.seoAudit || {}).filter(v => (v as { status: string }).status !== 'pass').length }
+                          { id: "seo", label: "SEO", icon: Globe, count: Object.values(audit?.seoAudit || {}).filter(v => (v as { status: string }).status !== "pass").length },
+                          { id: "discover", label: "Discover", icon: Compass, count: (audit?.claims.length || 0) + (audit?.linguisticClaims?.length || 0) }
                         ].map((tab) => (
                           <button 
                             key={tab.id}
@@ -3370,9 +3336,7 @@ const EagleCMS_Split: React.FC = () => {
                             role="tab"
                             aria-selected={activeAuditTab === tab.id}
                             onClick={() => {
-                              setActiveAuditTab(
-                                tab.id as "trust" | "linguistic" | "seo",
-                              );
+                              setActiveAuditTab(tab.id as "seo" | "discover");
                               setSelectedClaimId(null);
                             }}
                             className={cn(
@@ -4049,8 +4013,16 @@ const EagleCMS_Split: React.FC = () => {
                               animate={{ opacity: 1 }}
                               className="space-y-4"
                             >
-                              {activeAuditTab === 'trust' && (
+                              {activeAuditTab === "discover" && (
                                 <div className="space-y-3">
+                                  <div className="mb-2 rounded-xl border border-emerald-200/80 bg-emerald-50/60 px-3 py-2">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-emerald-900">
+                                      Lightweight trust/style
+                                    </p>
+                                    <p className="mt-1 text-xs text-emerald-900/90">
+                                      Len high-confidence signály, ktoré majú priamy dopad na discover výkon článku.
+                                    </p>
+                                  </div>
                                   {[...(audit?.claims ?? [])]
                                     .sort(sortClaimsByRisk)
                                     .map((claim) => (
@@ -4124,11 +4096,7 @@ const EagleCMS_Split: React.FC = () => {
                                         </p>
                                       </div>
                                     ))}
-                                </div>
-                              )}
-                              {activeAuditTab === 'linguistic' && (
-                                <div className="space-y-3">
-                                  <div className="mb-4 rounded-xl border border-gray-200 bg-gray-50/80 p-4 shadow-sm">
+                                  <div className="mb-4 mt-4 rounded-xl border border-gray-200 bg-gray-50/80 p-4 shadow-sm">
                                     <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
                                       Celkový tón
                                     </p>
