@@ -26,6 +26,42 @@
       "has": [{ "type": "host", "value": "www.aifreelancer.sk" }],
       "destination": "/prusafinance/dekujeme.html",
       "permanent": false
+    },
+    {
+      "source": "/prusafinance/:path*",
+      "has": [{ "type": "host", "value": "prusafinance.com" }],
+      "destination": "/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/prusafinance/:path*",
+      "has": [{ "type": "host", "value": "www.prusafinance.com" }],
+      "destination": "/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/prusafinance",
+      "has": [{ "type": "host", "value": "prusafinance.com" }],
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/prusafinance",
+      "has": [{ "type": "host", "value": "www.prusafinance.com" }],
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/index.html",
+      "has": [{ "type": "host", "value": "prusafinance.com" }],
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/index.html",
+      "has": [{ "type": "host", "value": "www.prusafinance.com" }],
+      "destination": "/",
+      "permanent": true
     }
   ],
   "rewrites": [
@@ -48,6 +84,46 @@
       "source": "/dekujeme",
       "has": [{ "type": "host", "value": "www.prusafinance.com" }],
       "destination": "/prusafinance/dekujeme.html"
+    },
+    {
+      "source": "/:page.html",
+      "has": [{ "type": "host", "value": "prusafinance.com" }],
+      "destination": "/prusafinance/:page.html"
+    },
+    {
+      "source": "/:page.html",
+      "has": [{ "type": "host", "value": "www.prusafinance.com" }],
+      "destination": "/prusafinance/:page.html"
+    },
+    {
+      "source": "/pf-contact.js",
+      "has": [{ "type": "host", "value": "prusafinance.com" }],
+      "destination": "/prusafinance/pf-contact.js"
+    },
+    {
+      "source": "/pf-contact.js",
+      "has": [{ "type": "host", "value": "www.prusafinance.com" }],
+      "destination": "/prusafinance/pf-contact.js"
+    },
+    {
+      "source": "/assets/:path*",
+      "has": [{ "type": "host", "value": "prusafinance.com" }],
+      "destination": "/prusafinance/assets/:path*"
+    },
+    {
+      "source": "/assets/:path*",
+      "has": [{ "type": "host", "value": "www.prusafinance.com" }],
+      "destination": "/prusafinance/assets/:path*"
+    },
+    {
+      "source": "/financni-gramotnost.pdf",
+      "has": [{ "type": "host", "value": "prusafinance.com" }],
+      "destination": "/prusafinance/financni-gramotnost.pdf"
+    },
+    {
+      "source": "/financni-gramotnost.pdf",
+      "has": [{ "type": "host", "value": "www.prusafinance.com" }],
+      "destination": "/prusafinance/financni-gramotnost.pdf"
     }
   ]
 }

@@ -26,6 +26,12 @@ function handlePrusafinanceHost(request: NextRequest): NextResponse {
     return NextResponse.next();
   }
 
+  if (pathname.startsWith("/prusafinance")) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.replace(/^\/prusafinance/, "") || "/";
+    return NextResponse.redirect(url, 308);
+  }
+
   const target = prusafinanceStaticPath(pathname);
   if (target === null) {
     return NextResponse.next();
@@ -45,6 +51,10 @@ export default function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Skip next-intl for static HTML under /prusafinance (public/prusafinance/*) and asset paths with extensions
-  matcher: ["/((?!api|trpc|_next|_vercel|prusafinance|.*\\..*).*)"],
+  // Skip next-intl for static HTML under /prusafinance (public/prusafinance/*) and asset paths with extensions.
+  // Include /prusafinance/* so custom domain can 308-strip the folder from the visible URL.
+  matcher: [
+    "/((?!api|trpc|_next|_vercel|prusafinance|.*\\..*).*)",
+    "/prusafinance/:path*",
+  ],
 };

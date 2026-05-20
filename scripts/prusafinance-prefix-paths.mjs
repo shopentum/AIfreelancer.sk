@@ -1,50 +1,39 @@
 /**
- * Rewrites relative .html / .pdf links to /prusafinance/... so they work when the page
- * is served as .../prusafinance (no trailing slash). Browser relative resolution would
- * otherwise point to site root (/vlastni-domov.html).
+ * Ensures internal links stay relative (no /prusafinance/ prefix in href/src).
+ * Relative links work on both aifreelancer.sk/prusafinance/* and prusafinance.com/* (clean URLs).
  *
- * Idempotent: skips links that already start with /prusafinance/
+ * Idempotent: strips any leftover /prusafinance/ prefix from prior builds.
  * Run: node scripts/prusafinance-prefix-paths.mjs
  */
 
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import {fileURLToPath} from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, "..");
 const dir = path.join(root, "public", "prusafinance");
 
-/** @type {string} */
-const BASE = "/prusafinance";
-
 /**
  * @param {string} html
  * @returns {string}
  */
-export function applyPrusafinancePathPrefix(html) {
+export function applyPrusafinanceRelativePaths(html) {
   let s = html;
-  // Safety: avoid double prefix if script runs twice
   s = s.replace(/\/prusafinance\/prusafinance\//g, "/prusafinance/");
 
-  // href="file.html" / "file.html#frag" / .pdf (not http/mailto/tel/# only/already prefixed)
-  const hrefRe =
-    /href="(?!https?:\/\/|mailto:|tel:|\/prusafinance\/|#)([^"]+\.(?:html|pdf))(#[^"]*)?"/g;
-  s = s.replace(hrefRe, (_, file, frag) => `href="${BASE}/${file}${frag || ""}"`);
+  s = s.replace(/href="\/prusafinance\//g, 'href="');
+  s = s.replace(/href='\/prusafinance\//g, "href='");
+  s = s.replace(/src="\/prusafinance\//g, 'src="');
+  s = s.replace(/src='\/prusafinance\//g, "src='");
 
-  const hrefSqRe =
-    /href='(?!https?:\/\/|mailto:|tel:|\/prusafinance\/|#)([^']+\.(?:html|pdf))(#[^']*)?'/g;
-  s = s.replace(hrefSqRe, (_, file, frag) => `href='${BASE}/${file}${frag || ""}'`);
-
-  // onclick / window.location — single quotes
   s = s.replace(
-    /window\.location\.href='(?!\/prusafinance\/)([^']+\.html)(#[^']*)?'/g,
-    (_, file, frag) => `window.location.href='${BASE}/${file}${frag || ""}'`,
+    /window\.location\.href="\/prusafinance\//g,
+    'window.location.href="',
   );
-  // double quotes
   s = s.replace(
-    /window\.location\.href="(?!\/prusafinance\/)([^"]+\.html)(#[^"]*)?"/g,
-    (_, file, frag) => `window.location.href="${BASE}/${file}${frag || ""}"`,
+    /window\.location\.href='\/prusafinance\//g,
+    "window.location.href='",
   );
 
   return s;
@@ -52,7 +41,7 @@ export function applyPrusafinancePathPrefix(html) {
 
 function main() {
   if (!fs.existsSync(dir)) {
-    console.warn("[prusafinance-prefix] Missing directory:", path.relative(root, dir));
+    console.warn("[prusafinance-paths] Missing directory:", path.relative(root, dir));
     process.exit(0);
   }
   const files = fs.readdirSync(dir).filter((f) => f.endsWith(".html"));
@@ -60,14 +49,14 @@ function main() {
   for (const f of files) {
     const p = path.join(dir, f);
     const before = fs.readFileSync(p, "utf8");
-    const after = applyPrusafinancePathPrefix(before);
+    const after = applyPrusafinanceRelativePaths(before);
     if (after !== before) {
       fs.writeFileSync(p, after, "utf8");
       n++;
     }
   }
   console.log(
-    "[prusafinance-prefix] Processed",
+    "[prusafinance-paths] Processed",
     files.length,
     "HTML files, updated",
     n,

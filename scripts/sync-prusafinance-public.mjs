@@ -43,8 +43,7 @@ const FORM_TAGS = {
   "ppc-raiffeisen-ucet.html": "formular:ppc-raiffeisen-ucet",
 };
 
-const PF_FORM_SCRIPT =
-  '<script src="/prusafinance/pf-contact.js"></script>\n';
+const PF_FORM_SCRIPT = '<script src="pf-contact.js"></script>\n';
 
 /** Tiny valid PDF placeholder — replace with real asset when the client provides it. */
 const MINIMAL_PDF = `%PDF-1.4
