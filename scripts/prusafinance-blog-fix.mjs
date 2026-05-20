@@ -13,6 +13,17 @@ const blogPath = path.join(root, "finance", "Web", "Ostatni", "blog_2.html");
 const docsBlogPath = path.join(root, "docs", "prusa-finance-texty", "Ostatni", "blog_2.html");
 const indexPath = path.join(root, "finance", "Web", "prusafinance_9.html");
 
+/** Committed blog snapshot with carousel + Čím vám (docs/ is not in repo / Vercel) */
+const GIT_BLOG_CAROUSEL = "51378a0:finance/Web/Ostatni/blog_2.html";
+const GIT_BLOG_DALSI = "2ac2a96:finance/Web/Ostatni/blog_2.html";
+
+/** When carousel HTML unavailable, reuse Další články thumbnails */
+const CAROUSEL_FALLBACK_HREF = {
+  "penzijni-sporeni-generali.html": "hypoteka-2025.html",
+  "sen-bali.html": "clanek-sporeni.html",
+  "vlastni-bydleni-bez-uspor.html": "clanek-pojisteni.html",
+};
+
 const PHOTO_BADGE = `<div style="position:absolute;bottom:18px;left:16px;right:16px;background:rgba(255,255,255,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.35);border-radius:11px;padding:13px 16px;z-index:2">
           <div style="font-family:'DM Serif Display',Georgia,serif;font-size:16px;color:#0C0C0C;margin-bottom:3px">Mgr. Martin Průša</div>
           <div style="font-size:10.5px;color:#6B6B6B;font-weight:400">Komplexní poradce · <strong style="color:#C9951A;font-weight:500">Certifikace ČNB</strong></div>
@@ -101,65 +112,96 @@ function normalizeArticleCard(full, href) {
   return `      ${s}`;
 }
 
-/** @param {{href: string, full: string}[]} pool @param {string} href */
-function pickCard(pool, href) {
-  const c = pool.find((x) => x.href === href);
-  if (!c) throw new Error(`[prusafinance-blog-fix] Missing article card: ${href}`);
-  return c;
-}
-
-/** 6 article cards with original thumbnails (2×3) */
-function buildPraxeArticlesGrid() {
-  let legacyHtml = "";
+/** @param {string} ref git ref:path */
+function loadGitFile(ref) {
   try {
-    legacyHtml = execSync("git show 2ac2a96:finance/Web/Ostatni/blog_2.html", {
+    return execSync(`git show ${ref}`, {
       encoding: "utf8",
       maxBuffer: 50 * 1024 * 1024,
     });
   } catch {
-    legacyHtml = fs.existsSync(docsBlogPath)
-      ? fs.readFileSync(docsBlogPath, "utf8")
-      : "";
+    return "";
   }
+}
 
-  if (!legacyHtml && fs.existsSync(docsBlogPath)) {
-    legacyHtml = fs.readFileSync(docsBlogPath, "utf8");
+/** @param {string} html */
+function extractCarouselPool(html) {
+  const carStart = html.indexOf("STARŠÍ ČLÁNKY");
+  if (carStart < 0) return [];
+  let carEnd = html.indexOf("Další články", carStart);
+  if (carEnd < 0) carEnd = html.indexOf("<!-- KDO JSEM", carStart);
+  if (carEnd < 0) carEnd = html.indexOf("Čím vám mohu pomoci", carStart);
+  if (carEnd < 0) carEnd = html.length;
+  return extractArticleCards(html.slice(carStart, carEnd));
+}
+
+/** @param {string} html */
+function extractDalsiPool(html) {
+  const dalsiStart = html.indexOf("Další články");
+  const dalsiEnd = html.indexOf("Fotky z úvodní", dalsiStart);
+  if (dalsiStart < 0 || dalsiEnd <= dalsiStart) return [];
+  return extractArticleCards(html.slice(dalsiStart, dalsiEnd));
+}
+
+/**
+ * @param {{href: string, full: string}[]} dalsiPool
+ * @param {{href: string, full: string}[]} carouselPool
+ * @param {string} href
+ */
+function resolveCard(dalsiPool, carouselPool, href) {
+  let c = carouselPool.find((x) => x.href === href);
+  if (!c) c = dalsiPool.find((x) => x.href === href);
+  const fallbackHref = CAROUSEL_FALLBACK_HREF[href];
+  if (!c && fallbackHref) c = dalsiPool.find((x) => x.href === fallbackHref);
+  if (!c && dalsiPool.length) {
+    console.warn(
+      `[prusafinance-blog-fix] Card ${href} not in git/docs; reusing ${dalsiPool[0].href} thumbnail`,
+    );
+    c = dalsiPool[0];
   }
+  if (!c) {
+    throw new Error(
+      `[prusafinance-blog-fix] No article cards in git history (need ${GIT_BLOG_DALSI})`,
+    );
+  }
+  return c;
+}
 
-  const dalsiStart = legacyHtml.indexOf("Další články");
-  const dalsiEnd = legacyHtml.indexOf("Fotky z úvodní", dalsiStart);
-  const dalsiPool =
-    dalsiStart >= 0 && dalsiEnd > dalsiStart
-      ? extractArticleCards(legacyHtml.slice(dalsiStart, dalsiEnd))
-      : [];
+/** @param {string} html */
+function praxeSectionHasThumbnails(html) {
+  const start = html.indexOf("<!-- Z naší praxe — 6 článků -->");
+  if (start < 0) return false;
+  const end = html.indexOf("<!-- KDO JSEM", start);
+  const chunk = end > start ? html.slice(start, end) : html.slice(start, start + 400000);
+  return (chunk.match(/data:image/g) || []).length >= 6;
+}
 
-  let carouselPool = [];
-  if (fs.existsSync(docsBlogPath)) {
-    const docs = fs.readFileSync(docsBlogPath, "utf8");
-    const carStart = docs.indexOf("STARŠÍ ČLÁNKY");
-    if (carStart >= 0) {
-      let carEnd = docs.indexOf("Další články", carStart);
-      if (carEnd < 0) carEnd = docs.indexOf("<!-- KDO JSEM", carStart);
-      if (carEnd < 0) carEnd = docs.indexOf("Čím vám mohu pomoci", carStart);
-      if (carEnd < 0) carEnd = docs.length;
-      carouselPool = extractArticleCards(docs.slice(carStart, carEnd));
-    }
+/** 6 article cards with original thumbnails (2×3) */
+function buildPraxeArticlesGrid() {
+  let dalsiHtml = loadGitFile(GIT_BLOG_DALSI);
+  if (!dalsiHtml && fs.existsSync(docsBlogPath)) {
+    dalsiHtml = fs.readFileSync(docsBlogPath, "utf8");
+  }
+  const dalsiPool = extractDalsiPool(dalsiHtml);
+
+  let carouselPool = extractCarouselPool(loadGitFile(GIT_BLOG_CAROUSEL));
+  if (!carouselPool.length && fs.existsSync(docsBlogPath)) {
+    carouselPool = extractCarouselPool(fs.readFileSync(docsBlogPath, "utf8"));
   }
 
   const order = [
-    {source: "dalsi", href: "hypoteka-2025.html"},
-    {source: "dalsi", href: "clanek-pojisteni.html"},
-    {source: "dalsi", href: "clanek-sporeni.html"},
-    {source: "carousel", href: "penzijni-sporeni-generali.html", link: "hypoteka-2025.html"},
-    {source: "carousel", href: "sen-bali.html", link: "zivotni-sen.html"},
-    {source: "carousel", href: "vlastni-bydleni-bez-uspor.html", link: "vlastni-domov.html"},
+    {href: "hypoteka-2025.html", link: "hypoteka-2025.html"},
+    {href: "clanek-pojisteni.html", link: "clanek-pojisteni.html"},
+    {href: "clanek-sporeni.html", link: "clanek-sporeni.html"},
+    {href: "penzijni-sporeni-generali.html", link: "hypoteka-2025.html"},
+    {href: "sen-bali.html", link: "zivotni-sen.html"},
+    {href: "vlastni-bydleni-bez-uspor.html", link: "vlastni-domov.html"},
   ];
 
   const cells = order
     .map((item) => {
-      const pool = item.source === "dalsi" ? dalsiPool : carouselPool;
-      const card = pickCard(pool, item.href);
-      return normalizeArticleCard(card.full, item.link || item.href);
+      const card = resolveCard(dalsiPool, carouselPool, item.href);
+      return normalizeArticleCard(card.full, item.link);
     })
     .join("\n");
 
@@ -231,6 +273,10 @@ function insertCimSection(html, cimBlock) {
 
 /** @param {string} html */
 function replacePraxeSection(html, useArticles) {
+  if (useArticles && praxeSectionHasThumbnails(html)) {
+    return html;
+  }
+
   const galleryStart = html.indexOf("<!-- Fotky z úvodní stránky");
   const praxeStart = html.indexOf("<!-- Z naší praxe");
   const start = galleryStart >= 0 ? galleryStart : praxeStart;
@@ -267,8 +313,14 @@ function patchBlog(html) {
     s = s.replace("</style>", `${BLOG_MOBILE_CSS}\n</style>`);
   }
 
-  const docsHtml = fs.existsSync(docsBlogPath) ? fs.readFileSync(docsBlogPath, "utf8") : "";
-  const cimBlock = docsHtml ? extractCimSection(docsHtml) : null;
+  let cimBlock = null;
+  if (fs.existsSync(docsBlogPath)) {
+    cimBlock = extractCimSection(fs.readFileSync(docsBlogPath, "utf8"));
+  }
+  if (!cimBlock) {
+    const gitCim = loadGitFile(GIT_BLOG_CAROUSEL);
+    if (gitCim) cimBlock = extractCimSection(gitCim);
+  }
 
   s = fixKdoJsem(s);
   s = replacePraxeSection(s, true);
