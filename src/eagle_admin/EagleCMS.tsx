@@ -2236,7 +2236,7 @@ const EagleCMS_Split: React.FC = () => {
               </div>
               <div>
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">
-                  Editorial Copilot
+                  Asistent kvality článku
                 </p>
                 <p className="text-xs font-bold text-gray-700">Asistent kvality článku</p>
               </div>
@@ -2711,7 +2711,7 @@ const EagleCMS_Split: React.FC = () => {
                       : "text-gray-500 hover:bg-gray-50",
                   )}
                 >
-                  <Sparkles size={14} className="mr-1 shrink-0 sm:mr-2" /> Editorial Copilot
+                  <Sparkles size={14} className="mr-1 shrink-0 sm:mr-2" /> Asistent kvality článku
                   {audit && <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[8px] flex items-center justify-center text-white border-2 border-white">!</div>}
                 </button>
               </div>
@@ -3076,7 +3076,7 @@ const EagleCMS_Split: React.FC = () => {
                             </div>
                             <div className="min-w-0 pt-0.5">
                               <h3 className="text-sm font-bold leading-snug tracking-tight text-slate-900">
-                                Editorial Copilot
+                                Asistent kvality článku
                               </h3>
                               <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
                                 Pomáha pripraviť kvalitnejší a výkonnejší článok pred
