@@ -1796,22 +1796,6 @@ const EagleCMS_Split: React.FC = () => {
       });
     }
 
-    if (out.length < 5) {
-      out.push({
-        rowKey: "seo-keyword-bold-tip",
-        kind: "opportunity",
-        title: "Automaticky zvýrazniť kľúčové slová boldom",
-        subtitle:
-          "SEO · odporúčanie pre čitateľnosť hlavného kľúčového slova v tele článku",
-        onActivate: () => {
-          activateAssistantPriority(() => {
-            setRightPanelMode("ai");
-            setActiveAuditTab("seo");
-            setSelectedClaimId(null);
-          }, { scrollToDetail: false });
-        },
-      });
-    }
     return out.slice(0, 5);
   }, [
     activateAssistantPriority,
