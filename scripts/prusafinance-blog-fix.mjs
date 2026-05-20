@@ -49,6 +49,82 @@ function extractCimSection(html) {
   return html.slice(start, end).trim();
 }
 
+const HOME_STORY_IMG = {
+  "ochrana.html": "Zlomil jsem si nohu",
+  "zivotni-sen.html": "Tři banky nám hypotéku zamítly",
+};
+
+/** @param {string} html @param {string} titlePart */
+function extractHomeStoryImage(html, titlePart) {
+  const h3Idx = html.indexOf(titlePart);
+  if (h3Idx < 0) return null;
+  const before = html.slice(Math.max(0, h3Idx - 200000), h3Idx);
+  const imgs = [...before.matchAll(/<div class="story-img"><img src="(data:image[^"]+)"/g)];
+  if (imgs.length) return imgs[imgs.length - 1][1];
+  const after = html.slice(h3Idx, h3Idx + 50000);
+  const m = after.match(/<div class="story-img"><img src="(data:image[^"]+)"/);
+  return m ? m[1] : null;
+}
+
+/** @param {string} html @param {string} href @param {string} imgSrc */
+function setCimCardPhoto(html, href, imgSrc) {
+  const cimStart = html.indexOf("<!-- Čím mohu pomoci");
+  const cimLabel = html.indexOf("Čím vám mohu pomoci");
+  const sectionStart =
+    cimStart >= 0 ? cimStart : cimLabel >= 0 ? cimLabel : -1;
+  const sectionEnd = html.indexOf("<!-- CTA + REZERVACE", sectionStart);
+  if (sectionStart < 0 || sectionEnd < 0) return html;
+
+  const chunk = html.slice(sectionStart, sectionEnd);
+  const anchor = `<a href="${href}" style="border-radius`;
+  const relStart = chunk.indexOf(anchor);
+  if (relStart < 0) return html;
+
+  const heightIdx = chunk.indexOf("height:130px", relStart);
+  if (heightIdx < 0 || heightIdx > relStart + 8000) return html;
+  const divOpenStart = chunk.lastIndexOf("<div", heightIdx);
+  const openEnd = chunk.indexOf(">", heightIdx) + 1;
+  const closeDiv = chunk.indexOf("</div>", openEnd);
+  if (closeDiv < 0 || divOpenStart < 0) return html;
+
+  const photoDivOpen = `<div style="height:130px;overflow:hidden;position:relative">`;
+  const imgBlock = `<img src="${imgSrc}" alt="" style="width:100%;height:100%;object-fit:cover;display:block">`;
+  const patchedChunk = `${chunk.slice(0, divOpenStart)}${photoDivOpen}\n          ${imgBlock}\n        ${chunk.slice(closeDiv)}`;
+  return html.slice(0, sectionStart) + patchedChunk + html.slice(sectionEnd);
+}
+
+/** @param {string} html */
+function patchCimSection(html) {
+  let s = html;
+
+  s = s.replace(/Čim vám mohu pomoci/gi, "Čím vám mohu pomoci");
+  s = s.replace(
+    />Čim vám mohu pomoci</gi,
+    ">Čím vám mohu pomoci<",
+  );
+
+  if (!s.includes("Čím vám mohu pomoci") && !s.includes("<!-- Čím mohu pomoci")) {
+    return s;
+  }
+
+  const indexHtml = fs.readFileSync(indexPath, "utf8");
+  for (const [href, titlePart] of Object.entries(HOME_STORY_IMG)) {
+    const src = extractHomeStoryImage(indexHtml, titlePart);
+    if (!src) {
+      console.warn(`[prusafinance-blog-fix] Homepage story image not found: ${titlePart}`);
+      continue;
+    }
+    const next = setCimCardPhoto(s, href, src);
+    if (next === s) {
+      console.warn(`[prusafinance-blog-fix] Could not patch Čím vám card: ${href}`);
+    } else {
+      s = next;
+    }
+  }
+
+  return s;
+}
+
 /** @param {string} html @param {number} n */
 function extractStoryImgs(html, n = 6) {
   const out = [];
@@ -326,6 +402,7 @@ function patchBlog(html) {
   s = replacePraxeSection(s, true);
   s = removeDuplicateDalsiClanky(s);
   s = insertCimSection(s, cimBlock);
+  s = patchCimSection(s);
 
   return s;
 }
