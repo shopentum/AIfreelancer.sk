@@ -2,6 +2,7 @@
  * Blog page fixes: Kdo jsem layout + badge, Z naší praxe 6 articles (2×3), Čím vám mohu pomoci.
  * Run after sync copies blog_2.html → public/prusafinance/blog.html
  */
+import {execSync} from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
@@ -65,93 +66,109 @@ function buildPraxeGallery(imgs) {
 </section>`;
 }
 
-/** 6 article cards — 2 rows × 3 cols */
+const CARD_LINK_STYLE =
+  'style="text-decoration:none;color:inherit;display:flex;flex-direction:column;border-radius:14px;overflow:hidden;border:1px solid var(--gl);background:#fff;transition:all .25s" onmouseover="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'0 12px 32px rgba(0,0,0,.09)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'"';
+
+/** @param {string} chunk */
+function extractArticleCards(chunk) {
+  const cards = [];
+  const re =
+    /<a href="([^"]+\.html)"[^>]*style="[^"]*display:flex;flex-direction:column[^"]*"[^>]*>([\s\S]*?)<\/a>/g;
+  let m;
+  while ((m = re.exec(chunk))) {
+    if (
+      m[2].includes("data:image") ||
+      m[2].includes("height:130px") ||
+      m[2].includes("height:200px")
+    ) {
+      cards.push({href: m[1], full: m[0]});
+    }
+  }
+  return cards;
+}
+
+/** @param {string} full @param {string} href */
+function normalizeArticleCard(full, href) {
+  let s = full.replace(/href="[^"]+\.html"/, `href="${href}"`);
+  s = s.replace(
+    /style="text-decoration:none;color:inherit;display:flex;flex-direction:column;flex:1"/,
+    CARD_LINK_STYLE,
+  );
+  s = s.replace(
+    /style="text-decoration:none;color:inherit;display:flex;flex-direction:column;border-radius:14px[^"]*"(?:\s+onmouseover="[^"]*"\s+onmouseout="[^"]*")?/,
+    CARD_LINK_STYLE,
+  );
+  return `      ${s}`;
+}
+
+/** @param {{href: string, full: string}[]} pool @param {string} href */
+function pickCard(pool, href) {
+  const c = pool.find((x) => x.href === href);
+  if (!c) throw new Error(`[prusafinance-blog-fix] Missing article card: ${href}`);
+  return c;
+}
+
+/** 6 article cards with original thumbnails (2×3) */
 function buildPraxeArticlesGrid() {
-  const cards = [
-    {
-      href: "hypoteka-2025.html",
-      tag: "Hypotéky",
-      date: "15. dubna 2025",
-      read: "4 min",
-      title: "Hypotéka v roce 2025: 5 věcí, které většina lidí přehlédne",
-      excerpt:
-        "Sazba není všechno. Podmínky při výpadku příjmu, flexibilita mimořádných splátek nebo pojistná doložka — to rozhoduje ve chvíli, kdy to potřebujete.",
-      accent: "#EFF6FF",
-    },
-    {
-      href: "clanek-pojisteni.html",
-      tag: "Pojištění",
-      date: "28. března 2025",
-      read: "3 min",
-      title: "Máte smlouvy, ale jste skutečně pojištěni?",
-      excerpt:
-        "70 % lidí platí za smlouvy, které je v klíčovém momentu nepokryjí. Typický příklad: pojištění trvalé...",
-      accent: "#FFF7ED",
-    },
-    {
-      href: "clanek-sporeni.html",
-      tag: "Finanční plánování",
-      date: "10. března 2025",
-      read: "5 min",
-      title: "Proč „začnu spořit příští měsíc“ nikdy nefunguje",
-      excerpt:
-        "Markéta to říkala pět let. Pak jsme nastavili automatický převod na den výplaty a problém byl vyřešen...",
-      accent: "#F0FDF4",
-    },
-    {
-      href: "hypoteka-2025.html",
-      tag: "Penzijní spoření",
-      date: "20. února 2025",
-      read: "6 min",
-      title: "Penzijní spoření u Generali: proč 9 % ročně mění všechno",
-      excerpt:
-        "Starý konzervativní fond s 1 % výnosem dnes nepokryje ani inflaci. Nový dynamický fond Generali hist...",
-      accent: "#FFFBE5",
-    },
-    {
-      href: "zivotni-sen.html",
-      tag: "Životní sen",
-      date: "5. února 2025",
-      read: "4 min",
-      title: "Splnění životního snu: plán místo přání",
-      excerpt:
-        "Exotická dovolená nebo nové auto — když máte čísla a postup, sen přestane být „někdy“ a stane se cílem.",
-      accent: "#FFFBE5",
-    },
-    {
-      href: "vlastni-domov.html",
-      tag: "Vlastní bydlení",
-      date: "22. ledna 2025",
-      read: "5 min",
-      title: "Vlastní bydlení bez desetiletí čekání",
-      excerpt:
-        "Hypotéka nebo úvěr ze stavební spořitelny — porovnám obě varianty pro vaši situaci a najdu cestu.",
-      accent: "#EFF6FF",
-    },
+  let legacyHtml = "";
+  try {
+    legacyHtml = execSync("git show 2ac2a96:finance/Web/Ostatni/blog_2.html", {
+      encoding: "utf8",
+      maxBuffer: 50 * 1024 * 1024,
+    });
+  } catch {
+    legacyHtml = fs.existsSync(docsBlogPath)
+      ? fs.readFileSync(docsBlogPath, "utf8")
+      : "";
+  }
+
+  if (!legacyHtml && fs.existsSync(docsBlogPath)) {
+    legacyHtml = fs.readFileSync(docsBlogPath, "utf8");
+  }
+
+  const dalsiStart = legacyHtml.indexOf("Další články");
+  const dalsiEnd = legacyHtml.indexOf("Fotky z úvodní", dalsiStart);
+  const dalsiPool =
+    dalsiStart >= 0 && dalsiEnd > dalsiStart
+      ? extractArticleCards(legacyHtml.slice(dalsiStart, dalsiEnd))
+      : [];
+
+  let carouselPool = [];
+  if (fs.existsSync(docsBlogPath)) {
+    const docs = fs.readFileSync(docsBlogPath, "utf8");
+    const carStart = docs.indexOf("STARŠÍ ČLÁNKY");
+    if (carStart >= 0) {
+      let carEnd = docs.indexOf("Další články", carStart);
+      if (carEnd < 0) carEnd = docs.indexOf("<!-- KDO JSEM", carStart);
+      if (carEnd < 0) carEnd = docs.indexOf("Čím vám mohu pomoci", carStart);
+      if (carEnd < 0) carEnd = docs.length;
+      carouselPool = extractArticleCards(docs.slice(carStart, carEnd));
+    }
+  }
+
+  const order = [
+    {source: "dalsi", href: "hypoteka-2025.html"},
+    {source: "dalsi", href: "clanek-pojisteni.html"},
+    {source: "dalsi", href: "clanek-sporeni.html"},
+    {source: "carousel", href: "penzijni-sporeni-generali.html", link: "hypoteka-2025.html"},
+    {source: "carousel", href: "sen-bali.html", link: "zivotni-sen.html"},
+    {source: "carousel", href: "vlastni-bydleni-bez-uspor.html", link: "vlastni-domov.html"},
   ];
 
-  const cells = cards
-    .map(
-      (c) => `
-      <a href="${c.href}" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;border-radius:14px;overflow:hidden;border:1px solid var(--gl);background:#fff;transition:all .25s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,.09)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
-        <div style="height:8px;background:${c.accent}"></div>
-        <div style="padding:20px 22px 22px;flex:1;display:flex;flex-direction:column">
-          <div style="font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--yd);margin-bottom:8px">${c.tag}</div>
-          <div style="font-size:11px;color:var(--gr);margin-bottom:10px">${c.date} · ${c.read} čtení</div>
-          <h3 style="font-family:var(--serif);font-size:17px;line-height:1.25;color:var(--bl);margin-bottom:10px;letter-spacing:-.3px">${c.title}</h3>
-          <p style="font-size:13px;font-weight:300;color:var(--gr);line-height:1.65;flex:1">${c.excerpt}</p>
-          <div style="margin-top:14px;font-size:13px;font-weight:500;color:var(--bl)">Číst článek →</div>
-        </div>
-      </a>`,
-    )
-    .join("");
+  const cells = order
+    .map((item) => {
+      const pool = item.source === "dalsi" ? dalsiPool : carouselPool;
+      const card = pickCard(pool, item.href);
+      return normalizeArticleCard(card.full, item.link || item.href);
+    })
+    .join("\n");
 
   return `<!-- Z naší praxe — 6 článků -->
 <section style="padding:56px var(--pad);background:var(--w);border-top:1px solid var(--gl)">
   <div style="max-width:var(--max);margin:0 auto">
     <div style="font-size:10.5px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--yd);margin-bottom:20px;display:flex;align-items:center;gap:8px">Z naší praxe<span style="width:16px;height:2px;background:var(--yd);display:block"></span></div>
     <div class="pf-blog-praxe-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
-      ${cells}
+${cells}
     </div>
   </div>
 </section>`;
