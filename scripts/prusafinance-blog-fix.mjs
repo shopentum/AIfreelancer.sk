@@ -101,6 +101,20 @@ function extractHomeStoryImage(html, titlePart) {
   return m ? m[1] : null;
 }
 
+/** @param {string} html */
+function repairBrokenCimCards(html) {
+  let s = html;
+  s = s.replace(
+    /(<div class="pf-blog-cim-card-photo"[^>]*>\s*<img[^>]*>)\s*<\/div>\s*<div style="position:absolute;bottom:10px;left:12px;font-size:20px">[^<]*<\/div>\s*<\/div>\s*(<div style="padding:16px">)/g,
+    "$1\n        </div>\n        $2",
+  );
+  s = s.replace(
+    /(<div class="pf-blog-cim-card-photo"[^>]*>\s*<img[^>]*>)\s*<\/div>\s*(<div style="padding:16px">)/g,
+    "$1\n        </div>\n        $2",
+  );
+  return s;
+}
+
 /** @param {string} html @param {string} href @param {string} imgSrc */
 function setCimCardPhoto(html, href, imgSrc) {
   const cimStart = html.indexOf("<!-- Čím mohu pomoci");
@@ -115,16 +129,16 @@ function setCimCardPhoto(html, href, imgSrc) {
   const relStart = chunk.indexOf(anchor);
   if (relStart < 0) return html;
 
+  const paddingStart = chunk.indexOf('<div style="padding:16px">', relStart);
   const heightIdx = chunk.indexOf("height:130px", relStart);
-  if (heightIdx < 0 || heightIdx > relStart + 8000) return html;
+  if (paddingStart < 0 || heightIdx < 0 || heightIdx > relStart + 8000) return html;
+
   const divOpenStart = chunk.lastIndexOf("<div", heightIdx);
-  const openEnd = chunk.indexOf(">", heightIdx) + 1;
-  const closeDiv = chunk.indexOf("</div>", openEnd);
-  if (closeDiv < 0 || divOpenStart < 0) return html;
+  if (divOpenStart < 0) return html;
 
   const photoDivOpen = `<div class="pf-blog-cim-card-photo" style="height:130px;overflow:hidden;position:relative">`;
   const imgBlock = `<img src="${imgSrc}" alt="" style="width:100%;height:100%;max-width:100%;object-fit:cover;display:block">`;
-  const patchedChunk = `${chunk.slice(0, divOpenStart)}${photoDivOpen}\n          ${imgBlock}\n        ${chunk.slice(closeDiv)}`;
+  const patchedChunk = `${chunk.slice(0, divOpenStart)}${photoDivOpen}\n          ${imgBlock}\n        </div>\n        ${chunk.slice(paddingStart)}`;
   return html.slice(0, sectionStart) + patchedChunk + html.slice(sectionEnd);
 }
 
@@ -157,6 +171,7 @@ function patchCimSection(html) {
   }
 
   s = normalizeCimGridLayout(s);
+  s = repairBrokenCimCards(s);
 
   const indexHtml = fs.readFileSync(indexPath, "utf8");
   for (const [href, titlePart] of Object.entries(HOME_STORY_IMG)) {
@@ -461,6 +476,7 @@ function patchBlog(html) {
   s = insertCimSection(s, cimBlock);
   s = patchCimSection(s);
   s = normalizeCimGridLayout(s);
+  s = repairBrokenCimCards(s);
 
   return s;
 }
