@@ -1624,56 +1624,6 @@ const EagleCMS_Split: React.FC = () => {
     ],
   );
 
-  const highlightNodes = useMemo(() => {
-    const claims = [
-      ...(audit?.claims ?? []),
-      ...(audit?.linguisticClaims ?? []),
-    ];
-    let pos = 0;
-    const parts = content.split(/(\s+)/);
-    return parts.map((part, i) => {
-      const partStart = pos;
-      pos += part.length;
-      const partEnd = pos;
-      const inFade =
-        fadeRange !== null &&
-        partStart < fadeRange.end &&
-        partEnd > fadeRange.start;
-
-      if (inFade) {
-        return (
-          <span key={`f-${partStart}-${i}`} className="eagle-editor-fade-fix rounded-sm">
-            {part}
-          </span>
-        );
-      }
-
-      const trimmed = part.trim();
-      if (trimmed.length < 3) return <span key={`t-${partStart}-${i}`}>{part}</span>;
-      const claim = claims.find((c) => c.text.includes(trimmed));
-      if (claim) {
-        return (
-          <span
-            key={`c-${partStart}-${i}`}
-            className={cn(
-              "rounded-sm ring-1 transition-colors duration-300",
-              selectedClaimId === claim.id
-                ? "bg-violet-100/85 ring-violet-400/70"
-                : claim.risk === "high"
-                  ? "bg-rose-100/55 ring-rose-200/60"
-                  : claim.risk === "medium"
-                    ? "bg-amber-50/80 ring-amber-200/50"
-                    : "bg-emerald-50/70 ring-emerald-200/45",
-            )}
-          >
-            {part}
-          </span>
-        );
-      }
-      return <span key={`n-${partStart}-${i}`}>{part}</span>;
-    });
-  }, [audit?.claims, audit?.linguisticClaims, content, fadeRange, selectedClaimId]);
-
   const sidebarItems = [
     { icon: BarChart3, label: 'Realtime štatistiky' },
     { icon: FileText, label: 'Zoznam článkov', active: true, subItems: true },
@@ -2698,22 +2648,8 @@ const EagleCMS_Split: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Grid: obe vrstvy majú presne rovnakú bunku (žiadne absolute + zlá výška textarea). */}
+                    {/* Jedna textová vrstva: bez podfarbenia nálezov priamo v tele editora. */}
                     <div className="relative isolate grid min-h-[22rem] shrink-0 grid-cols-1 grid-rows-1">
-                      <div className="pointer-events-none col-span-full row-span-full z-0 min-h-0 min-w-0 overflow-hidden">
-                        <div
-                          className={cn(
-                            EAGLE_EDITOR_TYPO_CLASS,
-                            "min-h-full text-transparent caret-transparent [text-shadow:none]",
-                          )}
-                          style={{
-                            transform: `translate3d(0, ${-scrollTop}px, 0)`,
-                            willChange: "transform",
-                          }}
-                        >
-                          {highlightNodes}
-                        </div>
-                      </div>
                       <textarea
                         ref={editorRef}
                         value={content}
