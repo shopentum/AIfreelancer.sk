@@ -85,6 +85,8 @@ function applyTransforms(html) {
       /<a class="see-all" href="#">Všechny články →<\/a>/g,
       '<a class="see-all" href="blog.html">Všechny články →</a>',
     ],
+    [/href="#blog"/g, 'href="blog.html"'],
+    [/financni-gramotnost-prusa\.pdf/g, "financni-gramotnost.pdf"],
     [
       /<div class="foot-legal"><a href="#">GDPR &amp; Ochrana osobních údajů<\/a><a href="#">Obchodní podmínky<\/a><\/div>/g,
       '<div class="foot-legal"><a href="gdpr.html">GDPR &amp; Ochrana osobních údajů</a><a href="obchodni-podminky.html">Obchodní podmínky</a></div>',
@@ -178,7 +180,25 @@ fs.copyFileSync(pfContactSrc, path.join(outDir, "pf-contact.js"));
 // Legacy filename for CDN/browser cache still requesting pf-lead.js
 fs.copyFileSync(pfContactSrc, path.join(outDir, "pf-lead.js"));
 
-fs.writeFileSync(path.join(outDir, "financni-gramotnost-prusa.pdf"), MINIMAL_PDF, "utf8");
+const PDF_NAME = "financni-gramotnost.pdf";
+const pdfSrcCandidates = [
+  path.join(root, "finance", "Web", "assets", PDF_NAME),
+  path.join(outDir, PDF_NAME),
+  path.join(outDir, "financni-gramotnost-prusa.pdf"),
+];
+let pdfWritten = false;
+for (const src of pdfSrcCandidates) {
+  if (fs.existsSync(src) && fs.statSync(src).size > 500) {
+    fs.copyFileSync(src, path.join(outDir, PDF_NAME));
+    pdfWritten = true;
+    break;
+  }
+}
+if (!pdfWritten) {
+  fs.writeFileSync(path.join(outDir, PDF_NAME), MINIMAL_PDF, "utf8");
+}
+const legacyPdf = path.join(outDir, "financni-gramotnost-prusa.pdf");
+if (fs.existsSync(legacyPdf)) fs.unlinkSync(legacyPdf);
 
 console.log(
   "Wrote",
