@@ -31,13 +31,48 @@ const PHOTO_BADGE = `<div style="position:absolute;bottom:18px;left:16px;right:1
 
 const BLOG_MOBILE_CSS = `
 /* pf-blog-fix */
+.pf-blog-cim-grid{
+  display:grid !important;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  gap:16px !important;
+  width:100% !important;
+  max-width:100% !important;
+  align-items:stretch;
+}
+.pf-blog-cim-grid>a{
+  min-width:0 !important;
+  max-width:100% !important;
+  width:100% !important;
+  display:flex !important;
+  flex-direction:column !important;
+  overflow:hidden !important;
+  box-sizing:border-box;
+}
+.pf-blog-cim-card-photo{
+  height:130px !important;
+  min-height:130px !important;
+  max-height:130px !important;
+  width:100% !important;
+  max-width:100% !important;
+  overflow:hidden !important;
+  position:relative;
+  flex-shrink:0;
+  box-sizing:border-box;
+}
+.pf-blog-cim-card-photo img{
+  width:100% !important;
+  height:100% !important;
+  max-width:100% !important;
+  object-fit:cover !important;
+  display:block !important;
+}
 @media(max-width:900px){
   .pf-blog-about{display:grid !important;grid-template-columns:1fr !important;gap:36px !important}
   .pf-blog-praxe-grid{grid-template-columns:1fr !important}
-  .pf-blog-cim-grid{grid-template-columns:repeat(2,1fr) !important}
+  .pf-blog-cim-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
 }
 @media(max-width:560px){
-  .pf-blog-cim-grid{grid-template-columns:1fr !important}
+  .pf-blog-cim-grid{grid-template-columns:minmax(0,1fr) !important}
 }`;
 
 /** @param {string} html */
@@ -87,10 +122,24 @@ function setCimCardPhoto(html, href, imgSrc) {
   const closeDiv = chunk.indexOf("</div>", openEnd);
   if (closeDiv < 0 || divOpenStart < 0) return html;
 
-  const photoDivOpen = `<div style="height:130px;overflow:hidden;position:relative">`;
-  const imgBlock = `<img src="${imgSrc}" alt="" style="width:100%;height:100%;object-fit:cover;display:block">`;
+  const photoDivOpen = `<div class="pf-blog-cim-card-photo" style="height:130px;overflow:hidden;position:relative">`;
+  const imgBlock = `<img src="${imgSrc}" alt="" style="width:100%;height:100%;max-width:100%;object-fit:cover;display:block">`;
   const patchedChunk = `${chunk.slice(0, divOpenStart)}${photoDivOpen}\n          ${imgBlock}\n        ${chunk.slice(closeDiv)}`;
   return html.slice(0, sectionStart) + patchedChunk + html.slice(sectionEnd);
+}
+
+/** @param {string} html */
+function normalizeCimGridLayout(html) {
+  let s = html;
+  s = s.replace(
+    /class="pf-blog-cim-grid" style="display:grid;grid-template-columns:repeat\(4,1fr\);gap:16px"/g,
+    'class="pf-blog-cim-grid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px"',
+  );
+  s = s.replace(
+    /<div style="height:130px;overflow:hidden;position:relative">(\s*<img)/g,
+    '<div class="pf-blog-cim-card-photo" style="height:130px;overflow:hidden;position:relative">$1',
+  );
+  return s;
 }
 
 /** @param {string} html */
@@ -106,6 +155,8 @@ function patchCimSection(html) {
   if (!s.includes("Čím vám mohu pomoci") && !s.includes("<!-- Čím mohu pomoci")) {
     return s;
   }
+
+  s = normalizeCimGridLayout(s);
 
   const indexHtml = fs.readFileSync(indexPath, "utf8");
   for (const [href, titlePart] of Object.entries(HOME_STORY_IMG)) {
@@ -342,7 +393,7 @@ function insertCimSection(html, cimBlock) {
   );
   block = block.replace(
     /<div style="display:grid;grid-template-columns:repeat\(4,1fr\);gap:16px">/,
-    '<div class="pf-blog-cim-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">',
+    '<div class="pf-blog-cim-grid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">',
   );
   return html.replace(/\s*<!-- CTA \+ REZERVACE -->/, `\n\n    ${block}\n\n<!-- CTA + REZERVACE -->`);
 }
@@ -385,7 +436,13 @@ function removeDuplicateDalsiClanky(html) {
 /** @param {string} html */
 function patchBlog(html) {
   let s = html;
-  if (!s.includes("/* pf-blog-fix */")) {
+  const cssStart = s.indexOf("/* pf-blog-fix */");
+  if (cssStart >= 0) {
+    const cssEnd = s.indexOf("</style>", cssStart);
+    if (cssEnd >= 0) {
+      s = `${s.slice(0, cssStart)}${BLOG_MOBILE_CSS.trim()}\n${s.slice(cssEnd)}`;
+    }
+  } else {
     s = s.replace("</style>", `${BLOG_MOBILE_CSS}\n</style>`);
   }
 
@@ -403,6 +460,7 @@ function patchBlog(html) {
   s = removeDuplicateDalsiClanky(s);
   s = insertCimSection(s, cimBlock);
   s = patchCimSection(s);
+  s = normalizeCimGridLayout(s);
 
   return s;
 }
